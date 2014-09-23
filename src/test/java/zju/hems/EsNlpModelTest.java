@@ -1,4 +1,4 @@
-package zju.hems;
+﻿package zju.hems;
 
 import junit.framework.TestCase;
 import org.supercsv.io.CsvListReader;
@@ -18,7 +18,7 @@ import java.util.List;
 public class EsNlpModelTest extends TestCase {
 
     public final double[] x_l; //下限
-    public final double[] x_u;
+    public final double[] x_u; //上限
     public final double[] pNeeded;
     public final double[] pricePerKwh;
     public final double[] minEnergeChage;
