@@ -20,7 +20,7 @@ public class EsNlpModelTest extends TestCase {
     public final double[] x_l; //下限
     public final double[] x_u; //上限
     public final double[] pNeeded; //负荷有功
-    public final double[] pricePerKwh;
+    public final double[] pricePerKwh;//价格
     public final double[] minEnergeChage;
     public final double[] maxEnergyChange;
 
