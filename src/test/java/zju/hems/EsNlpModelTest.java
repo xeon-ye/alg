@@ -17,7 +17,7 @@ import java.util.List;
  */
 public class EsNlpModelTest extends TestCase {
 
-    public final double[] x_l;
+    public final double[] x_l; //下限
     public final double[] x_u;
     public final double[] pNeeded;
     public final double[] pricePerKwh;
