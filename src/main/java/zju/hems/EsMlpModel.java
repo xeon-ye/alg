@@ -12,7 +12,7 @@ public class EsMlpModel {
     private static Logger log = Logger.getLogger(EsMlpModel.class);
 
     //储能能量初值,储能最大变化量
-    private double iniEnergy;
+    private double iniEnergy, finalEnergyChanged = 0;
     private double[] maxEnergyChange, minEnergeChage;
     //放电效率和充电效率，如果这两者不一样则目前程序还没有处理
     private double dischargeEff = 0.7, chargeEff = 1.3;
@@ -26,33 +26,44 @@ public class EsMlpModel {
      *
      * @return 是否收敛
      */
+
     public boolean doEsOpt() {
         //分别是w,z,x的数组长度,约束的个数以及约束中变量的个数, 分段函数中用w,z来表示x
         //element_count 最前面的元素是w1<=z1,w2<=z1+z2……z1+z2=1,w1+w2+w3=1这几个条件中的非零元素
         int w_count = 0, z_count = 0, x_count = 0, row_count = 0, element_count = 0;
-        double b1, b2;
-        int index = 0;
-        for (double p : pNeed) {
-            b1 = minEnergeChage[index];
+        double b2;
+        for (int k = 0; k < pNeed.length; k++) {
+            double p = pNeed[k];
             if (p > 0) {
                 b2 = -p / dischargeEff;
-                if (b2 > b1) {//第一种情况，三段线
-                    w_count += 4;
-                    z_count += 3;
-                    row_count += 6;
-                    element_count += 17;
-                } else { //第二种情况，两段线
+                if (b2 > minEnergeChage[k]) {//第一种情况，三段线
+                    if (maxEnergyChange[k] > 0) {
+                        w_count += 4;
+                        z_count += 3;
+                        row_count += 6;
+                        element_count += 17;
+                    } else if (maxEnergyChange[k] > b2) { //第二种情况，两段线
+                        w_count += 3;
+                        z_count += 2;
+                        row_count += 5;
+                        element_count += 12;
+                    } else {//此时已经不是分段函数
+                        x_count += 1;
+                    }
+                } else if (minEnergeChage[k] < 0 && maxEnergyChange[k] > 0) { //第二种情况，两段线
                     w_count += 3;
                     z_count += 2;
                     row_count += 5;
                     element_count += 12;
+                } else { //此时已经不是分段函数
+                    x_count += 1;
                 }
                 //w_1 <= z_1, w_2 <= z_1 + z_2, ..., w_n <= z_n-1 + z_n, w_n+1 <= zn
                 //z_1 + z_2 + ... + z_n = 1;
                 //w_1 + w_2 + ... + w_n+1 = 1;
             } else {
                 b2 = -p / chargeEff;
-                if (b2 < maxEnergyChange[index]) {//两段线
+                if (b2 < maxEnergyChange[k] && minEnergeChage[k] < b2) {//两段线
                     w_count += 3;
                     z_count += 2;
                     row_count += 5;
@@ -60,7 +71,6 @@ public class EsMlpModel {
                 } else //此时已经不是分段函数
                     x_count += 1;
             }
-            index++;
         }
         //x_L =< iniEnerge + x_1 <= x_U, x_L =< iniEnerge + x_1 + x_2 < x_L,...,
         //x_1 + x_2 + ... + x_n = 0
@@ -70,39 +80,47 @@ public class EsMlpModel {
         //因为最后一项加了x1+x2+....+xn(x48),长度跟最后一个约束一样，所以没有再计算个数
         //element_count第二部分列数是xL<=inienergy+x1<=xU这几个条件非零元素
         row_count += pNeed.length;
-        double[] bs1 = new double[4];
-        double[] bs2 = new double[3];
-        double[] bs3 = new double[3];
-        double[] bs4 = {1.0};
+        double[] forThreeLines = new double[4];
+        double[] forTwoLines = new double[3];
+        double[] forOneLine = {1.0};
         int lastCount = 0;
         double[] b;
-        index = 0;
-        for (double aPNeed : pNeed) {
-            bs1[0] = minEnergeChage[index];
-            bs2[0] = minEnergeChage[index];
-            bs3[0] = minEnergeChage[index];
-            bs1[3] = maxEnergyChange[index];
-            bs2[2] = maxEnergyChange[index];
-            bs3[2] = maxEnergyChange[index];
-            if (aPNeed > 0) {
-                b2 = -aPNeed / dischargeEff;
-                if (b2 > minEnergeChage[index]) {//第一种情况，三段线
-                    bs1[1] = b2;
-                    b = bs1;
-                } else { //第二种情况，两段线
-                    b = bs2;
-                }
+        for (int k = 0; k < pNeed.length; k++) {
+            double p = pNeed[k];
+            if (p > 0) {
+                b2 = -p / dischargeEff;
+                if (b2 > minEnergeChage[k]) {//第一种情况，三段线
+                    if (maxEnergyChange[k] > 0) {
+                        forThreeLines[0] = minEnergeChage[k];
+                        forThreeLines[1] = b2;
+                        forThreeLines[2] = 0;
+                        forThreeLines[3] = maxEnergyChange[k];
+                        b = forThreeLines;
+                    } else if (maxEnergyChange[k] > b2) { //第二种情况，两段线
+                        forTwoLines[0] = minEnergeChage[k];
+                        forTwoLines[1] = b2;
+                        forTwoLines[2] = maxEnergyChange[k];
+                        b = forTwoLines;
+                    } else {//此时已经不是分段函数
+                        b = forOneLine;
+                    }
+                } else if (minEnergeChage[k] < 0 && maxEnergyChange[k] > 0) { //第二种情况，两段线
+                    forTwoLines[0] = minEnergeChage[k];
+                    forTwoLines[1] = 0;
+                    forTwoLines[2] = maxEnergyChange[k];
+                    b = forTwoLines;
+                } else  //此时已经不是分段函数
+                    b = forOneLine;
             } else {
-                b2 = -aPNeed / chargeEff;
-                if (b2 < maxEnergyChange[index]) {//两段线
-                    bs3[1] = b2;
-                    b = bs3;
-                } else {//此时已经不是分段函数
-                    b = bs4;
-                }
+                b2 = -p / chargeEff;
+                if (b2 < maxEnergyChange[k] && minEnergeChage[k] < b2) {//两段线
+                    forTwoLines[0] = minEnergeChage[k];
+                    forTwoLines[1] = b2;
+                    forTwoLines[2] = maxEnergyChange[k];
+                    b = forTwoLines;
+                } else //此时已经不是分段函数
+                    b = forOneLine;
             }
-//            for(int i = 0; i < b.length; i++) {
-//                if (Math.abs(b[i]) < 1e-17)
             for (double aB : b) {
                 if (Math.abs(aB) < 1e-17)
                     continue;
@@ -110,8 +128,8 @@ public class EsMlpModel {
             }
             element_count += lastCount;
             //b=bs1={b1,b2,0,maxEnergyChange}循环检测b中的每个元素
-            index++;
         }
+
         //开辟内存
         double objValue[] = new double[w_count + z_count + x_count];
         //objValue 是优化问题中的变量的系数,　如min Cx 中 C矩阵里的系数
@@ -143,40 +161,69 @@ public class EsMlpModel {
             if (p > 0) {
                 b2 = -p / dischargeEff;
                 if (b2 > minEnergeChage[k]) {//第一种情况，三段线
-                    objValue[obj_count] = 0.0;
-                    columnLower[obj_count] = 0.0;
-                    columnUpper[obj_count++] = 1.0;
-
-                    objValue[obj_count] = 0.0;
-                    columnLower[obj_count] = 0.0;
-                    columnUpper[obj_count++] = 1.0;
-
-                    objValue[obj_count] = p * pricePerKwh[k];
-                    columnLower[obj_count] = 0.0;
-                    columnUpper[obj_count++] = 1.0;
-
-                    objValue[obj_count] = (p + chargeEff * maxEnergyChange[k]) * pricePerKwh[k];
-                    columnLower[obj_count] = 0.0;
-                    columnUpper[obj_count++] = 1.0;
-                    for (int i = 0; i < 3; i++) {
+                    if (maxEnergyChange[k] > 0) {
                         objValue[obj_count] = 0.0;
                         columnLower[obj_count] = 0.0;
-                        columnUpper[obj_count] = 1.0;
-                        whichInt[whichint_count++] = obj_count;
-                        obj_count++;
-                    }
-                    formElements(rowLower, rowUpper, element, column,
-                            starts, row_count, element_count, obj_count, 3);
-                    //后面一个method
-                    //objValue 是c(x)=[w1*c(b1),w2*c(b2),w3*c(b3),w4*c(b4),0,0,0,w1'*c(b1'),w2'*c(b2')....]其中的w*c(b)是y值， 0 是赋予整数的位置为0；
-                    //obj_count是[w1,w2,w3,w4,z1,z2,z3,w1',w2',w3',z1',z2'.......]个数. element_count =0; row_count = 0; rowLower[0]=?, element[0]=?, column[0]=? 后面会自动加吗?rowLower[1]?
-                    //columnLower and columnUpper是 w 和 z 的范围, 所以是变量下限
-                    row_count += 6;
-                    element_count += 17;
-                    //每有一个放电三段线情况，element_count加17 ，row_count加6， element 跟约束的参数有关， row 跟有几个整数优化的约束条件有关
+                        columnUpper[obj_count++] = 1.0;
 
-                } else { //第二种情况，两段线
-                    objValue[obj_count] = (p - dischargeEff * maxEnergyChange[k]) * pricePerKwh[k];
+                        objValue[obj_count] = 0.0;
+                        columnLower[obj_count] = 0.0;
+                        columnUpper[obj_count++] = 1.0;
+
+                        objValue[obj_count] = p * pricePerKwh[k];
+                        columnLower[obj_count] = 0.0;
+                        columnUpper[obj_count++] = 1.0;
+
+                        objValue[obj_count] = (p + chargeEff * maxEnergyChange[k]) * pricePerKwh[k];
+                        columnLower[obj_count] = 0.0;
+                        columnUpper[obj_count++] = 1.0;
+                        for (int i = 0; i < 3; i++) {
+                            objValue[obj_count] = 0.0;
+                            columnLower[obj_count] = 0.0;
+                            columnUpper[obj_count] = 1.0;
+                            whichInt[whichint_count++] = obj_count;
+                            obj_count++;
+                        }
+                        formElements(rowLower, rowUpper, element, column,
+                                starts, row_count, element_count, obj_count, 3);
+                        //后面一个method
+                        //objValue 是c(x)=[w1*c(b1),w2*c(b2),w3*c(b3),w4*c(b4),0,0,0,w1'*c(b1'),w2'*c(b2')....]其中的w*c(b)是y值， 0 是赋予整数的位置为0；
+                        //obj_count是[w1,w2,w3,w4,z1,z2,z3,w1',w2',w3',z1',z2'.......]个数. element_count =0; row_count = 0; rowLower[0]=?, element[0]=?, column[0]=? 后面会自动加吗?rowLower[1]?
+                        //columnLower and columnUpper是 w 和 z 的范围, 所以是变量下限
+                        row_count += 6;
+                        element_count += 17;
+                        //每有一个放电三段线情况，element_count加17 ，row_count加6， element 跟约束的参数有关， row 跟有几个整数优化的约束条件有关
+                    } else if (maxEnergyChange[k] > b2) { //第二种情况，两段线
+                        objValue[obj_count] = 0.0;
+                        columnLower[obj_count] = 0.0;
+                        columnUpper[obj_count++] = 1.0;
+
+                        objValue[obj_count] = 0.0;
+                        columnLower[obj_count] = 0.0;
+                        columnUpper[obj_count++] = 1.0;
+
+                        objValue[obj_count] = (maxEnergyChange[k] - b2) * dischargeEff * pricePerKwh[k];
+                        columnLower[obj_count] = 0.0;
+                        columnUpper[obj_count++] = 1.0;
+
+                        for (int i = 0; i < 2; i++) {
+                            objValue[obj_count] = 0.0;
+                            columnLower[obj_count] = 0.0;
+                            columnUpper[obj_count] = 1.0;
+                            whichInt[whichint_count++] = obj_count;
+                            obj_count++;
+                        }
+                        formElements(rowLower, rowUpper, element, column,
+                                starts, row_count, element_count, obj_count, 2);
+                        row_count += 5;
+                        element_count += 12;
+                    } else {//此时已经不是分段函数
+                        objValue[obj_count] = 0.0;
+                        columnLower[obj_count] = minEnergeChage[k];
+                        columnUpper[obj_count++] = maxEnergyChange[k];
+                    }
+                } else if (minEnergeChage[k] < 0 && maxEnergyChange[k] > 0) { //第二种情况，两段线
+                    objValue[obj_count] = (p - dischargeEff * minEnergeChage[k]) * pricePerKwh[k];
                     columnLower[obj_count] = 0.0;
                     columnUpper[obj_count++] = 1.0;
 
@@ -199,10 +246,20 @@ public class EsMlpModel {
                             starts, row_count, element_count, obj_count, 2);
                     row_count += 5;
                     element_count += 12;
+                } else { //此时已经不是分段函数
+                    if (maxEnergyChange[k] < 0) {
+                        objValue[obj_count] = dischargeEff;
+                    } else
+                        objValue[obj_count] = chargeEff;
+                    columnLower[obj_count] = minEnergeChage[k];
+                    columnUpper[obj_count++] = maxEnergyChange[k];
                 }
+                //w_1 <= z_1, w_2 <= z_1 + z_2, ..., w_n <= z_n-1 + z_n, w_n+1 <= zn
+                //z_1 + z_2 + ... + z_n = 1;
+                //w_1 + w_2 + ... + w_n+1 = 1;
             } else {
                 b2 = -p / chargeEff;
-                if (b2 < maxEnergyChange[k]) {//两段线
+                if (b2 < maxEnergyChange[k] && minEnergeChage[k] < b2) {//两段线
                     objValue[obj_count] = 0.0;
                     columnLower[obj_count] = 0.0;
                     columnUpper[obj_count++] = 1.0;
@@ -227,7 +284,10 @@ public class EsMlpModel {
                     row_count += 5;
                     element_count += 12;
                 } else {//此时已经不是分段函数
-                    objValue[obj_count] = 0.0;
+                    if (maxEnergyChange[k] < b2)
+                        objValue[obj_count] = 0.0;
+                    else
+                        objValue[obj_count] = chargeEff;
                     columnLower[obj_count] = minEnergeChage[k];
                     columnUpper[obj_count++] = maxEnergyChange[k];
                 }
@@ -240,30 +300,55 @@ public class EsMlpModel {
 
         x_count = 0;
         lastCount = 0;
-        for (int n1 = 0; n1 < pNeed.length; n1++) {
-            if (pNeed[n1] > 0) {
-                b2 = -pNeed[n1] / dischargeEff;
-                if (b2 > minEnergeChage[n1]) {//第一种情况，三段线
-                    bs1[1] = b2;
+        for (int k = 0; k < pNeed.length; k++) {
+            double p = pNeed[k];
+            if (p > 0) {
+                b2 = -p / dischargeEff;
+                if (b2 > minEnergeChage[k]) {//第一种情况，三段线
+                    if (maxEnergyChange[k] > 0) {
+                        forThreeLines[0] = minEnergeChage[k];
+                        forThreeLines[1] = b2;
+                        forThreeLines[2] = 0;
+                        forThreeLines[3] = maxEnergyChange[k];
+                        lastCount = formElements2(rowLower, rowUpper, element, column, starts,
+                                element_count, x_count, forThreeLines, k, lastCount);
+                        x_count += 7;
+                    } else if (maxEnergyChange[k] > b2) { //第二种情况，两段线
+                        forTwoLines[0] = minEnergeChage[k];
+                        forTwoLines[1] = b2;
+                        forTwoLines[2] = maxEnergyChange[k];
+                        lastCount = formElements2(rowLower, rowUpper, element, column, starts,
+                                element_count, x_count, forTwoLines, k, lastCount);
+                        x_count += 5;
+                    } else {//此时已经不是分段函数
+                        lastCount = formElements2(rowLower, rowUpper, element, column, starts,
+                                element_count, x_count, forOneLine, k, lastCount);
+                        x_count += 1;
+                    }
+                } else if (minEnergeChage[k] < 0 && maxEnergyChange[k] > 0) { //第二种情况，两段线
+                    forTwoLines[0] = minEnergeChage[k];
+                    forTwoLines[1] = 0;
+                    forTwoLines[2] = maxEnergyChange[k];
                     lastCount = formElements2(rowLower, rowUpper, element, column, starts,
-                            element_count, x_count, bs1, n1, lastCount);
-                    //什么形式？？
-                    x_count += 7;
-                } else { //第二种情况，两段线
-                    lastCount = formElements2(rowLower, rowUpper, element, column, starts,
-                            element_count, x_count, bs2, n1, lastCount);
-                    x_count += 5;
-                }
-            } else {
-                b2 = -pNeed[n1] / chargeEff;
-                if (b2 < maxEnergyChange[n1]) {//两段线
-                    bs3[1] = b2;
-                    lastCount = formElements2(rowLower, rowUpper, element, column, starts,
-                            element_count, x_count, bs3, n1, lastCount);
+                            element_count, x_count, forTwoLines, k, lastCount);
                     x_count += 5;
                 } else {//此时已经不是分段函数
                     lastCount = formElements2(rowLower, rowUpper, element, column, starts,
-                            element_count, x_count, bs4, n1, lastCount);
+                            element_count, x_count, forOneLine, k, lastCount);
+                    x_count += 1;
+                }
+            } else {
+                b2 = -p / chargeEff;
+                if (b2 < maxEnergyChange[k] && minEnergeChage[k] < b2) {//两段线
+                    forTwoLines[0] = minEnergeChage[k];
+                    forTwoLines[1] = b2;
+                    forTwoLines[2] = maxEnergyChange[k];
+                    lastCount = formElements2(rowLower, rowUpper, element, column, starts,
+                            element_count, x_count, forTwoLines, k, lastCount);
+                    x_count += 5;
+                } else {//此时已经不是分段函数
+                    lastCount = formElements2(rowLower, rowUpper, element, column, starts,
+                            element_count, x_count, forOneLine, k, lastCount);
                     x_count += 1;
                 }
             }
@@ -291,8 +376,8 @@ public class EsMlpModel {
         //solver.setDrive(LinearSolver.MLP_DRIVE_SYM);
         //int status = solver.solveMlp(numberColumns, numberRows, objValue,
         //        columnLower, columnUpper, rowLower, rowUpper, a, asub, xa, whichInt, result);
-        solver.setDrive(LinearSolver.MLP_DRIVE_CBC);
 
+        solver.setDrive(LinearSolver.MLP_DRIVE_CBC);
         int status = solver.solveMlp(numberColumns, numberRows, objValue,
                 columnLower, columnUpper, rowLower, rowUpper, element, column, starts, whichInt, result);
         if (status < 0) {
@@ -300,30 +385,56 @@ public class EsMlpModel {
         } else {
             log.info("计算结束.");
             optCharge = new double[pNeed.length];
+
+            //恢复x值，从w,z恢复成x
             x_count = 0;
-            for (int n1 = 0; n1 < pNeed.length; n1++) {
-                if (pNeed[n1] > 0) {
-                    b2 = -pNeed[n1] / dischargeEff;
-                    if (b2 > minEnergeChage[n1]) {//第一种情况，三段线
-                        bs1[1] = b2;
-                        for (int i = 0; i < 4; i++)
-                            optCharge[n1] += bs1[i] * result[x_count + i];
-                        //result[0]……是什么结果
-                        x_count += 7;
-                    } else { //第二种情况，两段线
+            for (int k = 0; k < pNeed.length; k++) {
+
+                double p = pNeed[k];
+                if (p > 0) {
+                    b2 = -p / dischargeEff;
+                    if (b2 > minEnergeChage[k]) {//第一种情况，三段线
+                        if (maxEnergyChange[k] > 0) {
+                            forThreeLines[0] = minEnergeChage[k];
+                            forThreeLines[1] = b2;
+                            forThreeLines[2] = 0;
+                            forThreeLines[3] = maxEnergyChange[k];
+                            for (int i = 0; i < 4; i++)
+                                optCharge[k] += forThreeLines[i] * result[x_count + i];
+                            x_count += 7;
+                        } else if (maxEnergyChange[k] > b2) { //第二种情况，两段线
+                            forTwoLines[0] = minEnergeChage[k];
+                            forTwoLines[1] = b2;
+                            forTwoLines[2] = maxEnergyChange[k];
+                            for (int i = 0; i < 3; i++)
+                                optCharge[k] += forTwoLines[i] * result[x_count + i];
+                            x_count += 5;
+                        } else {//此时已经不是分段函数
+                            optCharge[k] = result[x_count];
+                            x_count += 1;
+                        }
+                    } else if (minEnergeChage[k] < 0 && maxEnergyChange[k] > 0) { //第二种情况，两段线
+                        forTwoLines[0] = minEnergeChage[k];
+                        forTwoLines[1] = 0;
+                        forTwoLines[2] = maxEnergyChange[k];
                         for (int i = 0; i < 3; i++)
-                            optCharge[n1] += bs2[i] * result[x_count + i];
-                        x_count += 5;
-                    }
-                } else {
-                    b2 = -pNeed[n1] / chargeEff;
-                    if (b2 < maxEnergyChange[n1]) {//两段线
-                        bs3[1] = b2;
-                        for (int i = 0; i < 3; i++)
-                            optCharge[n1] += bs3[i] * result[x_count + i];
+                            optCharge[k] += forTwoLines[i] * result[x_count + i];
                         x_count += 5;
                     } else {//此时已经不是分段函数
-                        optCharge[n1] = result[x_count];
+                        optCharge[k] = result[x_count];
+                        x_count += 1;
+                    }
+                } else {
+                    b2 = -p / chargeEff;
+                    if (b2 < maxEnergyChange[k] && minEnergeChage[k] < b2) {//两段线
+                        forTwoLines[0] = minEnergeChage[k];
+                        forTwoLines[1] = b2;
+                        forTwoLines[2] = maxEnergyChange[k];
+                        for (int i = 0; i < 3; i++)
+                            optCharge[k] += forTwoLines[i] * result[x_count + i];
+                        x_count += 5;
+                    } else {//此时已经不是分段函数
+                        optCharge[k] = result[x_count];
                         x_count += 1;
                     }
                 }
@@ -347,8 +458,8 @@ public class EsMlpModel {
             //-2，0由来：w1<=z1, w1-z1<=0, w1最小值0，z1最大值1，结果最小-1，设置成-2，最大是0
             if (i == 0 || i == n)
                 starts[row_count] = starts[row_count - 1] + 2;
-            //前面声明starts[0]=0,row_count在上句中已经变成1，此时给starts[1]赋值
-            //此处2代表2个变量，当i=0时， 为w1,z1， 当i=n时， 为w4, z3
+                //前面声明starts[0]=0,row_count在上句中已经变成1，此时给starts[1]赋值
+                //此处2代表2个变量，当i=0时， 为w1,z1， 当i=n时， 为w4, z3
             else
                 starts[row_count] = starts[row_count - 1] + 3;
             //此处3 代表三个变量，即w2<=z1+z2中的3个变量，和w3<=z2+z3中的3个变量
@@ -404,8 +515,9 @@ public class EsMlpModel {
         int row = rowLower.length - pNeed.length + n;
         //第一个=rowLower-48+0, point to 第n个条件
         if (n == pNeed.length - 1) {
-            rowLower[rowLower.length - 1] = 0.0;
-            rowUpper[rowLower.length - 1] = 0.0;
+            //todo: MAY NOT RIGHT
+            rowLower[rowLower.length - 1] = finalEnergyChanged;
+            rowUpper[rowLower.length - 1] = finalEnergyChanged;
             //最后一个约束本该对应x_L =< iniEnerge + x_1+....x_48 <= x_U,但在此位置设立 x_1+....x_48=0,使iniEnerge + x_1+....x_48=iniEnerge+0=iniEnerge
         } else {
             rowLower[row] = energy_L[n] - iniEnergy;
@@ -515,5 +627,13 @@ public class EsMlpModel {
 
     public void setOptCharge(double[] optCharge) {
         this.optCharge = optCharge;
+    }
+
+    public double getFinalEnergyChanged() {
+        return finalEnergyChanged;
+    }
+
+    public void setFinalEnergyChanged(double finalEnergyChanged) {
+        this.finalEnergyChanged = finalEnergyChanged;
     }
 }

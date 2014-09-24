@@ -23,13 +23,15 @@ public class EsNlpModelTest extends TestCase {
     public final double[] pricePerKwh;//价格
     public final double[] minEnergeChage;
     public final double[] maxEnergyChange;
+    private double finalEnergyChange;
 
     public EsNlpModelTest() throws IOException {
 
         //开始读入每半小时所需的能量和电价
         ICsvListReader listReader;
         //String file = "/other/send_Ashton_winter_weekday.csv";
-        String file = "/other/send_Ashton_winter_weekday_2.csv";
+        //String file = "/other/send_Ashton_winter_weekday_2.csv";
+        String file = "/other/send_Ashton_winter_holi_weekend_3.csv";
         Reader r = new InputStreamReader(this.getClass().getResourceAsStream(file));
         listReader = new CsvListReader(r, CsvPreference.STANDARD_PREFERENCE);
         int count = 0;
@@ -41,19 +43,21 @@ public class EsNlpModelTest extends TestCase {
         //设定上下限
         x_l = new double[count];
         x_u = new double[count];
+        minEnergeChage = new double[count];
+        maxEnergyChange = new double[count];
         for (int i = 0; i < x_l.length; i++) {
             x_l[i] = 5.76;
             x_u[i] = 17.28;
+            minEnergeChage[i] = -2.15;
+            maxEnergyChange[i] = 2.15;
         }
         pNeeded = new double[count];
         pricePerKwh = new double[count];
-        minEnergeChage = new double[count];
-        maxEnergyChange = new double[count];
-
         r = new InputStreamReader(this.getClass().getResourceAsStream(file));
         listReader = new CsvListReader(r, CsvPreference.STANDARD_PREFERENCE);
         count = 0;
         List<String> customerList;
+        finalEnergyChange = 0.0;
         while ((customerList = listReader.read()) != null) {
             //AC负荷功率
             double acLoadP = Double.parseDouble(customerList.get(0));
@@ -62,19 +66,31 @@ public class EsNlpModelTest extends TestCase {
             //PV输出功率
             double pvOutputP = Double.parseDouble(customerList.get(2));
             //将功率转化为能量
-            pNeeded[count] = (acLoadP + dcLoadP - pvOutputP) * 0.5;
+            //pNeeded[count] = (acLoadP + dcLoadP - pvOutputP) * 0.5;
             //电价
             pricePerKwh[count] = Double.parseDouble(customerList.get(3)) / 100;
 
-            minEnergeChage[count] = -2.15;
-
-            maxEnergyChange[count] = 2.15;
+            pNeeded[count] = acLoadP * 0.5;
+            x_l[count] += dcLoadP;
+            x_l[count] -= pvOutputP;
+            x_u[count] += dcLoadP;
+            x_u[count] -= pvOutputP;
+            minEnergeChage[count] += dcLoadP;
+            minEnergeChage[count] -= pvOutputP;
+            maxEnergyChange[count] += dcLoadP;
+            maxEnergyChange[count] -= pvOutputP;
+            finalEnergyChange += (dcLoadP - pvOutputP);
             count++;
         }
         listReader.close();
         //读入结束
     }
 
+    /**
+     * 测试平滑后非线性模型的例子
+     *
+     * @throws IOException
+     */
     public void testEsOpt1() throws IOException {
         //开始设置优化的条件
         EsNlpModel esOpt = new EsNlpModel();
@@ -101,8 +117,9 @@ public class EsNlpModelTest extends TestCase {
         EsMlpModel esOpt = new EsMlpModel();
         esOpt.setEnergy_L(x_l);
         esOpt.setEnergy_U(x_u);
-        esOpt.setChargeEff(1);//存储效率
-        esOpt.setDischargeEff(1);//存储效率
+        esOpt.setChargeEff(1.15);//存储效率
+        esOpt.setDischargeEff(0.87);//存储效率
+        esOpt.setFinalEnergyChanged(finalEnergyChange);//todo:
         esOpt.setMinEnergeChage(minEnergeChage);//存储最大变化量
         esOpt.setMaxEnergyChange(maxEnergyChange);//存储最大变化量
         esOpt.setPricePerKwh(pricePerKwh);//每kwh能量的价格
@@ -113,6 +130,7 @@ public class EsNlpModelTest extends TestCase {
         boolean r = esOpt.doEsOpt();
         //判断是否收敛
         assertTrue(r);
+        //如果不收敛怎么显示？//
         //打印优化结果
         int index = 1;
         for (double d : esOpt.getOptCharge()) {
