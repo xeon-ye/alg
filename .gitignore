@@ -46,3 +46,5 @@ out/test/alg/other/send_Kings_summer_weekday_3.csv
 out/test/alg/other/send_Kings_winter_holi_weekday_3.csv
 out/test/alg/other/send_Kings_winter_holi_weekend_3.csv
 out/test/alg/other/send_Kings_winter_weekday_3.csv
+target
+.idea
