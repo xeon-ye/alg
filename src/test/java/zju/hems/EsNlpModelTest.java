@@ -31,7 +31,7 @@ public class EsNlpModelTest extends TestCase {
         ICsvListReader listReader;
         //String file = "/other/send_Ashton_winter_weekday.csv";
         //String file = "/other/send_Ashton_winter_weekday_2.csv";
-        String file = "/other/send_Ashton_winter_holi_weekend_3.csv";
+        String file = "/other/send_Brentry_winter_weekday_3.csv";
         Reader r = new InputStreamReader(this.getClass().getResourceAsStream(file));
         listReader = new CsvListReader(r, CsvPreference.STANDARD_PREFERENCE);
         int count = 0;
@@ -71,15 +71,15 @@ public class EsNlpModelTest extends TestCase {
             pricePerKwh[count] = Double.parseDouble(customerList.get(3)) / 100;
 
             pNeeded[count] = acLoadP * 0.5;
-            x_l[count] += dcLoadP;
-            x_l[count] -= pvOutputP;
-            x_u[count] += dcLoadP;
-            x_u[count] -= pvOutputP;
-            minEnergeChage[count] += dcLoadP;
-            minEnergeChage[count] -= pvOutputP;
-            maxEnergyChange[count] += dcLoadP;
-            maxEnergyChange[count] -= pvOutputP;
-            finalEnergyChange += (dcLoadP - pvOutputP);
+            x_l[count] += dcLoadP*0.5;
+            x_l[count] -= pvOutputP*0.5;
+            x_u[count] += dcLoadP*0.5;
+            x_u[count] -= pvOutputP*0.5;
+            minEnergeChage[count] += dcLoadP*0.5;
+            minEnergeChage[count] -= pvOutputP*0.5;
+            maxEnergyChange[count] += dcLoadP*0.5;
+            maxEnergyChange[count] -= pvOutputP*0.5;
+            finalEnergyChange += (dcLoadP - pvOutputP)*0.5;
             count++;
         }
         listReader.close();

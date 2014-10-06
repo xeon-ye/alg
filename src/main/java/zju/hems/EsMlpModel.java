@@ -223,7 +223,7 @@ public class EsMlpModel {
                         columnUpper[obj_count++] = maxEnergyChange[k];
                     }
                 } else if (minEnergeChage[k] < 0 && maxEnergyChange[k] > 0) { //第二种情况，两段线
-                    objValue[obj_count] = (p - dischargeEff * minEnergeChage[k]) * pricePerKwh[k];
+                    objValue[obj_count] = (p + dischargeEff * minEnergeChage[k]) * pricePerKwh[k];
                     columnLower[obj_count] = 0.0;
                     columnUpper[obj_count++] = 1.0;
 
