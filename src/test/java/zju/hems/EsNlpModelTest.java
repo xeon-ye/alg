@@ -31,7 +31,7 @@ public class EsNlpModelTest extends TestCase {
         ICsvListReader listReader;
         //String file = "/other/send_Ashton_winter_weekday.csv";
         //String file = "/other/send_Ashton_winter_weekday_2.csv";
-        String file = "/other/send_Brentry_winter_weekday_3.csv";
+        String file = "/other/send_Ashton_summer_weekday_5.csv";
         Reader r = new InputStreamReader(this.getClass().getResourceAsStream(file));
         listReader = new CsvListReader(r, CsvPreference.STANDARD_PREFERENCE);
         int count = 0;
@@ -46,8 +46,8 @@ public class EsNlpModelTest extends TestCase {
         minEnergeChage = new double[count];
         maxEnergyChange = new double[count];
         for (int i = 0; i < x_l.length; i++) {
-            x_l[i] = 5.76;
-            x_u[i] = 17.28;
+            x_l[i] =5.76;
+            x_u[i] =17.28;
             minEnergeChage[i] = -2.15;
             maxEnergyChange[i] = 2.15;
         }
@@ -59,27 +59,33 @@ public class EsNlpModelTest extends TestCase {
         List<String> customerList;
         finalEnergyChange = 0.0;
         while ((customerList = listReader.read()) != null) {
-            //AC负荷功率
-            double acLoadP = Double.parseDouble(customerList.get(0));
-            //DC负荷功率
-            double dcLoadP = Double.parseDouble(customerList.get(1));
-            //PV输出功率
-            double pvOutputP = Double.parseDouble(customerList.get(2));
-            //将功率转化为能量
-            //pNeeded[count] = (acLoadP + dcLoadP - pvOutputP) * 0.5;
-            //电价
-            pricePerKwh[count] = Double.parseDouble(customerList.get(3)) / 100;
 
-            pNeeded[count] = acLoadP * 0.5;
-            x_l[count] += dcLoadP*0.5;
-            x_l[count] -= pvOutputP*0.5;
-            x_u[count] += dcLoadP*0.5;
-            x_u[count] -= pvOutputP*0.5;
-            minEnergeChage[count] += dcLoadP*0.5;
-            minEnergeChage[count] -= pvOutputP*0.5;
-            maxEnergyChange[count] += dcLoadP*0.5;
-            maxEnergyChange[count] -= pvOutputP*0.5;
-            finalEnergyChange += (dcLoadP - pvOutputP)*0.5;
+                //AC负荷功率
+                double acLoadP = Double.parseDouble(customerList.get(0));
+                //DC负荷功率
+                double dcLoadP = Double.parseDouble(customerList.get(1));
+                //PV输出功率
+                double pvOutputP = Double.parseDouble(customerList.get(2));
+                //将功率转化为能量
+                //Needed[count] = (acLoadP + dcLoadP - pvOutputP) * 0.5;
+                //电价
+                pricePerKwh[count] = Double.parseDouble(customerList.get(3)) / 100;
+
+                pNeeded[count] = acLoadP * 0.5;
+                finalEnergyChange += (dcLoadP - pvOutputP) * 0.5;
+                //finalEnergyChange += (dcLoadP )*0.5;
+                //finalEnergyChange -= (pvOutputP)*0.5;
+                x_l[count] += finalEnergyChange;
+                x_u[count] += finalEnergyChange;
+                // x_l[count] += dcLoadP * 0.5;
+                // x_l[count] -= pvOutputP * 0.5;
+                // x_u[count] += dcLoadP * 0.5;
+                // x_u[count] -= pvOutputP * 0.5;
+                minEnergeChage[count] += dcLoadP * 0.5;
+                minEnergeChage[count] -= pvOutputP * 0.5;
+                maxEnergyChange[count] += dcLoadP * 0.5;
+                maxEnergyChange[count] -= pvOutputP * 0.5;
+
             count++;
         }
         listReader.close();

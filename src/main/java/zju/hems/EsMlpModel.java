@@ -249,8 +249,10 @@ public class EsMlpModel {
                 } else { //此时已经不是分段函数
                     if (maxEnergyChange[k] < 0) {
                         objValue[obj_count] = dischargeEff;
+                        //objValue[obj_count] = 0.0;
                     } else
                         objValue[obj_count] = chargeEff;
+                       // objValue[obj_count] = 0.0;
                     columnLower[obj_count] = minEnergeChage[k];
                     columnUpper[obj_count++] = maxEnergyChange[k];
                 }
