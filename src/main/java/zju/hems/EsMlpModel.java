@@ -248,9 +248,9 @@ public class EsMlpModel {
                     element_count += 12;
                 } else { //此时已经不是分段函数
                     if (maxEnergyChange[k] < 0) {
-                        objValue[obj_count] = dischargeEff;
+                        objValue[obj_count] = dischargeEff * pricePerKwh[k];
                     } else
-                        objValue[obj_count] = chargeEff;
+                        objValue[obj_count] = chargeEff * pricePerKwh[k];
                     columnLower[obj_count] = minEnergeChage[k];
                     columnUpper[obj_count++] = maxEnergyChange[k];
                 }
@@ -287,7 +287,7 @@ public class EsMlpModel {
                     if (maxEnergyChange[k] < b2)
                         objValue[obj_count] = 0.0;
                     else
-                        objValue[obj_count] = chargeEff;
+                        objValue[obj_count] = chargeEff * pricePerKwh[k];
                     columnLower[obj_count] = minEnergeChage[k];
                     columnUpper[obj_count++] = maxEnergyChange[k];
                 }
@@ -382,7 +382,7 @@ public class EsMlpModel {
                 columnLower, columnUpper, rowLower, rowUpper, element, column, starts, whichInt, result);
         if (status < 0) {
             log.warn("计算不收敛.");
-        } else {
+        } else { //状态位显示计算收敛
             log.info("计算结束.");
             optCharge = new double[pNeed.length];
 
@@ -510,15 +510,15 @@ public class EsMlpModel {
                               int element_count, int obj_count,
                               double[] b, int n, int lastCount) {
         //x_L =< iniEnerge + x_1 <= x_U, x_L =< iniEnerge + x_1 + x_2 < x_L,...,
-        //x_1 + x_2 + ... + x_n = 0
+        //x_1 + x_2 + ... + x_n = finalEnergyChanged
         //n=0...47一共48个数。
         int row = rowLower.length - pNeed.length + n;
         //第一个=rowLower-48+0, point to 第n个条件
         if (n == pNeed.length - 1) {
             //todo: MAY NOT RIGHT
-            rowLower[rowLower.length - 1] = finalEnergyChanged;
-            rowUpper[rowLower.length - 1] = finalEnergyChanged;
-            //最后一个约束本该对应x_L =< iniEnerge + x_1+....x_48 <= x_U,但在此位置设立 x_1+....x_48=0,使iniEnerge + x_1+....x_48=iniEnerge+0=iniEnerge
+            rowLower[row] = finalEnergyChanged;
+            rowUpper[row] = finalEnergyChanged;
+            //最后一个约束本该对应 x_1+....x_48 = finalEnergyChanged
         } else {
             rowLower[row] = energy_L[n] - iniEnergy;
             rowUpper[row] = energy_U[n] - iniEnergy;
