@@ -75,6 +75,11 @@ public class EsNlpModelTest extends TestCase {
             pricePerKwh[count] = Double.parseDouble(customerList.get(3)) / 100;
 
             pNeeded[count] = acLoadP * 0.5;
+            minEnergeChage[count] += dcLoadP * 0.5;
+            minEnergeChage[count] -= pvOutputP * 0.5;
+            maxEnergyChange[count] += dcLoadP * 0.5;
+            maxEnergyChange[count] -= pvOutputP * 0.5;
+            finalEnergyChange += (dcLoadP - pvOutputP) * 0.5;
             //对于直流系统，设存储能量的上下限为x_l[count],x_u[count]，直流系统的充电量为x[count]
             //则第1个时间段的充电
             //则第2个时间段的充电 x_l[1] < x[0] + x[1] - dcLoad[0] - dcLoad[1] + pvOutput[0]  + pvOutput[1] < x_u[1]
@@ -82,18 +87,9 @@ public class EsNlpModelTest extends TestCase {
             //对于上面的约束可以写成
             //  x_l[0] + dcLoad[0] - pvOutput[0] < x[0] < x_u[0] + dcLoad[0] - pvOutput[0]
             //  x_l[0] + dcLoad[0] + dcLoad[1] - pvOutput[0] - pvOutput[1] < x[1] < x_u[0] + dcLoad[0] + dcLoad[1] - pvOutput[0] - pvOutput[1]
-            //依次类推，将约束两边的上下限用dcEnergy_l[count],dcEnergy_u[count]表示，写成程序就是下面这个循环
-            for (int i = count; i < pNeeded.length; i++) {
-                dcEnergy_l[i] += dcLoadP * 0.5;
-                dcEnergy_l[i] -= pvOutputP * 0.5;
-                dcEnergy_u[i] += dcLoadP * 0.5;
-                dcEnergy_u[i] -= pvOutputP * 0.5;
-            }
-            minEnergeChage[count] += dcLoadP * 0.5;
-            minEnergeChage[count] -= pvOutputP * 0.5;
-            maxEnergyChange[count] += dcLoadP * 0.5;
-            maxEnergyChange[count] -= pvOutputP * 0.5;
-            finalEnergyChange += (dcLoadP - pvOutputP) * 0.5;
+            //依次类推，将约束两边的上下限用dcEnergy_l[count],dcEnergy_u[count]表示，写成程序就是下面两句
+            dcEnergy_l[count] += finalEnergyChange;
+            dcEnergy_u[count] += finalEnergyChange;
             count++;
         }
         listReader.close();
