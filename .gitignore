@@ -48,3 +48,8 @@ out/test/alg/other/send_Kings_winter_holi_weekend_3.csv
 out/test/alg/other/send_Kings_winter_weekday_3.csv
 target
 .idea
+/*.ipr
+/*.iws
+/*.log
+/src/main/cpp/*.d
+/src/main/cpp/*.o

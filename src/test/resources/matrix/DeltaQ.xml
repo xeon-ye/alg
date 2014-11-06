@@ -1,0 +1,705 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<java version="1.7.0_25" class="java.beans.XMLDecoder">
+ <object class="zju.matrix.AVector">
+  <void property="n">
+   <int>231</int>
+  </void>
+  <void property="values">
+   <array class="double" length="231">
+    <void index="0">
+     <double>0.38460539477823197</double>
+    </void>
+    <void index="1">
+     <double>0.042945169182190525</double>
+    </void>
+    <void index="2">
+     <double>-0.6072648808014063</double>
+    </void>
+    <void index="3">
+     <double>0.2069391668513195</double>
+    </void>
+    <void index="4">
+     <double>-0.4438966810371384</double>
+    </void>
+    <void index="5">
+     <double>-0.17375005235073734</double>
+    </void>
+    <void index="6">
+     <double>0.25099572754980626</double>
+    </void>
+    <void index="7">
+     <double>-0.18584563771766577</double>
+    </void>
+    <void index="8">
+     <double>0.19828098295568364</double>
+    </void>
+    <void index="9">
+     <double>-0.06883268990687288</double>
+    </void>
+    <void index="10">
+     <double>-0.22559051471900038</double>
+    </void>
+    <void index="11">
+     <double>-0.5337512526645132</double>
+    </void>
+    <void index="12">
+     <double>0.34880835540437516</double>
+    </void>
+    <void index="13">
+     <double>-0.9023238766384358</double>
+    </void>
+    <void index="14">
+     <double>-0.8442487731201478</double>
+    </void>
+    <void index="15">
+     <double>-0.09965066033989477</double>
+    </void>
+    <void index="16">
+     <double>-1.091187371571057</double>
+    </void>
+    <void index="17">
+     <double>-0.32415797566390847</double>
+    </void>
+    <void index="18">
+     <double>0.6953263037185059</double>
+    </void>
+    <void index="19">
+     <double>-0.007111523580145513</double>
+    </void>
+    <void index="20">
+     <double>-0.18756588996965107</double>
+    </void>
+    <void index="21">
+     <double>-0.1736551891057769</double>
+    </void>
+    <void index="22">
+     <double>-0.23284810505507508</double>
+    </void>
+    <void index="23">
+     <double>0.0941595429564065</double>
+    </void>
+    <void index="24">
+     <double>-0.20160203763721515</double>
+    </void>
+    <void index="25">
+     <double>0.15802942717074328</double>
+    </void>
+    <void index="26">
+     <double>-0.18642401540144563</double>
+    </void>
+    <void index="27">
+     <double>-0.32892575557645315</double>
+    </void>
+    <void index="28">
+     <double>-0.23706059885536296</double>
+    </void>
+    <void index="29">
+     <double>0.009198418637543612</double>
+    </void>
+    <void index="30">
+     <double>-0.189283264386262</double>
+    </void>
+    <void index="31">
+     <double>-0.037427187403312225</double>
+    </void>
+    <void index="32">
+     <double>-0.3725190442100108</double>
+    </void>
+    <void index="33">
+     <double>-0.1553588944667445</double>
+    </void>
+    <void index="34">
+     <double>0.1054920028830219</double>
+    </void>
+    <void index="35">
+     <double>-0.38050760475569884</double>
+    </void>
+    <void index="36">
+     <double>-0.8572525788987597</double>
+    </void>
+    <void index="37">
+     <double>-0.21315315243905245</double>
+    </void>
+    <void index="38">
+     <double>-0.07735793182218946</double>
+    </void>
+    <void index="39">
+     <double>0.547395529619757</double>
+    </void>
+    <void index="40">
+     <double>-0.028412392798072842</double>
+    </void>
+    <void index="41">
+     <double>-0.1666426715860679</double>
+    </void>
+    <void index="42">
+     <double>-0.21320091601737798</double>
+    </void>
+    <void index="43">
+     <double>-0.06412587895501258</double>
+    </void>
+    <void index="44">
+     <double>-7.678898277054409E-4</double>
+    </void>
+    <void index="45">
+     <double>-0.011550095628830647</double>
+    </void>
+    <void index="46">
+     <double>0.026431529930700078</double>
+    </void>
+    <void index="47">
+     <double>-0.2834760228330721</double>
+    </void>
+    <void index="48">
+     <double>-0.20092210976115452</double>
+    </void>
+    <void index="49">
+     <double>0.10329631158628179</double>
+    </void>
+    <void index="50">
+     <double>-0.16752750883206474</double>
+    </void>
+    <void index="51">
+     <double>-0.49175691671754834</double>
+    </void>
+    <void index="52">
+     <double>-0.05178746376999695</double>
+    </void>
+    <void index="53">
+     <double>-0.2313734871114054</double>
+    </void>
+    <void index="54">
+     <double>-0.09868614890544464</double>
+    </void>
+    <void index="55">
+     <double>-0.11956178000921586</double>
+    </void>
+    <void index="56">
+     <double>-0.08087169382298232</double>
+    </void>
+    <void index="57">
+     <double>-0.6639556082493941</double>
+    </void>
+    <void index="58">
+     <double>0.004462724368416545</double>
+    </void>
+    <void index="59">
+     <double>0.3478720030732101</double>
+    </void>
+    <void index="60">
+     <double>-0.10357106036233106</double>
+    </void>
+    <void index="61">
+     <double>-0.05966645808737267</double>
+    </void>
+    <void index="62">
+     <double>-0.4559138824793276</double>
+    </void>
+    <void index="63">
+     <double>-0.13842414324503388</double>
+    </void>
+    <void index="64">
+     <double>-0.13775581811052823</double>
+    </void>
+    <void index="65">
+     <double>-0.3191329514669001</double>
+    </void>
+    <void index="66">
+     <double>0.19442716847272612</double>
+    </void>
+    <void index="67">
+     <double>-0.1653507130718557</double>
+    </void>
+    <void index="68">
+     <double>-0.15218152666105922</double>
+    </void>
+    <void index="69">
+     <double>0.03910842139357985</double>
+    </void>
+    <void index="70">
+     <double>-0.14583865341306063</double>
+    </void>
+    <void index="71">
+     <double>-0.25537297330400355</double>
+    </void>
+    <void index="72">
+     <double>-0.003567523289842443</double>
+    </void>
+    <void index="73">
+     <double>-0.08277073042817568</double>
+    </void>
+    <void index="74">
+     <double>-0.017590483530235883</double>
+    </void>
+    <void index="75">
+     <double>-0.08311260783096262</double>
+    </void>
+    <void index="76">
+     <double>-0.206785280771609</double>
+    </void>
+    <void index="77">
+     <double>0.06461699501434699</double>
+    </void>
+    <void index="78">
+     <double>-0.06771551769644187</double>
+    </void>
+    <void index="79">
+     <double>-0.24948896430506975</double>
+    </void>
+    <void index="80">
+     <double>-0.07076663596968559</double>
+    </void>
+    <void index="81">
+     <double>-0.09102539943872684</double>
+    </void>
+    <void index="82">
+     <double>-0.014444614901099</double>
+    </void>
+    <void index="83">
+     <double>0.06863896351878682</double>
+    </void>
+    <void index="84">
+     <double>0.13076508372576018</double>
+    </void>
+    <void index="85">
+     <double>-0.42704398277088157</double>
+    </void>
+    <void index="86">
+     <double>-0.5067390785169448</double>
+    </void>
+    <void index="87">
+     <double>-0.8821209214438412</double>
+    </void>
+    <void index="88">
+     <double>-0.778088029274584</double>
+    </void>
+    <void index="89">
+     <double>-0.0900956415753694</double>
+    </void>
+    <void index="90">
+     <double>-0.27178451989493807</double>
+    </void>
+    <void index="91">
+     <double>-1.2232007439779489</double>
+    </void>
+    <void index="92">
+     <double>-0.6227010835429444</double>
+    </void>
+    <void index="93">
+     <double>-0.2930437028835814</double>
+    </void>
+    <void index="94">
+     <double>-0.3185943160166977</double>
+    </void>
+    <void index="95">
+     <double>-1.1323922326905513</double>
+    </void>
+    <void index="96">
+     <double>-0.10443283101388612</double>
+    </void>
+    <void index="97">
+     <double>-0.3941824259226502</double>
+    </void>
+    <void index="98">
+     <double>-1.5035150046518722</double>
+    </void>
+    <void index="99">
+     <double>-0.035967820628810834</double>
+    </void>
+    <void index="100">
+     <double>-0.42192092052710767</double>
+    </void>
+    <void index="101">
+     <double>-0.5546127979179227</double>
+    </void>
+    <void index="102">
+     <double>-0.32993293609047336</double>
+    </void>
+    <void index="103">
+     <double>-0.31690220911684175</double>
+    </void>
+    <void index="104">
+     <double>-0.6478938797646295</double>
+    </void>
+    <void index="105">
+     <double>-0.33129804427759524</double>
+    </void>
+    <void index="106">
+     <double>0.09365691281113998</double>
+    </void>
+    <void index="107">
+     <double>-0.5099780865557317</double>
+    </void>
+    <void index="108">
+     <double>0.16249945946330144</double>
+    </void>
+    <void index="109">
+     <double>-0.1903869952465199</double>
+    </void>
+    <void index="110">
+     <double>-0.20928271215997976</double>
+    </void>
+    <void index="111">
+     <double>-0.298308819503633</double>
+    </void>
+    <void index="112">
+     <double>-0.25415768734722605</double>
+    </void>
+    <void index="113">
+     <double>-0.34644199303454276</double>
+    </void>
+    <void index="114">
+     <double>0.00953426518938778</double>
+    </void>
+    <void index="115">
+     <double>0.14853972000242474</double>
+    </void>
+    <void index="116">
+     <double>-0.06655100283752945</double>
+    </void>
+    <void index="117">
+     <double>-0.08808204972060914</double>
+    </void>
+    <void index="118">
+     <double>-0.7832165679432113</double>
+    </void>
+    <void index="119">
+     <double>-0.3854300225777758</double>
+    </void>
+    <void index="120">
+     <double>-0.6092933772324333</double>
+    </void>
+    <void index="121">
+     <double>-0.24119040190242402</double>
+    </void>
+    <void index="122">
+     <double>-0.32975355516153976</double>
+    </void>
+    <void index="123">
+     <double>-0.5900743170254122</double>
+    </void>
+    <void index="124">
+     <double>-0.28745262826518686</double>
+    </void>
+    <void index="125">
+     <double>-0.045971068804430026</double>
+    </void>
+    <void index="126">
+     <double>-0.11345803330550913</double>
+    </void>
+    <void index="127">
+     <double>-0.5254976589261209</double>
+    </void>
+    <void index="128">
+     <double>0.09085253178685519</double>
+    </void>
+    <void index="129">
+     <double>-0.22000679981693538</double>
+    </void>
+    <void index="130">
+     <double>-1.1366880472141412</double>
+    </void>
+    <void index="131">
+     <double>-0.25271078905147465</double>
+    </void>
+    <void index="132">
+     <double>0.19049205167933497</double>
+    </void>
+    <void index="133">
+     <double>-0.4856153964466495</double>
+    </void>
+    <void index="134">
+     <double>-0.21841304560391125</double>
+    </void>
+    <void index="135">
+     <double>0.030173667452488596</double>
+    </void>
+    <void index="136">
+     <double>-0.18341316026912668</double>
+    </void>
+    <void index="137">
+     <double>-0.771265037276489</double>
+    </void>
+    <void index="138">
+     <double>0.016460336752062845</double>
+    </void>
+    <void index="139">
+     <double>-2.002743349020679</double>
+    </void>
+    <void index="140">
+     <double>0.035865226352961216</double>
+    </void>
+    <void index="141">
+     <double>5.913822671054121E-4</double>
+    </void>
+    <void index="142">
+     <double>-0.08710111935918254</double>
+    </void>
+    <void index="143">
+     <double>0.7396987827950601</double>
+    </void>
+    <void index="144">
+     <double>-0.06517451275645039</double>
+    </void>
+    <void index="145">
+     <double>-0.11092829785996296</double>
+    </void>
+    <void index="146">
+     <double>-0.12255318748480346</double>
+    </void>
+    <void index="147">
+     <double>-0.10893900548888646</double>
+    </void>
+    <void index="148">
+     <double>-0.05508295498684556</double>
+    </void>
+    <void index="149">
+     <double>-0.09483316935110152</double>
+    </void>
+    <void index="150">
+     <double>-0.018621186626715167</double>
+    </void>
+    <void index="151">
+     <double>-0.012046705945725423</double>
+    </void>
+    <void index="152">
+     <double>-0.030687668918842555</double>
+    </void>
+    <void index="153">
+     <double>-0.03446748151143688</double>
+    </void>
+    <void index="154">
+     <double>-0.010250009444570052</double>
+    </void>
+    <void index="155">
+     <double>-0.06704162497469973</double>
+    </void>
+    <void index="156">
+     <double>0.0010052207536884175</double>
+    </void>
+    <void index="157">
+     <double>-0.3521471415103959</double>
+    </void>
+    <void index="158">
+     <double>0.10216391124717482</double>
+    </void>
+    <void index="159">
+     <double>-0.15139462859235694</double>
+    </void>
+    <void index="160">
+     <double>0.033040912504309884</double>
+    </void>
+    <void index="161">
+     <double>-0.3233684765024794</double>
+    </void>
+    <void index="162">
+     <double>-0.032730324459781475</double>
+    </void>
+    <void index="163">
+     <double>-0.05470264881715466</double>
+    </void>
+    <void index="164">
+     <double>-0.25145289530953285</double>
+    </void>
+    <void index="165">
+     <double>-0.7618801918796193</double>
+    </void>
+    <void index="166">
+     <double>-0.4696261309648251</double>
+    </void>
+    <void index="167">
+     <double>-1.1726036804254518</double>
+    </void>
+    <void index="168">
+     <double>-0.0132527500031703</double>
+    </void>
+    <void index="169">
+     <double>-0.4053518172117051</double>
+    </void>
+    <void index="170">
+     <double>0.17013579931617626</double>
+    </void>
+    <void index="171">
+     <double>-1.6248463480864666</double>
+    </void>
+    <void index="172">
+     <double>-0.18857005837249596</double>
+    </void>
+    <void index="173">
+     <double>-0.32062352311880704</double>
+    </void>
+    <void index="174">
+     <double>-0.7662404468798495</double>
+    </void>
+    <void index="175">
+     <double>0.3264550732759177</double>
+    </void>
+    <void index="176">
+     <double>-0.023210139162969108</double>
+    </void>
+    <void index="177">
+     <double>-0.013891531408529497</double>
+    </void>
+    <void index="178">
+     <double>-0.07213732175148396</double>
+    </void>
+    <void index="179">
+     <double>-0.20119638771123194</double>
+    </void>
+    <void index="180">
+     <double>-0.053968446588455274</double>
+    </void>
+    <void index="181">
+     <double>-0.12968534216788427</double>
+    </void>
+    <void index="182">
+     <double>-0.07650994885000895</double>
+    </void>
+    <void index="183">
+     <double>0.039657439272677536</double>
+    </void>
+    <void index="184">
+     <double>0.01401534382911155</double>
+    </void>
+    <void index="185">
+     <double>-0.17160072921457178</double>
+    </void>
+    <void index="186">
+     <double>-0.027916510265798722</double>
+    </void>
+    <void index="187">
+     <double>-0.01356674410067065</double>
+    </void>
+    <void index="188">
+     <double>0.02147030560767109</double>
+    </void>
+    <void index="189">
+     <double>-0.08626116965141735</double>
+    </void>
+    <void index="190">
+     <double>-0.3931059247080291</double>
+    </void>
+    <void index="191">
+     <double>-0.06273669125010531</double>
+    </void>
+    <void index="192">
+     <double>-0.020287986731193343</double>
+    </void>
+    <void index="193">
+     <double>0.0289894227247369</double>
+    </void>
+    <void index="194">
+     <double>-0.08779536448019942</double>
+    </void>
+    <void index="195">
+     <double>-0.10470989651989428</double>
+    </void>
+    <void index="196">
+     <double>0.08951211328775995</double>
+    </void>
+    <void index="197">
+     <double>-0.050394864717483785</double>
+    </void>
+    <void index="198">
+     <double>0.006701666714687605</double>
+    </void>
+    <void index="199">
+     <double>-0.014627997678757144</double>
+    </void>
+    <void index="200">
+     <double>0.9269672080525719</double>
+    </void>
+    <void index="201">
+     <double>-0.028588300961040085</double>
+    </void>
+    <void index="202">
+     <double>-0.023626553314395175</double>
+    </void>
+    <void index="203">
+     <double>-0.007616098785934316</double>
+    </void>
+    <void index="204">
+     <double>-0.10276595308459795</double>
+    </void>
+    <void index="205">
+     <double>0.021353162774298832</double>
+    </void>
+    <void index="206">
+     <double>-0.003106018138289157</double>
+    </void>
+    <void index="207">
+     <double>0.006920337076939396</double>
+    </void>
+    <void index="208">
+     <double>-0.021962436545943136</double>
+    </void>
+    <void index="209">
+     <double>-0.0028399504775874673</double>
+    </void>
+    <void index="210">
+     <double>-0.0015049717795458223</double>
+    </void>
+    <void index="211">
+     <double>-0.0024952278341743173</double>
+    </void>
+    <void index="212">
+     <double>-8.068677443985444E-4</double>
+    </void>
+    <void index="213">
+     <double>-8.023310319614837E-4</double>
+    </void>
+    <void index="214">
+     <double>-0.0035380851256781804</double>
+    </void>
+    <void index="215">
+     <double>-0.0024905019983629696</double>
+    </void>
+    <void index="216">
+     <double>-0.0036908329216751366</double>
+    </void>
+    <void index="217">
+     <double>-0.0014449198262101886</double>
+    </void>
+    <void index="218">
+     <double>-0.0028708931133187804</double>
+    </void>
+    <void index="219">
+     <double>-0.0030574162646989597</double>
+    </void>
+    <void index="220">
+     <double>-0.002973225898294085</double>
+    </void>
+    <void index="221">
+     <double>-0.004597045512688275</double>
+    </void>
+    <void index="222">
+     <double>-0.0014596542659883265</double>
+    </void>
+    <void index="223">
+     <double>-0.001579871635431764</double>
+    </void>
+    <void index="224">
+     <double>-0.0014115438374331575</double>
+    </void>
+    <void index="225">
+     <double>-0.0015897130214808015</double>
+    </void>
+    <void index="226">
+     <double>-0.02444927398805948</double>
+    </void>
+    <void index="227">
+     <double>-0.001488951234884146</double>
+    </void>
+    <void index="228">
+     <double>-0.0014378138663201766</double>
+    </void>
+    <void index="229">
+     <double>-0.008603930159577259</double>
+    </void>
+    <void index="230">
+     <double>9.843072083915386E-5</double>
+    </void>
+   </array>
+  </void>
+ </object>
+</java>

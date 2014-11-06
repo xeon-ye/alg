@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<java version="1.7.0_25" class="java.beans.XMLDecoder">
+ <object class="zju.matrix.AVector">
+  <void property="n">
+   <int>24</int>
+  </void>
+  <void property="values">
+   <array class="double" length="24">
+    <void index="0">
+     <double>-0.015180926199382206</double>
+    </void>
+    <void index="1">
+     <double>-0.21590720031757835</double>
+    </void>
+    <void index="2">
+     <double>-0.1936837639044976</double>
+    </void>
+    <void index="3">
+     <double>-0.056639806778317696</double>
+    </void>
+    <void index="4">
+     <double>-0.011931300243777329</double>
+    </void>
+    <void index="5">
+     <double>0.09551932413202745</double>
+    </void>
+    <void index="6">
+     <double>0.07869898849572439</double>
+    </void>
+    <void index="7">
+     <double>-0.022122380625432495</double>
+    </void>
+    <void index="8">
+     <double>-0.027263387754845672</double>
+    </void>
+    <void index="9">
+     <double>-0.00980852952216698</double>
+    </void>
+    <void index="10">
+     <double>-0.02001128073135413</double>
+    </void>
+    <void index="11">
+     <double>-0.010717547492367896</double>
+    </void>
+    <void index="12">
+     <double>-0.029543470335301258</double>
+    </void>
+    <void index="13">
+     <double>-0.006437023883635263</double>
+    </void>
+    <void index="14">
+     <double>-0.04169980717731107</double>
+    </void>
+    <void index="15">
+     <double>3.190053704863148E-4</double>
+    </void>
+    <void index="16">
+     <double>-0.00889290742609271</double>
+    </void>
+    <void index="17">
+     <double>-0.029786317618148806</double>
+    </void>
+    <void index="18">
+     <double>2.8476882637986333E-5</double>
+    </void>
+    <void index="19">
+     <double>-0.00857390582332282</double>
+    </void>
+    <void index="20">
+     <double>0.059648917499074555</double>
+    </void>
+    <void index="21">
+     <double>-0.054911876271664675</double>
+    </void>
+    <void index="22">
+     <double>-0.008487897410165706</double>
+    </void>
+    <void index="23">
+     <double>-0.04050502285412519</double>
+    </void>
+   </array>
+  </void>
+ </object>
+</java>

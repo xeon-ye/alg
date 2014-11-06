@@ -1,0 +1,1 @@
+mvn clean package assembly:assembly -Ddescriptor=jar-singleModule.xml -Dmaven.test.skip=true -o

@@ -1,0 +1,17 @@
+Line Segment Data	3 items	feet
+1	2	2000	401
+2	3	0	XFM-1
+3	4	2500	402
+-999
+Spot Loads	1 item
+4	D-PQ	722.5	447.7653	1080	523.0679	1504.1635	494.3946
+-999
+Distributed Loads	0 item
+-999
+Shunt Capacitors	0 item
+-999
+Transformer	1 item
+XFM-1	2000	OpenGr.Y-D	7.2	4.16	1.0	6.0
+-999
+Regulator	0 item
+-999
