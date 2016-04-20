@@ -2,6 +2,7 @@ package zju.se;
 
 import junit.framework.TestCase;
 import zju.ieeeformat.BusData;
+import zju.ieeeformat.DefaultIcfParser;
 import zju.ieeeformat.IEEEDataIsland;
 import zju.ieeeformat.IcfDataUtil;
 import zju.measure.MeasTypeCons;
@@ -9,6 +10,7 @@ import zju.measure.SystemMeasure;
 import zju.pf.SimuMeasMaker;
 import zju.util.StateCalByPolar;
 
+import java.io.InputStream;
 import java.util.Map;
 
 /**
@@ -29,6 +31,29 @@ public class SeTest_IeeeCase extends TestCase implements MeasTypeCons {
     }
 
     public void setUp() throws Exception {
+    }
+
+    public void testNewCase() {
+        System.out.println("=========开始计算33节点配电网==========");
+        alg.setTol_p(1e-5);
+        alg.setTol_q(1e-5);
+        InputStream node33File = this.getClass().getResourceAsStream("/ieeefiles/33node-cdf.txt");
+        IEEEDataIsland island = new DefaultIcfParser().parse(node33File, "GBK");
+        SystemMeasure sm;
+        IEEEDataIsland islandClone = island.clone();
+        sm = SimuMeasMaker.createFullMeasure(islandClone, 1, 0.05);
+        doSE(islandClone, sm, island, false, false);
+        System.out.println("==========33节点配电网计算结束==========");
+        System.out.println("=========开始计算90节点配电网==========");
+        alg.setTol_p(1e-5);
+        alg.setTol_q(1e-5);
+        InputStream node90File = this.getClass().getResourceAsStream("/ieeefiles/90node-cdf.txt");
+        IEEEDataIsland island2 = new DefaultIcfParser().parse(node90File, "GBK");
+        SystemMeasure sm2;
+        IEEEDataIsland islandClone2 = island2.clone();
+        sm2 = SimuMeasMaker.createFullMeasure(islandClone2, 1, 0.05);
+        doSE(islandClone2, sm2, island2, false, false);
+        System.out.println("==========90节点配电网计算结束==========");
     }
 
     public void testCaseTrue() {
@@ -127,9 +152,9 @@ public class SeTest_IeeeCase extends TestCase implements MeasTypeCons {
                      IEEEDataIsland ref, boolean isTrueValue, boolean isZeroInjection) {
         int[] variables_types = {
                 IpoptSeAlg.VARIABLE_VTHETA,
-                //IpoptSeAlg.VARIABLE_VTHETA_PQ,
-                //IpoptSeAlg.VARIABLE_U,
-                //IpoptSeAlg.VARIABLE_UI,
+                IpoptSeAlg.VARIABLE_VTHETA_PQ,
+                IpoptSeAlg.VARIABLE_U,
+                IpoptSeAlg.VARIABLE_UI,
         };
         doSE(island, sm, ref, variables_types, isTrueValue, isZeroInjection);
     }

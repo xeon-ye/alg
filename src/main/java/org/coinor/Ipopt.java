@@ -275,7 +275,7 @@ public abstract class Ipopt {
      * @param n           the number of variables in the problem.
      * @param m           the number of constraints in the problem.
      * @param nele_jac    the number of nonzero entries in the Jacobian.
-     * @param nele_hess   the number of nonzero entries in the essian.
+     * @param nele_hess   the number of nonzero entries in the Hessian.
      * @param index_style the numbering style used for row/col entries in the sparse matrix format(0 for
      *                    C_STYLE, 1 for FORTRAN_STYLE).
      * @return true means success, false means fail!
