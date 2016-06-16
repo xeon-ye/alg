@@ -1,10 +1,7 @@
 package zju.lfp.forecasters.chaos;
 
 import org.apache.log4j.Logger;
-import weka.core.Attribute;
-import weka.core.FastVector;
-import weka.core.Instance;
-import weka.core.Instances;
+import weka.core.*;
 import zju.lfp.utils.MultiTimeSeries;
 
 /**
@@ -51,7 +48,7 @@ public class ChaosInstances {
     private void addInstance(Instances instances, int n) {
         double[] reformedSpacePoint = ChaosTimeSeriesUtil.getReformedSpacePoint(chaosTimeSerieses,
                 n, delayPoints, reformDims);
-        Instance instance = new Instance(totalAttributeDims + 1);
+        Instance instance = new DenseInstance(totalAttributeDims + 1);
         for(int i = 0; i < totalAttributeDims; i++) {
             instance.setValue(i, reformedSpacePoint[i]);
         }
@@ -70,7 +67,7 @@ public class ChaosInstances {
     }
 
     public Instance getWorkingInstance(int n) {
-        Instance instance = new Instance(totalAttributeDims + 1);
+        Instance instance = new DenseInstance(totalAttributeDims + 1);
         chaosTimeSerieses = ChaosTimeSeriesUtil.covertToChaosTimeSeries(multiTimeSeries);
         double[] reformedSpacePoint = ChaosTimeSeriesUtil.getReformedSpacePoint(chaosTimeSerieses,
                 n-1, delayPoints, reformDims);

@@ -1,14 +1,10 @@
 package zju.hems;
 
 import junit.framework.TestCase;
-import org.supercsv.io.CsvListReader;
-import org.supercsv.io.ICsvListReader;
-import org.supercsv.prefs.CsvPreference;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.Reader;
-import java.util.List;
 
 /**
  * Created by IntelliJ IDEA.
@@ -35,14 +31,11 @@ public class EsNlpModelTest extends TestCase {
      */
     private void readFile(String file) throws IOException {
         //开始读入每半小时所需的能量和电价
-        ICsvListReader listReader;
-        Reader r = new InputStreamReader(this.getClass().getResourceAsStream(file));
-        listReader = new CsvListReader(r, CsvPreference.STANDARD_PREFERENCE);
+        BufferedReader r = new BufferedReader(new InputStreamReader(this.getClass().getResourceAsStream(file)));
         int count = 0;
-        while (listReader.read() != null) {
+        while (r.readLine() != null)
             count++;
-        }
-        listReader.close();
+        r.close();
 
         //设定上下限
         dcEnergy_l = new double[count];
@@ -57,22 +50,23 @@ public class EsNlpModelTest extends TestCase {
         }
         pNeeded = new double[count];
         pricePerKwh = new double[count];
-        r = new InputStreamReader(this.getClass().getResourceAsStream(file));
-        listReader = new CsvListReader(r, CsvPreference.STANDARD_PREFERENCE);
+        r = new BufferedReader(new InputStreamReader(this.getClass().getResourceAsStream(file)));
         count = 0;
-        List<String> customerList;
+        String str;
+        String[] customerList;
         finalEnergyChange = 0.0;
-        while ((customerList = listReader.read()) != null) {
+        while ((str = r.readLine()) != null) {
+            customerList = str.split(",");
             //AC负荷功率
-            double acLoadP = Double.parseDouble(customerList.get(0));
+            double acLoadP = Double.parseDouble(customerList[0]);
             //DC负荷功率
-            double dcLoadP = Double.parseDouble(customerList.get(1));
+            double dcLoadP = Double.parseDouble(customerList[1]);
             //PV输出功率
-            double pvOutputP = Double.parseDouble(customerList.get(2));
+            double pvOutputP = Double.parseDouble(customerList[2]);
             //将功率转化为能量
             //pNeeded[count] = (acLoadP + dcLoadP - pvOutputP) * 0.5;
             //电价
-            pricePerKwh[count] = Double.parseDouble(customerList.get(3)) / 100;
+            pricePerKwh[count] = Double.parseDouble(customerList[3]) / 100;
 
             pNeeded[count] = acLoadP * 0.5;
             minEnergeChage[count] += dcLoadP * 0.5;
@@ -92,7 +86,7 @@ public class EsNlpModelTest extends TestCase {
             dcEnergy_u[count] += finalEnergyChange;
             count++;
         }
-        listReader.close();
+        r.close();
         //读入结束
     }
 

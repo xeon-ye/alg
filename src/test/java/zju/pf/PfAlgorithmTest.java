@@ -164,6 +164,23 @@ public class PfAlgorithmTest extends TestCase {
         pf.setPfMethod(PfConstants.ALG_NEWTON);
         testPfConvergence(island, pf);
     }
+    public void testCaseSZ2015() {
+        InputStream ieeeFile = this.getClass().getResourceAsStream("/ieeefiles/SZ_IEEE.txt");
+        IEEEDataIsland island = new DefaultIcfParser().parse(ieeeFile,"UTF-8");
+        for (BranchData b : island.getBranches()) {
+            //if (b.getType() == BranchData.BRANCH_TYPE_TF_FIXED_TAP)
+            //    b.setBranchR(0.0001);
+            //if (b.getType() == BranchData.BRANCH_TYPE_TF_FIXED_TAP && Math.abs(b.getBranchX()) > 0.8)
+            //    b.setBranchX(0.05);
+            //b.setBranchR(0.0001);
+            //b.setBranchX(0.05);
+        }
+
+        PolarPf pf = new PolarPf();
+        pf.setPfMethod(PfConstants.ALG_NEWTON);
+        testPfConvergence(island, pf);
+        assertNotNull(pf.createPfResult());
+    }
 
     //public void testCase2746() {
     //    InputStream ieeeFile = this.getClass().getResourceAsStream("/ieeefiles/case2746wop_ieee.txt");

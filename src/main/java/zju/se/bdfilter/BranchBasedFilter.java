@@ -2,10 +2,7 @@ package zju.se.bdfilter;
 
 import cern.colt.matrix.DoubleMatrix2D;
 import weka.clusterers.SimpleKMeans;
-import weka.core.Attribute;
-import weka.core.FastVector;
-import weka.core.Instance;
-import weka.core.Instances;
+import weka.core.*;
 import zju.common.NewtonModel;
 import zju.common.NewtonSolver;
 import zju.ieeeformat.BranchData;
@@ -94,7 +91,7 @@ public class BranchBasedFilter implements NewtonModel, MeasTypeCons {
         //初始化数据集
         dataset = new Instances("Test-dataset", attributes, all_cases.length);
         for (int[] ignored : all_cases)
-            dataset.add(new Instance(3));
+            dataset.add(new DenseInstance(3));
         //初始化聚类对象及其参数
         clusterer = new SimpleKMeans();
         clusterer.setOptions(weka.core.Utils.splitOptions(

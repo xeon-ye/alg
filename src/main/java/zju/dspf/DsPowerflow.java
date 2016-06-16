@@ -50,6 +50,10 @@ public class DsPowerflow implements DsModelCons {
         }
     }
 
+    public void doOutagePf() {
+
+    }
+
     /**
      * 使用Loop current based算法的潮流
      * @param island

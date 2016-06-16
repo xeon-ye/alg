@@ -31,7 +31,7 @@ public class EsMlpModel {
         //分别是w,z,x的数组长度,约束的个数以及约束中变量的个数, 分段函数中用w,z来表示x
         //element_count 最前面的元素是w1<=z1,w2<=z1+z2……z1+z2=1,w1+w2+w3=1这几个条件中的非零元素
         int w_count = 0, z_count = 0, x_count = 0, row_count = 0, element_count = 0;
-        double b2;
+        double b2; //放电量
         for (int k = 0; k < pNeed.length; k++) {
             double p = pNeed[k];
             if (p > 0) {

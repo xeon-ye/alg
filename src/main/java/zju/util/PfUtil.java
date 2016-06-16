@@ -38,7 +38,10 @@ public class PfUtil implements MeasTypeCons {
                 case BusData.BUS_TYPE_GEN_PV://
                     pm = (bus.getGenerationMW() - bus.getLoadMW()) / baseMVA;
                     pMeas.put(bus.getBusNumber(), pm);
-                    vMeas.put(bus.getBusNumber(), bus.getFinalVoltage());
+                    if(bus.getDesiredVolt() > 0.5 && bus.getDesiredVolt() < 1.5)
+                        vMeas.put(bus.getBusNumber(), bus.getDesiredVolt());
+                    else
+                        vMeas.put(bus.getBusNumber(), bus.getFinalVoltage());
                     break;
                 case BusData.BUS_TYPE_SLACK://
                     vMeas.put(bus.getBusNumber(), bus.getFinalVoltage());
