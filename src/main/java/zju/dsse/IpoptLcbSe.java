@@ -348,13 +348,12 @@ public class IpoptLcbSe extends IpoptSeAlg {
      * @param v1 节点id
      * @param v2 节点id
      */
-    private void fillJacOfV(String v1, String v2, int index) {
+    private void fillJacOfV(String v1, String v2, int index, double a, double b) {
         int vertexNo1 = pfModel.getVertexIdToNo().get(v1);
         int vertexNo2 = pfModel.getVertexIdToNo().get(v2);
         int tmpNo;
         String id1, id2;
         DetailedEdge tmpEdge;
-        calV(v1, v2, tempV);
         while (vertexNo1 != vertexNo2) {
             if (vertexNo1 > vertexNo2) {
                 tmpNo = pfModel.getSonToFather().get(vertexNo1);
@@ -362,7 +361,7 @@ public class IpoptLcbSe extends IpoptSeAlg {
                 id2 = pfModel.getVertexNoToId().get(vertexNo1);
                 tmpEdge = dsIsland.getDetailedG().getEdge(id1, id2);
                 //todo:
-                pfModel.fillVDropJac(null, tmpEdge, index, 1.0, 2.0 * tempV[0], 2.0 * tempV[1]);
+                pfModel.fillVDropJac(null, tmpEdge, index, 1.0, a, b);
                 vertexNo1 = pfModel.getSonToFather().get(vertexNo1);
             } else {
                 tmpNo = pfModel.getSonToFather().get(vertexNo2);
@@ -370,7 +369,7 @@ public class IpoptLcbSe extends IpoptSeAlg {
                 id2 = pfModel.getVertexNoToId().get(vertexNo2);
                 tmpEdge = dsIsland.getDetailedG().getEdge(id1, id2);
                 //todo:
-                pfModel.fillVDropJac(null, tmpEdge, index, 1.0, 2.0 * tempV[0], 2.0 * tempV[1]);
+                pfModel.fillVDropJac(null, tmpEdge, index, 1.0, a, b);
                 vertexNo2 = pfModel.getSonToFather().get(vertexNo2);
             }
         }
@@ -432,7 +431,7 @@ public class IpoptLcbSe extends IpoptSeAlg {
                         num = meas.getBus_v_pos()[i];
                         phase = meas.getBus_v_phase()[i];
                         calV(num + "-" + phase, DsTopoIsland.EARTH_NODE_ID, tempV);
-                        fillJacOfV(num + "-" + phase, DsTopoIsland.EARTH_NODE_ID, index);
+                        fillJacOfV(num + "-" + phase, DsTopoIsland.EARTH_NODE_ID, index, 2.0 * tempV[0],  2.0 * tempV[1]);
                     }
                     break;
                 case TYPE_BUS_ACTIVE_POWER:
@@ -456,8 +455,16 @@ public class IpoptLcbSe extends IpoptSeAlg {
                     for (int k = 0; k < meas.getLine_from_p_pos().length; k++, index++) {
                         num = meas.getLine_from_p_pos()[k];
                         phase = meas.getLine_from_p_phase()[k];
-
-                        //fillJacobian_line_from_p(num, phase, result, index);
+                        key = String.valueOf(num);
+                        tn1 = dsIsland.getGraph().getEdgeSource(dsIsland.getDevices().get(key));
+                        tn2 = dsIsland.getGraph().getEdgeTarget(dsIsland.getDevices().get(key));
+                        e = dsIsland.getDetailedG().getEdge(tn1.getBusNo() + "-" + phase, tn2.getBusNo() + "-" + phase);
+                        branchNo = pfModel.getEdgeToNo().get(e);
+                        pfModel.calCurrent(branchNo, pfModel.getState(), tempI);
+                        calV(num + "-" + phase, DsTopoIsland.EARTH_NODE_ID, tempV);
+                        fillJacOfV(num + "-" + phase, DsTopoIsland.EARTH_NODE_ID, index, -tempI[0],  tempI[1]);
+                        pfModel.fillJacStruc(result, branchNo, index, tempV[1], 0);
+                        pfModel.fillJacStruc(result, branchNo, index, -tempV[0], pfModel.getDimension());
                     }
                     break;
                 case TYPE_LINE_FROM_REACTIVE:
