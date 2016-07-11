@@ -211,5 +211,4 @@ public class MeshedDsPfTest extends TestCase implements DsModelCons {
                 obj.setProperty(KEY_CONNECTED_NODE, node2);
         }
     }
-
 }

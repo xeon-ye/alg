@@ -98,7 +98,7 @@ public class DsPowerflowTest extends TestCase implements DsModelCons {
         }
         for (; i < 2 * (model.getLoopSize() + model.getWindingEdges().size()); i++)
             assertTrue(Math.abs(z_est.getValue(i)) < 4.1);
-        for (; i < 2 * (model.getLoopSize() + model.getWindingEdges().size() + model.getLoadEdges().size()); i++)
+        for (; i < 2 * (model.getLoopSize() + model.getWindingEdges().size() + model.getNonZLoadEdges().size()); i++)
             if (Math.abs(z_est.getValue(i)) > 110)
                 assertTrue(Math.abs(z_est.getValue(i)) < 110);
         for (; i < z_est.getN(); i++)

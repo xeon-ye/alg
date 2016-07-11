@@ -110,19 +110,15 @@ public class IpoptLcbSe extends IpoptSeAlg {
     }
 
     public boolean eval_g(int n, double[] x, boolean new_x, int m, double[] g) {
+        //计算回路KVL方程
         pfModel.calLoopKVL(g, 0, true);
+        //计算变压器原副边电流方程
         pfModel.calTfCurrent(g, pfModel.getLoopSize() * 2);
         int i = pfModel.getLoopSize();
         //计算量测方程约束
         calEstimatedZ();
         for (int j = 0; j < meas.getZ_estimate().getN(); j++, i++)
             g[i] = meas.getZ_estimate().getValue(j) + x[j + dimension] - meas.getZ().getValue(j);
-        //计算角度参考节点的约束
-        if (getSlackBusNum() > 0) {
-            //g[i] = x[3 * slackBusCol + vImageOffset];
-            //g[i + 1] = x[3 * slackBusCol + 1 + vImageOffset] - x[3 * slackBusCol + 1 + vRealOffset] * DsModelCons.tanB;
-            //g[i + 2] = x[3 * slackBusCol + 2 + vImageOffset] - x[3 * slackBusCol + 2 + vRealOffset] * DsModelCons.tanC;
-        }
         return true;
     }
 
@@ -210,7 +206,7 @@ public class IpoptLcbSe extends IpoptSeAlg {
                         tn2 = dsIsland.getGraph().getEdgeTarget(dsIsland.getDevices().get(key));
                         e = dsIsland.getDetailedG().getEdge(tn1.getBusNo() + "-" + phase, tn2.getBusNo() + "-" + phase);
                         branchNo = pfModel.getEdgeToNo().get(e);
-                        pfModel.calCurrent(branchNo, pfModel.getState(), tempI);
+                        pfModel.calCurrent(branchNo, tempI);
                         meas.getZ_estimate().setValue(index, tempI[0] * tempI[0] + tempI[1] * tempI[1]);
                     }
                     break;
@@ -221,7 +217,7 @@ public class IpoptLcbSe extends IpoptSeAlg {
     }
 
     /**
-     * 用于计算流出定点到负荷的功率
+     * 用于计算流出节点到负荷的功率
      * @param vertexId 顶点ID
      * @param isQ 是否计算无功
      * @return 计算结果
@@ -311,10 +307,10 @@ public class IpoptLcbSe extends IpoptSeAlg {
     }
 
     /**
-     * 该方法用于计算两个定点之间的电压差，方法是不断通过树枝回溯，累加电压降
+     * 该方法用于计算两个节点之间的电压差，方法是不断通过树枝回溯，累加电压降
      *
-     * @param v1 定点id
-     * @param v2 定点id
+     * @param v1 节点id
+     * @param v2 节点id
      * @param v  存储计算结果的数组
      */
     public void calV(String v1, String v2, double[] v) {
@@ -347,41 +343,38 @@ public class IpoptLcbSe extends IpoptSeAlg {
     }
 
     /**
-        * 该方法用于计算两个定点之间的电压差，方法是不断通过树枝回溯，累加电压降
-        *
-        * @param v1 定点id
-        * @param v2 定点id
-        * @param v  存储计算结果的数组
-        */
-       private void fillJacOfV(String v1, String v2, double[] v,int index) {
-           int vertexNo1 = pfModel.getVertexIdToNo().get(v1);
-           int vertexNo2 = pfModel.getVertexIdToNo().get(v2);
-           int tmpNo;
-           String id1, id2;
-           DetailedEdge tmpEdge;
-           v[0] = 0.0;
-           v[1] = 0.0;
-           while (vertexNo1 != vertexNo2) {
-               if (vertexNo1 > vertexNo2) {
-                   tmpNo = pfModel.getSonToFather().get(vertexNo1);
-                   id1 = pfModel.getVertexNoToId().get(tmpNo);
-                   id2 = pfModel.getVertexNoToId().get(vertexNo1);
-                   tmpEdge = dsIsland.getDetailedG().getEdge(id1, id2);
-                   //pfModel.fillVDropJac(null, tmpEdge, index, v);
-                   vertexNo1 = pfModel.getSonToFather().get(vertexNo1);
-               } else {
-                   tmpNo = pfModel.getSonToFather().get(vertexNo2);
-                   id1 = pfModel.getVertexNoToId().get(tmpNo);
-                   id2 = pfModel.getVertexNoToId().get(vertexNo2);
-                   tmpEdge = dsIsland.getDetailedG().getEdge(id1, id2);
-                   pfModel.calVoltDrop(tmpEdge, id1, id2, tempV, tempI);
-                   vertexNo2 = pfModel.getSonToFather().get(vertexNo2);
-               }
-               v[0] += tempV[0];
-               v[1] += tempV[1];
-           }
-       }
-
+     * 该方法用于计算两个节点之间的电压差所对应的Jacobian元素
+     *
+     * @param v1 节点id
+     * @param v2 节点id
+     */
+    private void fillJacOfV(String v1, String v2, int index) {
+        int vertexNo1 = pfModel.getVertexIdToNo().get(v1);
+        int vertexNo2 = pfModel.getVertexIdToNo().get(v2);
+        int tmpNo;
+        String id1, id2;
+        DetailedEdge tmpEdge;
+        calV(v1, v2, tempV);
+        while (vertexNo1 != vertexNo2) {
+            if (vertexNo1 > vertexNo2) {
+                tmpNo = pfModel.getSonToFather().get(vertexNo1);
+                id1 = pfModel.getVertexNoToId().get(tmpNo);
+                id2 = pfModel.getVertexNoToId().get(vertexNo1);
+                tmpEdge = dsIsland.getDetailedG().getEdge(id1, id2);
+                //todo:
+                pfModel.fillVDropJac(null, tmpEdge, index, 1.0, 2.0 * tempV[0], 2.0 * tempV[1]);
+                vertexNo1 = pfModel.getSonToFather().get(vertexNo1);
+            } else {
+                tmpNo = pfModel.getSonToFather().get(vertexNo2);
+                id1 = pfModel.getVertexNoToId().get(tmpNo);
+                id2 = pfModel.getVertexNoToId().get(vertexNo2);
+                tmpEdge = dsIsland.getDetailedG().getEdge(id1, id2);
+                //todo:
+                pfModel.fillVDropJac(null, tmpEdge, index, 1.0, 2.0 * tempV[0], 2.0 * tempV[1]);
+                vertexNo2 = pfModel.getSonToFather().get(vertexNo2);
+            }
+        }
+    }
 
 
     public void setXLimit(double[] x_L, double[] x_U) {
@@ -430,70 +423,82 @@ public class IpoptLcbSe extends IpoptSeAlg {
 
 
     public void fillJacobian(MeasVector meas, DoubleMatrix2D result, int index) {
+        //todo:
+        int num, phase, branchNo;
         for (int type : meas.getMeasureOrder()) {
             switch (type) {
                 case TYPE_BUS_VOLOTAGE:
                     for (int i = 0; i < meas.getBus_v_pos().length; i++, index++) {
-                        int num = meas.getBus_v_pos()[i];
-                        int phase = meas.getBus_v_phase()[i];
-                        //fillJacOfV(num + "-" + phase, DsTopoIsland.EARTH_NODE_ID);
-                        //fillJacobian_bus_v_ampl(num, phase, result, index);
+                        num = meas.getBus_v_pos()[i];
+                        phase = meas.getBus_v_phase()[i];
+                        calV(num + "-" + phase, DsTopoIsland.EARTH_NODE_ID, tempV);
+                        fillJacOfV(num + "-" + phase, DsTopoIsland.EARTH_NODE_ID, index);
                     }
                     break;
                 case TYPE_BUS_ACTIVE_POWER:
                     for (int i = 0; i < meas.getBus_p_pos().length; i++, index++) {
-                        int num = meas.getBus_p_pos()[i];//num starts from 1
-                        int phase = meas.getBus_p_phase()[i];
+                        num = meas.getBus_p_pos()[i];//num starts from 1
+                        phase = meas.getBus_p_phase()[i];
                         //fillJacobian_bus_p(num, phase, result, index);
                     }
                     break;
                 case TYPE_BUS_REACTIVE_POWER:
                     for (int i = 0; i < meas.getBus_q_pos().length; i++, index++) {
-                        int num = meas.getBus_q_pos()[i];
-                        int phase = meas.getBus_q_phase()[i];
+                        num = meas.getBus_q_pos()[i];
+                        phase = meas.getBus_q_phase()[i];
                         //fillJacobian_bus_q(num, phase, result, index);
                     }
                     break;
                 case TYPE_LINE_FROM_ACTIVE:
+                    DsTopoNode tn1, tn2;
+                    String key;
+                    DetailedEdge e;
                     for (int k = 0; k < meas.getLine_from_p_pos().length; k++, index++) {
-                        int num = meas.getLine_from_p_pos()[k];
-                        int phase = meas.getLine_from_p_phase()[k];
+                        num = meas.getLine_from_p_pos()[k];
+                        phase = meas.getLine_from_p_phase()[k];
+
                         //fillJacobian_line_from_p(num, phase, result, index);
                     }
                     break;
                 case TYPE_LINE_FROM_REACTIVE:
                     for (int k = 0; k < meas.getLine_from_q_pos().length; k++, index++) {
-                        int num = meas.getLine_from_q_pos()[k];
-                        int phase = meas.getLine_from_q_phase()[k];
+                        num = meas.getLine_from_q_pos()[k];
+                        phase = meas.getLine_from_q_phase()[k];
                         //fillJacobian_line_from_q(num, phase, result, index);
                     }
                     break;
                 case TYPE_LINE_TO_ACTIVE:
                     for (int k = 0; k < meas.getLine_to_p_pos().length; k++, index++) {
-                        int num = meas.getLine_to_p_pos()[k];
-                        int phase = meas.getLine_to_p_phase()[k];
+                        num = meas.getLine_to_p_pos()[k];
+                        phase = meas.getLine_to_p_phase()[k];
                         //fillJacobian_line_to_p(num, phase, result, index);
                     }
                     break;
                 case TYPE_LINE_TO_REACTIVE:
                     for (int k = 0; k < meas.getLine_to_q_pos().length; k++, index++) {
-                        int num = meas.getLine_to_q_pos()[k];
-                        int phase = meas.getLine_to_q_phase()[k];
+                        num = meas.getLine_to_q_pos()[k];
+                        phase = meas.getLine_to_q_phase()[k];
                         //fillJacobian_line_to_q(num, phase, result, index);
                     }
                     break;
                 case TYPE_LINE_FROM_CURRENT:
                     for (int k = 0; k < meas.getLine_from_i_amp_pos().length; k++, index++) {
-                        Integer num = meas.getLine_from_i_amp_pos()[k];//num starts from 1
-                        int phase = meas.getLine_from_i_amp_phase()[k];//num starts from 1
+                        num = meas.getLine_from_i_amp_pos()[k];//num starts from 1
+                        phase = meas.getLine_from_i_amp_phase()[k];//num starts from 1
                         //fillJacobian_line_from_i_ampl(num, phase, result, index);
-                    }
-                    break;
-                case TYPE_LINE_TO_CURRENT:
-                    for (int k = 0; k < meas.getLine_to_i_amp_pos().length; k++, index++) {
-                        Integer num = meas.getLine_to_i_amp_pos()[k];//num starts from 1
-                        int phase = meas.getLine_to_i_amp_phase()[k];//num starts from 1
-                        //fillJacobian_line_to_i_ampl(num, phase, result, index);
+                        key = String.valueOf(num);
+                        tn1 = dsIsland.getGraph().getEdgeSource(dsIsland.getDevices().get(key));
+                        tn2 = dsIsland.getGraph().getEdgeTarget(dsIsland.getDevices().get(key));
+                        e = dsIsland.getDetailedG().getEdge(tn1.getBusNo() + "-" + phase, tn2.getBusNo() + "-" + phase);
+                        branchNo = pfModel.getEdgeToNo().get(e);
+                        int tmpK = pfModel.getB().getJA2()[branchNo], i;
+                        pfModel.calCurrent(branchNo, tempI);
+                        while (tmpK != -1) {
+                            i = pfModel.getB().getIA2().get(tmpK);
+                            tmpK = pfModel.getB().getLINK2().get(tmpK);
+                            result.setQuick(index, i, 2 * pfModel.getB().getVA().get(tmpK) * tempI[0]);
+                            result.setQuick(index, i + pfModel.getDimension(), 2 * pfModel.getB().getVA().get(tmpK) * tempI[1]);
+                        }
                     }
                     break;
                 default:
@@ -503,7 +508,7 @@ public class IpoptLcbSe extends IpoptSeAlg {
     }
 
     private void fillHessian(MeasVector meas, MySparseDoubleMatrix2D hessian, double[] lambda, int index) {
-
+        //todo:
     }
 
     public DsTopoIsland getDsIsland() {

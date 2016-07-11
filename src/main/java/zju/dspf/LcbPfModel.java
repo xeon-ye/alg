@@ -34,7 +34,7 @@ public class LcbPfModel implements NewtonModel, DsModelCons {
     //变压器原边所在支路
     private List<DetailedEdge> windingEdges;
     //非恒阻抗支路
-    private List<DetailedEdge> loadEdges;
+    private List<DetailedEdge> nonZLoadEdges;
     //分布式电源支路
     private List<DetailedEdge> dgEdges;
     //存储计算值,环路电压实部，环路电压虚部，变压器电流方程
@@ -72,7 +72,8 @@ public class LcbPfModel implements NewtonModel, DsModelCons {
 
         dimension = B.getM();
         dimension += windingEdges != null ? windingEdges.size() : 0;
-        dimension += loadEdges != null ? loadEdges.size() : 0;
+        //非恒阻抗支路的电压作为状态变量
+        dimension += nonZLoadEdges != null ? nonZLoadEdges.size() : 0;
         varSize = dimension * 2;
         for (DispersedGen dg : island.getDispersedGens().values()) {
             dg.setStateIndex(dimension);
@@ -134,7 +135,7 @@ public class LcbPfModel implements NewtonModel, DsModelCons {
         }
         //将变压器支路和非恒阻抗支路电压在状态变量中的位置进行编号
         windingEdges = new ArrayList<DetailedEdge>(tfWindingCount);
-        loadEdges = new ArrayList<DetailedEdge>(loadCount);
+        nonZLoadEdges = new ArrayList<DetailedEdge>(loadCount);
         dgEdges = new ArrayList<DetailedEdge>(dgCount);
         edgeIndex = new HashMap<DetailedEdge, Integer>(tfWindingCount + loadCount);
         int tfIndex = 0, loadIndex = 0;
@@ -153,7 +154,7 @@ public class LcbPfModel implements NewtonModel, DsModelCons {
                     if (Math.abs(edge.getS_real()) > ZERO_LIMIT
                             || Math.abs(edge.getS_image()) > ZERO_LIMIT
                             || Math.abs(edge.getI_ampl()) > ZERO_LIMIT) {
-                        loadEdges.add(edge);
+                        nonZLoadEdges.add(edge);
                         edgeIndex.put(edge, loopSize + tfWindingCount + loadIndex);
                         loadIndex++;
                     }
@@ -307,7 +308,7 @@ public class LcbPfModel implements NewtonModel, DsModelCons {
     @Override
     public AVector getInitial() {
         fillVInState(windingEdges);
-        fillVInState(loadEdges);
+        fillVInState(nonZLoadEdges);
         for (DispersedGen dg : island.getDispersedGens().values())
             dg.initialState(this);
         for (DispersedGen dg : island.getDispersedGens().values())
@@ -371,7 +372,7 @@ public class LcbPfModel implements NewtonModel, DsModelCons {
         fillTfCurrentJac(jacobian, index);
         index += 2 * windingEdges.size();
         //负荷功率平衡方程
-        for (DetailedEdge edge : loadEdges) {
+        for (DetailedEdge edge : nonZLoadEdges) {
             pos = edgeIndex.get(edge);
             vx = state.getValue(pos);
             vy = state.getValue(pos + dimension);
@@ -588,7 +589,7 @@ public class LcbPfModel implements NewtonModel, DsModelCons {
         int index = 2 * (getLoopSize() + windingEdges.size()), pos;
         double[] tempI = new double[2];
         double vx, vy, r, x, tmp, p, q;
-        for (DetailedEdge e : loadEdges) {
+        for (DetailedEdge e : nonZLoadEdges) {
             pos = edgeIndex.get(e);
             vx = state.getValue(pos);
             vy = state.getValue(pos + dimension);
@@ -675,6 +676,10 @@ public class LcbPfModel implements NewtonModel, DsModelCons {
             jacStruc.setValue(row, i + offset, B.getVA().get(k) * v, true);
             k = B.getLINK2().get(k);
         }
+    }
+
+    public void calCurrent(int branchNo, double[] c) {
+        calCurrent(branchNo, state, c);
     }
 
     public void calCurrent(int branchNo, AVector state, double[] c) {
@@ -1025,7 +1030,7 @@ public class LcbPfModel implements NewtonModel, DsModelCons {
             while (k != -1) {
                 j = B.getJA().get(k);
                 e = noToEdge.get(j);
-                fillVDropJac(m, e, row, B.getVA().get(k));
+                fillVDropJac(m, e, row, B.getVA().get(k), 1.0, 1.0);
                 k = B.getLINK().get(k);
             }
         }
@@ -1043,7 +1048,7 @@ public class LcbPfModel implements NewtonModel, DsModelCons {
      * @param row 当前的Jacobian矩阵中的行
      * @param value 回路矩阵中该支路所对应的值
      */
-    public void fillVDropJac(ASparseMatrixLink2D m, DetailedEdge e, int row, double value) {
+    public void fillVDropJac(ASparseMatrixLink2D m, DetailedEdge e, int row, double value, double a, double b) {
         switch (e.getEdgeType()) {
             case DetailedEdge.EDGE_TYPE_FEEDER:
                 Feeder feeder = (Feeder) island.getBranches().get(island.getDevices().get(e.getDevId()));
@@ -1057,42 +1062,42 @@ public class LcbPfModel implements NewtonModel, DsModelCons {
                 tnId = tnId.substring(0, tnId.length() - 1);
 
                 int pos = edgeToNo.get(e);
-                fillJacStruc(m, pos, row, value * feeder.getZ_real()[e.getPhase()][e.getPhase()], 0);
-                fillJacStruc(m, pos, row, -value * feeder.getZ_imag()[e.getPhase()][e.getPhase()], dimension);
-                fillJacStruc(m, pos, row + B.getM(), value * feeder.getZ_imag()[e.getPhase()][e.getPhase()], 0);
-                fillJacStruc(m, pos, row + B.getM(), value * feeder.getZ_real()[e.getPhase()][e.getPhase()], dimension);
+                fillJacStruc(m, pos, row, a * value * feeder.getZ_real()[e.getPhase()][e.getPhase()], 0);
+                fillJacStruc(m, pos, row, - a * value * feeder.getZ_imag()[e.getPhase()][e.getPhase()], dimension);
+                fillJacStruc(m, pos, row + B.getM(), b * value * feeder.getZ_imag()[e.getPhase()][e.getPhase()], 0);
+                fillJacStruc(m, pos, row + B.getM(), b * value * feeder.getZ_real()[e.getPhase()][e.getPhase()], dimension);
                 for (DetailedEdge otherE : e.getOtherEdgesOfSameFeeder()) {
                     pos = edgeToNo.get(otherE);
                     v1 = vertexIdToNo.get(island.getDetailedG().getEdgeSource(otherE));
                     v2 = vertexIdToNo.get(island.getDetailedG().getEdgeTarget(otherE));
                     if (v1 < v2) {
                         if (!vertexNoToId.get(v1).startsWith(tnId)) {
-                            fillJacStruc(m, pos, row, -value * feeder.getZ_real()[e.getPhase()][otherE.getPhase()], 0);
-                            fillJacStruc(m, pos, row, value * feeder.getZ_imag()[e.getPhase()][otherE.getPhase()], dimension);
-                            fillJacStruc(m, pos, row + B.getM(), -value * feeder.getZ_imag()[e.getPhase()][otherE.getPhase()], 0);
-                            fillJacStruc(m, pos, row + B.getM(), -value * feeder.getZ_real()[e.getPhase()][otherE.getPhase()], dimension);
+                            fillJacStruc(m, pos, row, -a * value * feeder.getZ_real()[e.getPhase()][otherE.getPhase()], 0);
+                            fillJacStruc(m, pos, row, a * value * feeder.getZ_imag()[e.getPhase()][otherE.getPhase()], dimension);
+                            fillJacStruc(m, pos, row + B.getM(), -b * value * feeder.getZ_imag()[e.getPhase()][otherE.getPhase()], 0);
+                            fillJacStruc(m, pos, row + B.getM(), -b * value * feeder.getZ_real()[e.getPhase()][otherE.getPhase()], dimension);
                             continue;
                         }
                     } else {
                         if (!vertexNoToId.get(v2).startsWith(tnId)) {
-                            fillJacStruc(m, pos, row, -value * feeder.getZ_real()[e.getPhase()][otherE.getPhase()], 0);
-                            fillJacStruc(m, pos, row, value * feeder.getZ_imag()[e.getPhase()][otherE.getPhase()], dimension);
-                            fillJacStruc(m, pos, row + B.getM(), -value * feeder.getZ_imag()[e.getPhase()][otherE.getPhase()], 0);
-                            fillJacStruc(m, pos, row + B.getM(), -value * feeder.getZ_real()[e.getPhase()][otherE.getPhase()], dimension);
+                            fillJacStruc(m, pos, row, -a * value * feeder.getZ_real()[e.getPhase()][otherE.getPhase()], 0);
+                            fillJacStruc(m, pos, row, a * value * feeder.getZ_imag()[e.getPhase()][otherE.getPhase()], dimension);
+                            fillJacStruc(m, pos, row + B.getM(), -b * value * feeder.getZ_imag()[e.getPhase()][otherE.getPhase()], 0);
+                            fillJacStruc(m, pos, row + B.getM(), -b * value * feeder.getZ_real()[e.getPhase()][otherE.getPhase()], dimension);
                             continue;
                         }
                     }
-                    fillJacStruc(m, pos, row, value * feeder.getZ_real()[e.getPhase()][otherE.getPhase()], 0);
-                    fillJacStruc(m, pos, row, -value * feeder.getZ_imag()[e.getPhase()][otherE.getPhase()], dimension);
-                    fillJacStruc(m, pos, row + B.getM(), value * feeder.getZ_imag()[e.getPhase()][otherE.getPhase()], 0);
-                    fillJacStruc(m, pos, row + B.getM(), value * feeder.getZ_real()[e.getPhase()][otherE.getPhase()], dimension);
+                    fillJacStruc(m, pos, row, a * value * feeder.getZ_real()[e.getPhase()][otherE.getPhase()], 0);
+                    fillJacStruc(m, pos, row, -a * value * feeder.getZ_imag()[e.getPhase()][otherE.getPhase()], dimension);
+                    fillJacStruc(m, pos, row + B.getM(), b * value * feeder.getZ_imag()[e.getPhase()][otherE.getPhase()], 0);
+                    fillJacStruc(m, pos, row + B.getM(), b * value * feeder.getZ_real()[e.getPhase()][otherE.getPhase()], dimension);
                 }
                 break;
             case DetailedEdge.EDGE_TYPE_LOAD_TF_MIX:
                 if (e.isSource()) {
                     pos = edgeIndex.get(e);
-                    m.setValue(row, pos, value);
-                    m.setValue(row + B.getM(), pos + dimension, value);
+                    m.setValue(row, pos, a * value);
+                    m.setValue(row + B.getM(), pos + dimension, b * value);
                 } else {
                     log.warn("Not supported, Not supported, Not supported!!!");
                 }
@@ -1101,17 +1106,17 @@ public class LcbPfModel implements NewtonModel, DsModelCons {
                 Transformer tf = (Transformer) island.getBranches().get(island.getDevices().get(e.getDevId()));
                 if (e.isSource()) {
                     pos = edgeIndex.get(e);
-                    m.setValue(row, pos, value);
-                    m.setValue(row + B.getM(), pos + dimension, value);
+                    m.setValue(row, pos, a * value);
+                    m.setValue(row + B.getM(), pos + dimension, b * value);
                 } else {
                     pos = edgeIndex.get(e.getOtherEdgeOfTf());
-                    m.setValue(row, pos, -value / tf.getNt());
-                    m.setValue(row + B.getM(), pos + dimension, -value / tf.getNt());
+                    m.setValue(row, pos, -a * value / tf.getNt());
+                    m.setValue(row + B.getM(), pos + dimension, -b * value / tf.getNt());
                     pos = edgeToNo.get(e);
-                    fillJacStruc(m, pos, row, value * tf.getR()[e.getPhase()], 0);
-                    fillJacStruc(m, pos, row, -value * tf.getX()[e.getPhase()], dimension);
-                    fillJacStruc(m, pos, row + B.getM(), value * tf.getX()[e.getPhase()], 0);
-                    fillJacStruc(m, pos, row + B.getM(), value * tf.getR()[e.getPhase()], dimension);
+                    fillJacStruc(m, pos, row, a * value * tf.getR()[e.getPhase()], 0);
+                    fillJacStruc(m, pos, row, -a * value * tf.getX()[e.getPhase()], dimension);
+                    fillJacStruc(m, pos, row + B.getM(), b * value * tf.getX()[e.getPhase()], 0);
+                    fillJacStruc(m, pos, row + B.getM(), b * value * tf.getR()[e.getPhase()], dimension);
                 }
                 break;
             case DetailedEdge.EDGE_TYPE_LOAD:
@@ -1119,14 +1124,14 @@ public class LcbPfModel implements NewtonModel, DsModelCons {
                         || Math.abs(e.getS_image()) > ZERO_LIMIT
                         || Math.abs(e.getI_ampl()) > ZERO_LIMIT) {
                     pos = edgeIndex.get(e);
-                    m.setValue(row, pos, value);
-                    m.setValue(row + B.getM(), pos + dimension, value);
+                    m.setValue(row, pos, a * value);
+                    m.setValue(row + B.getM(), pos + dimension, b * value);
                 } else {
                     pos = edgeToNo.get(e);
-                    fillJacStruc(m, pos, row, value * e.getZ_real(), 0);
-                    fillJacStruc(m, pos, row, -value * e.getZ_image(), dimension);
-                    fillJacStruc(m, pos, row + B.getM(), value * e.getZ_image(), 0);
-                    fillJacStruc(m, pos, row + B.getM(), value * e.getZ_real(), dimension);
+                    fillJacStruc(m, pos, row, a * value * e.getZ_real(), 0);
+                    fillJacStruc(m, pos, row, -a * value * e.getZ_image(), dimension);
+                    fillJacStruc(m, pos, row + B.getM(), b * value * e.getZ_image(), 0);
+                    fillJacStruc(m, pos, row + B.getM(), b * value * e.getZ_real(), dimension);
                 }
                 break;
             default:
@@ -1201,7 +1206,7 @@ public class LcbPfModel implements NewtonModel, DsModelCons {
         }
         //负荷功率平衡方程
         int branchNo;
-        for (DetailedEdge edge : loadEdges) {
+        for (DetailedEdge edge : nonZLoadEdges) {
             pos = edgeIndex.get(edge);
             branchNo = edgeToNo.get(edge);
             fillJacStruc(branchNo, index, 1.0, 0);
@@ -1527,7 +1532,7 @@ public class LcbPfModel implements NewtonModel, DsModelCons {
             switch (tf.getConnType()) {
                 case Transformer.CONN_TYPE_Y_D:
                     //todo:
-                    System.out.println("ldjflajfldjf");
+                    System.out.println("!!! Connection type Y_D Not supported!");
                     break;
                 case Transformer.CONN_TYPE_D_GrY:
                     state.setValue(pos, -tnV[edge.getPhase()][0] + tnV[(edge.getPhase() + 1) % 3][0]);
@@ -1545,7 +1550,7 @@ public class LcbPfModel implements NewtonModel, DsModelCons {
                     break;
             }
         }
-        for (DetailedEdge edge : loadEdges) {
+        for (DetailedEdge edge : nonZLoadEdges) {
             tn = island.getBusNoToTn().get(edge.getTnNo1());
             pos = edgeIndex.get(edge);
             tnV = island.getBusV().get(tn);
@@ -1587,8 +1592,8 @@ public class LcbPfModel implements NewtonModel, DsModelCons {
         return windingEdges;
     }
 
-    public List<DetailedEdge> getLoadEdges() {
-        return loadEdges;
+    public List<DetailedEdge> getNonZLoadEdges() {
+        return nonZLoadEdges;
     }
 
     public Map<DetailedEdge, Integer> getEdgeIndex() {

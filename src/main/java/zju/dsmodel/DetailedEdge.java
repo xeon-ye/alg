@@ -5,7 +5,7 @@ import java.io.Serializable;
 /**
  * 该类用于在表述三相配电网详细拓扑结构中的边
  *
- * @author: Dong Shufeng
+ * @author Dong Shufeng
  * Date: 14-2-18
  */
 public class DetailedEdge implements Serializable {

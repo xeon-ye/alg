@@ -4,6 +4,8 @@ import org.apache.log4j.Logger;
 import weka.core.*;
 import zju.lfp.utils.MultiTimeSeries;
 
+import java.util.ArrayList;
+
 /**
  * Created by IntelliJ IDEA.
  * User: zhangsiyuan
@@ -37,9 +39,9 @@ public class ChaosInstances {
 
     private Instances formInstancesHeader() {
         String instancesName = toString();
-        FastVector attrInfo = new FastVector();
+        ArrayList<Attribute> attrInfo = new ArrayList<Attribute>();
         for (int i = 0; i < totalAttributeDims + 1; i++)
-            attrInfo.addElement(new Attribute(ATTRIBUTE_NAME + i));
+            attrInfo.add(new Attribute(ATTRIBUTE_NAME + i));
         Instances instances = new Instances(instancesName, attrInfo, 0);
         instances.setClass(instances.attribute(totalAttributeDims));
         return instances;

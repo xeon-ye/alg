@@ -2,7 +2,9 @@ package zju.se.bdfilter;
 
 import cern.colt.matrix.DoubleMatrix2D;
 import weka.clusterers.SimpleKMeans;
-import weka.core.*;
+import weka.core.Attribute;
+import weka.core.DenseInstance;
+import weka.core.Instances;
 import zju.common.NewtonModel;
 import zju.common.NewtonSolver;
 import zju.ieeeformat.BranchData;
@@ -15,6 +17,7 @@ import zju.util.StateCalByPolar;
 import zju.util.YMatrixGetter;
 
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 
 /**
  * Created by IntelliJ IDEA.
@@ -64,7 +67,7 @@ public class BranchBasedFilter implements NewtonModel, MeasTypeCons {
     //聚类方法
     public SimpleKMeans clusterer;
     //聚类的参数
-    public FastVector attributes;
+    public ArrayList<Attribute> attributes;
     //用于聚类的数据
     public Instances dataset;
 
@@ -84,10 +87,10 @@ public class BranchBasedFilter implements NewtonModel, MeasTypeCons {
         //jacStruc = new ASparseMatrixLink2D(3, 3);
 
         //初始化样本的属性
-        attributes = new FastVector();
-        attributes.addElement(new Attribute("vi"));
-        attributes.addElement(new Attribute("vj"));
-        attributes.addElement(new Attribute("theta"));
+        attributes = new ArrayList<Attribute>();
+        attributes.add(new Attribute("vi"));
+        attributes.add(new Attribute("vj"));
+        attributes.add(new Attribute("theta"));
         //初始化数据集
         dataset = new Instances("Test-dataset", attributes, all_cases.length);
         for (int[] ignored : all_cases)
