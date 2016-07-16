@@ -72,6 +72,16 @@ public class DsStateEstimatorTest extends TestCase implements DsModelCons {
     public static void doDsSe(DistriSys dsRef, double tol, DistriSys ds, SystemMeasure sm) {
         long start = System.currentTimeMillis();
         DsStateEstimator estimator = new DsStateEstimator(ds, sm);
+        estimator.setAlg(new IpoptDsSe());
+        estimator.getAlg().getObjFunc().setObjType(SeObjective.OBJ_TYPE_WLS);
+        estimator.doSe();
+        assertTrue(estimator.getAlg().isConverged());
+        System.out.println("计算WLS状态估计用时：" + (System.currentTimeMillis() - start) + "ms.");
+        if (dsRef != null && tol > 0)
+            assertTrueSe(dsRef, ds, tol);
+
+
+        estimator.setAlg(new IpoptLcbSe());
         estimator.getAlg().getObjFunc().setObjType(SeObjective.OBJ_TYPE_WLS);
         estimator.doSe();
         assertTrue(estimator.getAlg().isConverged());

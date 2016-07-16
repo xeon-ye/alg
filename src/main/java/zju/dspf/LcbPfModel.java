@@ -682,6 +682,12 @@ public class LcbPfModel implements NewtonModel, DsModelCons {
         calCurrent(branchNo, state, c);
     }
 
+    /**
+     * 计算支路电流，电流正方向为小的节点号->大的节点号
+     * @param branchNo 支路号
+     * @param state 状态变量
+     * @param c 计算结果
+     */
     public void calCurrent(int branchNo, AVector state, double[] c) {
         int k = B.getJA2()[branchNo], i;
         c[0] = 0;

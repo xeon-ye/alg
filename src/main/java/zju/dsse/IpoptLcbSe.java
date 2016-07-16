@@ -38,6 +38,7 @@ public class IpoptLcbSe extends IpoptSeAlg {
         busNumber = dsIsland.getTns().size();
         if (!dsIsland.isPerUnitSys())
             setTolerance(1e-1);//todo:
+        dsIsland.buildDetailedGraph();
         pfModel = new LcbPfModel(dsIsland);
         dimension = pfModel.getVarSize();
 
@@ -83,7 +84,7 @@ public class IpoptLcbSe extends IpoptSeAlg {
         if (isNewX)
             fillState(x);
         pfModel.fillTfCurrentJac(jacobian, 2 * pfModel.getLoopSize());
-        fillJacobian(meas, jacobian, 2 * (pfModel.getLoopSize() + pfModel.getWindingEdges().size()));
+        fillJacobian(meas, 2 * (pfModel.getLoopSize() + pfModel.getWindingEdges().size()));
     }
 
     @Override
@@ -422,7 +423,7 @@ public class IpoptLcbSe extends IpoptSeAlg {
     }
 
 
-    public void fillJacobian(MeasVector meas, DoubleMatrix2D result, int index) {
+    private void fillJacobian(MeasVector meas, int index) {
         //todo:
         int num, phase, branchNo;
         for (int type : meas.getMeasureOrder()) {
@@ -496,8 +497,8 @@ public class IpoptLcbSe extends IpoptSeAlg {
                         while (tmpK != -1) {
                             i = pfModel.getB().getIA2().get(tmpK);
                             tmpK = pfModel.getB().getLINK2().get(tmpK);
-                            result.setQuick(index, i, 2 * pfModel.getB().getVA().get(tmpK) * tempI[0]);
-                            result.setQuick(index, i + pfModel.getDimension(), 2 * pfModel.getB().getVA().get(tmpK) * tempI[1]);
+                            jacobian.setQuick(index, i, 2 * pfModel.getB().getVA().get(tmpK) * tempI[0]);
+                            jacobian.setQuick(index, i + pfModel.getDimension(), 2 * pfModel.getB().getVA().get(tmpK) * tempI[1]);
                         }
                     }
                     break;

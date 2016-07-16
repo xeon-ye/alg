@@ -27,7 +27,7 @@ public class DsSimuMeasMaker implements MeasTypeCons {
     }
 
     /**
-     * this method using powerflow result as true value and add random noise as measurement value
+     * this method using power flow result as true value and add random noise as measurement value
      *
      * @param errorDistribution 0: equality 1:Gauss
      * @param ratio             error limit

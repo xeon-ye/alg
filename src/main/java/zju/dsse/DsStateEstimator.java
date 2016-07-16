@@ -8,6 +8,7 @@ import zju.dsmodel.DsTopoNode;
 import zju.measure.MeasVector;
 import zju.measure.MeasVectorCreator;
 import zju.measure.SystemMeasure;
+import zju.se.IpoptSeAlg;
 import zju.se.SeObjective;
 
 /**
@@ -31,7 +32,7 @@ public class DsStateEstimator implements DsModelCons {
 
     private boolean isFlatStart = true;
 
-    private IpoptDsSe alg;
+    private IpoptSeAlg alg;
 
     private DsSeResult result;
 
@@ -64,7 +65,11 @@ public class DsStateEstimator implements DsModelCons {
                     linkBuses[count++] = tn.getBusNo();
             MeasVector meas = new MeasVectorCreator().getMeasureVector(sm, true);//todo: check it
             alg.setSlackBusNum(1);//todo:
-            alg.setDsIsland(island);
+            if(alg instanceof IpoptDsSe) {
+                ((IpoptDsSe)alg).setDsIsland(island);
+            } else if(alg instanceof IpoptLcbSe) {
+                ((IpoptLcbSe)alg).setDsIsland(island);
+            }
             alg.setMeas(meas);
             alg.setZeroPBuses(linkBuses);
             initialObjFunc(meas, alg.getObjFunc());
@@ -130,7 +135,7 @@ public class DsStateEstimator implements DsModelCons {
         return badData_threshhold;
     }
 
-    public IpoptDsSe getAlg() {
+    public IpoptSeAlg getAlg() {
         return alg;
     }
 
@@ -184,5 +189,9 @@ public class DsStateEstimator implements DsModelCons {
 
     public DsSeResult getResult() {
         return result;
+    }
+
+    public void setAlg(IpoptSeAlg alg) {
+        this.alg = alg;
     }
 }
