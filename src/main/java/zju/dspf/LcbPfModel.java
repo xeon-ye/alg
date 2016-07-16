@@ -660,6 +660,15 @@ public class LcbPfModel implements NewtonModel, DsModelCons {
         }
     }
 
+    public void fillJacStruc(DoubleMatrix2D jacStruc, int branchNo, int row, double v, int offset) {
+        int k = B.getJA2()[branchNo], i;
+        while (k != -1) {
+            i = B.getIA2().get(k);
+            jacStruc.setQuick(row, i + offset, B.getVA().get(k) * v); //todo:
+            k = B.getLINK2().get(k);
+        }
+    }
+
     public void fillJacStruc(ASparseMatrixLink2D jacStruc, int branchNo, int row, double v, int offset) {
         int k = B.getJA2()[branchNo], i;
         while (k != -1) {
