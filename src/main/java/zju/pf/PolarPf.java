@@ -285,7 +285,7 @@ public class PolarPf extends AbstractPf implements PfConstants, NewtonModel, Mea
         int busNo, bus_p_index = meas.getBus_p_index(), bus_q_index = meas.getBus_q_index();
         boolean isQConverged, isPConverged = false;
         boolean isQIterFirst = true, isPIterFirst = true;
-        double maxDelta, delta;
+        double maxDelta, delta, absDelta;
 
         setConverged(false);
         //初始化状态量
@@ -296,7 +296,7 @@ public class PolarPf extends AbstractPf implements PfConstants, NewtonModel, Mea
             for (int i = 0; i < clonedIsland.getPqBusSize(); i++) {
                 delta = meas.getZ().getValue(i + bus_q_index) - StateCalByPolar.calBusQ(i + 1, Y, variableState);
                 deltaQ[i] = delta / variableState[i];
-                double absDelta = Math.abs(delta);
+                absDelta = Math.abs(delta);
                 if (maxDelta < absDelta)
                     maxDelta = absDelta;
             }
@@ -322,7 +322,7 @@ public class PolarPf extends AbstractPf implements PfConstants, NewtonModel, Mea
                 busNo = meas.getBus_p_pos()[i];
                 delta = meas.getZ().getValue(i + bus_p_index) - StateCalByPolar.calBusP(busNo, Y, variableState);
                 deltaP[i] = delta / variableState[i];
-                double absDelta = Math.abs(delta);
+                absDelta = Math.abs(delta);
                 if (maxDelta < absDelta)
                     maxDelta = absDelta;
             }

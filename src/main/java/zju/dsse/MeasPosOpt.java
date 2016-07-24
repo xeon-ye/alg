@@ -3,6 +3,7 @@ package zju.dsse;
 import jpscpu.LinearSolver;
 import org.apache.log4j.Logger;
 import zju.dsmodel.DistriSys;
+import zju.measure.MeasureInfo;
 
 /**
  * 量测位置优化
@@ -15,15 +16,12 @@ public class MeasPosOpt {
 
     private DistriSys distriSys;
 
-    private int[] cand_v_pos;
-    private int[] cand_i_pos;
-    private int[] cand_p_pos;
-    private int[] cand_q_pos;
+    private MeasureInfo[] existMeas;
 
-    private int v_num;
-    private int i_num;
-    private int p_num;
-    private int q_num;
+    //可以布置的位置
+    private int[] cand_pos;
+    //每个位置可以布置的量测集合
+    private int[][] meas_types;
 
     public MeasPosOpt(DistriSys distriSys) {
         this.distriSys = distriSys;
@@ -33,7 +31,7 @@ public class MeasPosOpt {
         int row_count = 0;
         int element_count = 0;
         //开辟内存
-        double objValue[] = new double[cand_v_pos.length + cand_i_pos.length + cand_p_pos.length + cand_q_pos.length];
+        double objValue[] = new double[0];
         //objValue 是优化问题中的变量的系数,　如min Cx 中 C矩阵里的系数
         //变量下限//
         //column里元素的个数等于矩阵C里系数的个数,详见starts解释

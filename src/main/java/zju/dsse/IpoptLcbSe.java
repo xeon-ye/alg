@@ -398,7 +398,7 @@ public class IpoptLcbSe extends IpoptSeAlg {
         System.arraycopy(x, 0, pfModel.getState().getValues(), 0, pfModel.getVarSize());
     }
 
-    public int getNonZeroNum(MeasVector meas) {
+    private int getNonZeroNum(MeasVector meas) {
         int p_from_size = meas.getLine_from_p_pos().length;
         int q_from_size = meas.getLine_from_q_pos().length;
         int p_to_size = meas.getLine_to_p_pos().length;
@@ -464,8 +464,8 @@ public class IpoptLcbSe extends IpoptSeAlg {
                         pfModel.calCurrent(branchNo, pfModel.getState(), tempI);
                         calV(num + "-" + phase, DsTopoIsland.EARTH_NODE_ID, tempV);
                         fillJacOfV(num + "-" + phase, DsTopoIsland.EARTH_NODE_ID, index, -tempI[0],  tempI[1]);
-                        pfModel.fillJacStruc(result, branchNo, index, tempV[1], 0);
-                        pfModel.fillJacStruc(result, branchNo, index, -tempV[0], pfModel.getDimension());
+                        //pfModel.fillJacStruc(result, branchNo, index, tempV[1], 0);
+                        //pfModel.fillJacStruc(result, branchNo, index, -tempV[0], pfModel.getDimension());
                     }
                     break;
                 case TYPE_LINE_FROM_REACTIVE:
