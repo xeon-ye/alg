@@ -287,12 +287,7 @@ public class IpoptSeAlg extends AbstractSeAlg implements MeasTypeCons, IpoptMode
     }
 
     protected void updateHessian(double[] x, double obj_factor, double[] lambda) {
-        hessian.forEachNonZero(new IntIntDoubleFunction() {
-            @Override
-            public double apply(int i, int i2, double v) {
-                return 0.0;
-            }
-        });
+        hessian.forEachNonZero((i, i2, v) -> 0.0);
         switch (variable_type) {
             case VARIABLE_VTHETA:
                 HessianMakerPC.getHessianOfVTheta(meas, Y, x, hessian, lambda, 0);

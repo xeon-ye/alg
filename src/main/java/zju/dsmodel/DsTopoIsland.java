@@ -4,6 +4,7 @@ import org.jgrapht.UndirectedGraph;
 import org.jgrapht.graph.SimpleGraph;
 import org.jgrapht.traverse.BreadthFirstIterator;
 import zju.devmodel.MapObject;
+import zju.ieeeformat.IEEEDataIsland;
 import zju.util.JOFileUtil;
 
 import java.io.Serializable;
@@ -117,7 +118,7 @@ public class DsTopoIsland implements Serializable, DsModelCons {
      * <Br>对于负荷，以"-0","-1","-2"结尾;</Br>
      */
     public void buildDetailedGraph() {
-        devices = new HashMap<String, MapObject>(spotLoadNum + distriLoadNum + distriGenNum + shuntCapacitorNum + idToBranch.size());
+        devices = new HashMap<>(spotLoadNum + distriLoadNum + distriGenNum + shuntCapacitorNum + idToBranch.size());
         for (MapObject obj : idToBranch.values())
             devices.put(obj.getId(), obj);
         for (DsTopoNode tn : tns)
@@ -898,5 +899,10 @@ public class DsTopoIsland implements Serializable, DsModelCons {
            return (DsTopoIsland) JOFileUtil.cloneObj(this);
        }
 
+    public IEEEDataIsland toIeeeIsland() {
+        if(detailedG == null)
+            buildDetailedGraph();
+        return null;//todo
+    }
 }
 

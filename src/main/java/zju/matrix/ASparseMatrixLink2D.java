@@ -36,8 +36,8 @@ public class ASparseMatrixLink2D extends ASparseMatrixLink implements Serializab
             JA2[i] = -1;
             NA2[i] = 0;
         }
-        IA2 = new ArrayList<Integer>(nnz);
-        LINK2 = new ArrayList<Integer>(nnz);
+        IA2 = new ArrayList<>(nnz);
+        LINK2 = new ArrayList<>(nnz);
     }
 
     public ASparseMatrixLink2D(int m, int n) {
@@ -48,8 +48,8 @@ public class ASparseMatrixLink2D extends ASparseMatrixLink implements Serializab
             JA2[i] = -1;
             NA2[i] = 0;
         }
-        IA2 = new ArrayList<Integer>();
-        LINK2 = new ArrayList<Integer>();
+        IA2 = new ArrayList<>();
+        LINK2 = new ArrayList<>();
     }
 
     public void setValue(int row, int col, double value, boolean isAddTo) {
@@ -122,21 +122,18 @@ public class ASparseMatrixLink2D extends ASparseMatrixLink implements Serializab
         for (double v : VA)
             matrix.getVA().add(v);
 
-        for (int i = 0; i < IA.length; i++)
-            matrix.getJA2()[i] = IA[i];
-        for (int i = 0; i < NA.length; i++)
-            matrix.getNA2()[i] = NA[i];
-        for (int i : LINK)
+        System.arraycopy(IA, 0, matrix.getJA2(), 0, IA.length);
+        System.arraycopy(NA, 0, matrix.getNA2(), 0, NA.length);
+        for (int i : LINK) {
             matrix.getLINK2().add(i);
+        }
         for (int i : JA)
             matrix.getIA2().add(i);
 
         for (int i : IA2)
             matrix.getJA().add(i);
-        for (int i = 0; i < JA2.length; i++)
-            matrix.getIA()[i] = JA2[i];
-        for (int i = 0; i < NA2.length; i++)
-            matrix.getNA()[i] = NA2[i];
+        System.arraycopy(JA2, 0, matrix.getIA(), 0, JA2.length);
+        System.arraycopy(NA2, 0, matrix.getNA(), 0, NA2.length);
         for (int i : LINK2)
             matrix.getLINK().add(i);
         return matrix;
@@ -170,10 +167,8 @@ public class ASparseMatrixLink2D extends ASparseMatrixLink implements Serializab
         for (double v : VA)
             matrix.getVA().add(v);
 
-        for (int i = 0; i < IA.length; i++)
-            matrix.getIA()[i] = IA[i];
-        for (int i = 0; i < NA.length; i++)
-            matrix.getNA()[i] = NA[i];
+        System.arraycopy(IA, 0, matrix.getIA(), 0, IA.length);
+        System.arraycopy(NA, 0, matrix.getNA(), 0, NA.length);
         for (int i : LINK)
             matrix.getLINK().add(i);
         for (int i : JA)
@@ -181,10 +176,8 @@ public class ASparseMatrixLink2D extends ASparseMatrixLink implements Serializab
 
         for (int i : IA2)
             matrix.getIA2().add(i);
-        for (int i = 0; i < JA2.length; i++)
-            matrix.getJA2()[i] = JA2[i];
-        for (int i = 0; i < NA2.length; i++)
-            matrix.getNA2()[i] = NA2[i];
+        System.arraycopy(JA2, 0, matrix.getJA2(), 0, JA2.length);
+        System.arraycopy(NA2, 0, matrix.getNA2(), 0, NA2.length);
         for (int i : LINK2)
             matrix.getLINK2().add(i);
         return matrix;

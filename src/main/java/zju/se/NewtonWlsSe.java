@@ -59,44 +59,41 @@ public class NewtonWlsSe extends AbstractSeAlg implements NewtonWlsModel {
         jacobian = new MySparseDoubleMatrix2D(meas.getZ().getN(), 2 * n, nonzero, 0.9, 0.95);
         reducedJac = new MySparseDoubleMatrix2D(meas.getZ().getN(), aCount + vCount, nonzero, 0.9, 0.95);
 
-        reduceFunc = new IntIntDoubleFunction() {
-            @Override
-            public double apply(int i, int j, double v) {
-                //System.out.println(i + "\t" + j + "\t" + v);
-                int col = j;
-                if (j < n) {
-                    if (j > getSlackBusNum() - 1 && isSlackBusVoltageFixed())
-                        col--;
-                    else if (j == getSlackBusNum() - 1 && isSlackBusVoltageFixed())
-                        return v;
-                    if (unObserveBuses != null)
-                        for (int busNum : unObserveBuses) {
-                            if (j == busNum - 1)
-                                return v;
-                            else if (j < busNum - 1)
-                                break;
-                            else
-                                col--;
-                        }
-                    reducedJac.setQuick(i, col, v);
-                } else {
-                    if (j > getSlackBusNum() + n - 1)
-                        col--;
-                    else if (j == getSlackBusNum() + n - 1)
-                        return v;
-                    if (unObserveBuses != null)
-                        for (int busNum : unObserveBuses) {
-                            if (j == busNum + n - 1)
-                                return v;
-                            else if (j < busNum + n - 1)
-                                break;
-                            else
-                                col--;
-                        }
-                    reducedJac.setQuick(i, col - n + vCount, v);
-                }
-                return v;
+        reduceFunc = (i, j, v) -> {
+            //System.out.println(i + "\t" + j + "\t" + v);
+            int col = j;
+            if (j < n) {
+                if (j > getSlackBusNum() - 1 && isSlackBusVoltageFixed())
+                    col--;
+                else if (j == getSlackBusNum() - 1 && isSlackBusVoltageFixed())
+                    return v;
+                if (unObserveBuses != null)
+                    for (int busNum : unObserveBuses) {
+                        if (j == busNum - 1)
+                            return v;
+                        else if (j < busNum - 1)
+                            break;
+                        else
+                            col--;
+                    }
+                reducedJac.setQuick(i, col, v);
+            } else {
+                if (j > getSlackBusNum() + n - 1)
+                    col--;
+                else if (j == getSlackBusNum() + n - 1)
+                    return v;
+                if (unObserveBuses != null)
+                    for (int busNum : unObserveBuses) {
+                        if (j == busNum + n - 1)
+                            return v;
+                        else if (j < busNum + n - 1)
+                            break;
+                        else
+                            col--;
+                    }
+                reducedJac.setQuick(i, col - n + vCount, v);
             }
+            return v;
         };
 
         NewtonSolver solver = new NewtonSolver();

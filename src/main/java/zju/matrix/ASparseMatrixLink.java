@@ -38,9 +38,9 @@ public class ASparseMatrixLink extends AbstractMatrix implements Serializable {
             IA[i] = -1;
             NA[i] = 0;
         }
-        VA = new ArrayList<Double>(nnz);
-        JA = new ArrayList<Integer>(nnz);
-        LINK = new ArrayList<Integer>(nnz);
+        VA = new ArrayList<>(nnz);
+        JA = new ArrayList<>(nnz);
+        LINK = new ArrayList<>(nnz);
     }
 
     public ASparseMatrixLink(int n) {
@@ -55,9 +55,9 @@ public class ASparseMatrixLink extends AbstractMatrix implements Serializable {
             IA[i] = -1;
             NA[i] = 0;
         }
-        VA = new ArrayList<Double>();
-        JA = new ArrayList<Integer>();
-        LINK = new ArrayList<Integer>();
+        VA = new ArrayList<>();
+        JA = new ArrayList<>();
+        LINK = new ArrayList<>();
     }
 
     public ASparseMatrixLink(int m, int n, List<Double> VA,
@@ -188,10 +188,8 @@ public class ASparseMatrixLink extends AbstractMatrix implements Serializable {
         ASparseMatrixLink matrix = new ASparseMatrixLink(getM(), getN());
         for (double v : VA)
             matrix.getVA().add(v);
-        for (int i = 0; i < IA.length; i++)
-            matrix.getIA()[i] = IA[i];
-        for (int i = 0; i < NA.length; i++)
-            matrix.getNA()[i] = NA[i];
+        System.arraycopy(IA, 0, matrix.getIA(), 0, IA.length);
+        System.arraycopy(NA, 0, matrix.getNA(), 0, NA.length);
         for (int i : LINK)
             matrix.getLINK().add(i);
         for (int i : JA)

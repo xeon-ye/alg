@@ -1,5 +1,7 @@
 package zju.ieeeformat;
 
+import zju.matrix.ASparseMatrixLink2D;
+import zju.matrix.AbstractMatrix;
 import zju.util.JOFileUtil;
 
 import java.io.Serializable;
