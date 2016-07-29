@@ -35,16 +35,16 @@ public class MeasPosOpt implements MeasTypeCons {
         this.island = island;
     }
 
-    private ASparseMatrixLink2D formH(ASparseMatrixLink2D bApos, ASparseMatrixLink2D bAposTwo, int[] measTypes, int pos) {
+    private ASparseMatrixLink2D formH(YMatrixGetter Y, ASparseMatrixLink2D bApos, int[] measTypes, int pos) {
         int[] posArray = new int[measTypes.length];
         for(int i = 0; i < posArray.length; i++)
             posArray[i] = pos;
-        return formH(bApos, bAposTwo, measTypes, posArray);
+        return formH(Y, bApos, measTypes, posArray);
     }
 
-    private ASparseMatrixLink2D formH(ASparseMatrixLink2D bApos, ASparseMatrixLink2D bAposTwo, int[] measTypes, int[] pos) {
-        int i = 0;
-        int size = 2 * island.getBuses().size() - 1;//状态变量的维数
+    private ASparseMatrixLink2D formH(YMatrixGetter Y, ASparseMatrixLink2D bApos, int[] measTypes, int[] pos) {
+        int i = 0, n = island.getBuses().size();
+        int size = 2 * n - 1;//状态变量的维数
         ASparseMatrixLink2D H = new ASparseMatrixLink2D(measTypes.length, size);
         for(int measType : measTypes) {
             switch (measType) {
@@ -58,37 +58,55 @@ public class MeasPosOpt implements MeasTypeCons {
                     int k = bApos.getIA()[pos[i]];
                     while (k != -1) {
                         int j = bApos.getJA().get(k);
-                        H.setValue(i, j, bApos.getVA().get(k));
+                        H.setValue(i, j + n, bApos.getVA().get(k));
                         k = bApos.getLINK().get(k);
                     }
                     break;
                 case TYPE_BUS_REACTIVE_POWER:
-                    k = bAposTwo.getIA()[pos[i]];
+                    k = Y.getAdmittance()[1].getIA()[pos[i]];
                     while (k != -1) {
-                        int j = bAposTwo.getJA().get(k);
-                        H.setValue(i, j, bAposTwo.getVA().get(k));
-                        k = bAposTwo.getLINK().get(k);
+                        int j = Y.getAdmittance()[1].getJA().get(k);
+                        H.setValue(i, j + n, Y.getAdmittance()[1].getVA().get(k));
+                        k = Y.getAdmittance()[1].getLINK().get(k);
                     }
                     break;
                 case TYPE_LINE_FROM_ACTIVE:
                     BranchData branch = island.getId2branch().get(pos);
-                    H.setValue(i, branch.getTapBusNumber() - 1, -1.0 / branch.getBranchX());
-                    H.setValue(i, branch.getZBusNumber() - 1, -1.0 / branch.getBranchX());
-                    break;
-                case TYPE_LINE_FROM_REACTIVE:
-                    branch = island.getId2branch().get(pos);
-                    H.setValue(i, branch.getTapBusNumber() - 1, -1.0 / branch.getBranchX());
-                    H.setValue(i, branch.getZBusNumber() - 1, -1.0 / branch.getBranchX());
+                    H.setValue(i, branch.getTapBusNumber() + n - 1, 1.0 / branch.getBranchX());
+                    H.setValue(i, branch.getZBusNumber() + n - 1, -1.0 / branch.getBranchX());
                     break;
                 case TYPE_LINE_TO_ACTIVE:
                     branch = island.getId2branch().get(pos);
-                    H.setValue(i, branch.getTapBusNumber() - 1, -1.0 / branch.getBranchX());
-                       H.setValue(i, branch.getZBusNumber() - 1, -1.0 / branch.getBranchX());
+                    H.setValue(i, branch.getTapBusNumber() + n - 1, -1.0 / branch.getBranchX());
+                    H.setValue(i, branch.getZBusNumber() + n - 1, 1.0 / branch.getBranchX());
+                    break;
+                case TYPE_LINE_FROM_REACTIVE:
+                    branch = island.getId2branch().get(pos);
+                    double r = branch.getBranchR();
+                    double x = branch.getBranchX();
+                    double b = -x / (r * r + x * x);
+
+                    //general procedure for branchType 0,1,2,3
+                    if (branch.getType() != BranchData.BRANCH_TYPE_ACLINE) {
+                        double c = 1 / branch.getTransformerRatio();
+                        b = c * b;
+                    }
+                    H.setValue(i, branch.getTapBusNumber() - 1, b);
+                    H.setValue(i, branch.getZBusNumber() - 1, b);
                     break;
                 case TYPE_LINE_TO_REACTIVE:
                     branch = island.getId2branch().get(pos);
-                    H.setValue(i, branch.getTapBusNumber() - 1, -1.0 / branch.getBranchX());
-                    H.setValue(i, branch.getZBusNumber() - 1, -1.0 / branch.getBranchX());
+                    r = branch.getBranchR();
+                    x = branch.getBranchX();
+                    b = -x / (r * r + x * x);
+
+                    //general procedure for branchType 0,1,2,3
+                    if (branch.getType() != BranchData.BRANCH_TYPE_ACLINE) {
+                        double c = 1 / branch.getTransformerRatio();
+                        b = c * b;
+                    }
+                    H.setValue(i, branch.getTapBusNumber() - 1, -b);
+                    H.setValue(i, branch.getZBusNumber() - 1, -b);
                     break;
                 case TYPE_LINE_FROM_CURRENT:
                     branch = island.getId2branch().get(pos);
@@ -160,20 +178,19 @@ public class MeasPosOpt implements MeasTypeCons {
         YMatrixGetter Y = new YMatrixGetter(island);
         Y.formYMatrix();
         ASparseMatrixLink2D bApos = Y.formBApostrophe(false);
-        ASparseMatrixLink2D bAposTwo = Y.formBApostropheTwo(false);
 
         int n = island.getBuses().size();
         int size = 2 * n - 1;//状态变量的维数
         int[] element_count = new int[]{0};
 
         ASparseMatrixLink2D[] Ds = new ASparseMatrixLink2D[candPos.length + 1];
-        ASparseMatrixLink2D H0 = formH(bApos, bAposTwo, existMeasTypes, existMeasPos);
+        ASparseMatrixLink2D H0 = formH(Y, bApos, existMeasTypes, existMeasPos);
         Ds[0] = formHTWH(H0, existMeasWeight, element_count);
 
         int i = 1;
         for(int pos : candPos) {
             int[] measTypes = measTypesPerPos[i];
-            ASparseMatrixLink2D H = formH(bApos, bAposTwo, measTypes, pos);
+            ASparseMatrixLink2D H = formH(Y, bApos, measTypes, pos);
             Ds[i] = formHTWH(H, measWeight[i], element_count);
             i++;
         }
