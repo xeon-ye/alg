@@ -68,7 +68,7 @@ public class DefaultMeasParser implements MeasTypeCons {
 
     private static void setMeasValue(BufferedReader reader, SystemMeasure meas, int measType) throws IOException, IllegalAccessException, InvocationTargetException {
         Map<String, MeasureInfo> container = meas.getContainer(measType);
-        ArrayList<MeasureInfo> list = new ArrayList<MeasureInfo>();
+        ArrayList<MeasureInfo> list = new ArrayList<>();
         setMeasValue(reader, list, measType);
         for (MeasureInfo info : list)
             container.put(info.getPositionId(), info);

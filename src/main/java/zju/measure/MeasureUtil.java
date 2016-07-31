@@ -145,6 +145,14 @@ public class MeasureUtil implements MeasTypeCons {
                         for (int k = 0; k < source.getLine_i_amp_pos().length; k++, index++)
                             dest.getLine_i_amp().get(source.getLine_i_amp_pos()[k] + "_" + source.getLine_i_amp_phase()[k]).setValue_est(source.getZ_estimate().getValue(index));
                     break;
+                case TYPE_LINE_CURRENT_ANGLE:
+                    if (source.getLine_i_amp_phase() == null)
+                        for (int k = 0; k < source.line_i_a_pos.length; k++, index++)
+                            dest.getLine_i_a().get(String.valueOf(source.line_i_amp_pos[k])).setValue_est(source.z_estimate.getValue(index));
+                    else
+                        for (int k = 0; k < source.getLine_i_amp_pos().length; k++, index++)
+                            dest.getLine_i_a().get(source.line_i_a_pos[k] + "_" + source.line_i_amp_phase[k]).setValue_est(source.z_estimate.getValue(index));
+                    break;
                 case TYPE_LINE_FROM_CURRENT:
                     if (source.getLine_from_i_amp_phase() == null)
                         for (int k = 0; k < source.getLine_from_i_amp_pos().length; k++, index++)
@@ -155,11 +163,11 @@ public class MeasureUtil implements MeasTypeCons {
                     break;
                 case TYPE_LINE_FROM_CURRENT_ANGLE:
                     if (source.getLine_from_i_a_phase() == null)
-                        for (int k = 0; k < source.getLine_from_i_a_pos().length; k++, index++)
-                            dest.getLine_from_i_a().get(String.valueOf(source.getLine_from_i_a_pos()[k])).setValue_est(source.getZ_estimate().getValue(index));
+                        for (int k = 0; k < source.line_from_i_a_pos.length; k++, index++)
+                            dest.getLine_from_i_a().get(String.valueOf(source.line_from_i_a_pos[k])).setValue_est(source.getZ_estimate().getValue(index));
                     else
-                        for (int k = 0; k < source.getLine_from_i_a_pos().length; k++, index++)
-                            dest.getLine_from_i_a().get(source.getLine_from_i_a_pos()[k] + "_" + source.getLine_from_i_a_phase()[k]).setValue_est(source.getZ_estimate().getValue(index));
+                        for (int k = 0; k < source.line_from_i_a_pos.length; k++, index++)
+                            dest.getLine_from_i_a().get(source.line_from_i_a_pos[k] + "_" + source.getLine_from_i_a_phase()[k]).setValue_est(source.getZ_estimate().getValue(index));
                     break;
                 case TYPE_LINE_TO_CURRENT:
                     if (source.getLine_to_i_amp_phase() == null)

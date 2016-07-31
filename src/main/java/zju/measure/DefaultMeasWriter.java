@@ -673,9 +673,9 @@ public class DefaultMeasWriter implements MeasTypeCons {
                         break;
                     case TYPE_LINE_CURRENT:
                         for (int k = 0; k < meas.getLine_i_amp_pos().length; k++, index++) {
-                            int num = meas.getLine_i_amp_pos()[k];
-                            double v = meas.getZ().getValue(index);
-                            double v_true = meas.getZ_true().getValue(index);
+                            int num = meas.line_i_amp_pos[k];
+                            double v = meas.z.getValue(index);
+                            double v_true = meas.z_true.getValue(index);
                             String item = "\tline i(" + num + ")\t";
                             writer.write((index + 1) + item + format.format(v) + "\t" + format.format(v_true)
                                     + "\t" + format.format(v - v_true) + "\t" + format.format(meas.getSigma().getValue(index))

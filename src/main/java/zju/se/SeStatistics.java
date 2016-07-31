@@ -546,7 +546,7 @@ public class SeStatistics implements MeasTypeCons {
                     }
                     break;
                 case TYPE_LINE_FROM_CURRENT_ANGLE:
-                    for (int i = 0; i < meas.getLine_from_i_a_pos().length; i++, index++) {
+                    for (int i = 0; i < meas.line_from_i_a_pos.length; i++, index++) {
                         a[index] = tol_vol_angle / 180 * Math.PI;
                     }
                     break;

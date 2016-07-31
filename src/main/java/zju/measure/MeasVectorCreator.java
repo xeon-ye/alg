@@ -25,6 +25,8 @@ public class MeasVectorCreator implements MeasTypeCons {
     private List<Double> weights;
     private List<Double> est_values;
     private List<Double> true_values;
+    private List<Integer> measTypes;
+    private List<Integer> measPos;
 
     private int[] measureType;
 
@@ -56,11 +58,13 @@ public class MeasVectorCreator implements MeasTypeCons {
         count += sysMeas.getLine_to_i_amp().size();
         count += sysMeas.getLine_to_i_a().size();
 
-        measures = new ArrayList<Double>(count);
-        sigmas = new ArrayList<Double>(count);
-        weights = new ArrayList<Double>(count);
-        est_values = new ArrayList<Double>(count);
-        true_values = new ArrayList<Double>(count);
+        measures = new ArrayList<>(count);
+        sigmas = new ArrayList<>(count);
+        weights = new ArrayList<>(count);
+        est_values = new ArrayList<>(count);
+        true_values = new ArrayList<>(count);
+        measPos = new ArrayList<>(count);
+        measTypes = new ArrayList<>(count);
 
         MeasVector meas = new MeasVector();
         if (measureType == null)
@@ -74,73 +78,72 @@ public class MeasVectorCreator implements MeasTypeCons {
                 switch (type) {
                     case TYPE_BUS_ANGLE:
                         field = "bus_a";
-                        meas.setBus_a_index(index);
-                        index += sysMeas.getBus_a().size();
+                        meas.bus_a_index = index;
                         break;
                     case TYPE_BUS_VOLOTAGE:
                         field = "bus_v";
                         meas.setBus_v_index(index);
-                        index += sysMeas.getBus_v().size();
+                        index += sysMeas.bus_v.size();
                         break;
                     case TYPE_BUS_ACTIVE_POWER:
                         field = "bus_p";
                         meas.setBus_p_index(index);
-                        index += sysMeas.getBus_p().size();
+                        index += sysMeas.bus_p.size();
                         break;
                     case TYPE_BUS_REACTIVE_POWER:
                         field = "bus_q";
                         meas.setBus_q_index(index);
-                        index += sysMeas.getBus_q().size();
+                        index += sysMeas.bus_q.size();
                         break;
                     case TYPE_LINE_FROM_ACTIVE:
                         field = "line_from_p";
                         meas.setLine_from_p_index(index);
-                        index += sysMeas.getLine_from_p().size();
+                        index += sysMeas.line_from_p.size();
                         break;
                     case TYPE_LINE_FROM_REACTIVE:
                         field = "line_from_q";
                         meas.setLine_from_q_index(index);
-                        index += sysMeas.getLine_from_q().size();
+                        index += sysMeas.line_from_q.size();
                         break;
                     case TYPE_LINE_TO_ACTIVE:
                         field = "line_to_p";
                         meas.setLine_to_p_index(index);
-                        index += sysMeas.getLine_to_p().size();
+                        index += sysMeas.line_to_p.size();
                         break;
                     case TYPE_LINE_TO_REACTIVE:
                         field = "line_to_q";
                         meas.setLine_to_q_index(index);
-                        index += sysMeas.getLine_to_q().size();
+                        index += sysMeas.line_to_q.size();
                         break;
                     case TYPE_LINE_CURRENT:
                         field = "line_i_amp";
-                        meas.setLine_i_amp_index(index);
-                        index += sysMeas.getLine_i_amp().size();
+                        meas.line_i_amp_index = index;
+                        index += sysMeas.line_i_amp.size();
                         break;
                     case TYPE_LINE_CURRENT_ANGLE:
                         field = "line_i_a";
-                        //meas.setLine_i_a_index(index);
-                        //index+= sysMeas.getLine_i_a().size();
+                        meas.line_i_a_index = index;
+                        index+= sysMeas.line_i_a.size();
                         break;
                     case TYPE_LINE_FROM_CURRENT:
                         field = "line_from_i_amp";
-                        meas.setLine_i_amp_index(index);
-                        index += sysMeas.getLine_from_i_amp().size();
+                        meas.line_from_i_amp_index = index;
+                        index += sysMeas.line_from_i_amp.size();
                         break;
                     case TYPE_LINE_FROM_CURRENT_ANGLE:
                         field = "line_from_i_a";
                         meas.setLine_from_i_a_index(index);
-                        index += sysMeas.getLine_from_i_a().size();
+                        index += sysMeas.line_from_i_a.size();
                         break;
                     case TYPE_LINE_TO_CURRENT:
                         field = "line_to_i_amp";
                         meas.setLine_to_i_amp_index(index);
-                        index += sysMeas.getLine_to_i_amp().size();
+                        index += sysMeas.line_to_i_amp.size();
                         break;
                     case TYPE_LINE_TO_CURRENT_ANGLE:
                         field = "line_to_i_a";
                         meas.setLine_to_i_a_index(index);
-                        index += sysMeas.getLine_to_i_a().size();
+                        index += sysMeas.line_to_i_a.size();
                         break;
                     default:
                         log.warn("unsupported measure type: " + type);
@@ -209,23 +212,23 @@ public class MeasVectorCreator implements MeasTypeCons {
             if (m.getName().equalsIgnoreCase(setter)) {
                 m.invoke(meas, v1);
             } else if (m.getName().equalsIgnoreCase(setter + "_pos")) {
-                m.invoke(meas, v2);
+                m.invoke(meas, (Object) v2);
             } else if (m.getName().equalsIgnoreCase(setter + "_phase")) {
-                m.invoke(meas, v3);
+                m.invoke(meas, (Object) v3);
             }
         }
         int i = 0;
         for (MeasureInfo info : content.values()) {
             if (withPhase) {
                 String[] v = info.getPositionId().split("_");
-                v2[i] = Integer.parseInt(v[0]);
-                v3[i] = Integer.parseInt(v[1]);
+                measPos.add(Integer.parseInt(v[0]));
+                //v3[i] = Integer.parseInt(v[1]);
             } else {
                 String[] v = info.getPositionId().split("_");
                 if (v[0].equals("null"))
                     continue;
-                v2[i] = Integer.parseInt(v[0]); //todo:solve the key problem
-                //v2[i] = Integer.parseInt(info.getPositionId());
+                //v2[i] = Integer.parseInt(v[0]);
+                measPos.add(Integer.parseInt(v[0])); //todo:solve the key problem
             }
             v1.setValue(i, info.getValue());
             measures.add(info.getValue());
@@ -239,11 +242,11 @@ public class MeasVectorCreator implements MeasTypeCons {
 
     public static MeasVector createVector(MeasureInfo[] infos) {
         MeasVector meas = new MeasVector();
-        List<Double> measures = new ArrayList<Double>(infos.length);
-        List<Double> sigmas = new ArrayList<Double>(infos.length);
-        List<Double> weights = new ArrayList<Double>(infos.length);
-        List<Double> est_values = new ArrayList<Double>(infos.length);
-        List<Double> true_values = new ArrayList<Double>(infos.length);
+        List<Double> measures = new ArrayList<>(infos.length);
+        List<Double> sigmas = new ArrayList<>(infos.length);
+        List<Double> weights = new ArrayList<>(infos.length);
+        List<Double> est_values = new ArrayList<>(infos.length);
+        List<Double> true_values = new ArrayList<>(infos.length);
         for (MeasureInfo info : infos) {
             measures.add(info.getValue());
             sigmas.add(info.getSigma());
@@ -253,19 +256,19 @@ public class MeasVectorCreator implements MeasTypeCons {
         }
         meas.setZ(new AVector(measures.size()));
         for (int i = 0; i < measures.size(); i++)
-            meas.getZ().setValue(i, measures.get(i));
+            meas.z.setValue(i, measures.get(i));
         meas.setSigma(new AVector(sigmas.size()));
         for (int i = 0; i < sigmas.size(); i++)
-            meas.getSigma().setValue(i, sigmas.get(i));
+            meas.sigma.setValue(i, sigmas.get(i));
         meas.setWeight(new AVector(weights.size()));
         for (int i = 0; i < weights.size(); i++)
-            meas.getWeight().setValue(i, weights.get(i));
+            meas.weight.setValue(i, weights.get(i));
         meas.setZ_estimate(new AVector(est_values.size()));
         for (int i = 0; i < est_values.size(); i++)
-            meas.getZ_estimate().setValue(i, est_values.get(i));
+            meas.z_estimate.setValue(i, est_values.get(i));
         meas.setZ_true(new AVector(true_values.size()));
         for (int i = 0; i < true_values.size(); i++)
-            meas.getZ_true().setValue(i, true_values.get(i));
+            meas.z_true.setValue(i, true_values.get(i));
         return meas;
     }
 

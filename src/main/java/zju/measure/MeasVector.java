@@ -15,70 +15,74 @@ import java.util.Map;
  */
 public class MeasVector implements Serializable, MeasTypeCons {
 
-    AVector z;
+    public AVector z;
 
-    AVector z_estimate = new AVector(0);
+    public AVector z_estimate = new AVector(0);
 
-    AVector z_true;
+    public AVector z_true;
 
-    AVector sigma;
+    public AVector sigma;
 
-    AVector weight;
+    public AVector weight;
 
-    int[] measureOrder = new int[8]; //todo: does not include transformer tap measurement
+    public int[] measureOrder = new int[8]; //todo: does not include transformer tap measurement
 
-    int[] bus_a_pos = new int[0];
-    int[] bus_a_phase = new int[0];
-    int bus_a_index = 0;
+    public int[] bus_a_pos = new int[0];
+    public int[] bus_a_phase = new int[0];
+    public int bus_a_index = 0;
 
-    int[] bus_v_pos = new int[0];
-    int[] bus_v_phase = new int[0];
-    int bus_v_index = 0;
+    public int[] bus_v_pos = new int[0];
+    public int[] bus_v_phase = new int[0];
+    public int bus_v_index = 0;
 
-    int[] bus_p_pos = new int[0];
-    int[] bus_p_phase = new int[0];
-    int bus_p_index = 0;
+    public int[] bus_p_pos = new int[0];
+    public int[] bus_p_phase = new int[0];
+    public int bus_p_index = 0;
 
-    int[] bus_q_pos = new int[0];
-    int[] bus_q_phase = new int[0];
-    int bus_q_index = 0;
+    public int[] bus_q_pos = new int[0];
+    public int[] bus_q_phase = new int[0];
+    public int bus_q_index = 0;
 
-    int[] line_from_p_pos = new int[0];
-    int[] line_from_p_phase = new int[0];
-    int line_from_p_index = 0;
+    public int[] line_from_p_pos = new int[0];
+    public int[] line_from_p_phase = new int[0];
+    public int line_from_p_index = 0;
 
     //AVector line_from_q;
-    int[] line_from_q_pos = new int[0];
-    int[] line_from_q_phase = new int[0];
-    int line_from_q_index = 0;
+    public int[] line_from_q_pos = new int[0];
+    public int[] line_from_q_phase = new int[0];
+    public int line_from_q_index = 0;
 
-    int[] line_to_p_pos = new int[0];
-    int[] line_to_p_phase = new int[0];
-    int line_to_p_index = 0;
+    public int[] line_to_p_pos = new int[0];
+    public int[] line_to_p_phase = new int[0];
+    public int line_to_p_index = 0;
 
-    int[] line_to_q_pos = new int[0];
-    int[] line_to_q_phase = new int[0];
-    int line_to_q_index = 0;
+    public int[] line_to_q_pos = new int[0];
+    public int[] line_to_q_phase = new int[0];
+    public int line_to_q_index = 0;
 
-    int[] line_i_amp_pos = new int[0];
-    int[] line_i_amp_phase = new int[0];
-    int line_i_amp_index = 0;
+    public int[] line_i_amp_pos = new int[0];
+    public int[] line_i_amp_phase = new int[0];
+    public int line_i_amp_index = 0;
 
-    int[] line_from_i_amp_pos;
-    int[] line_from_i_amp_phase;
-    int line_from_i_amp_index = 0;
+    public int[] line_i_a_pos = new int[0];
+    public int[] line_i_a_phase = new int[0];
+    public int line_i_a_index = 0;
 
-    int[] line_to_i_amp_pos;
-    int[] line_to_i_amp_phase;
-    int line_to_i_amp_index = 0;
+    public int[] line_from_i_amp_pos;
+    public int[] line_from_i_amp_phase;
+    public int line_from_i_amp_index = 0;
 
-    int[] line_from_i_a_pos;
-    int[] line_from_i_a_phase;
-    int line_from_i_a_index = 0;
+    public int[] line_to_i_amp_pos;
+    public int[] line_to_i_amp_phase;
+    public int line_to_i_amp_index = 0;
 
-    int[] line_to_i_a_pos;
-    int[] line_to_i_a_phase;
-    int line_to_i_a_index = 0;
+    public int[] line_from_i_a_pos;
+    public int[] line_from_i_a_phase;
+    public int line_from_i_a_index = 0;
+
+    public int[] line_to_i_a_pos;
+    public int[] line_to_i_a_phase;
+    public int line_to_i_a_index = 0;
 
     Collection<Integer> badMeasId;//
 
@@ -86,7 +90,7 @@ public class MeasVector implements Serializable, MeasTypeCons {
 
     public Collection<Integer> getBadMeasId() {
         if (badMeasId == null)
-            badMeasId = new ArrayList<Integer>(0);
+            badMeasId = new ArrayList<>(0);
         return badMeasId;
     }
 

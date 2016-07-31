@@ -20,36 +20,36 @@ public class SystemMeasure implements Serializable, MeasTypeCons, Cloneable {
     public static Logger log = Logger.getLogger(SystemMeasure.class);
 
     //physical measurements
-    public Map<String, List<MeasureInfo>> id2Measure = new HashMap<String, List<MeasureInfo>>();
+    private Map<String, List<MeasureInfo>> id2Measure = new HashMap<>();
 
     //the following measurement is efficient measurements
-    public Map<String, MeasureInfo> bus_v = new HashMap<String, MeasureInfo>();
+    Map<String, MeasureInfo> bus_v = new HashMap<>();
 
-    public Map<String, MeasureInfo> bus_a = new HashMap<String, MeasureInfo>();
+    Map<String, MeasureInfo> bus_a = new HashMap<>();
 
-    public Map<String, MeasureInfo> bus_p = new HashMap<String, MeasureInfo>();
+    Map<String, MeasureInfo> bus_p = new HashMap<>();
 
-    public Map<String, MeasureInfo> bus_q = new HashMap<String, MeasureInfo>();
+    Map<String, MeasureInfo> bus_q = new HashMap<>();
 
-    public Map<String, MeasureInfo> line_from_p = new HashMap<String, MeasureInfo>();
+    Map<String, MeasureInfo> line_from_p = new HashMap<>();
 
-    public Map<String, MeasureInfo> line_to_p = new HashMap<String, MeasureInfo>();
+    Map<String, MeasureInfo> line_to_p = new HashMap<>();
 
-    public Map<String, MeasureInfo> line_from_q = new HashMap<String, MeasureInfo>();
+    Map<String, MeasureInfo> line_from_q = new HashMap<>();
 
-    public Map<String, MeasureInfo> line_to_q = new HashMap<String, MeasureInfo>();
+    Map<String, MeasureInfo> line_to_q = new HashMap<>();
 
-    public Map<String, MeasureInfo> line_i_amp = new HashMap<String, MeasureInfo>();
+    Map<String, MeasureInfo> line_i_amp = new HashMap<>();
 
-    public Map<String, MeasureInfo> line_i_a = new HashMap<String, MeasureInfo>();
+    Map<String, MeasureInfo> line_i_a = new HashMap<>();
 
-    public Map<String, MeasureInfo> line_from_i_amp = new HashMap<String, MeasureInfo>();
+    Map<String, MeasureInfo> line_from_i_amp = new HashMap<>();
 
-    public Map<String, MeasureInfo> line_from_i_a = new HashMap<String, MeasureInfo>();
+    Map<String, MeasureInfo> line_from_i_a = new HashMap<>();
 
-    public Map<String, MeasureInfo> line_to_i_amp = new HashMap<String, MeasureInfo>();
+    Map<String, MeasureInfo> line_to_i_amp = new HashMap<>();
 
-    public Map<String, MeasureInfo> line_to_i_a = new HashMap<String, MeasureInfo>();
+    Map<String, MeasureInfo> line_to_i_a = new HashMap<>();
 
     public SystemMeasure() {
     }
@@ -62,8 +62,7 @@ public class SystemMeasure implements Serializable, MeasTypeCons, Cloneable {
     }
 
     public void addMeasure(MeasureInfo info) {
-        if (id2Measure.get(info.getPositionId()) == null)
-            id2Measure.put(info.getPositionId(), new ArrayList<MeasureInfo>());
+        id2Measure.putIfAbsent(info.getPositionId(), new ArrayList<>());
         id2Measure.get(info.getPositionId()).add(info);
     }
 

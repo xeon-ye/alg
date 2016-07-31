@@ -19,18 +19,20 @@ public class SeTest_case4 extends TestCase implements SeConstants, MeasTypeCons 
 
     double tolerance = 1e-3;
 
-    IEEEDataIsland island;
+    static IEEEDataIsland island;
 
-    YMatrixGetter y;
+    static YMatrixGetter y;
 
-    public SystemMeasure sm;
+    static SystemMeasure sm;
+
+    static {
+        island = new DefaultIcfParser().parse(SeTest_case4.class.getResourceAsStream("/ieeefiles/case4.txt"));
+        y = new YMatrixGetter(island);
+        y.formYMatrix();
+    }
 
     public SeTest_case4(String name) {
         super(name);
-        island = new DefaultIcfParser().parse(this.getClass().getResourceAsStream("/ieeefiles/case4.txt"));
-        y = new YMatrixGetter(island);
-        y.formYMatrix();
-
         sm = DefaultMeasParser.parse(this.getClass().getResourceAsStream("/measfiles/case4_meas.txt"));
     }
 
