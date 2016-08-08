@@ -216,60 +216,65 @@ public class YMatrixGetter {
 
     public ASparseMatrixLink2D formBApostrophe(boolean isXB) {
         int size = island.getPqBusSize() + island.getPvBusSize();
-        ASparseMatrixLink2D bApos = new ASparseMatrixLink2D(size);
-        if (isXB) {
-            int f, t;
-            for (BranchData branch : island.getBranches()) {
-                f = branch.getTapBusNumber() - 1;
-                t = branch.getZBusNumber() - 1;
-                if (f >= size && t < size) {
-                    bApos.increase(t, t, -1.0 / branch.getBranchX());
-                } else if (f < size && t >= size) {
-                    bApos.increase(f, f, -1.0 / branch.getBranchX());
-                } else if (f < size && t < size) {
-                    bApos.increase(f, f, -1.0 / branch.getBranchX());
-                    bApos.increase(t, t, -1.0 / branch.getBranchX());
-                    bApos.increase(f, t, 1.0 / branch.getBranchX());
-                    bApos.increase(t, f, 1.0 / branch.getBranchX());
-                }
-            }
-        } else {
-            for (BranchData branch : island.getBranches()) {
-                int f = branch.getTapBusNumber() - 1;
-                int t = branch.getZBusNumber() - 1;
-                double r = branch.getBranchR();
-                double x = branch.getBranchX();
-                double b = -x / (r * r + x * x);
-                if (f >= size && t < size) {
-                    bApos.increase(t, t, b);
-                } else if (f < size && t >= size) {
-                    bApos.increase(f, f, b);
-                } else if (f < size && t < size) {
-                    bApos.increase(f, f, b);
-                    bApos.increase(t, t, b);
-                    bApos.increase(f, t, -b);
-                    bApos.increase(t, f, -b);
-                }
-            }
-        }
-        //for (int i = 0; i < size; i++) {
-        //    int k = Y.getAdmittance()[1].getIA()[i];
-        //    while (k != -1) {
-        //        int j = Y.getAdmittance()[1].getJA().get(k);
-        //        if (j >= size)
-        //            break;
-        //        bApos.setValue(i, j, Y.getAdmittance()[1].getVA().get(k));
-        //        k = Y.getAdmittance()[1].getLINK().get(k);
-        //    }
-        //}
-        //for (BusData bus : clonedIsland.getBuses()) {
-        //    int i = bus.getBusNumber() - 1;
-        //    if (i >= size)
-        //        continue;
-        //    bApos.increase(i, i, -bus.getShuntSusceptance());
-        //}
-        return bApos;
+        return formBApostrophe(isXB, size);
     }
+
+    public ASparseMatrixLink2D formBApostrophe(boolean isXB, int size) {
+            ASparseMatrixLink2D bApos = new ASparseMatrixLink2D(size);
+            if (isXB) {
+                int f, t;
+                for (BranchData branch : island.getBranches()) {
+                    f = branch.getTapBusNumber() - 1;
+                    t = branch.getZBusNumber() - 1;
+                    if (f >= size && t < size) {
+                        bApos.increase(t, t, -1.0 / branch.getBranchX());
+                    } else if (f < size && t >= size) {
+                        bApos.increase(f, f, -1.0 / branch.getBranchX());
+                    } else if (f < size && t < size) {
+                        bApos.increase(f, f, -1.0 / branch.getBranchX());
+                        bApos.increase(t, t, -1.0 / branch.getBranchX());
+                        bApos.increase(f, t, 1.0 / branch.getBranchX());
+                        bApos.increase(t, f, 1.0 / branch.getBranchX());
+                    }
+                }
+            } else {
+                for (BranchData branch : island.getBranches()) {
+                    int f = branch.getTapBusNumber() - 1;
+                    int t = branch.getZBusNumber() - 1;
+                    double r = branch.getBranchR();
+                    double x = branch.getBranchX();
+                    double b = -x / (r * r + x * x);
+                    if (f >= size && t < size) {
+                        bApos.increase(t, t, b);
+                    } else if (f < size && t >= size) {
+                        bApos.increase(f, f, b);
+                    } else if (f < size && t < size) {
+                        bApos.increase(f, f, b);
+                        bApos.increase(t, t, b);
+                        bApos.increase(f, t, -b);
+                        bApos.increase(t, f, -b);
+                    }
+                }
+            }
+            //for (int i = 0; i < size; i++) {
+            //    int k = Y.getAdmittance()[1].getIA()[i];
+            //    while (k != -1) {
+            //        int j = Y.getAdmittance()[1].getJA().get(k);
+            //        if (j >= size)
+            //            break;
+            //        bApos.setValue(i, j, Y.getAdmittance()[1].getVA().get(k));
+            //        k = Y.getAdmittance()[1].getLINK().get(k);
+            //    }
+            //}
+            //for (BusData bus : clonedIsland.getBuses()) {
+            //    int i = bus.getBusNumber() - 1;
+            //    if (i >= size)
+            //        continue;
+            //    bApos.increase(i, i, -bus.getShuntSusceptance());
+            //}
+            return bApos;
+        }
+
 
     public ASparseMatrixLink2D formBApostropheTwo(boolean isXB) {
         int size = island.getPqBusSize();

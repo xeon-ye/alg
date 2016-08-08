@@ -44,7 +44,7 @@ public class MeasPosOpt implements MeasTypeCons {
 
     private ASparseMatrixLink2D formH(YMatrixGetter Y, ASparseMatrixLink2D bApos, int[] measTypes, int[] pos) {
         int i = 0, n = island.getBuses().size();
-        int size = 2 * n - 1;//状态变量的维数
+        int size = 2 * n;//状态变量的维数
         ASparseMatrixLink2D H = new ASparseMatrixLink2D(measTypes.length, size);
         for(int measType : measTypes) {
             switch (measType) {
@@ -55,7 +55,7 @@ public class MeasPosOpt implements MeasTypeCons {
                     H.setValue(i, pos[i] - 1, 1.0);
                     break;
                 case TYPE_BUS_ACTIVE_POWER:
-                    int k = bApos.getIA()[pos[i]];
+                    int k = bApos.getIA()[pos[i] - 1];
                     while (k != -1) {
                         int j = bApos.getJA().get(k);
                         H.setValue(i, j + n, bApos.getVA().get(k));
@@ -63,7 +63,7 @@ public class MeasPosOpt implements MeasTypeCons {
                     }
                     break;
                 case TYPE_BUS_REACTIVE_POWER:
-                    k = Y.getAdmittance()[1].getIA()[pos[i]];
+                    k = Y.getAdmittance()[1].getIA()[pos[i] - 1];
                     while (k != -1) {
                         int j = Y.getAdmittance()[1].getJA().get(k);
                         H.setValue(i, j + n, Y.getAdmittance()[1].getVA().get(k));
@@ -71,17 +71,17 @@ public class MeasPosOpt implements MeasTypeCons {
                     }
                     break;
                 case TYPE_LINE_FROM_ACTIVE:
-                    BranchData branch = island.getId2branch().get(pos);
+                    BranchData branch = island.getId2branch().get(pos[i]);
                     H.setValue(i, branch.getTapBusNumber() + n - 1, 1.0 / branch.getBranchX());
                     H.setValue(i, branch.getZBusNumber() + n - 1, -1.0 / branch.getBranchX());
                     break;
                 case TYPE_LINE_TO_ACTIVE:
-                    branch = island.getId2branch().get(pos);
+                    branch = island.getId2branch().get(pos[i]);
                     H.setValue(i, branch.getTapBusNumber() + n - 1, -1.0 / branch.getBranchX());
                     H.setValue(i, branch.getZBusNumber() + n - 1, 1.0 / branch.getBranchX());
                     break;
                 case TYPE_LINE_FROM_REACTIVE:
-                    branch = island.getId2branch().get(pos);
+                    branch = island.getId2branch().get(pos[i]);
                     double r = branch.getBranchR();
                     double x = branch.getBranchX();
                     double b = -x / (r * r + x * x);
@@ -95,7 +95,7 @@ public class MeasPosOpt implements MeasTypeCons {
                     H.setValue(i, branch.getZBusNumber() - 1, b);
                     break;
                 case TYPE_LINE_TO_REACTIVE:
-                    branch = island.getId2branch().get(pos);
+                    branch = island.getId2branch().get(pos[i]);
                     r = branch.getBranchR();
                     x = branch.getBranchX();
                     b = -x / (r * r + x * x);
@@ -109,12 +109,14 @@ public class MeasPosOpt implements MeasTypeCons {
                     H.setValue(i, branch.getZBusNumber() - 1, -b);
                     break;
                 case TYPE_LINE_FROM_CURRENT:
-                    branch = island.getId2branch().get(pos);
+                    //todo
+                    branch = island.getId2branch().get(pos[i]);
                     H.setValue(i, branch.getTapBusNumber() - 1, -1.0 / branch.getBranchX());
                     H.setValue(i, branch.getZBusNumber() - 1, -1.0 / branch.getBranchX());
                     break;
                 case TYPE_LINE_TO_CURRENT:
-                    branch = island.getId2branch().get(pos);
+                    //todo
+                    branch = island.getId2branch().get(pos[i]);
                     H.setValue(i, branch.getTapBusNumber() - 1, -1.0 / branch.getBranchX());
                     H.setValue(i, branch.getZBusNumber() - 1, -1.0 / branch.getBranchX());
                     break;
@@ -141,15 +143,17 @@ public class MeasPosOpt implements MeasTypeCons {
                 s += weight[i1] * H.getVA().get(k1) * H.getVA().get(k1);
                 k1 = H.getLINK2().get(k1);
             }
-            assert s != 0;
-            r.setValue(row, row, s);
+            if(s != 0.0) {
+                r.setValue(row, row, s);
+                elementCount[0] += (H.getN() - row);
+            }
             //计算上三角元素
             for (int col = row + 1; col < H.getN(); col++) {
                 k1 = H.getJA2()[row];
                 k2 = H.getJA2()[col];
                 s = 0;
                 isExist = false;
-                while (true) {
+                while (k1 != -1 && k2 != -1) {
                     i1 = H.getIA2().get(k1);
                     i2 = H.getIA2().get(k2);
                     if (i1 == i2) {
@@ -162,25 +166,27 @@ public class MeasPosOpt implements MeasTypeCons {
                     } else {
                         k2 = H.getLINK2().get(k2);
                     }
-                    if (k1 == -1 || k2 == -1)
-                        break;
                 }
                 if(!isExist)
                     continue;
                 r.setValue(row, col, s);
-                elementCount[0] += (2 * H.getN() - 2 * col + row);
+                r.setValue(col, row, s);
+                //计算变量的个数
+                elementCount[0] += (2 * H.getN() - col - row);
             }
         }
         return r;
     }
 
     public void doOpt() {
+        int n = island.getBuses().size();
+        int size = 2 * n;//状态变量的维数
+
         YMatrixGetter Y = new YMatrixGetter(island);
         Y.formYMatrix();
-        ASparseMatrixLink2D bApos = Y.formBApostrophe(false);
+        ASparseMatrixLink2D bApos = Y.formBApostrophe(false, n);
 
-        int n = island.getBuses().size();
-        int size = 2 * n - 1;//状态变量的维数
+        //约束中非零元的个数
         int[] element_count = new int[]{0};
 
         ASparseMatrixLink2D[] Ds = new ASparseMatrixLink2D[candPos.length + 1];
@@ -189,9 +195,10 @@ public class MeasPosOpt implements MeasTypeCons {
 
         int i = 1;
         for(int pos : candPos) {
-            int[] measTypes = measTypesPerPos[i];
+            int[] measTypes = measTypesPerPos[i - 1];
             ASparseMatrixLink2D H = formH(Y, bApos, measTypes, pos);
-            Ds[i] = formHTWH(H, measWeight[i], element_count);
+            //H.printOnScreen();
+            Ds[i] = formHTWH(H, measWeight[i - 1], element_count);
             i++;
         }
 
@@ -212,7 +219,7 @@ public class MeasPosOpt implements MeasTypeCons {
         //约束上限
         double rowUpper[] = new double[rowLower.length];
         //约束中非零元系数
-        double element[] = new double[element_count[0]];
+        double element[] = new double[element_count[0] + 5 * candPos.length * size * (size + 1)];
         //上面系数对应的列
         int column[] = new int[element.length];
         //每一行起始位置
@@ -240,8 +247,8 @@ public class MeasPosOpt implements MeasTypeCons {
         //对约束的参数赋值
         int k, col, index, count, rowInA = 1;
         int nonZeroOfRow = 0, nonZeroOfCol[] = new int[size], nonZeroOfCurrent;
-        for (int row = 0; row < size; row++) {
-            starts[rowInA] = 0;
+        for (int row = 0; row < size; row++, rowInA++) {
+            starts[rowInA] = starts[rowInA - 1];
             for(int j = row; j < size; j++) {
                 //记录当前行的前j列共有多少个非零元
                 nonZeroOfCol[j] = 0;
@@ -254,7 +261,7 @@ public class MeasPosOpt implements MeasTypeCons {
                     rowUpper[rowInA - 1] = 0;
                     rowLower[rowInA - 1] = 0;
                 }
-                starts[rowInA++] = nonZeroOfRow + nonZeroOfCol[j];
+                starts[rowInA] += nonZeroOfRow + nonZeroOfCol[j];
             }
 
             nonZeroOfCurrent = 0;
@@ -280,7 +287,7 @@ public class MeasPosOpt implements MeasTypeCons {
             for(ASparseMatrixLink2D m : Ds)
                 nonZeroOfRow += m.getNA()[row] * (size - row);
         }
-        index = starts[rowInA];
+        index = nonZeroOfRow;
         for(i = 1; i < Ds.length; i++) {
             for(int row = 0; row < size; row++) {
                 for(col = row; col < size; col++) {
@@ -291,15 +298,17 @@ public class MeasPosOpt implements MeasTypeCons {
                     //约束上下限
                     rowUpper[rowInA] = Double.MAX_VALUE;
                     rowLower[rowInA] = 0;
-                    starts[rowInA++] = 2;
+                    starts[rowInA] = starts[rowInA - 1] + 2;
+                    rowInA++;
 
                     element[index] = 1;
                     column[index++] = candPos.length + i * (size - 1) * (size + 2) / 2 + row * size - row * (row + 1)/2 + col;
                     element[index] = -1000;
                     column[index++] = i - 1;
                     rowUpper[rowInA] = 0;
-                    rowLower[rowInA] = Double.MIN_VALUE;;
-                    starts[rowInA++] = 2;
+                    rowLower[rowInA] = Double.MIN_VALUE;
+                    starts[rowInA] = starts[rowInA - 1] + 2;
+                    rowInA++;
 
                     element[index] = 1;
                     column[index++] = candPos.length + i * (size - 1) * (size + 2) / 2  + row * size - row * (row + 1)/2 + col;
@@ -309,7 +318,8 @@ public class MeasPosOpt implements MeasTypeCons {
                     column[index++] = candPos.length + row * size - row * (row + 1)/2 + col;;
                     rowUpper[rowInA] = Double.MAX_VALUE;
                     rowLower[rowInA] = -1000;
-                    starts[rowInA++] = 3;
+                    starts[rowInA] = starts[rowInA - 1] + 3;
+                    rowInA++;
 
                     element[index] = 1;
                     column[index++] = candPos.length + i * (size - 1) * (size + 2) / 2  + row * size - row * (row + 1)/2 + col;
@@ -319,10 +329,12 @@ public class MeasPosOpt implements MeasTypeCons {
                     column[index++] = candPos.length + row * size - row * (row + 1)/2 + col;;
                     rowUpper[rowInA] = 1000;
                     rowLower[rowInA] = Double.MIN_VALUE;
-                    starts[rowInA++] = 3;
+                    starts[rowInA] = starts[rowInA - 1] + 3;
+                    rowInA++;
                 }
             }
         }
+
 
         //01变量放在最前面的位置
         for(i = 0; i < candPos.length; i++)
@@ -343,16 +355,8 @@ public class MeasPosOpt implements MeasTypeCons {
         }
     }
 
-    public int[] getExistMeasTypes() {
-        return existMeasTypes;
-    }
-
     public void setExistMeasTypes(int[] existMeasTypes) {
         this.existMeasTypes = existMeasTypes;
-    }
-
-    public int[] getExistMeasPos() {
-        return existMeasPos;
     }
 
     public void setExistMeasPos(int[] existMeasPos) {
@@ -367,26 +371,13 @@ public class MeasPosOpt implements MeasTypeCons {
         this.existMeasWeight = existMeasWeight;
     }
 
-    public int[] getCandPos() {
-        return candPos;
-    }
-
     public void setCandPos(int[] candPos) {
         this.candPos = candPos;
-    }
-
-    public int[][] getMeasTypesPerPos() {
-        return measTypesPerPos;
     }
 
     public void setMeasTypesPerPos(int[][] measTypesPerPos) {
         this.measTypesPerPos = measTypesPerPos;
     }
-
-    public double[][] getMeasWeight() {
-        return measWeight;
-    }
-
     public void setMeasWeight(double[][] measWeight) {
         this.measWeight = measWeight;
     }
