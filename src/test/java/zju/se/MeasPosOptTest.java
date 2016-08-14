@@ -5,6 +5,7 @@ import zju.measure.*;
 
 /**
  * Created by arno on 16-7-31.
+ * @author Dong Shufeng
  */
 public class MeasPosOptTest extends TestCase implements MeasTypeCons {
 
@@ -12,7 +13,7 @@ public class MeasPosOptTest extends TestCase implements MeasTypeCons {
     public void testCase4() {
         MeasPosOpt mpo = new MeasPosOpt(SeTest_case4.island);
         int[] candPos = new int[0];
-        for(int i = 0; i < 0; i++)
+        for(int i = 0; i < candPos.length; i++)
             candPos[i] = i + 1;
 
         int[][] measTypePerPos = new int[candPos.length][];

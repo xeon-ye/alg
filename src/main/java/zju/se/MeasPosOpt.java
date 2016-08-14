@@ -247,13 +247,12 @@ public class MeasPosOpt implements MeasTypeCons {
         //对约束的参数赋值
         int k, col, index, count, rowInA = 1;
         int nonZeroOfRow = 0, nonZeroOfCol[] = new int[size], nonZeroOfCurrent;
-        for (int row = 0; row < size; row++, rowInA++) {
-            starts[rowInA] = starts[rowInA - 1];
-            for(int j = row; j < size; j++) {
+        for (int row = 0; row < size; row++) {
+            for(int j = row; j < size; j++, rowInA++) {
                 //记录当前行的前j列共有多少个非零元
                 nonZeroOfCol[j] = 0;
                 for(ASparseMatrixLink2D m : Ds)
-                    nonZeroOfCol[j] += m.getNA()[row] * (j - row);
+                    nonZeroOfCol[j] += m.getNA()[row] * (j - row + 1);
                 if(j == row) {
                     rowUpper[rowInA - 1] = 1;
                     rowLower[rowInA - 1] = 1;
@@ -261,17 +260,19 @@ public class MeasPosOpt implements MeasTypeCons {
                     rowUpper[rowInA - 1] = 0;
                     rowLower[rowInA - 1] = 0;
                 }
-                starts[rowInA] += nonZeroOfRow + nonZeroOfCol[j];
+                starts[rowInA] = nonZeroOfRow + nonZeroOfCol[j];
             }
 
-            nonZeroOfCurrent = 0;
-            count = 0;
+            nonZeroOfCurrent = 0;//记录当前
+            count = 0; //记录当前矩阵的位置
             for(ASparseMatrixLink2D m : Ds) {
                 k = m.getIA()[row];
                 while (k != -1) {
                     col = m.getJA().get(k);
                     for(int j = row; j < size; j++) {
-                        index = nonZeroOfRow + nonZeroOfCol[j] + nonZeroOfCurrent;
+                        index = nonZeroOfRow + nonZeroOfCurrent;
+                        if(j > row)
+                            index += nonZeroOfCol[j - 1];
                         element[index] = m.getVA().get(k);
                         if(col > j)
                             column[index] = candPos.length + count * (size - 1) * (size + 2) / 2 + j * size - j * (j + 1) / 2 + col;
@@ -287,6 +288,12 @@ public class MeasPosOpt implements MeasTypeCons {
             for(ASparseMatrixLink2D m : Ds)
                 nonZeroOfRow += m.getNA()[row] * (size - row);
         }
+
+        System.out.println("====================");
+        for(ASparseMatrixLink2D m : Ds)
+            m.printOnScreen2();
+        System.out.println("====================");
+
         index = nonZeroOfRow;
         for(i = 1; i < Ds.length; i++) {
             for(int row = 0; row < size; row++) {
@@ -296,8 +303,8 @@ public class MeasPosOpt implements MeasTypeCons {
                     element[index] = 1000;
                     column[index++] = i - 1;
                     //约束上下限
-                    rowUpper[rowInA] = Double.MAX_VALUE;
-                    rowLower[rowInA] = 0;
+                    rowUpper[rowInA - 1] = Double.MAX_VALUE;
+                    rowLower[rowInA - 1] = 0;
                     starts[rowInA] = starts[rowInA - 1] + 2;
                     rowInA++;
 
@@ -305,8 +312,8 @@ public class MeasPosOpt implements MeasTypeCons {
                     column[index++] = candPos.length + i * (size - 1) * (size + 2) / 2 + row * size - row * (row + 1)/2 + col;
                     element[index] = -1000;
                     column[index++] = i - 1;
-                    rowUpper[rowInA] = 0;
-                    rowLower[rowInA] = Double.MIN_VALUE;
+                    rowUpper[rowInA - 1] = 0;
+                    rowLower[rowInA - 1] = Double.MIN_VALUE;
                     starts[rowInA] = starts[rowInA - 1] + 2;
                     rowInA++;
 
@@ -316,8 +323,8 @@ public class MeasPosOpt implements MeasTypeCons {
                     column[index++] = i - 1;
                     element[index] = -1;
                     column[index++] = candPos.length + row * size - row * (row + 1)/2 + col;;
-                    rowUpper[rowInA] = Double.MAX_VALUE;
-                    rowLower[rowInA] = -1000;
+                    rowUpper[rowInA - 1] = Double.MAX_VALUE;
+                    rowLower[rowInA - 1] = -1000;
                     starts[rowInA] = starts[rowInA - 1] + 3;
                     rowInA++;
 
@@ -326,9 +333,9 @@ public class MeasPosOpt implements MeasTypeCons {
                     element[index] = 1000;
                     column[index++] = i - 1;
                     element[index] = -1;
-                    column[index++] = candPos.length + row * size - row * (row + 1)/2 + col;;
-                    rowUpper[rowInA] = 1000;
-                    rowLower[rowInA] = Double.MIN_VALUE;
+                    column[index++] = candPos.length + row * size - row * (row + 1)/2 + col;
+                    rowUpper[rowInA - 1] = 1000;
+                    rowLower[rowInA - 1] = Double.MIN_VALUE;
                     starts[rowInA] = starts[rowInA - 1] + 3;
                     rowInA++;
                 }
@@ -352,6 +359,7 @@ public class MeasPosOpt implements MeasTypeCons {
             log.warn("计算不收敛.");
         } else { //状态位显示计算收敛
             log.info("计算结束.");
+            System.out.println("优化结果：");
         }
     }
 

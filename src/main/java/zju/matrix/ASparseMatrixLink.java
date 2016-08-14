@@ -246,6 +246,31 @@ public class ASparseMatrixLink extends AbstractMatrix implements Serializable {
         return v;
     }
 
+    public void printOnScreen2() {
+        System.out.println("========= matrix ==========");
+        int j;
+        for (int i = 0; i < getM(); i++) {
+            int k = getIA()[i];
+            j = -1;
+            while (k != -1) {
+                double v = getVA().get(k);
+                for(int m = j + 1; m < getJA().get(k); m++)
+                    System.out.print("0\t");
+                System.out.print(v);
+                j = getJA().get(k);
+                k = getLINK().get(k);
+                if(j != getN() - 1)
+                    System.out.print("\t");
+            }
+            for(int m = j + 1; m < getN(); m++) {
+                System.out.print("0");
+                if(m != getN() - 1)
+                    System.out.print("\t");
+            }
+            System.out.println();
+        }
+    }
+
     public void printOnScreen() {
         System.out.println("========= matrix ==========");
         for (int i = 0; i < getM(); i++) {
