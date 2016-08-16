@@ -29,6 +29,8 @@ public class MeasPosOpt implements MeasTypeCons {
     //量测的均方差
     private double[][] measWeight;
 
+    private int maxDevNum;
+
     private IEEEDataIsland island;
 
     public MeasPosOpt(IEEEDataIsland island) {
@@ -215,11 +217,11 @@ public class MeasPosOpt implements MeasTypeCons {
         int whichInt[] = new int[candPos.length];
 
         //约束下限
-        double rowLower[] = new double[(4 * candPos.length + 1 ) * (size * size + size) / 2];
+        double rowLower[] = new double[(4 * candPos.length + 1 ) * (size * size + size) / 2 + 1];
         //约束上限
         double rowUpper[] = new double[rowLower.length];
         //约束中非零元系数
-        double element[] = new double[element_count[0] + 5 * candPos.length * size * (size + 1)];
+        double element[] = new double[element_count[0] + 5 * candPos.length * size * (size + 1) + candPos.length];
         //上面系数对应的列
         int column[] = new int[element.length];
         //每一行起始位置
@@ -235,8 +237,9 @@ public class MeasPosOpt implements MeasTypeCons {
                 columnUpper[i] = 1;
                 objValue[i] = 0;
             } else {
-                columnLower[i] = Double.MIN_VALUE;
-                columnUpper[i] = Double.MAX_VALUE;
+                //之前一直用Double.MIN_VALUE作为下限是错的，Double.MIN_VALUE是最小的正数，所以导致一直不收敛
+                columnLower[i] = -2e14;
+                columnUpper[i] = 2e14;
                 objValue[i] = 0;
             }
         }
@@ -254,11 +257,11 @@ public class MeasPosOpt implements MeasTypeCons {
                 for(ASparseMatrixLink2D m : Ds)
                     nonZeroOfCol[j] += m.getNA()[row] * (j - row + 1);
                 if(j == row) {
-                    rowUpper[rowInA - 1] = 1;
-                    rowLower[rowInA - 1] = 1;
+                    rowUpper[rowInA - 1] = 1 + 1e-6;
+                    rowLower[rowInA - 1] = 1 - 1e-6;
                 } else {
-                    rowUpper[rowInA - 1] = 0;
-                    rowLower[rowInA - 1] = 0;
+                    rowUpper[rowInA - 1] = 1e-6;
+                    rowLower[rowInA - 1] = -1e-6;
                 }
                 starts[rowInA] = nonZeroOfRow + nonZeroOfCol[j];
             }
@@ -289,63 +292,78 @@ public class MeasPosOpt implements MeasTypeCons {
                 nonZeroOfRow += m.getNA()[row] * (size - row);
         }
 
-        System.out.println("====================");
-        for(ASparseMatrixLink2D m : Ds)
-            m.printOnScreen2();
-        System.out.println("====================");
+        //System.out.println("====================");
+        //for(ASparseMatrixLink2D m : Ds)
+        //    m.printOnScreen2();
+        //System.out.println("====================");
 
         index = nonZeroOfRow;
+        double bigM = 5000;
         for(i = 1; i < Ds.length; i++) {
             for(int row = 0; row < size; row++) {
                 for(col = row; col < size; col++) {
+                    //处理约束Zi = bi * zi
+                    //|Zi| <= Mbi
+
+                    //Zi + MBi >= 0
                     element[index] = 1;
                     column[index++] = candPos.length + i * (size - 1) * (size + 2) / 2 + row * size - row * (row + 1)/2 + col;
-                    element[index] = 1000;
+                    element[index] = bigM;
                     column[index++] = i - 1;
                     //约束上下限
                     rowUpper[rowInA - 1] = Double.MAX_VALUE;
                     rowLower[rowInA - 1] = 0;
                     starts[rowInA] = starts[rowInA - 1] + 2;
                     rowInA++;
-
+                    //Zi - Mbi <= 0
                     element[index] = 1;
                     column[index++] = candPos.length + i * (size - 1) * (size + 2) / 2 + row * size - row * (row + 1)/2 + col;
-                    element[index] = -1000;
+                    element[index] = -bigM;
                     column[index++] = i - 1;
                     rowUpper[rowInA - 1] = 0;
-                    rowLower[rowInA - 1] = Double.MIN_VALUE;
+                    rowLower[rowInA - 1] = -2e14;
                     starts[rowInA] = starts[rowInA - 1] + 2;
                     rowInA++;
 
+                    // |Zi - zi| <= (1 - bi)M
+                    //Zi - zi - Mbi >= -M
                     element[index] = 1;
                     column[index++] = candPos.length + i * (size - 1) * (size + 2) / 2  + row * size - row * (row + 1)/2 + col;
-                    element[index] = -1000;
-                    column[index++] = i - 1;
-                    element[index] = -1;
-                    column[index++] = candPos.length + row * size - row * (row + 1)/2 + col;;
-                    rowUpper[rowInA - 1] = Double.MAX_VALUE;
-                    rowLower[rowInA - 1] = -1000;
-                    starts[rowInA] = starts[rowInA - 1] + 3;
-                    rowInA++;
-
-                    element[index] = 1;
-                    column[index++] = candPos.length + i * (size - 1) * (size + 2) / 2  + row * size - row * (row + 1)/2 + col;
-                    element[index] = 1000;
+                    element[index] = -bigM;
                     column[index++] = i - 1;
                     element[index] = -1;
                     column[index++] = candPos.length + row * size - row * (row + 1)/2 + col;
-                    rowUpper[rowInA - 1] = 1000;
-                    rowLower[rowInA - 1] = Double.MIN_VALUE;
+                    rowUpper[rowInA - 1] = Double.MAX_VALUE;
+                    rowLower[rowInA - 1] = -bigM;
+                    starts[rowInA] = starts[rowInA - 1] + 3;
+                    rowInA++;
+
+                    //Zi - zi + Mbi <= M
+                    element[index] = 1;
+                    column[index++] = candPos.length + i * (size - 1) * (size + 2) / 2  + row * size - row * (row + 1)/2 + col;
+                    element[index] = bigM;
+                    column[index++] = i - 1;
+                    element[index] = -1;
+                    column[index++] = candPos.length + row * size - row * (row + 1)/2 + col;
+                    rowUpper[rowInA - 1] = bigM;
+                    rowLower[rowInA - 1] = -2e14;
                     starts[rowInA] = starts[rowInA - 1] + 3;
                     rowInA++;
                 }
             }
         }
+        //设备个数的限制
+        rowUpper[rowInA - 1] = maxDevNum;
+        rowLower[rowInA - 1] = 0;
+        starts[rowInA] = starts[rowInA - 1] + candPos.length;
 
-
-        //01变量放在最前面的位置
-        for(i = 0; i < candPos.length; i++)
+        for(i = 0; i < candPos.length; i++) {
+            //01变量放在最前面的位置
             whichInt[i] = i;
+            //设备个数的限制
+            element[index] = 1.0;
+            column[index++] = i;
+        }
 
         int numberRows = rowLower.length;
         int numberColumns = columnLower.length;
@@ -358,8 +376,14 @@ public class MeasPosOpt implements MeasTypeCons {
         if (status < 0) {
             log.warn("计算不收敛.");
         } else { //状态位显示计算收敛
-            log.info("计算结束.");
-            System.out.println("优化结果：");
+            log.info("计算结果.");
+            double obj = 0;
+            for(int row = 0; row < size; row++)
+                obj += result[candPos.length + row * size - row * (row + 1)/2 + row];
+            System.out.println("优化结果: " + obj);
+            for(i = 0; i < candPos.length; i++)
+                System.out.print(result[i] + "\t");
+            System.out.println();
         }
     }
 
@@ -369,10 +393,6 @@ public class MeasPosOpt implements MeasTypeCons {
 
     public void setExistMeasPos(int[] existMeasPos) {
         this.existMeasPos = existMeasPos;
-    }
-
-    public double[] getExistMeasWeight() {
-        return existMeasWeight;
     }
 
     public void setExistMeasWeight(double[] existMeasWeight) {
@@ -386,7 +406,12 @@ public class MeasPosOpt implements MeasTypeCons {
     public void setMeasTypesPerPos(int[][] measTypesPerPos) {
         this.measTypesPerPos = measTypesPerPos;
     }
+
     public void setMeasWeight(double[][] measWeight) {
         this.measWeight = measWeight;
+    }
+
+    public void setMaxDevNum(int maxDevNum) {
+        this.maxDevNum = maxDevNum;
     }
 }

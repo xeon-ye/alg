@@ -12,19 +12,19 @@ public class MeasPosOptTest extends TestCase implements MeasTypeCons {
 
     public void testCase4() {
         MeasPosOpt mpo = new MeasPosOpt(SeTest_case4.island);
-        int[] candPos = new int[0];
+        int[] candPos = new int[4];
         for(int i = 0; i < candPos.length; i++)
             candPos[i] = i + 1;
 
         int[][] measTypePerPos = new int[candPos.length][];
         double[][] weights = new double[candPos.length][];
         for(int i = 0; i < measTypePerPos.length; i++) {
-            measTypePerPos[i] = new int[1];
+            measTypePerPos[i] = new int[2];
             measTypePerPos[i][0] = TYPE_BUS_ACTIVE_POWER;
-            //measTypePerPos[i][1] = TYPE_BUS_REACTIVE_POWER;
-            weights[i] = new double[1];
+            measTypePerPos[i][1] = TYPE_BUS_REACTIVE_POWER;
+            weights[i] = new double[measTypePerPos[i].length];
             weights[i][0] = 1.0;
-           // weights[i][1] = 1.0;
+            weights[i][1] = 1.0;
         }
 
         SystemMeasure sm = DefaultMeasParser.parse(this.getClass().getResourceAsStream("/measfiles/case4_meas.txt"));
@@ -37,6 +37,7 @@ public class MeasPosOptTest extends TestCase implements MeasTypeCons {
         mpo.setExistMeasPos(mc.measPos);
         mpo.setExistMeasTypes(mc.measTypes);
         mpo.setExistMeasWeight(mc.weights);
+        mpo.setMaxDevNum(1);
 
         mpo.doOpt();
     }
