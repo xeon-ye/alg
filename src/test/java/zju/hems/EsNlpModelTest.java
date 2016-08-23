@@ -13,13 +13,19 @@ import java.io.InputStreamReader;
  */
 public class EsNlpModelTest extends TestCase {
 
-    public double[] dcEnergy_l; //下限
-    public double[] dcEnergy_u; //上限
-    public double[] pNeeded; //负荷有功
-    public double[] pricePerKwh;//价格
-    public double[] minEnergeChage;
-    public double[] maxEnergyChange;
+    private double[] dcEnergy_l; //下限
+    private double[] dcEnergy_u; //上限
+    private double[] pNeeded; //负荷有功
+    private double[] pricePerKwh;//价格
+    private double[] minEnergeChage;
+    private double[] maxEnergyChange;
     private double finalEnergyChange;
+
+    //traditional method
+    boolean isTraditional = false;
+    private double[] DCOut;//DC power
+    private double minBatteryChange;
+    private double maxBatteryChange;
 
     public EsNlpModelTest(){
     }
@@ -48,8 +54,13 @@ public class EsNlpModelTest extends TestCase {
             minEnergeChage[i] = -2.15;
             maxEnergyChange[i] = 2.15;
         }
+        //traditional method
+        minBatteryChange = -2.15;
+        maxBatteryChange =2.15;
+
         pNeeded = new double[count];
         pricePerKwh = new double[count];
+        DCOut = new double[count];
         r = new BufferedReader(new InputStreamReader(this.getClass().getResourceAsStream(file)));
         count = 0;
         String str;
@@ -63,6 +74,8 @@ public class EsNlpModelTest extends TestCase {
             double dcLoadP = Double.parseDouble(customerList[1]);
             //PV输出功率
             double pvOutputP = Double.parseDouble(customerList[2]);
+            //dc输出
+            DCOut[count] = (dcLoadP - pvOutputP) * 0.5;
             //将功率转化为能量
             //pNeeded[count] = (acLoadP + dcLoadP - pvOutputP) * 0.5;
             //电价
@@ -82,8 +95,10 @@ public class EsNlpModelTest extends TestCase {
             //  x_l[0] + dcLoad[0] - pvOutput[0] < x[0] < x_u[0] + dcLoad[0] - pvOutput[0]
             //  x_l[0] + dcLoad[0] + dcLoad[1] - pvOutput[0] - pvOutput[1] < x[1] < x_u[0] + dcLoad[0] + dcLoad[1] - pvOutput[0] - pvOutput[1]
             //依次类推，将约束两边的上下限用dcEnergy_l[count],dcEnergy_u[count]表示，写成程序就是下面两句
-            dcEnergy_l[count] += finalEnergyChange;
-            dcEnergy_u[count] += finalEnergyChange;
+            if(!isTraditional) {
+                dcEnergy_l[count] += finalEnergyChange;
+                dcEnergy_u[count] += finalEnergyChange;
+            }
             count++;
         }
         r.close();
@@ -91,6 +106,7 @@ public class EsNlpModelTest extends TestCase {
     }
 
     public void testAshley() throws IOException {
+        isTraditional = false;
         String[] files = {
                 "/other/send_Ashton_winter_weekday.csv",
                 "/other/send_Ashton_winter_weekday_2.csv",
@@ -101,6 +117,24 @@ public class EsNlpModelTest extends TestCase {
             System.out.println("Test Hems opt from : " + file);
             readFile(file);
             doEsOpt2();
+        }
+    }
+
+    public void testTraditional() throws IOException {
+        isTraditional = true;
+        String[] files = {
+                // "/other/send_normal_house_hpv.csv",
+//                "/other/send_Ashton_winter_weekday_PV_H DC_H.csv",
+                 "/other/send_Ashley_winter_holi_weekday_3.csv",
+                // "/other/send_house_23_real_test.csv",
+        };
+        for (String file : files) {
+            System.out.println("Test Hems opt from : " + file);
+            readFile(file);
+            //change here to set 1 efficiency and 2 efficiencies
+            //doEsOpt2();
+            //doEsOpt3();
+            doEsOpt4();
         }
     }
 
@@ -153,6 +187,37 @@ public class EsNlpModelTest extends TestCase {
         int index = 1;
         for (double d : esOpt.getOptCharge()) {
             System.out.println((index) + "\t" + d + "\t" + pricePerKwh[index - 1]);
+            index++;
+        }
+    }
+
+    public void doEsOpt4() throws IOException {
+        System.out.println("KB1: " + (double) (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1024);
+        //开始设置优化的条件
+        P2pMlpModel esOpt = new P2pMlpModel();
+        esOpt.setEnergy_L(dcEnergy_l);
+        esOpt.setEnergy_U(dcEnergy_u);
+        esOpt.setChargeEff(0.9);//充电效率1
+        esOpt.setDischargeEff(0.9);//放电效率1
+        esOpt.setDCOut(DCOut);//todo:
+        esOpt.setMinBatteryChange(minBatteryChange);//存储最大变化量
+        esOpt.setMaxBatteryChange(maxBatteryChange);//存储最大变化量
+        esOpt.setPricePerKwh(pricePerKwh);//每kwh能量的价格
+        esOpt.setpNeed(pNeeded);//所需的能量
+        esOpt.setIniEnergy(5.76);//储能能量的初值
+        esOpt.setRating(40);//converter容量
+        esOpt.setPG(100);//家庭外网最大
+
+        //开始优化
+        boolean r = esOpt.doEsOpt_p2p();
+        //判断是否收敛
+        assertTrue(r);
+        //如果不收敛怎么显示？//
+        //打印优化结果
+        System.out.println("KB3: " + (double) (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1024);
+        int index = 1;
+        for (double d : esOpt.getResult()) { //这里result共576个变量，究竟要打印哪些
+            System.out.println((index) + "\t" + d + "\t" + pricePerKwh[(index -1) / 12]);
             index++;
         }
     }

@@ -298,7 +298,8 @@ public class MeasPosOpt implements MeasTypeCons {
         //System.out.println("====================");
 
         index = nonZeroOfRow;
-        double bigM = 5000;
+        double bigM = 1000; //todo:
+        int nonZeroInM = (size - 1) * (size + 2) / 2 + 1;
         for(i = 1; i < Ds.length; i++) {
             for(int row = 0; row < size; row++) {
                 for(col = row; col < size; col++) {
@@ -306,20 +307,20 @@ public class MeasPosOpt implements MeasTypeCons {
                     //|Zi| <= Mbi
 
                     //Zi + MBi >= 0
-                    element[index] = 1;
-                    column[index++] = candPos.length + i * (size - 1) * (size + 2) / 2 + row * size - row * (row + 1)/2 + col;
                     element[index] = bigM;
                     column[index++] = i - 1;
+                    element[index] = 1;
+                    column[index++] = candPos.length + i * nonZeroInM + row * size - row * (row + 1)/2 + col;
                     //约束上下限
                     rowUpper[rowInA - 1] = Double.MAX_VALUE;
                     rowLower[rowInA - 1] = 0;
                     starts[rowInA] = starts[rowInA - 1] + 2;
                     rowInA++;
                     //Zi - Mbi <= 0
-                    element[index] = 1;
-                    column[index++] = candPos.length + i * (size - 1) * (size + 2) / 2 + row * size - row * (row + 1)/2 + col;
                     element[index] = -bigM;
                     column[index++] = i - 1;
+                    element[index] = 1;
+                    column[index++] = candPos.length + i * nonZeroInM + row * size - row * (row + 1)/2 + col;
                     rowUpper[rowInA - 1] = 0;
                     rowLower[rowInA - 1] = -2e14;
                     starts[rowInA] = starts[rowInA - 1] + 2;
@@ -327,24 +328,24 @@ public class MeasPosOpt implements MeasTypeCons {
 
                     // |Zi - zi| <= (1 - bi)M
                     //Zi - zi - Mbi >= -M
-                    element[index] = 1;
-                    column[index++] = candPos.length + i * (size - 1) * (size + 2) / 2  + row * size - row * (row + 1)/2 + col;
                     element[index] = -bigM;
                     column[index++] = i - 1;
                     element[index] = -1;
                     column[index++] = candPos.length + row * size - row * (row + 1)/2 + col;
+                    element[index] = 1;
+                    column[index++] = candPos.length + i * nonZeroInM  + row * size - row * (row + 1)/2 + col;
                     rowUpper[rowInA - 1] = Double.MAX_VALUE;
                     rowLower[rowInA - 1] = -bigM;
                     starts[rowInA] = starts[rowInA - 1] + 3;
                     rowInA++;
 
                     //Zi - zi + Mbi <= M
-                    element[index] = 1;
-                    column[index++] = candPos.length + i * (size - 1) * (size + 2) / 2  + row * size - row * (row + 1)/2 + col;
-                    element[index] = bigM;
+                     element[index] = bigM;
                     column[index++] = i - 1;
                     element[index] = -1;
                     column[index++] = candPos.length + row * size - row * (row + 1)/2 + col;
+                    element[index] = 1;
+                    column[index++] = candPos.length + i * nonZeroInM  + row * size - row * (row + 1)/2 + col;
                     rowUpper[rowInA - 1] = bigM;
                     rowLower[rowInA - 1] = -2e14;
                     starts[rowInA] = starts[rowInA - 1] + 3;

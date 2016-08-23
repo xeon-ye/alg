@@ -25,9 +25,9 @@ public class SoFileLoader {
                 writeSoFile("/win32/libquadmath-0.dll", "libquadmath-0.dll");
 
                 //COIN常用库
-                writeSoFile("/win32/libcoinblas.a", "libcoinblas.a");
-                writeSoFile("/win32/libcoinlapack.a", "libcoinlapack.a");
-                writeSoFile("/win32/libcoinhsl.a", "libcoinhsl.a");
+                //writeSoFile("/win32/libcoinblas.a", "libcoinblas.a");
+                //writeSoFile("/win32/libcoinlapack.a", "libcoinlapack.a");
+                //writeSoFile("/win32/libcoinhsl.a", "libcoinhsl.a");
                 writeSoFile("/win32/libipopt.dll", "libipopt.dll");
                 writeSoFile("/win32/libCoinUtils.dll", "libCoinUtils.dll");
                 writeSoFile("/win32/libClp.dll", "libClp.dll");
@@ -38,7 +38,7 @@ public class SoFileLoader {
                 writeSoFile("/win32/libBonmin.dll", "libBonmin.dll");
 
                 //SuperLU库
-                writeSoFile("/win32/libsuperlu_4.3.a", "libsuperlu_4.3.a");
+                //writeSoFile("/win32/libsuperlu_4.3.a", "libsuperlu_4.3.a");
 
                 //加载
                 loadLib("/win32/libjpscpu.dll", "libjpscpu.dll");
