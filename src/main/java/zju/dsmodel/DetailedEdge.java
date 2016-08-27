@@ -9,12 +9,19 @@ import java.io.Serializable;
  * Date: 14-2-18
  */
 public class DetailedEdge implements Serializable {
+    //电源
     public static final int EDGE_TYPE_SUPPLIER = 1;
+    //馈线
     public static final int EDGE_TYPE_FEEDER = 2;
+    //变压器绕组
     public static final int EDGE_TYPE_TF_WINDING = 3;
+    //负荷
     public static final int EDGE_TYPE_LOAD = 4;
+    //绕组带一个负荷
     public static final int EDGE_TYPE_LOAD_TF_MIX = 5;
+    //分布式电源
     public static final int EDGE_TYPE_DG = 6;
+    //绕组带一个分布式电源
     public static final int EDGE_TYPE_DG_TF_MIX = 7;
 
     //该标志位用于确定变压器支路是否为源端

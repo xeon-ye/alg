@@ -1,0 +1,15 @@
+Line Segment Data	3 items	feet
+1	2	2000	402
+2	3	2500	402
+-999
+Spot Loads	1 item
+3	D-PQ	1800	871.78	1800	871.78	1800	871.78
+-999
+Distributed Loads	0 item
+-999
+Shunt Capacitors	0 item
+-999
+Transformer	0 item
+-999
+Regulator	0 item
+-999

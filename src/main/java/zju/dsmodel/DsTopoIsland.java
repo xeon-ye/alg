@@ -1,17 +1,18 @@
 package zju.dsmodel;
 
+import org.apache.log4j.Logger;
 import org.jgrapht.UndirectedGraph;
 import org.jgrapht.graph.SimpleGraph;
 import org.jgrapht.traverse.BreadthFirstIterator;
 import zju.devmodel.MapObject;
+import zju.ieeeformat.BranchData;
+import zju.ieeeformat.BusData;
 import zju.ieeeformat.IEEEDataIsland;
+import zju.matrix.Complex;
 import zju.util.JOFileUtil;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by IntelliJ IDEA.
@@ -20,6 +21,8 @@ import java.util.Map;
  *         Date: 2010-7-10
  */
 public class DsTopoIsland implements Serializable, DsModelCons {
+
+    private static Logger log = Logger.getLogger(DsTopoIsland.class);
 
     public static final String EARTH_NODE_ID = "ground-node-3";
 
@@ -66,8 +69,8 @@ public class DsTopoIsland implements Serializable, DsModelCons {
 
     public void initialVariables() {
         initialBusV();
-        branchHeadI = new HashMap<MapObject, double[][]>(getBranches().size());
-        branchTailI = new HashMap<MapObject, double[][]>(getBranches().size());
+        branchHeadI = new HashMap<>(getBranches().size());
+        branchTailI = new HashMap<>(getBranches().size());
         for (MapObject b : getBranches().keySet()) {
             GeneralBranch branch = getBranches().get(b);
             if (isBalanced) {
@@ -93,7 +96,7 @@ public class DsTopoIsland implements Serializable, DsModelCons {
     }
 
     public void initialBusV() {
-        busV = new HashMap<DsTopoNode, double[][]>(getTns().size());
+        busV = new HashMap<>(getTns().size());
         for (DsTopoNode tn : getTns()) {
             double v = 1.0;
             if (!isPerUnitSys())
@@ -125,7 +128,7 @@ public class DsTopoIsland implements Serializable, DsModelCons {
             for (MapObject obj : tn.getConnectedDev())
                 if (!devices.containsKey(obj.getId()))
                     devices.put(obj.getId(), obj);
-        detailedG = new SimpleGraph<String, DetailedEdge>(DetailedEdge.class);
+        detailedG = new SimpleGraph<>(DetailedEdge.class);
         String id1, id2, id3;
         //第一步，加入大地节点以及电源节点
         detailedG.addVertex(EARTH_NODE_ID);
@@ -702,14 +705,14 @@ public class DsTopoIsland implements Serializable, DsModelCons {
      * <br>给每个支路编号</br>
      */
     public void initialIsland() {
-        tns = new ArrayList<DsTopoNode>(graph.vertexSet().size());
+        tns = new ArrayList<>(graph.vertexSet().size());
         DsTopoNode subTn = null;
         for (DsTopoNode tn : supplyTns)
             if (tn.getType() == DsTopoNode.TYPE_SUB) {
                 subTn = tn;
                 break;
             }
-        BreadthFirstIterator<DsTopoNode, MapObject> iter = new BreadthFirstIterator<DsTopoNode, MapObject>(graph, subTn);
+        BreadthFirstIterator<DsTopoNode, MapObject> iter = new BreadthFirstIterator<>(graph, subTn);
         int count = 1;
         while (iter.hasNext()) {
             DsTopoNode tn = iter.next();
@@ -718,7 +721,7 @@ public class DsTopoIsland implements Serializable, DsModelCons {
             tn.setIsland(this);
             count++;
         }
-        idToBranch = new HashMap<Integer, MapObject>(graph.edgeSet().size());
+        idToBranch = new HashMap<>(graph.edgeSet().size());
         int branchId = 1;
         for (DsTopoNode tn : getTns()) {
             int[] connected = new int[graph.degreeOf(tn)];
@@ -896,13 +899,195 @@ public class DsTopoIsland implements Serializable, DsModelCons {
     }
 
     public DsTopoIsland clone() {
-           return (DsTopoIsland) JOFileUtil.cloneObj(this);
-       }
+        return (DsTopoIsland) JOFileUtil.cloneObj(this);
+    }
 
     public IEEEDataIsland toIeeeIsland() {
         if(detailedG == null)
             buildDetailedGraph();
-        return null;//todo
+        IEEEDataIsland island = new IEEEDataIsland();
+        ArrayList<BusData> buses = new ArrayList<>(detailedG.vertexSet().size());
+        ArrayList<BranchData> branches = new ArrayList<>(detailedG.edgeSet().size());
+        int index = 1;
+        Map<String, BusData> vertexToBus = new HashMap<>(detailedG.vertexSet().size());
+        for(String key : detailedG.vertexSet()) {
+            if(key.equals(EARTH_NODE_ID))
+                continue;
+            BusData bus = new BusData();
+            bus.setName(key);
+            bus.setBusNumber(index);
+            buses.add(bus);
+            index++;
+            vertexToBus.put(key, bus);
+        }
+        //记录馈线及其对应Branch之间的关系
+        Map<Feeder, BranchData[]> feederToBranch = new HashMap<>(branches.size());
+        for(DetailedEdge e : detailedG.edgeSet()) {
+            if(e.getEdgeType() == DetailedEdge.EDGE_TYPE_FEEDER) {
+                Feeder f = (Feeder) this.branches.get(this.getDevices().get(e.getDevId()));
+                if(feederToBranch.containsKey(f))
+                    continue;
+                switch (f.getPhases().length) {
+                    case 1:
+                        BranchData branch = new BranchData();
+                        BusData bus1 = vertexToBus.get(detailedG.getEdgeSource(e));
+                        BusData bus2 = vertexToBus.get(detailedG.getEdgeTarget(e));
+                        branch.setTapBusNumber(bus1.getBusNumber());
+                        branch.setZBusNumber(bus2.getBusNumber());
+                        branch.setBranchR(f.getZ_real()[e.getPhase()][e.getPhase()]);
+                        branch.setBranchX(f.getZ_imag()[e.getPhase()][e.getPhase()]);
+                        feederToBranch.put(f, new BranchData[]{branch});
+                        break;
+                    case 2:
+                        //由于是对称矩阵，只计算上三角矩阵
+                        Complex a = new Complex(f.getZ_real()[f.getPhases()[0]][f.getPhases()[0]], f.getZ_imag()[f.getPhases()[0]][f.getPhases()[0]]);
+                        Complex b = new Complex(f.getZ_real()[f.getPhases()[0]][f.getPhases()[1]], f.getZ_imag()[f.getPhases()[0]][f.getPhases()[1]]);
+                        Complex d = new Complex(f.getZ_real()[f.getPhases()[1]][f.getPhases()[1]], f.getZ_imag()[f.getPhases()[1]][f.getPhases()[1]]);
+
+                        //计算行列式
+                        Complex tmp1 = Complex.subtract(Complex.multiply(a, d), Complex.multiply(b, b));
+                        if(tmp1.mod() < 1e-6) {
+                            log.warn("!!!Warning because mod of determinant of resistance matrix is zero. Feeder id: " + e.getDevId());
+                            continue;
+                        }
+                        Complex y12 = Complex.divide(new Complex(-b.getRe(), -b.getIm()), tmp1);
+                        Complex z11 = Complex.divide(d, tmp1).inverse();
+                        Complex z22 = Complex.divide(a, tmp1).inverse();
+
+                        BusData bus3, bus4;
+                        if(e.getPhase() == f.getPhases()[0]) {
+                            bus1 = vertexToBus.get(detailedG.getEdgeSource(e));
+                            bus2 = vertexToBus.get(detailedG.getEdgeTarget(e));
+                            bus3 = vertexToBus.get(detailedG.getEdgeSource(e.getOtherEdgesOfSameFeeder()[0]));
+                            bus4 = vertexToBus.get(detailedG.getEdgeTarget(e.getOtherEdgesOfSameFeeder()[0]));
+                        } else {
+                            bus3 = vertexToBus.get(detailedG.getEdgeSource(e));
+                            bus4 = vertexToBus.get(detailedG.getEdgeTarget(e));
+                            bus1 = vertexToBus.get(detailedG.getEdgeSource(e.getOtherEdgesOfSameFeeder()[0]));
+                            bus2 = vertexToBus.get(detailedG.getEdgeTarget(e.getOtherEdgesOfSameFeeder()[0]));
+                        }
+                        BranchData branch1 = new BranchData();
+                        branch1.setTapBusNumber(bus1.getBusNumber());
+                        branch1.setZBusNumber(bus2.getBusNumber());
+                        branch1.setBranchR(z11.getRe());
+                        branch1.setBranchX(z11.getIm());
+
+                        BranchData branch2 = new BranchData();
+                        bus1 = vertexToBus.get(detailedG.getEdgeSource(e.getOtherEdgesOfSameFeeder()[0]));
+                        bus2 = vertexToBus.get(detailedG.getEdgeSource(e.getOtherEdgesOfSameFeeder()[0]));
+                        branch2.setTapBusNumber(bus3.getBusNumber());
+                        branch2.setZBusNumber(bus4.getBusNumber());
+                        branch2.setBranchR(z22.getRe());
+                        branch2.setBranchX(z22.getIm());
+
+                        if(y12.mod() > 1e-6) {
+                            Complex z12 = y12.inverse();
+                            BranchData branch3 = new BranchData();
+                            branch3.setTapBusNumber(bus1.getBusNumber());
+                            branch3.setZBusNumber(bus3.getBusNumber());
+                            branch3.setBranchR(-z12.getRe());
+                            branch3.setBranchX(-z12.getIm());
+
+                            BranchData branch4 = new BranchData();
+                            branch4.setTapBusNumber(bus2.getBusNumber());
+                            branch4.setZBusNumber(bus4.getBusNumber());
+                            branch4.setBranchR(-z12.getRe());
+                            branch4.setBranchX(-z12.getIm());
+
+                            BranchData branch5 = new BranchData();
+                            branch5.setTapBusNumber(bus1.getBusNumber());
+                            branch5.setZBusNumber(bus4.getBusNumber());
+                            branch5.setBranchR(z12.getRe());
+                            branch5.setBranchX(z12.getIm());
+
+                            BranchData branch6 = new BranchData();
+                            branch6.setTapBusNumber(bus2.getBusNumber());
+                            branch6.setZBusNumber(bus3.getBusNumber());
+                            branch6.setBranchR(z12.getRe());
+                            branch6.setBranchX(z12.getIm());
+                            feederToBranch.put(f, new BranchData[]{branch1, branch2, branch3, branch4, branch5, branch6});
+                        } else {
+                            feederToBranch.put(f, new BranchData[]{branch1, branch2});
+                        }
+                        break;
+                    case 3:
+
+                        //由于是对称矩阵，只存储上三角矩阵
+                        z11 = new Complex(f.getZ_real()[0][0], f.getZ_imag()[0][0]);
+                        Complex z12 = new Complex(f.getZ_real()[0][1], f.getZ_imag()[0][1]);
+                        Complex z13 = new Complex(f.getZ_real()[0][2], f.getZ_imag()[0][2]);
+                        z22 = new Complex(f.getZ_real()[1][1], f.getZ_imag()[1][1]);
+                        Complex z23 = new Complex(f.getZ_real()[1][2], f.getZ_imag()[1][2]);
+                        Complex z33 = new Complex(f.getZ_real()[2][2], f.getZ_imag()[2][2]);
+
+                        //计算行列式
+                        tmp1 = Complex.multiply(Complex.multiply(z11, z22), z33);
+                        Complex tmp2 = Complex.multiply(Complex.multiply(z12, z23), z13);
+                        Complex tmp3 = Complex.multiply(Complex.multiply(z13, z12), z23);
+                        Complex tmp4 = Complex.multiply(Complex.multiply(z13, z22), z13);
+                        Complex tmp5 = Complex.multiply(Complex.multiply(z23, z23), z11);
+                        Complex tmp6 = Complex.multiply(Complex.multiply(z33, z12), z12);
+
+                        Complex tmp7 = Complex.add(Complex.add(tmp1, tmp2), tmp3);
+                        Complex tmp8 = Complex.add(Complex.add(tmp4, tmp5), tmp6);
+                        Complex tmp9 = Complex.subtract(tmp7, tmp8);
+
+
+                        //由于是对称矩阵，只计算上三角矩阵
+                        Complex[] Y = new Complex[6];
+                        Y[0] = Complex.divide(Complex.subtract(Complex.multiply(z22, z33), Complex.multiply(z23, z23)), tmp9);
+                        Y[1] = Complex.divide(Complex.subtract(Complex.multiply(z23, z13), Complex.multiply(z12, z33)), tmp9);
+                        Y[2] = Complex.divide(Complex.subtract(Complex.multiply(z12, z23), Complex.multiply(z22, z13)), tmp9);
+                        Y[3] = Complex.divide(Complex.subtract(Complex.multiply(z11, z33), Complex.multiply(z13, z13)), tmp9);
+                        Y[4] = Complex.divide(Complex.subtract(Complex.multiply(z12, z13), Complex.multiply(z11, z23)), tmp9);
+                        Y[5] = Complex.divide(Complex.subtract(Complex.multiply(z11, z22), Complex.multiply(z12, z12)), tmp9);
+
+                        BusData[] busArr = new BusData[6];
+                        busArr[0] = vertexToBus.get(e.getTnNo1() + "-0");
+                        busArr[1] = vertexToBus.get(e.getTnNo2() + "-0");
+                        busArr[2] = vertexToBus.get(e.getTnNo1() + "-1");
+                        busArr[3] = vertexToBus.get(e.getTnNo2() + "-1");
+                        busArr[4] = vertexToBus.get(e.getTnNo1() + "-2");
+                        busArr[5] = vertexToBus.get(e.getTnNo2() + "-2");
+
+                        List<BranchData> brArr = new ArrayList<>(12);
+                        //分别对应a->b, a->c, a->a',a->b',a->c',b->c,b->a',b->b',b->c',c->a',c->b',c->c',a'->b', a'->c', b'->c'
+                        int[] pos = new int[]{1, 2, 0, 1, 2, 4, 1, 3, 4, 2, 4, 5, 1, 2, 4};
+                        int count = 0;
+                        for(int i = 0; i < 6; i++) {
+                            for(int j = i + 1; j < 6; j++) {
+                                if(Y[pos[count]].mod() < 1e-6) {
+                                    count++;
+                                    continue;
+                                }
+                                Complex z = Y[pos[count]].inverse();
+                                BranchData br = new BranchData();
+                                br.setTapBusNumber(busArr[i].getBusNumber());
+                                br.setZBusNumber(busArr[j].getBusNumber());
+                                if(i < 3 && j > 2) {
+                                    br.setBranchR(z.getRe());
+                                    br.setBranchX(z.getIm());
+                                } else {
+                                    br.setBranchR(-z.getRe());
+                                    br.setBranchX(-z.getIm());
+                                }
+                                brArr.add(br);
+                                count++;
+                            }
+                        }
+                        feederToBranch.put(f, brArr.toArray(new BranchData[]{}));
+                        break;
+                    default:
+                        log.warn("Wrong phase number of feeder whose id is " + e.getDevId());
+                }
+                Collections.addAll(branches, feederToBranch.get(f));
+            } else if(e.getEdgeType() == DetailedEdge.EDGE_TYPE_TF_WINDING) {
+                //todo
+            }
+        }
+        island.setBuses(buses);
+        island.setBranches(branches);
+        return island;
     }
 }
 

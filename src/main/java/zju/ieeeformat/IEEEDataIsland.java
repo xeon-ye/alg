@@ -90,7 +90,7 @@ public class IEEEDataIsland implements Serializable, Cloneable {
     }
 
     public void buildBranchIndex() {
-        id2branch = new HashMap<Integer, BranchData>(this.getBranches().size());
+        id2branch = new HashMap<>(this.getBranches().size());
         for (int i = 0; i < getBranches().size(); i++) {
             BranchData branch = getBranches().get(i);
             branch.setId(i + 1);

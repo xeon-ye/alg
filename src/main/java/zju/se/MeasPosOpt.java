@@ -111,16 +111,18 @@ public class MeasPosOpt implements MeasTypeCons {
                     H.setValue(i, branch.getZBusNumber() - 1, -b);
                     break;
                 case TYPE_LINE_FROM_CURRENT:
-                    //todo
                     branch = island.getId2branch().get(pos[i]);
-                    H.setValue(i, branch.getTapBusNumber() - 1, -1.0 / branch.getBranchX());
-                    H.setValue(i, branch.getZBusNumber() - 1, -1.0 / branch.getBranchX());
+                    r = branch.getBranchR();
+                    x = branch.getBranchX();
+                    H.setValue(i, branch.getTapBusNumber() - 1, 1.0 / (r * r + x * x));
+                    H.setValue(i, branch.getZBusNumber() - 1, -1.0 / (r * r + x * x));
                     break;
                 case TYPE_LINE_TO_CURRENT:
-                    //todo
                     branch = island.getId2branch().get(pos[i]);
-                    H.setValue(i, branch.getTapBusNumber() - 1, -1.0 / branch.getBranchX());
-                    H.setValue(i, branch.getZBusNumber() - 1, -1.0 / branch.getBranchX());
+                    r = branch.getBranchR();
+                    x = branch.getBranchX();
+                    H.setValue(i, branch.getTapBusNumber() - 1, -1.0 / (r * r + x * x));
+                    H.setValue(i, branch.getZBusNumber() - 1, 1.0 / (r * r + x * x));
                     break;
                 default:
                     break;
@@ -130,7 +132,7 @@ public class MeasPosOpt implements MeasTypeCons {
         return H;
     }
 
-    ASparseMatrixLink2D formHTWH(ASparseMatrixLink2D H, double[] weight, int[] elementCount) {
+    private ASparseMatrixLink2D formHTWH(ASparseMatrixLink2D H, double[] weight, int[] elementCount) {
         //计算 HT*W*H
         ASparseMatrixLink2D r = new ASparseMatrixLink2D(H.getN(), H.getN());
         int k1, k2, i1, i2;
