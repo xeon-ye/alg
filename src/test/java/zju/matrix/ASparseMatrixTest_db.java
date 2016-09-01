@@ -35,7 +35,7 @@ public class ASparseMatrixTest_db implements MeasTypeCons {
         InputStream ieeeFile = this.getClass().getResourceAsStream("/ieeefiles/20101016_0050_island.txt");
         InputStream measFile = this.getClass().getResourceAsStream("/measfiles/20101016_0050_meas.txt");
         IEEEDataIsland island = new DefaultIcfParser().parse(ieeeFile, "GBK");
-        SystemMeasure sm = DefaultMeasParser.parse(measFile);
+        SystemMeasure sm = MeasureFileRw.parse(measFile);
 
         NumberOptHelper numOpt = new NumberOptHelper();
         numOpt.simple(island);

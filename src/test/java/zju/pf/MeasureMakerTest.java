@@ -16,18 +16,18 @@ public class MeasureMakerTest extends TestCase {
     protected void setUp() throws Exception {
     }
 
-    public void testCreateFullMeasure(IEEEDataIsland island, String targetFile) {
+    private void testCreateFullMeasure(IEEEDataIsland island, String targetFile) {
         //SystemMeasure sm = SimuMeasMaker.createFullMeasure(island, 1);
         SystemMeasure sm = SimuMeasMaker.createFullMeasure_withBadData(island, 1, 0.05, 0.02);
         assertNotNull(sm);
-        //DefaultMeasWriter.writeFullyWithTrueValue(sm, targetFile);
+        //MeasureFileRw.writeFullyWithTrueValue(sm, targetFile);
     }
 
-    public void testCreateWithBad(IEEEDataIsland island, String targetFile) {
+    private void testCreateWithBad(IEEEDataIsland island, String targetFile) {
         for (int i = 0; i <= 5; i++) {
             SystemMeasure sm = SimuMeasMaker.createFullMeasure_withBadData(island, 1, 0.018 * i, 0.02);
             assertNotNull(sm);
-            //DefaultMeasWriter.writeFullyWithTrueValue(sm, targetFile + "" + i + ".txt");
+            //MeasureFileRw.writeFullyWithTrueValue(sm, targetFile + "" + i + ".txt");
         }
     }
 
@@ -61,12 +61,4 @@ public class MeasureMakerTest extends TestCase {
         testCreateWithBad(IcfDataUtil.ISLAND_300.clone(), "case300_withBad");
     }
 
-    //public void testAll() throws IOException {
-    //    test14();
-    //    test30();
-    //    test39();
-    //    test57();
-    //    test118();
-    //    test300();
-    //}
 }

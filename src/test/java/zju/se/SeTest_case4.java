@@ -33,7 +33,7 @@ public class SeTest_case4 extends TestCase implements SeConstants, MeasTypeCons 
 
     public SeTest_case4(String name) {
         super(name);
-        sm = DefaultMeasParser.parse(this.getClass().getResourceAsStream("/measfiles/case4_meas.txt"));
+        sm = MeasureFileRw.parse(this.getClass().getResourceAsStream("/measfiles/case4_meas.txt"));
     }
 
     public void testSE_wls_no_chaintrs() {

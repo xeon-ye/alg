@@ -27,6 +27,7 @@ public class MeasVectorCreator implements MeasTypeCons {
     public double[] true_values;
     public int[] measTypes;
     public int[] measPos;
+    public String[] measPosWithPhase;
 
     private int[] measureType;
 
@@ -63,7 +64,10 @@ public class MeasVectorCreator implements MeasTypeCons {
         weights = new double[count];
         est_values = new double[count];
         true_values = new double[count];
-        measPos = new int[count];
+        if(withPhase)
+            measPosWithPhase = new String[count];
+        else
+            measPos = new int[count];
         measTypes = new int[count];
 
         MeasVector meas = new MeasVector();
@@ -72,9 +76,9 @@ public class MeasVectorCreator implements MeasTypeCons {
         else
             meas.setMeasureOrder(measureType);
         try {
-            int index = 0, rowStart;
+            int index = 0;
             for (int type : meas.getMeasureOrder()) {
-                String field = null;
+                String field;
                 switch (type) {
                     case TYPE_BUS_ANGLE:
                         field = "bus_a";
@@ -229,7 +233,7 @@ public class MeasVectorCreator implements MeasTypeCons {
     }
 
     public MeasVector parse(Reader in) {
-        return getMeasureVector(DefaultMeasParser.parse(in));
+        return getMeasureVector(MeasureFileRw.parse(in));
     }
 
     private void setMeasValue(String field, SystemMeasure sm, MeasVector meas, boolean withPhase, int index) throws IOException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
@@ -265,7 +269,7 @@ public class MeasVectorCreator implements MeasTypeCons {
                 String[] v = info.getPositionId().split("_");
                 v2[i] = Integer.parseInt(v[0]);
                 v3[i] = Integer.parseInt(v[1]);
-                measPos[index] = v2[i];
+                measPosWithPhase[index] = info.getPositionId();
             } else {
                 String[] v = info.getPositionId().split("_");
                 if (v[0].equals("null"))

@@ -193,13 +193,13 @@ public class PfAlgorithmTest extends TestCase {
         IEEEDataIsland island = new DefaultIcfParser().parse(ieeeFile, "UTF-8");
         testPf_anhui(island);
 
-        ieeeFile = this.getClass().getResourceAsStream("/ieeefiles/ahxx201309251500.txt");
-        island = new DefaultIcfParser().parse(ieeeFile, "UTF-8");
-        testPf_anhui(island);
+        //ieeeFile = this.getClass().getResourceAsStream("/ieeefiles/ahxx201309251500.txt");
+        //island = new DefaultIcfParser().parse(ieeeFile, "UTF-8");
+        //testPf_anhui(island);
 
-        ieeeFile = this.getClass().getResourceAsStream("/ieeefiles/ahxx201312041630.txt");
-        island = new DefaultIcfParser().parse(ieeeFile, "UTF-8");
-        testPf_anhui(island);
+        //ieeeFile = this.getClass().getResourceAsStream("/ieeefiles/ahxx201312041630.txt");
+        //island = new DefaultIcfParser().parse(ieeeFile, "UTF-8");
+        //testPf_anhui(island);
     }
 
     public static void testPf_anhui(IEEEDataIsland island) {
@@ -208,49 +208,49 @@ public class PfAlgorithmTest extends TestCase {
         pf.setPfMethod(PfConstants.ALG_IPOPT);
         pf.setTol_p(0.005); //允许的误差，有功
         pf.setTol_q(0.001); //允许的误差，无功
-        pf.setTol_v(0.00); //允许的误差，电压
+        pf.setTol_v(0.001); //允许的误差，电压
         pf.setTolerance(0.001);
         pf.setPrintPath(false);
         IEEEDataIsland island1 = island.clone();
         testPfConvergence(island1, pf);
         pf.fillOriIslandPfResult();
 
-        //pf.setPfMethod(PfConstants.ALG_NEWTON);
-        //pf.setDecoupledPqNum(1);
-        //pf.setXB(false);
-        //IEEEDataIsland island2 = island.clone();
-        //testPfConvergence(island2, pf);
-        //pf.fillOriIslandPfResult();
+        pf.setPfMethod(PfConstants.ALG_NEWTON);
+        pf.setDecoupledPqNum(1);
+        pf.setXB(false);
+        IEEEDataIsland island2 = island.clone();
+        testPfConvergence(island2, pf);
+        pf.fillOriIslandPfResult();
 
         ////两种方法分别得到的结果应该是一致的
-        //for (int i = 0; i < island1.getBuses().size(); i++) {
-        //    BusData bus1 = island1.getBuses().get(i);
-        //    BusData bus2 = island2.getBuses().get(i);
-        //    assertEquals(bus1.getBusNumber(), bus2.getBusNumber());
-        //    assertEquals(bus1.getType(), bus2.getType());
-        //    assertEquals(bus1.getMaximum(), bus2.getMaximum());
-        //    assertEquals(bus1.getMinimum(), bus2.getMinimum());
-        //    double v1 = bus1.getFinalVoltage();
-        //    double a1 = bus1.getFinalAngle();
-        //    double genP1 = bus1.getGenerationMW();
-        //    double genQ1 = bus1.getGenerationMVAR();
-        //    double loadP1 = bus1.getLoadMW();
-        //    double loadQ1 = bus1.getLoadMVAR();
-        //
-        //    double v2 = bus2.getFinalVoltage();
-        //    double a2 = bus2.getFinalAngle();
-        //    double genP2 = bus2.getGenerationMW();
-        //    double genQ2 = bus2.getGenerationMVAR();
-        //    double loadP2 = bus2.getLoadMW();
-        //    double loadQ2 = bus2.getLoadMVAR();
-        //
-        //    assertTrue(Math.abs(v1 - v2) < pf.getTol_v());
-        //    assertTrue(Math.abs(a1 - a2) < 1e-2);
-        //    assertTrue(Math.abs(genP1 - genP2) < pf.getTol_p());
-        //    assertTrue(Math.abs(genQ1 - genQ2) < pf.getTol_q());
-        //    assertTrue(Math.abs(loadP1 - loadP2) < pf.getTol_p());
-        //    assertTrue(Math.abs(loadQ1 - loadQ2) < pf.getTol_q());
-        //}
+        for (int i = 0; i < island1.getBuses().size(); i++) {
+            BusData bus1 = island1.getBuses().get(i);
+            BusData bus2 = island2.getBuses().get(i);
+            assertEquals(bus1.getBusNumber(), bus2.getBusNumber());
+            assertEquals(bus1.getType(), bus2.getType());
+            assertEquals(bus1.getMaximum(), bus2.getMaximum());
+            assertEquals(bus1.getMinimum(), bus2.getMinimum());
+            double v1 = bus1.getFinalVoltage();
+            double a1 = bus1.getFinalAngle();
+            double genP1 = bus1.getGenerationMW();
+            double genQ1 = bus1.getGenerationMVAR();
+            double loadP1 = bus1.getLoadMW();
+            double loadQ1 = bus1.getLoadMVAR();
+
+            double v2 = bus2.getFinalVoltage();
+            double a2 = bus2.getFinalAngle();
+            double genP2 = bus2.getGenerationMW();
+            double genQ2 = bus2.getGenerationMVAR();
+            double loadP2 = bus2.getLoadMW();
+            double loadQ2 = bus2.getLoadMVAR();
+
+            //assertTrue(Math.abs(v1 - v2) < 1e-2);
+            //assertTrue(Math.abs(a1 - a2) < 1e-2);
+            //assertTrue(Math.abs(genP1 - genP2) / island.getTitle().getMvaBase() < 1e-2);
+            //assertTrue(Math.abs(genQ1 - genQ2) / island.getTitle().getMvaBase() < 1e-2);
+            //assertTrue(Math.abs(loadP1 - loadP2) / island.getTitle().getMvaBase() < 1e-2);
+            //assertTrue(Math.abs(loadQ1 - loadQ2) / island.getTitle().getMvaBase() < 1e-2);
+        }
     }
 
     public void testOutagePf_anhui() throws IOException {
@@ -275,7 +275,7 @@ public class PfAlgorithmTest extends TestCase {
         //设置进行PV转PQ的转换时最大迭代次数
         //pf.setMaxQLimWatchTime(15);
         //测试开断潮流(N - 1)
-        //testOutagePf(island, branchIds, pf);
+        testOutagePf(island, branchIds, pf);
     }
 
     public void testOutagePf(IEEEDataIsland island, PolarPf pf) {

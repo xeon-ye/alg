@@ -740,7 +740,7 @@ public class DsTopoIsland implements Serializable, DsModelCons {
             tn.setConnectedBusNo(connected);
         }
 
-        busNoToTn = new HashMap<Integer, DsTopoNode>(getTns().size());
+        busNoToTn = new HashMap<>(getTns().size());
         for (DsTopoNode tn : tns)
             busNoToTn.put(tn.getBusNo(), tn);
         fillTnDevices();
@@ -902,14 +902,18 @@ public class DsTopoIsland implements Serializable, DsModelCons {
         return (DsTopoIsland) JOFileUtil.cloneObj(this);
     }
 
-    public IEEEDataIsland toIeeeIsland() {
+    /**
+     * 将三相等效电路转换成IEEE潮流模型
+     * @param devIdToBranch 用于记录两个模型之间线路的对应关系
+     * @return IEEE潮流模型
+     */
+    public IEEEDataIsland toIeeeIsland(Map<String, BranchData[]> devIdToBranch, Map<String, BusData> vertexToBus) {
         if(detailedG == null)
             buildDetailedGraph();
         IEEEDataIsland island = new IEEEDataIsland();
         ArrayList<BusData> buses = new ArrayList<>(detailedG.vertexSet().size());
         ArrayList<BranchData> branches = new ArrayList<>(detailedG.edgeSet().size());
         int index = 1;
-        Map<String, BusData> vertexToBus = new HashMap<>(detailedG.vertexSet().size());
         for(String key : detailedG.vertexSet()) {
             if(key.equals(EARTH_NODE_ID))
                 continue;
@@ -920,12 +924,12 @@ public class DsTopoIsland implements Serializable, DsModelCons {
             index++;
             vertexToBus.put(key, bus);
         }
+        //Map<Feeder, BranchData> feederToBranch = new HashMap<>(branches.size());
         //记录馈线及其对应Branch之间的关系
-        Map<Feeder, BranchData[]> feederToBranch = new HashMap<>(branches.size());
-        for(DetailedEdge e : detailedG.edgeSet()) {
+       for(DetailedEdge e : detailedG.edgeSet()) {
             if(e.getEdgeType() == DetailedEdge.EDGE_TYPE_FEEDER) {
                 Feeder f = (Feeder) this.branches.get(this.getDevices().get(e.getDevId()));
-                if(feederToBranch.containsKey(f))
+                if(devIdToBranch.containsKey(e.getDevId()))
                     continue;
                 switch (f.getPhases().length) {
                     case 1:
@@ -936,7 +940,7 @@ public class DsTopoIsland implements Serializable, DsModelCons {
                         branch.setZBusNumber(bus2.getBusNumber());
                         branch.setBranchR(f.getZ_real()[e.getPhase()][e.getPhase()]);
                         branch.setBranchX(f.getZ_imag()[e.getPhase()][e.getPhase()]);
-                        feederToBranch.put(f, new BranchData[]{branch});
+                        devIdToBranch.put(e.getDevId(), new BranchData[]{branch});
                         break;
                     case 2:
                         //由于是对称矩阵，只计算上三角矩阵
@@ -1005,9 +1009,9 @@ public class DsTopoIsland implements Serializable, DsModelCons {
                             branch6.setZBusNumber(bus3.getBusNumber());
                             branch6.setBranchR(z12.getRe());
                             branch6.setBranchX(z12.getIm());
-                            feederToBranch.put(f, new BranchData[]{branch1, branch2, branch3, branch4, branch5, branch6});
+                            devIdToBranch.put(e.getDevId(), new BranchData[]{branch1, branch2, branch3, branch4, branch5, branch6});
                         } else {
-                            feederToBranch.put(f, new BranchData[]{branch1, branch2});
+                            devIdToBranch.put(e.getDevId(), new BranchData[]{branch1, branch2});
                         }
                         break;
                     case 3:
@@ -1075,12 +1079,12 @@ public class DsTopoIsland implements Serializable, DsModelCons {
                                 count++;
                             }
                         }
-                        feederToBranch.put(f, brArr.toArray(new BranchData[]{}));
+                        devIdToBranch.put(e.getDevId(), brArr.toArray(new BranchData[]{}));
                         break;
                     default:
                         log.warn("Wrong phase number of feeder whose id is " + e.getDevId());
                 }
-                Collections.addAll(branches, feederToBranch.get(f));
+                Collections.addAll(branches, devIdToBranch.get(e.getDevId()));
             } else if(e.getEdgeType() == DetailedEdge.EDGE_TYPE_TF_WINDING) {
                 //todo
             }

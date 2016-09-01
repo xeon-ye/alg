@@ -6,6 +6,7 @@
 
 using namespace std;
 
+// use simple driver DGSSV to solve a linear system one time.
 double* solve0(int m, int n, int nnz, double* a, int* asub, int* xa, double* b) {
 	SuperMatrix A;
     int      *perm_c; /* column permutation vector */
@@ -64,7 +65,7 @@ double* solve0(int m, int n, int nnz, double* a, int* asub, int* xa, double* b) 
 	return result;
 }
 
-
+//use DGSSVX to solve a linear system.
 double* solve1(int m, int n, int nnz, double* a, int* asub, int* xa, double* b) {
 
 	char           equed[1];
@@ -72,6 +73,8 @@ double* solve1(int m, int n, int nnz, double* a, int* asub, int* xa, double* b) 
 	trans_t        trans;
 	SuperMatrix    A, L, U;
 	SuperMatrix    B, X;
+	GlobalLU_t	   Glu; /* facilitate multiple factorizations with
+                               SamePattern_SameRowPerm                */
 	int            *perm_r; /* row permutations from partial pivoting */
 	int            *perm_c; /* column permutation vector */
 	int            *etree;
@@ -136,7 +139,7 @@ double* solve1(int m, int n, int nnz, double* a, int* asub, int* xa, double* b) 
 		------------------------------------------------------------*/
 	dgssvx(&options, &A, perm_c, perm_r, etree, equed, R, C,
 	&L, &U, work, lwork, &B, &X, &rpg, &rcond, ferr, berr,
-	&mem_usage, &stat, &info);
+	&Glu, &mem_usage, &stat, &info);
 	
 	if ( info == 0 || info == n+1 ) {
         for (int i = 0; i < n; i++)
@@ -171,6 +174,8 @@ double* solve1(int m, int n, int nnz, double* a, int* asub, int* xa, double* b) 
 	return result;
 }
 
+//use DGSSVX to solve Ax = b first time.
+// 将A分解结果可重用的部分存入 perm_c 和 etree
 double* solve2(int m,int n,int nnz,double* a,int* asub,int* xa,double* b,int* perm_c,int *etree){
 
 	char           equed[1];
@@ -178,6 +183,8 @@ double* solve2(int m,int n,int nnz,double* a,int* asub,int* xa,double* b,int* pe
 	trans_t        trans;
 	SuperMatrix    A, L, U;
 	SuperMatrix    B, X;
+	GlobalLU_t	   Glu; /* facilitate multiple factorizations with
+                                   SamePattern_SameRowPerm            */
 	int            *perm_r; /* row permutations from partial pivoting */
 	void           *work;
 	int            info, lwork, nrhs;
@@ -248,7 +255,7 @@ double* solve2(int m,int n,int nnz,double* a,int* asub,int* xa,double* b,int* pe
        ------------------------------------------------------------*/
     dgssvx(&options, &A, perm_c, perm_r, etree, equed, R, C,
            &L, &U, work, lwork, &B, &X, &rpg, &rcond, ferr, berr,
-           &mem_usage, &stat, &info);
+           &Glu, &mem_usage, &stat, &info);
 
     if ( info == 0 || info == n+1 ) {
         for (int i = 0; i < n; i++)
@@ -280,6 +287,8 @@ double* solve2(int m,int n,int nnz,double* a,int* asub,int* xa,double* b,int* pe
 	return sol;
 }
 
+//use DGSSVX to solve systems repeatedly with the same sparsity pattern and similar numerical values as matrix A.
+// 也就是所重用了 perm_c and etree
 double* solve3(int m, int n, int nnz, double* a, int* asub, int* xa,double* b,int* perm_c,int *etree) {
 
 	char           equed[1];
@@ -287,6 +296,8 @@ double* solve3(int m, int n, int nnz, double* a, int* asub, int* xa,double* b,in
 	trans_t        trans;
 	SuperMatrix    A1, L, U;
 	SuperMatrix    B, X;
+    GlobalLU_t	   Glu; /* facilitate multiple factorizations with
+                                   SamePattern_SameRowPerm            */
 	int            *perm_r; /* row permutations from partial pivoting */
 	void           *work;
 	int            info, lwork, nrhs;
@@ -361,7 +372,7 @@ double* solve3(int m, int n, int nnz, double* a, int* asub, int* xa,double* b,in
        ------------------------------------------------------------*/
     dgssvx(&options, &A1, perm_c, perm_r, etree, equed, R, C,
            &L, &U, work, lwork, &B, &X, &rpg, &rcond, ferr, berr,
-           &mem_usage, &stat, &info);
+           &Glu, &mem_usage, &stat, &info);
 	if ( info == 0 || info == n+1 ) {
 		for (int i = 0; i < n; i++)
 			sol[i] = ((double*)((DNformat*)X.Store)->nzval)[i];        
@@ -392,12 +403,16 @@ double* solve3(int m, int n, int nnz, double* a, int* asub, int* xa,double* b,in
 	return sol;
 }
 
+// use DGSSVX to factorize A first, then solve the system later.
+// 保存了A分解之后的信息，并将将分解后的A矩阵非零元赋值到ja中
 double* solve4(int m, int n, int nnz, double* a, int* asub, int* xa,double* b, int* perm_c, int* perm_r, int *etree, double* R, double* C, SuperMatrix *L, SuperMatrix *U, jdouble *ja, jint* jequed) {
     char           equed[1];
     yes_no_t       equil;
     trans_t        trans;
     SuperMatrix    A;
     SuperMatrix    B, X;
+    GlobalLU_t	   Glu; /* facilitate multiple factorizations with
+                           SamePattern_SameRowPerm            */
 	double         *rhsb, *rhsx, *sol;
     void           *work;
     int            info, lwork, nrhs;
@@ -466,7 +481,7 @@ double* solve4(int m, int n, int nnz, double* a, int* asub, int* xa,double* b, i
     B.ncol = 0;  /* Indicate not to solve the system */
     dgssvx(&options, &A, perm_c, perm_r, etree, equed, R, C,
            L, U, work, lwork, &B, &X, &rpg, &rcond, ferr, berr,
-           &mem_usage, &stat, &info);
+           &Glu, &mem_usage, &stat, &info);
 	StatFree(&stat);		
 	
 	/* ------------------------------------------------------------
@@ -492,7 +507,7 @@ double* solve4(int m, int n, int nnz, double* a, int* asub, int* xa,double* b, i
     */	
     dgssvx(&options, &A, perm_c, perm_r, etree, equed, R, C,
            L, U, work, lwork, &B, &X, &rpg, &rcond, ferr, berr,
-           &mem_usage, &stat, &info);   
+           &Glu, &mem_usage, &stat, &info);
 	if ( info == 0 || info == n + 1 ) {
        for (int i = 0; i < n; i++)
 			sol[i] = ((double*)((DNformat*)X.Store)->nzval)[i];   
@@ -522,12 +537,15 @@ double* solve4(int m, int n, int nnz, double* a, int* asub, int* xa,double* b, i
 	return sol;
 }
 
+//参数提供了分解后A矩阵的信息
+//配合solve4一起使用,适合求解A不变,b变化之后多次求解的场合
 double* solve5(int m, int n, int nnz, double* a, int* asub, int* xa,double* b, int* perm_c, int* perm_r, int *etree, double* R, double* C, SuperMatrix *L, SuperMatrix *U, jint* jequed) {
     char           equed[1];
     yes_no_t       equil;
     trans_t        trans;
     SuperMatrix    A;
     SuperMatrix    B, X;
+    GlobalLU_t	   Glu; // facilitate multiple factorizations with SamePattern_SameRowPerm
 	double         *rhsb, *rhsx, *sol;
     void           *work;
     int            info, lwork, nrhs;
@@ -601,7 +619,7 @@ double* solve5(int m, int n, int nnz, double* a, int* asub, int* xa,double* b, i
     */
 	dgssvx(&options, &A, perm_c, perm_r, etree, equed, R, C,
            L, U, work, lwork, &B, &X, &rpg, &rcond, ferr, berr,
-           &mem_usage, &stat, &info);
+           &Glu, &mem_usage, &stat, &info);
    
     if ( info == 0 || info == n + 1 ) {
        for (int i = 0; i < n; i++)

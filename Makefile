@@ -56,12 +56,13 @@
 ##==========================================================================  
   
 # The pre-processor and compiler options.  
-MY_CFLAGS = -I. -I./src/main/cpp -I${JAVA_HOME}/include -I./src/main/cpp -I${JAVA_HOME}/include/linux
+MY_CFLAGS = -I. -I./src/main/cpp -I${JAVA_HOME}/include -I${JAVA_HOME}/include/linux
   
 # The linker options.  
 #MY_LIBS   =  -lipopt -lcoinmumps -lsuperlu_4.3 -lcoinlapack -lcoinblas -lieeeformat -lgfortran
-MY_LIBS   =  -lbonmin -lOsiSym -lSym -lipopt -lOsiCbc -lCbcSolver -lCbc -lCgl -lOsiClp -lClp -lOsi -lCoinUtils -lpardiso500-GNU481-X86-64 -lsuperlu_4.3 -lopenblas -lgomp -lm -ldl
- 
+#MY_LIBS   =  -lbonmin -lOsiSym -lSym -lipopt -lOsiCbc -lCbcSolver -lCbc -lCgl -lOsiClp -lClp -lOsi -lCoinUtils -lpardiso500-GNU481-X86-64 -lsuperlu_4.3 -lopenblas -lgomp -lm -ldl
+MY_LIBS   =  -lbonmin -lipopt -lCbc -lSym -lCgl -lClp -lOsi -lCoinUtils -lcoinmumps -lcoinmetis -lsuperlu -lcoinlapack -lcoinblas -lgfortran
+
 # The pre-processor options used by the cpp (man cpp for more).  
 CPPFLAGS  = -Wall 
   
