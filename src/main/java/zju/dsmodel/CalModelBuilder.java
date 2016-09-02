@@ -29,9 +29,9 @@ public class CalModelBuilder implements DsModelCons, Serializable {
         loadNum += island.getDistriLoadNum();
         loadNum += island.getShuntCapacitorNum();
 
-        HashMap<MapObject, GeneralBranch> branches = new HashMap<MapObject, GeneralBranch>(branchNum);
-        HashMap<MapObject, ThreePhaseLoad> loads = new HashMap<MapObject, ThreePhaseLoad>(loadNum);
-        HashMap<MapObject, DispersedGen> dgs = new HashMap<MapObject, DispersedGen>(island.getDistriGenNum());
+        HashMap<MapObject, GeneralBranch> branches = new HashMap<>(branchNum);
+        HashMap<MapObject, ThreePhaseLoad> loads = new HashMap<>(loadNum);
+        HashMap<MapObject, DispersedGen> dgs = new HashMap<>(island.getDistriGenNum());
         for (MapObject obj : island.getIdToBranch().values()) {
             String devType = obj.getProperty(KEY_RESOURCE_TYPE);
             if (RESOURCE_FEEDER.equals(devType)) {

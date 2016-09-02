@@ -977,8 +977,6 @@ public class DsTopoIsland implements Serializable, DsModelCons {
                         branch1.setBranchX(z11.getIm());
 
                         BranchData branch2 = new BranchData();
-                        bus1 = vertexToBus.get(detailedG.getEdgeSource(e.getOtherEdgesOfSameFeeder()[0]));
-                        bus2 = vertexToBus.get(detailedG.getEdgeSource(e.getOtherEdgesOfSameFeeder()[0]));
                         branch2.setTapBusNumber(bus3.getBusNumber());
                         branch2.setZBusNumber(bus4.getBusNumber());
                         branch2.setBranchR(z22.getRe());

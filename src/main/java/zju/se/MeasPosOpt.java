@@ -380,9 +380,9 @@ public class MeasPosOpt implements MeasTypeCons {
             binaryNum = ds_candPos.length;
             Ds = new ASparseMatrixLink2D[binaryNum + 1];
             H0 = formH_ds(Y, bApos, ds_existMeasTypes, ds_existMeasPos);
-            //H0.printOnScreen2();
+            H0.printOnScreen2();
             Ds[0] = formHTWH(H0, ds_existMeasWeight, element_count);
-            //Ds[0].printOnScreen2();
+            Ds[0].printOnScreen2();
 
             for (String[] pos : ds_candPos) {
                 int[][] measTypes = ds_measTypesPerPos.get(i - 1);

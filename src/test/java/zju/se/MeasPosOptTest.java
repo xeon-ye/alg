@@ -15,6 +15,8 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import static zju.dsmodel.DsModelCons.sqrt3;
+
 /**
  * Created by arno on 16-7-31.
  * @author Dong Shufeng
@@ -58,7 +60,7 @@ public class MeasPosOptTest extends TestCase implements MeasTypeCons {
 
     public void testDscase4() {
         InputStream ieeeFile = IeeeDsInHand.class.getResourceAsStream("/dsfiles/case4-notrans.txt");
-        DistriSys sys = IeeeDsInHand.createDs(ieeeFile, "1", 12.47 / IeeeDsInHand.sqrt3);
+        DistriSys sys = IeeeDsInHand.createDs(ieeeFile, "1", 12.47 / sqrt3);
         //计算潮流
         DsPowerflowTest.testConverged(sys, false);
         DsTopoIsland dsIsland = sys.getActiveIslands()[0];
@@ -142,15 +144,88 @@ public class MeasPosOptTest extends TestCase implements MeasTypeCons {
     }
 
     public void testDscase13() {
-        DistriSys sys = IeeeDsInHand.FEEDER13.clone();
+        InputStream ieeeFile = IeeeDsInHand.class.getResourceAsStream("/dsfiles/case13-notrans.txt");
+        DistriSys sys = IeeeDsInHand.createDs(ieeeFile, "650", 4.16 / sqrt3);
+        //计算潮流
         DsPowerflowTest.testConverged(sys, false);
-        DsSimuMeasMaker smMaker = new DsSimuMeasMaker();
         DsTopoIsland dsIsland = sys.getActiveIslands()[0];
-        SystemMeasure sm = smMaker.createFullMeasure(dsIsland, 1, 0.02);
-
+        //形成量测
+        //DsSimuMeasMaker smMaker = new DsSimuMeasMaker();
+        //SystemMeasure sm = smMaker.createFullMeasure(dsIsland, 1, 0.02);
+        //MeasureFileRw.writeFileSimple(sm, "/home/arno/alg/src/test/resources/dsfiles/case13-notrans-measure.txt");
+        //读取量测
+        SystemMeasure sm = MeasureFileRw.parse(getClass().getResourceAsStream("/dsfiles/case13-notrans-measure.txt"));
         MeasVectorCreator mc = new MeasVectorCreator();
-        mc.getMeasureVector(sm);
+        mc.getMeasureVector(sm, true);
 
         MeasPosOpt mpo = new MeasPosOpt(dsIsland);
+
+
+        String[][] candPos = new String[0][];
+        //candPos[0] = new String[6];
+        //candPos[0][0] = "1_0";
+        //candPos[0][1] = "1_1";
+        //candPos[0][2] = "1_2";
+        //candPos[0][3] = "1_0";
+        //candPos[0][4] = "1_1";
+        //candPos[0][5] = "1_2";
+        //candPos[1] = new String[6];
+        //candPos[1][0] = "3_0";
+        //candPos[1][1] = "3_1";
+        //candPos[1][2] = "3_2";
+        //candPos[1][3] = "2_0";
+        //candPos[1][4] = "2_1";
+        //candPos[1][5] = "2_2";
+        List<int[][]> measTypePerPos = new ArrayList<>(candPos.length);
+        double[][] weights = new double[candPos.length][];
+        for (int i = 0; i < candPos.length; i++) {
+            int[][] ts = new int[candPos[i].length][3];
+            weights[i] = new double[candPos[i].length * 3];
+            measTypePerPos.add(ts);
+            int count = 0;
+            for (int j = 0; j < 3; j++) {
+                ts[j] = new int[3];
+                ts[j][0] = TYPE_BUS_ACTIVE_POWER;
+                ts[j][1] = TYPE_BUS_REACTIVE_POWER;
+                ts[j][2] = TYPE_BUS_VOLOTAGE;
+                weights[i][count] = 0.58;
+                weights[i][count + 1] = 0.50;
+                weights[i][count + 2] = 0.80;
+                count += 3;
+            }
+            if(i < 1 && candPos[i].length > 3) {
+                for (int j = 3; j < 6; j++) {
+                    ts[j] = new int[3];
+                    ts[j][0] = TYPE_LINE_FROM_ACTIVE;
+                    ts[j][1] = TYPE_LINE_FROM_REACTIVE;
+                    ts[j][2] = TYPE_LINE_FROM_CURRENT;
+                    weights[i][count] = 0.58;
+                    weights[i][count + 1] = 0.50;
+                    weights[i][count + 2] = 0.80;
+                    count += 3;
+                }
+            } else if(candPos[i].length > 3){
+                for (int j = 3; j < 6; j++) {
+                    ts[j] = new int[3];
+                    ts[j][0] = TYPE_LINE_TO_ACTIVE;
+                    ts[j][1] = TYPE_LINE_TO_REACTIVE;
+                    ts[j][2] = TYPE_LINE_TO_CURRENT;
+                    weights[i][count] = 0.58;
+                    weights[i][count + 1] = 0.50;
+                    weights[i][count + 2] = 0.80;
+                    count += 3;
+                }
+            }
+        }
+
+        mpo.setDs_candPos(candPos);
+        mpo.setDs_measTypesPerPos(measTypePerPos);
+        mpo.setDs_measWeight(weights);
+        mpo.setDs_existMeasPos(mc.measPosWithPhase);
+        mpo.setDs_existMeasTypes(mc.measTypes);
+        mpo.setDs_existMeasWeight(mc.weights);
+        mpo.setMaxDevNum(1);
+
+        mpo.doOpt(true);
     }
 }
