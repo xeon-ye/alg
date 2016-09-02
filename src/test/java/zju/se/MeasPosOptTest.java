@@ -74,14 +74,20 @@ public class MeasPosOptTest extends TestCase implements MeasTypeCons {
         MeasPosOpt mpo = new MeasPosOpt(dsIsland);
 
         String[][] candPos = new String[2][];
-        candPos[0] = new String[3];
-        candPos[0][0] = "1-0";
-        candPos[0][1] = "1-1";
-        candPos[0][2] = "1-2";
-        candPos[1] = new String[3];
-        candPos[1][0] = "3-0";
-        candPos[1][1] = "3-1";
-        candPos[1][2] = "3-2";
+        candPos[0] = new String[6];
+        candPos[0][0] = "1_0";
+        candPos[0][1] = "1_1";
+        candPos[0][2] = "1_2";
+        candPos[0][3] = "1_0";
+        candPos[0][4] = "1_1";
+        candPos[0][5] = "1_2";
+        candPos[1] = new String[6];
+        candPos[1][0] = "3_0";
+        candPos[1][1] = "3_1";
+        candPos[1][2] = "3_2";
+        candPos[1][3] = "2_0";
+        candPos[1][4] = "2_1";
+        candPos[1][5] = "2_2";
         List<int[][]> measTypePerPos = new ArrayList<>(candPos.length);
         double[][] weights = new double[candPos.length][];
         for (int i = 0; i < candPos.length; i++) {
@@ -89,7 +95,7 @@ public class MeasPosOptTest extends TestCase implements MeasTypeCons {
             weights[i] = new double[candPos[i].length * 3];
             measTypePerPos.add(ts);
             int count = 0;
-            for (int j = 0; j < candPos[i].length; j++) {
+            for (int j = 0; j < 3; j++) {
                 ts[j] = new int[3];
                 ts[j][0] = TYPE_BUS_ACTIVE_POWER;
                 ts[j][1] = TYPE_BUS_REACTIVE_POWER;
@@ -97,7 +103,30 @@ public class MeasPosOptTest extends TestCase implements MeasTypeCons {
                 weights[i][count] = 0.58;
                 weights[i][count + 1] = 0.50;
                 weights[i][count + 2] = 0.80;
-                count++;
+                count += 3;
+            }
+            if(i < 1 && candPos[i].length > 3) {
+                for (int j = 3; j < 6; j++) {
+                    ts[j] = new int[3];
+                    ts[j][0] = TYPE_LINE_FROM_ACTIVE;
+                    ts[j][1] = TYPE_LINE_FROM_REACTIVE;
+                    ts[j][2] = TYPE_LINE_FROM_CURRENT;
+                    weights[i][count] = 0.58;
+                    weights[i][count + 1] = 0.50;
+                    weights[i][count + 2] = 0.80;
+                    count += 3;
+                }
+            } else if(candPos[i].length > 3){
+                for (int j = 3; j < 6; j++) {
+                    ts[j] = new int[3];
+                    ts[j][0] = TYPE_LINE_TO_ACTIVE;
+                    ts[j][1] = TYPE_LINE_TO_REACTIVE;
+                    ts[j][2] = TYPE_LINE_TO_CURRENT;
+                    weights[i][count] = 0.58;
+                    weights[i][count + 1] = 0.50;
+                    weights[i][count + 2] = 0.80;
+                    count += 3;
+                }
             }
         }
 
