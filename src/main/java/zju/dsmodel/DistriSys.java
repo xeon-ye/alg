@@ -63,7 +63,7 @@ public class DistriSys implements DsModelCons, Serializable {
                 }
             }
         }
-        List<DsTopoNode> supplyTns = new ArrayList<DsTopoNode>(supplyCns.length);
+        List<DsTopoNode> supplyTns = new ArrayList<>(supplyCns.length);
         for (String cnId : supplyCns) {
             DsTopoNode tn = getCnToTn().get(getCns().get(cnId));
             if (!supplyTns.contains(tn)) {
@@ -128,8 +128,8 @@ public class DistriSys implements DsModelCons, Serializable {
 
     public void buildOrigTopo(DsDevices devs) {
         this.devices = devs;
-        cns = new HashMap<String, DsConnectNode>();
-        origGraph = new SimpleGraph<DsConnectNode, MapObject>(MapObject.class);
+        cns = new HashMap<>();
+        origGraph = new SimpleGraph<>(MapObject.class);
         dealBranch(devs.getFeeders());
         dealBranch(devs.getSwitches());
         dealBranch(devs.getTransformers());
@@ -149,33 +149,29 @@ public class DistriSys implements DsModelCons, Serializable {
     }
 
     public void buildDynamicTopo() {
-        cnToTn = new HashMap<DsConnectNode, DsTopoNode>(cns.size());
+        cnToTn = new HashMap<>(cns.size());
         //先把开关打开的边去掉
-        for (MapObject aSwtich : devices.getSwitches()) {
-            if (aSwtich.getProperty(KEY_SWITCH_STATUS).equals(SWITCH_OFF)) {
-                String[] s = aSwtich.getProperty(KEY_CONNECTED_NODE).split(";");
-                DsConnectNode cn1 = cns.get(s[0]);
-                DsConnectNode cn2 = cns.get(s[1]);
-                origGraph.removeEdge(cn1, cn2);
-            }
-        }
+        devices.getSwitches().stream().filter(aSwtich -> aSwtich.getProperty(KEY_SWITCH_STATUS).equals(SWITCH_OFF)).forEach(aSwtich -> {
+            String[] s = aSwtich.getProperty(KEY_CONNECTED_NODE).split(";");
+            DsConnectNode cn1 = cns.get(s[0]);
+            DsConnectNode cn2 = cns.get(s[1]);
+            origGraph.removeEdge(cn1, cn2);
+        });
         //分析得到联通的子图
-        ConnectivityInspector<DsConnectNode, MapObject> inspector = new ConnectivityInspector<DsConnectNode, MapObject>(origGraph);
+        ConnectivityInspector<DsConnectNode, MapObject> inspector = new ConnectivityInspector<>(origGraph);
         List<Set<DsConnectNode>> subgraphs = inspector.connectedSets();
         //把开关打开的边恢复到原图中
-        for (MapObject aSwtich : devices.getSwitches()) {
-            if (aSwtich.getProperty(KEY_SWITCH_STATUS).equals(SWITCH_OFF)) {
-                String[] s = aSwtich.getProperty(KEY_CONNECTED_NODE).split(";");
-                DsConnectNode cn1 = cns.get(s[0]);
-                DsConnectNode cn2 = cns.get(s[1]);
-                origGraph.addEdge(cn1, cn2, aSwtich);
-            }
-        }
+        devices.getSwitches().stream().filter(aSwtich -> aSwtich.getProperty(KEY_SWITCH_STATUS).equals(SWITCH_OFF)).forEach(aSwtich -> {
+            String[] s = aSwtich.getProperty(KEY_CONNECTED_NODE).split(";");
+            DsConnectNode cn1 = cns.get(s[0]);
+            DsConnectNode cn2 = cns.get(s[1]);
+            origGraph.addEdge(cn1, cn2, aSwtich);
+        });
 
-        topoIslands = new ArrayList<DsTopoIsland>(subgraphs.size());
+        topoIslands = new ArrayList<>(subgraphs.size());
 
         for (Set<DsConnectNode> aSet : subgraphs) {
-            UndirectedGraph<DsTopoNode, MapObject> g = new SimpleGraph<DsTopoNode, MapObject>(MapObject.class);
+            UndirectedGraph<DsTopoNode, MapObject> g = new SimpleGraph<>(MapObject.class);
             //填充子图的顶点
             for (DsConnectNode node : aSet) {
                 if (cnToTn.containsKey(node))
@@ -215,10 +211,9 @@ public class DistriSys implements DsModelCons, Serializable {
         fillCnBaseKv(startCn);
         //对所有设备设置基值电压
         for (DsConnectNode cn : cns.values()) {
-            for (MapObject obj : cn.getConnectedObjs())
-                if (!RESOURCE_TRANSFORMER.equals(obj.getProperty(KEY_RESOURCE_TYPE))) {
-                    obj.setProperty(KEY_KV_BASE, cn.getBaseKv().toString());
-                }
+            cn.getConnectedObjs().stream().filter(obj -> !RESOURCE_TRANSFORMER.equals(obj.getProperty(KEY_RESOURCE_TYPE))).forEach(obj -> {
+                obj.setProperty(KEY_KV_BASE, cn.getBaseKv().toString());
+            });
         }
     }
 
@@ -249,9 +244,9 @@ public class DistriSys implements DsModelCons, Serializable {
     }
 
     private void traversalBfs(DsConnectNode first) {
-        LinkedList<DsConnectNode> queue = new LinkedList<DsConnectNode>();
+        LinkedList<DsConnectNode> queue = new LinkedList<>();
         queue.addFirst(first);
-        Map<DsConnectNode, Boolean> isDealed = new HashMap<DsConnectNode, Boolean>(cns.size());
+        Map<DsConnectNode, Boolean> isDealed = new HashMap<>(cns.size());
         while (!queue.isEmpty()) {
             DsConnectNode last = queue.pollLast();
             isDealed.put(last, true);
@@ -279,7 +274,7 @@ public class DistriSys implements DsModelCons, Serializable {
             //新建一个虚拟节点，该虚拟节点将和LocationCn通过Regurator相连，而LocationCn和AnotherCn之间的边将
             //移到该虚拟节点和AnotherCn之间
             DsConnectNode virtualCn = new DsConnectNode("VirtualCN_" + virtual_cn_count++);
-            virtualCn.setConnectedObjs(new ArrayList<MapObject>());
+            virtualCn.setConnectedObjs(new ArrayList<>());
             anotherCn.getConnectedObjs().remove(regulator);//remove regulator from another node
             for (MapObject object : anotherCn.getConnectedObjs()) {
                 String[] str = object.getProperty(KEY_CONNECTED_NODE).split(";");
@@ -317,7 +312,7 @@ public class DistriSys implements DsModelCons, Serializable {
             topoNode = new DsTopoNode();
             cnToTn.put(node, topoNode);
             g.addVertex(topoNode);
-            topoNode.setConnectivityNodes(new ArrayList<DsConnectNode>());
+            topoNode.setConnectivityNodes(new ArrayList<>());
         }
         topoNode.getConnectivityNodes().add(node);
         for (MapObject obj : node.getConnectedObjs()) {
@@ -363,7 +358,7 @@ public class DistriSys implements DsModelCons, Serializable {
                 if (cns.containsKey(str)) {
                     DsConnectNode cn = cns.get(str);
                     if (cn.getConnectedObjs() == null)
-                        cn.setConnectedObjs(new ArrayList<MapObject>());
+                        cn.setConnectedObjs(new ArrayList<>());
                     cn.getConnectedObjs().add(obj);
                 } else
                     log.warn("Not node is found at cn maps: " + str);

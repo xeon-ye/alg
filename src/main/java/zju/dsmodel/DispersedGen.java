@@ -144,7 +144,7 @@ public class DispersedGen implements DsModelCons, Serializable {
                 double[] c = new double[2];
                 double p;
                 for (int i = 0; i < phases.length; i++) {
-                    e = tn.getIsland().getDetailedG().getEdge(tn.getBusNo() + "-" + phases[i], DsTopoIsland.EARTH_NODE_ID);
+                    e = tn.getIsland().getDetailedG().getEdge(tn.getTnNo() + "-" + phases[i], DsTopoIsland.EARTH_NODE_ID);
                     m.calCurrent(m.getEdgeToNo().get(e), m.getState(), c);
                     vx = m.getState().getValue(stateIndex + i);
                     vy = m.getState().getValue(stateIndex + i + m.getDimension());
@@ -176,7 +176,7 @@ public class DispersedGen implements DsModelCons, Serializable {
                 //tn = motors.get(motor);
                 for (int j = 0; j < motor.getStateSize(); j++, index++) {
                     for (int i = 0; i < 3; i++) {
-                        e = tn.getIsland().getDetailedG().getEdge(tn.getBusNo() + "-" + i, tn.getBusNo() + "-motor-3");
+                        e = tn.getIsland().getDetailedG().getEdge(tn.getTnNo() + "-" + i, tn.getTnNo() + "-motor-3");
                         m.fillJacStruc(m.getEdgeToNo().get(e), index, 1.0, 0);
                         m.fillJacStruc(m.getEdgeToNo().get(e), index, 1.0, dim);
                     }
@@ -184,7 +184,7 @@ public class DispersedGen implements DsModelCons, Serializable {
                 break;
             case MODE_PV:
                 for (int i = 0; i < phases.length; i++) {
-                    e = tn.getIsland().getDetailedG().getEdge(tn.getBusNo() + "-" + phases[i], DsTopoIsland.EARTH_NODE_ID);
+                    e = tn.getIsland().getDetailedG().getEdge(tn.getTnNo() + "-" + phases[i], DsTopoIsland.EARTH_NODE_ID);
                     m.fillJacStruc(m.getEdgeToNo().get(e), index + i, 1.0, 0);
                     m.fillJacStruc(m.getEdgeToNo().get(e), index + i, 1.0, dim);
                     m.getJacobianStruc().setValue(index + i, stateIndex + i, 1.0);
@@ -208,12 +208,12 @@ public class DispersedGen implements DsModelCons, Serializable {
                 motor.fillJacOfI(jacOfMotorEdgeI, 0);
                 for (int j = 0; j < motor.getStateSize(); j++, index++) {
                     for (int i = 0; i < 3; i++) {
-                        e = tn.getIsland().getDetailedG().getEdge(tn.getBusNo() + "-" + i, tn.getBusNo() + "-motor-3");
+                        e = tn.getIsland().getDetailedG().getEdge(tn.getTnNo() + "-" + i, tn.getTnNo() + "-motor-3");
                         m.cleanJac(m.getEdgeToNo().get(e), index, 0);
                         m.cleanJac(m.getEdgeToNo().get(e), index, dim);
                     }
                     for (int i = 0; i < 3; i++) {
-                        e = tn.getIsland().getDetailedG().getEdge(tn.getBusNo() + "-" + i, tn.getBusNo() + "-motor-3");
+                        e = tn.getIsland().getDetailedG().getEdge(tn.getTnNo() + "-" + i, tn.getTnNo() + "-motor-3");
                         m.fillJac2(m.getEdgeToNo().get(e), index, jacOfMotorEdgeI[j][i], 0);
                         m.fillJac2(m.getEdgeToNo().get(e), index, jacOfMotorEdgeI[j][i + 3], dim);
                     }
@@ -223,7 +223,7 @@ public class DispersedGen implements DsModelCons, Serializable {
                 double vx, vy;
                 double[] c = new double[2];
                 for (int i = 0; i < phases.length; i++) {
-                    e = tn.getIsland().getDetailedG().getEdge(tn.getBusNo() + "-" + phases[i], DsTopoIsland.EARTH_NODE_ID);
+                    e = tn.getIsland().getDetailedG().getEdge(tn.getTnNo() + "-" + phases[i], DsTopoIsland.EARTH_NODE_ID);
                     m.calCurrent(m.getEdgeToNo().get(e), m.getState(), c);
                     vx = m.getState().getValue(stateIndex + i);
                     vy = m.getState().getValue(stateIndex + i + m.getDimension());
@@ -268,7 +268,7 @@ public class DispersedGen implements DsModelCons, Serializable {
                 values[4] = m.getState().getValue(slipIndex);
                 double[] tempI = new double[2];
                 for (int i = 0; i < 3; i++) {
-                    edge = tn.getIsland().getDetailedG().getEdge(tn.getBusNo() + "-" + i, tn.getBusNo() + "-motor-3");
+                    edge = tn.getIsland().getDetailedG().getEdge(tn.getTnNo() + "-" + i, tn.getTnNo() + "-motor-3");
                     m.calCurrent(m.getEdgeToNo().get(edge), m.getState(), tempI);
                     values[0] += InductionMachine.A_inv_real[1][i] * tempI[0] - InductionMachine.A_inv_imag[1][i] * tempI[1];
                     values[2] += InductionMachine.A_inv_real[1][i] * tempI[1] + InductionMachine.A_inv_imag[1][i] * tempI[0];

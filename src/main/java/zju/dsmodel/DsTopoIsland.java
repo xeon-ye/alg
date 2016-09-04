@@ -46,7 +46,7 @@ public class DsTopoIsland implements Serializable, DsModelCons {
     //三相分离的详细拓扑图，包含地节点
     private UndirectedGraph<String, DetailedEdge> detailedG;
     //节点编号和对象之间的映射关系
-    public Map<Integer, DsTopoNode> busNoToTn;
+    public Map<Integer, DsTopoNode> tnNoToTn;
     //支路号和对象之间的映射关系
     private Map<Integer, MapObject> idToBranch;
     //支路计算模型，支路可能是：馈线，变压器，调压器
@@ -135,17 +135,17 @@ public class DsTopoIsland implements Serializable, DsModelCons {
         for (DsTopoNode tn : getSupplyTns()) {
             if (tn.getType() != DsTopoNode.TYPE_SUB)
                 continue;
-            id1 = tn.getBusNo() + "-0";
-            id2 = tn.getBusNo() + "-1";
-            id3 = tn.getBusNo() + "-2";
+            id1 = tn.getTnNo() + "-0";
+            id2 = tn.getTnNo() + "-1";
+            id3 = tn.getTnNo() + "-2";
             detailedG.addVertex(id1);
             detailedG.addVertex(id2);
             detailedG.addVertex(id3);
-            DetailedEdge edge = new DetailedEdge(DetailedEdge.EDGE_TYPE_SUPPLIER, tn.getBusNo(), 0);
+            DetailedEdge edge = new DetailedEdge(DetailedEdge.EDGE_TYPE_SUPPLIER, tn.getTnNo(), 0);
             detailedG.addEdge(EARTH_NODE_ID, id1, edge);
-            edge = new DetailedEdge(DetailedEdge.EDGE_TYPE_SUPPLIER, tn.getBusNo(), 1);
+            edge = new DetailedEdge(DetailedEdge.EDGE_TYPE_SUPPLIER, tn.getTnNo(), 1);
             detailedG.addEdge(EARTH_NODE_ID, id2, edge);
-            edge = new DetailedEdge(DetailedEdge.EDGE_TYPE_SUPPLIER, tn.getBusNo(), 2);
+            edge = new DetailedEdge(DetailedEdge.EDGE_TYPE_SUPPLIER, tn.getTnNo(), 2);
             detailedG.addEdge(EARTH_NODE_ID, id3, edge);
             break;//todo：目前只支持只有一个变电站节点
         }
@@ -157,7 +157,7 @@ public class DsTopoIsland implements Serializable, DsModelCons {
             tn1 = graph.getEdgeSource(obj);
             tn2 = graph.getEdgeTarget(obj);
             //todo: 对于变压器绕组来说，默认节点编号小的为源端，这一点要注意
-            if (tn1.getBusNo() > tn2.getBusNo()) {
+            if (tn1.getTnNo() > tn2.getTnNo()) {
                 tn2 = graph.getEdgeSource(obj);
                 tn1 = graph.getEdgeTarget(obj);
             }
@@ -174,13 +174,13 @@ public class DsTopoIsland implements Serializable, DsModelCons {
                 for (int i = 0; i < 3; i++) {
                     if (Math.abs(feeder.getZ_real()[i][i]) > ZERO_LIMIT
                             || Math.abs(feeder.getZ_imag()[i][i]) > ZERO_LIMIT) {
-                        id1 = tn1.getBusNo() + "-" + i;
-                        id2 = tn2.getBusNo() + "-" + i;
+                        id1 = tn1.getTnNo() + "-" + i;
+                        id2 = tn2.getTnNo() + "-" + i;
                         if (!detailedG.containsVertex(id1))
                             detailedG.addVertex(id1);
                         if (!detailedG.containsVertex(id2))
                             detailedG.addVertex(id2);
-                        edges[count] = new DetailedEdge(DetailedEdge.EDGE_TYPE_FEEDER, tn1.getBusNo(), tn2.getBusNo(), i, obj.getId());
+                        edges[count] = new DetailedEdge(DetailedEdge.EDGE_TYPE_FEEDER, tn1.getTnNo(), tn2.getTnNo(), i, obj.getId());
                         detailedG.addEdge(id1, id2, edges[count]);
                         count++;
                     }
@@ -197,8 +197,8 @@ public class DsTopoIsland implements Serializable, DsModelCons {
             } else if (branch instanceof Transformer) {
                 Transformer tf = (Transformer) branch;
                 for (int i = 0; i < 3; i++) {
-                    id1 = tn1.getBusNo() + "-" + i;
-                    id2 = tn2.getBusNo() + "-" + i;
+                    id1 = tn1.getTnNo() + "-" + i;
+                    id2 = tn2.getTnNo() + "-" + i;
                     if (!detailedG.containsVertex(id1))
                         detailedG.addVertex(id1);
                     if (!detailedG.containsVertex(id2))
@@ -206,21 +206,21 @@ public class DsTopoIsland implements Serializable, DsModelCons {
                 }
                 switch (tf.getConnType()) {
                     case Transformer.CONN_TYPE_D_GrY:
-                        id1 = tn1.getBusNo() + "-0";
-                        id2 = tn1.getBusNo() + "-1";
-                        id3 = tn1.getBusNo() + "-2";
-                        DetailedEdge edge1 = new DetailedEdge(DetailedEdge.EDGE_TYPE_TF_WINDING, tn1.getBusNo(), 0, true, obj.getId());
-                        DetailedEdge edge2 = new DetailedEdge(DetailedEdge.EDGE_TYPE_TF_WINDING, tn1.getBusNo(), 1, true, obj.getId());
-                        DetailedEdge edge3 = new DetailedEdge(DetailedEdge.EDGE_TYPE_TF_WINDING, tn1.getBusNo(), 2, true, obj.getId());
+                        id1 = tn1.getTnNo() + "-0";
+                        id2 = tn1.getTnNo() + "-1";
+                        id3 = tn1.getTnNo() + "-2";
+                        DetailedEdge edge1 = new DetailedEdge(DetailedEdge.EDGE_TYPE_TF_WINDING, tn1.getTnNo(), 0, true, obj.getId());
+                        DetailedEdge edge2 = new DetailedEdge(DetailedEdge.EDGE_TYPE_TF_WINDING, tn1.getTnNo(), 1, true, obj.getId());
+                        DetailedEdge edge3 = new DetailedEdge(DetailedEdge.EDGE_TYPE_TF_WINDING, tn1.getTnNo(), 2, true, obj.getId());
                         detailedG.addEdge(id1, id2, edge1);
                         detailedG.addEdge(id2, id3, edge2);
                         detailedG.addEdge(id3, id1, edge3);
-                        id1 = tn2.getBusNo() + "-0";
-                        id2 = tn2.getBusNo() + "-1";
-                        id3 = tn2.getBusNo() + "-2";
-                        DetailedEdge edge4 = new DetailedEdge(DetailedEdge.EDGE_TYPE_TF_WINDING, tn2.getBusNo(), 0, false, obj.getId());
-                        DetailedEdge edge5 = new DetailedEdge(DetailedEdge.EDGE_TYPE_TF_WINDING, tn2.getBusNo(), 1, false, obj.getId());
-                        DetailedEdge edge6 = new DetailedEdge(DetailedEdge.EDGE_TYPE_TF_WINDING, tn2.getBusNo(), 2, false, obj.getId());
+                        id1 = tn2.getTnNo() + "-0";
+                        id2 = tn2.getTnNo() + "-1";
+                        id3 = tn2.getTnNo() + "-2";
+                        DetailedEdge edge4 = new DetailedEdge(DetailedEdge.EDGE_TYPE_TF_WINDING, tn2.getTnNo(), 0, false, obj.getId());
+                        DetailedEdge edge5 = new DetailedEdge(DetailedEdge.EDGE_TYPE_TF_WINDING, tn2.getTnNo(), 1, false, obj.getId());
+                        DetailedEdge edge6 = new DetailedEdge(DetailedEdge.EDGE_TYPE_TF_WINDING, tn2.getTnNo(), 2, false, obj.getId());
                         detailedG.addEdge(id1, EARTH_NODE_ID, edge4);
                         detailedG.addEdge(id2, EARTH_NODE_ID, edge5);
                         detailedG.addEdge(id3, EARTH_NODE_ID, edge6);
@@ -232,21 +232,21 @@ public class DsTopoIsland implements Serializable, DsModelCons {
                         edge4.setOtherEdgeOfTf(edge3);
                         break;
                     case Transformer.CONN_TYPE_GrY_GrY:
-                        id1 = tn1.getBusNo() + "-0";
-                        id2 = tn1.getBusNo() + "-1";
-                        id3 = tn1.getBusNo() + "-2";
-                        edge1 = new DetailedEdge(DetailedEdge.EDGE_TYPE_TF_WINDING, tn1.getBusNo(), 0, true, obj.getId());
-                        edge2 = new DetailedEdge(DetailedEdge.EDGE_TYPE_TF_WINDING, tn1.getBusNo(), 1, true, obj.getId());
-                        edge3 = new DetailedEdge(DetailedEdge.EDGE_TYPE_TF_WINDING, tn1.getBusNo(), 2, true, obj.getId());
+                        id1 = tn1.getTnNo() + "-0";
+                        id2 = tn1.getTnNo() + "-1";
+                        id3 = tn1.getTnNo() + "-2";
+                        edge1 = new DetailedEdge(DetailedEdge.EDGE_TYPE_TF_WINDING, tn1.getTnNo(), 0, true, obj.getId());
+                        edge2 = new DetailedEdge(DetailedEdge.EDGE_TYPE_TF_WINDING, tn1.getTnNo(), 1, true, obj.getId());
+                        edge3 = new DetailedEdge(DetailedEdge.EDGE_TYPE_TF_WINDING, tn1.getTnNo(), 2, true, obj.getId());
                         detailedG.addEdge(id1, EARTH_NODE_ID, edge1);
                         detailedG.addEdge(id2, EARTH_NODE_ID, edge2);
                         detailedG.addEdge(id3, EARTH_NODE_ID, edge3);
-                        edge4 = new DetailedEdge(DetailedEdge.EDGE_TYPE_TF_WINDING, tn2.getBusNo(), 0, false, obj.getId());
-                        edge5 = new DetailedEdge(DetailedEdge.EDGE_TYPE_TF_WINDING, tn2.getBusNo(), 1, false, obj.getId());
-                        edge6 = new DetailedEdge(DetailedEdge.EDGE_TYPE_TF_WINDING, tn2.getBusNo(), 2, false, obj.getId());
-                        id1 = tn2.getBusNo() + "-0";
-                        id2 = tn2.getBusNo() + "-1";
-                        id3 = tn2.getBusNo() + "-2";
+                        edge4 = new DetailedEdge(DetailedEdge.EDGE_TYPE_TF_WINDING, tn2.getTnNo(), 0, false, obj.getId());
+                        edge5 = new DetailedEdge(DetailedEdge.EDGE_TYPE_TF_WINDING, tn2.getTnNo(), 1, false, obj.getId());
+                        edge6 = new DetailedEdge(DetailedEdge.EDGE_TYPE_TF_WINDING, tn2.getTnNo(), 2, false, obj.getId());
+                        id1 = tn2.getTnNo() + "-0";
+                        id2 = tn2.getTnNo() + "-1";
+                        id3 = tn2.getTnNo() + "-2";
                         detailedG.addEdge(id1, EARTH_NODE_ID, edge4);
                         detailedG.addEdge(id2, EARTH_NODE_ID, edge5);
                         detailedG.addEdge(id3, EARTH_NODE_ID, edge6);
@@ -258,23 +258,23 @@ public class DsTopoIsland implements Serializable, DsModelCons {
                         edge6.setOtherEdgeOfTf(edge3);
                         break;
                     case Transformer.CONN_TYPE_Y_D:
-                        id1 = tn1.getBusNo() + "-0";
-                        id2 = tn1.getBusNo() + "-1";
-                        id3 = tn1.getBusNo() + "-2";
+                        id1 = tn1.getTnNo() + "-0";
+                        id2 = tn1.getTnNo() + "-1";
+                        id3 = tn1.getTnNo() + "-2";
                         String neutralNodeId = obj.getId() + "-3";
                         detailedG.addVertex(neutralNodeId);
-                        edge1 = new DetailedEdge(DetailedEdge.EDGE_TYPE_TF_WINDING, tn1.getBusNo(), 0, true, obj.getId());
-                        edge2 = new DetailedEdge(DetailedEdge.EDGE_TYPE_TF_WINDING, tn1.getBusNo(), 1, true, obj.getId());
-                        edge3 = new DetailedEdge(DetailedEdge.EDGE_TYPE_TF_WINDING, tn1.getBusNo(), 2, true, obj.getId());
+                        edge1 = new DetailedEdge(DetailedEdge.EDGE_TYPE_TF_WINDING, tn1.getTnNo(), 0, true, obj.getId());
+                        edge2 = new DetailedEdge(DetailedEdge.EDGE_TYPE_TF_WINDING, tn1.getTnNo(), 1, true, obj.getId());
+                        edge3 = new DetailedEdge(DetailedEdge.EDGE_TYPE_TF_WINDING, tn1.getTnNo(), 2, true, obj.getId());
                         detailedG.addEdge(id1, neutralNodeId, edge1);
                         detailedG.addEdge(id2, neutralNodeId, edge2);
                         detailedG.addEdge(id3, neutralNodeId, edge3);
-                        id1 = tn2.getBusNo() + "-0";
-                        id2 = tn2.getBusNo() + "-1";
-                        id3 = tn2.getBusNo() + "-2";
-                        edge4 = new DetailedEdge(DetailedEdge.EDGE_TYPE_TF_WINDING, tn2.getBusNo(), 0, false, obj.getId());
-                        edge5 = new DetailedEdge(DetailedEdge.EDGE_TYPE_TF_WINDING, tn2.getBusNo(), 1, false, obj.getId());
-                        edge6 = new DetailedEdge(DetailedEdge.EDGE_TYPE_TF_WINDING, tn2.getBusNo(), 2, false, obj.getId());
+                        id1 = tn2.getTnNo() + "-0";
+                        id2 = tn2.getTnNo() + "-1";
+                        id3 = tn2.getTnNo() + "-2";
+                        edge4 = new DetailedEdge(DetailedEdge.EDGE_TYPE_TF_WINDING, tn2.getTnNo(), 0, false, obj.getId());
+                        edge5 = new DetailedEdge(DetailedEdge.EDGE_TYPE_TF_WINDING, tn2.getTnNo(), 1, false, obj.getId());
+                        edge6 = new DetailedEdge(DetailedEdge.EDGE_TYPE_TF_WINDING, tn2.getTnNo(), 2, false, obj.getId());
                         detailedG.addEdge(id1, id2, edge4);
                         detailedG.addEdge(id2, id3, edge5);
                         detailedG.addEdge(id3, id1, edge6);
@@ -286,21 +286,21 @@ public class DsTopoIsland implements Serializable, DsModelCons {
                         edge6.setOtherEdgeOfTf(edge3);
                         break;
                     case Transformer.CONN_TYPE_D_D:
-                        id1 = tn1.getBusNo() + "-0";
-                        id2 = tn1.getBusNo() + "-1";
-                        id3 = tn1.getBusNo() + "-2";
-                        edge1 = new DetailedEdge(DetailedEdge.EDGE_TYPE_TF_WINDING, tn1.getBusNo(), 0, true, obj.getId());
-                        edge2 = new DetailedEdge(DetailedEdge.EDGE_TYPE_TF_WINDING, tn1.getBusNo(), 1, true, obj.getId());
-                        edge3 = new DetailedEdge(DetailedEdge.EDGE_TYPE_TF_WINDING, tn1.getBusNo(), 2, true, obj.getId());
+                        id1 = tn1.getTnNo() + "-0";
+                        id2 = tn1.getTnNo() + "-1";
+                        id3 = tn1.getTnNo() + "-2";
+                        edge1 = new DetailedEdge(DetailedEdge.EDGE_TYPE_TF_WINDING, tn1.getTnNo(), 0, true, obj.getId());
+                        edge2 = new DetailedEdge(DetailedEdge.EDGE_TYPE_TF_WINDING, tn1.getTnNo(), 1, true, obj.getId());
+                        edge3 = new DetailedEdge(DetailedEdge.EDGE_TYPE_TF_WINDING, tn1.getTnNo(), 2, true, obj.getId());
                         detailedG.addEdge(id1, id2, edge1);
                         detailedG.addEdge(id2, id3, edge2);
                         detailedG.addEdge(id3, id1, edge3);
-                        id1 = tn2.getBusNo() + "-0";
-                        id2 = tn2.getBusNo() + "-1";
-                        id3 = tn2.getBusNo() + "-2";
-                        edge4 = new DetailedEdge(DetailedEdge.EDGE_TYPE_TF_WINDING, tn2.getBusNo(), 0, false, obj.getId());
-                        edge5 = new DetailedEdge(DetailedEdge.EDGE_TYPE_TF_WINDING, tn2.getBusNo(), 1, false, obj.getId());
-                        edge6 = new DetailedEdge(DetailedEdge.EDGE_TYPE_TF_WINDING, tn2.getBusNo(), 2, false, obj.getId());
+                        id1 = tn2.getTnNo() + "-0";
+                        id2 = tn2.getTnNo() + "-1";
+                        id3 = tn2.getTnNo() + "-2";
+                        edge4 = new DetailedEdge(DetailedEdge.EDGE_TYPE_TF_WINDING, tn2.getTnNo(), 0, false, obj.getId());
+                        edge5 = new DetailedEdge(DetailedEdge.EDGE_TYPE_TF_WINDING, tn2.getTnNo(), 1, false, obj.getId());
+                        edge6 = new DetailedEdge(DetailedEdge.EDGE_TYPE_TF_WINDING, tn2.getTnNo(), 2, false, obj.getId());
                         detailedG.addEdge(id1, id2, edge4);
                         detailedG.addEdge(id2, id3, edge5);
                         detailedG.addEdge(id3, id1, edge6);
@@ -332,15 +332,15 @@ public class DsTopoIsland implements Serializable, DsModelCons {
                 if (!dispersedGens.containsKey(obj))
                     continue;
                 DispersedGen gen = dispersedGens.get(obj);
-                id1 = tn.getBusNo() + "-0";
-                id2 = tn.getBusNo() + "-1";
-                id3 = tn.getBusNo() + "-2";
+                id1 = tn.getTnNo() + "-0";
+                id2 = tn.getTnNo() + "-1";
+                id3 = tn.getTnNo() + "-2";
                 switch (gen.getMode()) {
                     case DispersedGen.MODE_PV:
                         //todo: 认为PV节点只有接地这种模式
                         DetailedEdge e = detailedG.getEdge(id1, EARTH_NODE_ID);
                         if (e == null) {
-                            e = new DetailedEdge(DetailedEdge.EDGE_TYPE_DG, tn.getBusNo(), 0);
+                            e = new DetailedEdge(DetailedEdge.EDGE_TYPE_DG, tn.getTnNo(), 0);
                             detailedG.addEdge(id1, EARTH_NODE_ID, e);
                         } else if (e.getEdgeType() == DetailedEdge.EDGE_TYPE_TF_WINDING
                                 || e.getEdgeType() == DetailedEdge.EDGE_TYPE_LOAD_TF_MIX)
@@ -351,7 +351,7 @@ public class DsTopoIsland implements Serializable, DsModelCons {
 
                         e = detailedG.getEdge(id2, EARTH_NODE_ID);
                         if (e == null) {
-                            e = new DetailedEdge(DetailedEdge.EDGE_TYPE_DG, tn.getBusNo(), 1);
+                            e = new DetailedEdge(DetailedEdge.EDGE_TYPE_DG, tn.getTnNo(), 1);
                             detailedG.addEdge(id2, EARTH_NODE_ID, e);
                         } else if (e.getEdgeType() == DetailedEdge.EDGE_TYPE_TF_WINDING
                                 || e.getEdgeType() == DetailedEdge.EDGE_TYPE_LOAD_TF_MIX)
@@ -362,7 +362,7 @@ public class DsTopoIsland implements Serializable, DsModelCons {
 
                         e = detailedG.getEdge(id3, EARTH_NODE_ID);
                         if (e == null) {
-                            e = new DetailedEdge(DetailedEdge.EDGE_TYPE_DG, tn.getBusNo(), 2);
+                            e = new DetailedEdge(DetailedEdge.EDGE_TYPE_DG, tn.getTnNo(), 2);
                             e.setDevId(obj.getId());
                             detailedG.addEdge(id3, EARTH_NODE_ID, e);
                         } else if (e.getEdgeType() == DetailedEdge.EDGE_TYPE_TF_WINDING
@@ -375,11 +375,11 @@ public class DsTopoIsland implements Serializable, DsModelCons {
                     case DispersedGen.MODE_IM:
                         switch (gen.getMotor().getConnType()) {
                             case InductionMachine.CONN_TYPE_Y:
-                                String neutralNodeId = tn.getBusNo() + "-motor-3";
+                                String neutralNodeId = tn.getTnNo() + "-motor-3";
                                 detailedG.addVertex(neutralNodeId);
-                                DetailedEdge edge1 = new DetailedEdge(DetailedEdge.EDGE_TYPE_DG, tn.getBusNo(), 0);
-                                DetailedEdge edge2 = new DetailedEdge(DetailedEdge.EDGE_TYPE_DG, tn.getBusNo(), 1);
-                                DetailedEdge edge3 = new DetailedEdge(DetailedEdge.EDGE_TYPE_DG, tn.getBusNo(), 2);
+                                DetailedEdge edge1 = new DetailedEdge(DetailedEdge.EDGE_TYPE_DG, tn.getTnNo(), 0);
+                                DetailedEdge edge2 = new DetailedEdge(DetailedEdge.EDGE_TYPE_DG, tn.getTnNo(), 1);
+                                DetailedEdge edge3 = new DetailedEdge(DetailedEdge.EDGE_TYPE_DG, tn.getTnNo(), 2);
                                 edge1.setDgId(obj.getId());
                                 edge2.setDgId(obj.getId());
                                 edge3.setDgId(obj.getId());
@@ -402,222 +402,229 @@ public class DsTopoIsland implements Serializable, DsModelCons {
     }
 
     private void formGraphOfLoad(DsTopoNode tn, BasicLoad load, MapObject obj) {
-        String id1 = tn.getBusNo() + "-0";
-        String id2 = tn.getBusNo() + "-1";
-        String id3 = tn.getBusNo() + "-2";
-        if (load.getMode().equals(LOAD_D_I)) {
-            if (Math.abs(load.getConstantI()[0][0]) > ZERO_LIMIT) {
-                DetailedEdge e = detailedG.getEdge(id1, id2);
-                if (e == null) {
-                    e = new DetailedEdge(DetailedEdge.EDGE_TYPE_LOAD, tn.getBusNo(), 0);
-                    e.setDevId(obj.getId());
-                    e.setLoadD(true);
-                    detailedG.addEdge(id1, id2, e);
+        String id1 = tn.getTnNo() + "-0";
+        String id2 = tn.getTnNo() + "-1";
+        String id3 = tn.getTnNo() + "-2";
+        switch (load.getMode()) {
+            case LOAD_D_I:
+                if (Math.abs(load.getConstantI()[0][0]) > ZERO_LIMIT) {
+                    DetailedEdge e = detailedG.getEdge(id1, id2);
+                    if (e == null) {
+                        e = new DetailedEdge(DetailedEdge.EDGE_TYPE_LOAD, tn.getTnNo(), 0);
+                        e.setDevId(obj.getId());
+                        e.setLoadD(true);
+                        detailedG.addEdge(id1, id2, e);
+                    }
+                    setLoadEdgeI(e, load.getConstantI()[0][0], load.getConstantI()[0][1]);
                 }
-                setLoadEdgeI(e, load.getConstantI()[0][0], load.getConstantI()[0][1]);
-            }
-            if (Math.abs(load.getConstantI()[1][0]) > ZERO_LIMIT) {
-                DetailedEdge e = detailedG.getEdge(id2, id3);
-                if (e == null) {
-                    e = new DetailedEdge(DetailedEdge.EDGE_TYPE_LOAD, tn.getBusNo(), 1);
-                    e.setDevId(obj.getId());
-                    e.setLoadD(true);
-                    detailedG.addEdge(id2, id3, e);
+                if (Math.abs(load.getConstantI()[1][0]) > ZERO_LIMIT) {
+                    DetailedEdge e = detailedG.getEdge(id2, id3);
+                    if (e == null) {
+                        e = new DetailedEdge(DetailedEdge.EDGE_TYPE_LOAD, tn.getTnNo(), 1);
+                        e.setDevId(obj.getId());
+                        e.setLoadD(true);
+                        detailedG.addEdge(id2, id3, e);
+                    }
+                    setLoadEdgeI(e, load.getConstantI()[1][0], load.getConstantI()[1][1]);
                 }
-                setLoadEdgeI(e, load.getConstantI()[1][0], load.getConstantI()[1][1]);
-            }
-            if (Math.abs(load.getConstantI()[2][0]) > ZERO_LIMIT) {
-                DetailedEdge e = detailedG.getEdge(id3, id1);
-                if (e == null) {
-                    e = new DetailedEdge(DetailedEdge.EDGE_TYPE_LOAD, tn.getBusNo(), 2);
-                    e.setDevId(obj.getId());
-                    e.setLoadD(true);
-                    detailedG.addEdge(id3, id1, e);
+                if (Math.abs(load.getConstantI()[2][0]) > ZERO_LIMIT) {
+                    DetailedEdge e = detailedG.getEdge(id3, id1);
+                    if (e == null) {
+                        e = new DetailedEdge(DetailedEdge.EDGE_TYPE_LOAD, tn.getTnNo(), 2);
+                        e.setDevId(obj.getId());
+                        e.setLoadD(true);
+                        detailedG.addEdge(id3, id1, e);
+                    }
+                    setLoadEdgeI(e, load.getConstantI()[2][0], load.getConstantI()[2][1]);
                 }
-                setLoadEdgeI(e, load.getConstantI()[2][0], load.getConstantI()[2][1]);
-            }
-        } else if (load.getMode().equals(LOAD_D_PQ)) {
-            if (Math.abs(load.getConstantS()[0][0]) > ZERO_LIMIT
-                    || Math.abs(load.getConstantS()[0][1]) > ZERO_LIMIT) {
-                DetailedEdge e = detailedG.getEdge(id1, id2);
-                if (e == null) {
-                    e = new DetailedEdge(DetailedEdge.EDGE_TYPE_LOAD, tn.getBusNo(), 0);
-                    e.setDevId(obj.getId());
-                    e.setLoadD(true);
-                    detailedG.addEdge(id1, id2, e);
+                break;
+            case LOAD_D_PQ:
+                if (Math.abs(load.getConstantS()[0][0]) > ZERO_LIMIT
+                        || Math.abs(load.getConstantS()[0][1]) > ZERO_LIMIT) {
+                    DetailedEdge e = detailedG.getEdge(id1, id2);
+                    if (e == null) {
+                        e = new DetailedEdge(DetailedEdge.EDGE_TYPE_LOAD, tn.getTnNo(), 0);
+                        e.setDevId(obj.getId());
+                        e.setLoadD(true);
+                        detailedG.addEdge(id1, id2, e);
+                    }
+                    e.setS_real(e.getS_real() + load.getConstantS()[0][0]);
+                    e.setS_image(e.getS_image() + load.getConstantS()[0][1]);
                 }
-                e.setS_real(e.getS_real() + load.getConstantS()[0][0]);
-                e.setS_image(e.getS_image() + load.getConstantS()[0][1]);
-            }
-            if (Math.abs(load.getConstantS()[1][0]) > ZERO_LIMIT
-                    || Math.abs(load.getConstantS()[1][1]) > ZERO_LIMIT) {
-                DetailedEdge e = detailedG.getEdge(id2, id3);
-                if (e == null) {
-                    e = new DetailedEdge(DetailedEdge.EDGE_TYPE_LOAD, tn.getBusNo(), 1);
-                    e.setDevId(obj.getId());
-                    e.setLoadD(true);
-                    detailedG.addEdge(id2, id3, e);
+                if (Math.abs(load.getConstantS()[1][0]) > ZERO_LIMIT
+                        || Math.abs(load.getConstantS()[1][1]) > ZERO_LIMIT) {
+                    DetailedEdge e = detailedG.getEdge(id2, id3);
+                    if (e == null) {
+                        e = new DetailedEdge(DetailedEdge.EDGE_TYPE_LOAD, tn.getTnNo(), 1);
+                        e.setDevId(obj.getId());
+                        e.setLoadD(true);
+                        detailedG.addEdge(id2, id3, e);
+                    }
+                    e.setS_real(e.getS_real() + load.getConstantS()[1][0]);
+                    e.setS_image(e.getS_image() + load.getConstantS()[1][1]);
                 }
-                e.setS_real(e.getS_real() + load.getConstantS()[1][0]);
-                e.setS_image(e.getS_image() + load.getConstantS()[1][1]);
-            }
-            if (Math.abs(load.getConstantS()[2][0]) > ZERO_LIMIT
-                    || Math.abs(load.getConstantS()[2][1]) > ZERO_LIMIT) {
-                DetailedEdge e = detailedG.getEdge(id3, id1);
-                if (e == null) {
-                    e = new DetailedEdge(DetailedEdge.EDGE_TYPE_LOAD, tn.getBusNo(), 2);
-                    e.setDevId(obj.getId());
-                    e.setLoadD(true);
-                    detailedG.addEdge(id3, id1, e);
+                if (Math.abs(load.getConstantS()[2][0]) > ZERO_LIMIT
+                        || Math.abs(load.getConstantS()[2][1]) > ZERO_LIMIT) {
+                    DetailedEdge e = detailedG.getEdge(id3, id1);
+                    if (e == null) {
+                        e = new DetailedEdge(DetailedEdge.EDGE_TYPE_LOAD, tn.getTnNo(), 2);
+                        e.setDevId(obj.getId());
+                        e.setLoadD(true);
+                        detailedG.addEdge(id3, id1, e);
+                    }
+                    e.setS_real(e.getS_real() + load.getConstantS()[2][0]);
+                    e.setS_image(e.getS_image() + load.getConstantS()[2][1]);
                 }
-                e.setS_real(e.getS_real() + load.getConstantS()[2][0]);
-                e.setS_image(e.getS_image() + load.getConstantS()[2][1]);
-            }
-        } else if (load.getMode().equals(LOAD_D_Z)) {
-            if (Math.abs(load.getConstantZ()[0][0]) > ZERO_LIMIT
-                    || Math.abs(load.getConstantZ()[0][1]) > ZERO_LIMIT) {
-                DetailedEdge e = detailedG.getEdge(id1, id2);
-                if (e == null) {
-                    e = new DetailedEdge(DetailedEdge.EDGE_TYPE_LOAD, tn.getBusNo(), 0);
-                    e.setDevId(obj.getId());
-                    e.setLoadD(true);
-                    detailedG.addEdge(id1, id2, e);
+                break;
+            case LOAD_D_Z:
+                if (Math.abs(load.getConstantZ()[0][0]) > ZERO_LIMIT
+                        || Math.abs(load.getConstantZ()[0][1]) > ZERO_LIMIT) {
+                    DetailedEdge e = detailedG.getEdge(id1, id2);
+                    if (e == null) {
+                        e = new DetailedEdge(DetailedEdge.EDGE_TYPE_LOAD, tn.getTnNo(), 0);
+                        e.setDevId(obj.getId());
+                        e.setLoadD(true);
+                        detailedG.addEdge(id1, id2, e);
+                    }
+                    setLoadEdgeZ(e, load.getConstantZ()[0][0], load.getConstantZ()[0][1]);
                 }
-                setLoadEdgeZ(e, load.getConstantZ()[0][0], load.getConstantZ()[0][1]);
-            }
-            if (Math.abs(load.getConstantZ()[1][0]) > ZERO_LIMIT
-                    || Math.abs(load.getConstantZ()[1][1]) > ZERO_LIMIT) {
-                DetailedEdge e = detailedG.getEdge(id2, id3);
-                if (e == null) {
-                    e = new DetailedEdge(DetailedEdge.EDGE_TYPE_LOAD, tn.getBusNo(), 1);
-                    e.setDevId(obj.getId());
-                    e.setLoadD(true);
-                    detailedG.addEdge(id2, id3, e);
+                if (Math.abs(load.getConstantZ()[1][0]) > ZERO_LIMIT
+                        || Math.abs(load.getConstantZ()[1][1]) > ZERO_LIMIT) {
+                    DetailedEdge e = detailedG.getEdge(id2, id3);
+                    if (e == null) {
+                        e = new DetailedEdge(DetailedEdge.EDGE_TYPE_LOAD, tn.getTnNo(), 1);
+                        e.setDevId(obj.getId());
+                        e.setLoadD(true);
+                        detailedG.addEdge(id2, id3, e);
+                    }
+                    setLoadEdgeZ(e, load.getConstantZ()[1][0], load.getConstantZ()[1][1]);
                 }
-                setLoadEdgeZ(e, load.getConstantZ()[1][0], load.getConstantZ()[1][1]);
-            }
-            if (Math.abs(load.getConstantZ()[2][0]) > ZERO_LIMIT
-                    || Math.abs(load.getConstantZ()[2][1]) > ZERO_LIMIT) {
-                DetailedEdge e = detailedG.getEdge(id3, id1);
-                if (e == null) {
-                    e = new DetailedEdge(DetailedEdge.EDGE_TYPE_LOAD, tn.getBusNo(), 2);
-                    e.setDevId(obj.getId());
-                    e.setLoadD(true);
-                    detailedG.addEdge(id3, id1, e);
+                if (Math.abs(load.getConstantZ()[2][0]) > ZERO_LIMIT
+                        || Math.abs(load.getConstantZ()[2][1]) > ZERO_LIMIT) {
+                    DetailedEdge e = detailedG.getEdge(id3, id1);
+                    if (e == null) {
+                        e = new DetailedEdge(DetailedEdge.EDGE_TYPE_LOAD, tn.getTnNo(), 2);
+                        e.setDevId(obj.getId());
+                        e.setLoadD(true);
+                        detailedG.addEdge(id3, id1, e);
+                    }
+                    setLoadEdgeZ(e, load.getConstantZ()[2][0], load.getConstantZ()[2][1]);
                 }
-                setLoadEdgeZ(e, load.getConstantZ()[2][0], load.getConstantZ()[2][1]);
-            }
-        } else if (load.getMode().equals(LOAD_Y_I)) {
-            if (Math.abs(load.getConstantI()[0][0]) > ZERO_LIMIT) {
-                DetailedEdge e = detailedG.getEdge(id1, EARTH_NODE_ID);
-                if (e == null) {
-                    e = new DetailedEdge(DetailedEdge.EDGE_TYPE_LOAD, tn.getBusNo(), 0);
-                    e.setDevId(obj.getId());
-                    e.setLoadD(false);
-                    detailedG.addEdge(id1, EARTH_NODE_ID, e);
-                } else if (e.getEdgeType() == DetailedEdge.EDGE_TYPE_TF_WINDING)
-                    e.setEdgeType(DetailedEdge.EDGE_TYPE_LOAD_TF_MIX);
-                setLoadEdgeI(e, load.getConstantI()[0][0], load.getConstantI()[0][1]);
-            }
-            if (Math.abs(load.getConstantI()[1][0]) > ZERO_LIMIT) {
-                DetailedEdge e = detailedG.getEdge(id2, EARTH_NODE_ID);
-                if (e == null) {
-                    e = new DetailedEdge(DetailedEdge.EDGE_TYPE_LOAD, tn.getBusNo(), 1);
-                    e.setDevId(obj.getId());
-                    e.setLoadD(false);
-                    detailedG.addEdge(id2, EARTH_NODE_ID, e);
-                } else if (e.getEdgeType() == DetailedEdge.EDGE_TYPE_TF_WINDING)
-                    e.setEdgeType(DetailedEdge.EDGE_TYPE_LOAD_TF_MIX);
-                setLoadEdgeI(e, load.getConstantI()[1][0], load.getConstantI()[1][1]);
-            }
-            if (Math.abs(load.getConstantI()[2][0]) > ZERO_LIMIT) {
-                DetailedEdge e = detailedG.getEdge(id3, EARTH_NODE_ID);
-                if (e == null) {
-                    e = new DetailedEdge(DetailedEdge.EDGE_TYPE_LOAD, tn.getBusNo(), 2);
-                    e.setDevId(obj.getId());
-                    e.setLoadD(false);
-                    detailedG.addEdge(id3, EARTH_NODE_ID, e);
-                } else if (e.getEdgeType() == DetailedEdge.EDGE_TYPE_TF_WINDING)
-                    e.setEdgeType(DetailedEdge.EDGE_TYPE_LOAD_TF_MIX);
-                setLoadEdgeI(e, load.getConstantI()[2][0], load.getConstantI()[2][1]);
-            }
-        } else if (load.getMode().equals(LOAD_Y_PQ)) {
-            if (Math.abs(load.getConstantS()[0][0]) > ZERO_LIMIT
-                    || Math.abs(load.getConstantS()[0][1]) > ZERO_LIMIT) {
-                DetailedEdge e = detailedG.getEdge(id1, EARTH_NODE_ID);
-                if (e == null) {
-                    e = new DetailedEdge(DetailedEdge.EDGE_TYPE_LOAD, tn.getBusNo(), 0);
-                    e.setDevId(obj.getId());
-                    e.setLoadD(false);
-                    detailedG.addEdge(id1, EARTH_NODE_ID, e);
-                } else if (e.getEdgeType() == DetailedEdge.EDGE_TYPE_TF_WINDING)
-                    e.setEdgeType(DetailedEdge.EDGE_TYPE_LOAD_TF_MIX);
-                e.setS_real(e.getS_real() + load.getConstantS()[0][0]);
-                e.setS_image(e.getS_image() + load.getConstantS()[0][1]);
-            }
-            if (Math.abs(load.getConstantS()[1][0]) > ZERO_LIMIT
-                    || Math.abs(load.getConstantS()[1][1]) > ZERO_LIMIT) {
-                DetailedEdge e = detailedG.getEdge(id2, EARTH_NODE_ID);
-                if (e == null) {
-                    e = new DetailedEdge(DetailedEdge.EDGE_TYPE_LOAD, tn.getBusNo(), 1);
-                    e.setDevId(obj.getId());
-                    e.setLoadD(false);
-                    detailedG.addEdge(id2, EARTH_NODE_ID, e);
-                } else if (e.getEdgeType() == DetailedEdge.EDGE_TYPE_TF_WINDING)
-                    e.setEdgeType(DetailedEdge.EDGE_TYPE_LOAD_TF_MIX);
-                e.setS_real(e.getS_real() + load.getConstantS()[1][0]);
-                e.setS_image(e.getS_image() + load.getConstantS()[1][1]);
-            }
-            if (Math.abs(load.getConstantS()[2][0]) > ZERO_LIMIT
-                    || Math.abs(load.getConstantS()[2][1]) > ZERO_LIMIT) {
-                DetailedEdge e = detailedG.getEdge(id3, EARTH_NODE_ID);
-                if (e == null) {
-                    e = new DetailedEdge(DetailedEdge.EDGE_TYPE_LOAD, tn.getBusNo(), 2);
-                    e.setDevId(obj.getId());
-                    e.setLoadD(false);
-                    detailedG.addEdge(id3, EARTH_NODE_ID, e);
-                } else if (e.getEdgeType() == DetailedEdge.EDGE_TYPE_TF_WINDING)
-                    e.setEdgeType(DetailedEdge.EDGE_TYPE_LOAD_TF_MIX);
-                e.setS_real(e.getS_real() + load.getConstantS()[2][0]);
-                e.setS_image(e.getS_image() + load.getConstantS()[2][1]);
-            }
-        } else if (load.getMode().equals(LOAD_Y_Z)) {
-            if (Math.abs(load.getConstantZ()[0][0]) > ZERO_LIMIT
-                    || Math.abs(load.getConstantZ()[0][1]) > ZERO_LIMIT) {
-                DetailedEdge e = detailedG.getEdge(id1, EARTH_NODE_ID);
-                if (e == null) {
-                    e = new DetailedEdge(DetailedEdge.EDGE_TYPE_LOAD, tn.getBusNo(), 0);
-                    e.setDevId(obj.getId());
-                    e.setLoadD(false);
-                    detailedG.addEdge(id1, EARTH_NODE_ID, e);
-                } else if (e.getEdgeType() == DetailedEdge.EDGE_TYPE_TF_WINDING)
-                    e.setEdgeType(DetailedEdge.EDGE_TYPE_LOAD_TF_MIX);
-                setLoadEdgeZ(e, load.getConstantZ()[0][0], load.getConstantZ()[0][1]);
-            }
-            if (Math.abs(load.getConstantZ()[1][0]) > ZERO_LIMIT
-                    || Math.abs(load.getConstantZ()[1][1]) > ZERO_LIMIT) {
-                DetailedEdge e = detailedG.getEdge(id2, EARTH_NODE_ID);
-                if (e == null) {
-                    e = new DetailedEdge(DetailedEdge.EDGE_TYPE_LOAD, tn.getBusNo(), 1);
-                    e.setDevId(obj.getId());
-                    e.setLoadD(false);
-                    detailedG.addEdge(id2, EARTH_NODE_ID, e);
-                } else if (e.getEdgeType() == DetailedEdge.EDGE_TYPE_TF_WINDING)
-                    e.setEdgeType(DetailedEdge.EDGE_TYPE_LOAD_TF_MIX);
-                setLoadEdgeZ(e, load.getConstantZ()[1][0], load.getConstantZ()[1][1]);
-            }
-            if (Math.abs(load.getConstantZ()[2][0]) > ZERO_LIMIT
-                    || Math.abs(load.getConstantZ()[2][1]) > ZERO_LIMIT) {
-                DetailedEdge e = detailedG.getEdge(id3, EARTH_NODE_ID);
-                if (e == null) {
-                    e = new DetailedEdge(DetailedEdge.EDGE_TYPE_LOAD, tn.getBusNo(), 2);
-                    e.setDevId(obj.getId());
-                    e.setLoadD(false);
-                    detailedG.addEdge(id3, EARTH_NODE_ID, e);
-                } else if (e.getEdgeType() == DetailedEdge.EDGE_TYPE_TF_WINDING)
-                    e.setEdgeType(DetailedEdge.EDGE_TYPE_LOAD_TF_MIX);
-                setLoadEdgeZ(e, load.getConstantZ()[2][0], load.getConstantZ()[2][1]);
-            }
+                break;
+            case LOAD_Y_I:
+                if (Math.abs(load.getConstantI()[0][0]) > ZERO_LIMIT) {
+                    DetailedEdge e = detailedG.getEdge(id1, EARTH_NODE_ID);
+                    if (e == null) {
+                        e = new DetailedEdge(DetailedEdge.EDGE_TYPE_LOAD, tn.getTnNo(), 0);
+                        e.setDevId(obj.getId());
+                        e.setLoadD(false);
+                        detailedG.addEdge(id1, EARTH_NODE_ID, e);
+                    } else if (e.getEdgeType() == DetailedEdge.EDGE_TYPE_TF_WINDING)
+                        e.setEdgeType(DetailedEdge.EDGE_TYPE_LOAD_TF_MIX);
+                    setLoadEdgeI(e, load.getConstantI()[0][0], load.getConstantI()[0][1]);
+                }
+                if (Math.abs(load.getConstantI()[1][0]) > ZERO_LIMIT) {
+                    DetailedEdge e = detailedG.getEdge(id2, EARTH_NODE_ID);
+                    if (e == null) {
+                        e = new DetailedEdge(DetailedEdge.EDGE_TYPE_LOAD, tn.getTnNo(), 1);
+                        e.setDevId(obj.getId());
+                        e.setLoadD(false);
+                        detailedG.addEdge(id2, EARTH_NODE_ID, e);
+                    } else if (e.getEdgeType() == DetailedEdge.EDGE_TYPE_TF_WINDING)
+                        e.setEdgeType(DetailedEdge.EDGE_TYPE_LOAD_TF_MIX);
+                    setLoadEdgeI(e, load.getConstantI()[1][0], load.getConstantI()[1][1]);
+                }
+                if (Math.abs(load.getConstantI()[2][0]) > ZERO_LIMIT) {
+                    DetailedEdge e = detailedG.getEdge(id3, EARTH_NODE_ID);
+                    if (e == null) {
+                        e = new DetailedEdge(DetailedEdge.EDGE_TYPE_LOAD, tn.getTnNo(), 2);
+                        e.setDevId(obj.getId());
+                        e.setLoadD(false);
+                        detailedG.addEdge(id3, EARTH_NODE_ID, e);
+                    } else if (e.getEdgeType() == DetailedEdge.EDGE_TYPE_TF_WINDING)
+                        e.setEdgeType(DetailedEdge.EDGE_TYPE_LOAD_TF_MIX);
+                    setLoadEdgeI(e, load.getConstantI()[2][0], load.getConstantI()[2][1]);
+                }
+                break;
+            case LOAD_Y_PQ:
+                if (Math.abs(load.getConstantS()[0][0]) > ZERO_LIMIT
+                        || Math.abs(load.getConstantS()[0][1]) > ZERO_LIMIT) {
+                    DetailedEdge e = detailedG.getEdge(id1, EARTH_NODE_ID);
+                    if (e == null) {
+                        e = new DetailedEdge(DetailedEdge.EDGE_TYPE_LOAD, tn.getTnNo(), 0);
+                        e.setDevId(obj.getId());
+                        e.setLoadD(false);
+                        detailedG.addEdge(id1, EARTH_NODE_ID, e);
+                    } else if (e.getEdgeType() == DetailedEdge.EDGE_TYPE_TF_WINDING)
+                        e.setEdgeType(DetailedEdge.EDGE_TYPE_LOAD_TF_MIX);
+                    e.setS_real(e.getS_real() + load.getConstantS()[0][0]);
+                    e.setS_image(e.getS_image() + load.getConstantS()[0][1]);
+                }
+                if (Math.abs(load.getConstantS()[1][0]) > ZERO_LIMIT
+                        || Math.abs(load.getConstantS()[1][1]) > ZERO_LIMIT) {
+                    DetailedEdge e = detailedG.getEdge(id2, EARTH_NODE_ID);
+                    if (e == null) {
+                        e = new DetailedEdge(DetailedEdge.EDGE_TYPE_LOAD, tn.getTnNo(), 1);
+                        e.setDevId(obj.getId());
+                        e.setLoadD(false);
+                        detailedG.addEdge(id2, EARTH_NODE_ID, e);
+                    } else if (e.getEdgeType() == DetailedEdge.EDGE_TYPE_TF_WINDING)
+                        e.setEdgeType(DetailedEdge.EDGE_TYPE_LOAD_TF_MIX);
+                    e.setS_real(e.getS_real() + load.getConstantS()[1][0]);
+                    e.setS_image(e.getS_image() + load.getConstantS()[1][1]);
+                }
+                if (Math.abs(load.getConstantS()[2][0]) > ZERO_LIMIT
+                        || Math.abs(load.getConstantS()[2][1]) > ZERO_LIMIT) {
+                    DetailedEdge e = detailedG.getEdge(id3, EARTH_NODE_ID);
+                    if (e == null) {
+                        e = new DetailedEdge(DetailedEdge.EDGE_TYPE_LOAD, tn.getTnNo(), 2);
+                        e.setDevId(obj.getId());
+                        e.setLoadD(false);
+                        detailedG.addEdge(id3, EARTH_NODE_ID, e);
+                    } else if (e.getEdgeType() == DetailedEdge.EDGE_TYPE_TF_WINDING)
+                        e.setEdgeType(DetailedEdge.EDGE_TYPE_LOAD_TF_MIX);
+                    e.setS_real(e.getS_real() + load.getConstantS()[2][0]);
+                    e.setS_image(e.getS_image() + load.getConstantS()[2][1]);
+                }
+                break;
+            case LOAD_Y_Z:
+                if (Math.abs(load.getConstantZ()[0][0]) > ZERO_LIMIT
+                        || Math.abs(load.getConstantZ()[0][1]) > ZERO_LIMIT) {
+                    DetailedEdge e = detailedG.getEdge(id1, EARTH_NODE_ID);
+                    if (e == null) {
+                        e = new DetailedEdge(DetailedEdge.EDGE_TYPE_LOAD, tn.getTnNo(), 0);
+                        e.setDevId(obj.getId());
+                        e.setLoadD(false);
+                        detailedG.addEdge(id1, EARTH_NODE_ID, e);
+                    } else if (e.getEdgeType() == DetailedEdge.EDGE_TYPE_TF_WINDING)
+                        e.setEdgeType(DetailedEdge.EDGE_TYPE_LOAD_TF_MIX);
+                    setLoadEdgeZ(e, load.getConstantZ()[0][0], load.getConstantZ()[0][1]);
+                }
+                if (Math.abs(load.getConstantZ()[1][0]) > ZERO_LIMIT
+                        || Math.abs(load.getConstantZ()[1][1]) > ZERO_LIMIT) {
+                    DetailedEdge e = detailedG.getEdge(id2, EARTH_NODE_ID);
+                    if (e == null) {
+                        e = new DetailedEdge(DetailedEdge.EDGE_TYPE_LOAD, tn.getTnNo(), 1);
+                        e.setDevId(obj.getId());
+                        e.setLoadD(false);
+                        detailedG.addEdge(id2, EARTH_NODE_ID, e);
+                    } else if (e.getEdgeType() == DetailedEdge.EDGE_TYPE_TF_WINDING)
+                        e.setEdgeType(DetailedEdge.EDGE_TYPE_LOAD_TF_MIX);
+                    setLoadEdgeZ(e, load.getConstantZ()[1][0], load.getConstantZ()[1][1]);
+                }
+                if (Math.abs(load.getConstantZ()[2][0]) > ZERO_LIMIT
+                        || Math.abs(load.getConstantZ()[2][1]) > ZERO_LIMIT) {
+                    DetailedEdge e = detailedG.getEdge(id3, EARTH_NODE_ID);
+                    if (e == null) {
+                        e = new DetailedEdge(DetailedEdge.EDGE_TYPE_LOAD, tn.getTnNo(), 2);
+                        e.setDevId(obj.getId());
+                        e.setLoadD(false);
+                        detailedG.addEdge(id3, EARTH_NODE_ID, e);
+                    } else if (e.getEdgeType() == DetailedEdge.EDGE_TYPE_TF_WINDING)
+                        e.setEdgeType(DetailedEdge.EDGE_TYPE_LOAD_TF_MIX);
+                    setLoadEdgeZ(e, load.getConstantZ()[2][0], load.getConstantZ()[2][1]);
+                }
+                break;
         }
     }
 
@@ -716,7 +723,7 @@ public class DsTopoIsland implements Serializable, DsModelCons {
         int count = 1;
         while (iter.hasNext()) {
             DsTopoNode tn = iter.next();
-            tn.setBusNo(count);
+            tn.setTnNo(count);
             tns.add(tn);
             tn.setIsland(this);
             count++;
@@ -729,8 +736,8 @@ public class DsTopoIsland implements Serializable, DsModelCons {
             for (MapObject edge : graph.edgesOf(tn)) {
                 DsTopoNode t1 = graph.getEdgeSource(edge);
                 DsTopoNode t2 = graph.getEdgeTarget(edge);
-                connected[count] = (t1 == tn) ? t2.getBusNo() : t1.getBusNo();
-                if (connected[count] > tn.getBusNo()) {
+                connected[count] = (t1 == tn) ? t2.getTnNo() : t1.getTnNo();
+                if (connected[count] > tn.getTnNo()) {
                     edge.setId(String.valueOf(branchId));
                     idToBranch.put(branchId, edge);
                     branchId++;
@@ -740,9 +747,9 @@ public class DsTopoIsland implements Serializable, DsModelCons {
             tn.setConnectedBusNo(connected);
         }
 
-        busNoToTn = new HashMap<>(getTns().size());
+        tnNoToTn = new HashMap<>(getTns().size());
         for (DsTopoNode tn : tns)
-            busNoToTn.put(tn.getBusNo(), tn);
+            tnNoToTn.put(tn.getTnNo(), tn);
         fillTnDevices();
     }
 
@@ -794,8 +801,8 @@ public class DsTopoIsland implements Serializable, DsModelCons {
         isPerUnitSys = perUnitSys;
     }
 
-    public Map<Integer, DsTopoNode> getBusNoToTn() {
-        return busNoToTn;
+    public Map<Integer, DsTopoNode> getTnNoToTn() {
+        return tnNoToTn;
     }
 
     public Map<Integer, MapObject> getIdToBranch() {

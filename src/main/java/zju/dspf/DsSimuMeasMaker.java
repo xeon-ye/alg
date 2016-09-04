@@ -65,7 +65,7 @@ public class DsSimuMeasMaker implements MeasTypeCons {
                         if (tn.getType() == DsTopoNode.TYPE_PQ) {
                             for (int i : tn.getPhases()) {
                                 double trueValue = cal.calBusPQ(tn, i)[0];
-                                String positionId = tn.getBusNo() + "_" + (i);
+                                String positionId = tn.getTnNo() + "_" + (i);
                                 MeasureInfo injectionP = new MeasureInfo(positionId, TYPE_BUS_ACTIVE_POWER, 0);
                                 SimuMeasMaker.formMeasure(trueValue, errorDistribution, ratio, injectionP);
                                 sm.addEfficientMeasure(injectionP);
@@ -78,7 +78,7 @@ public class DsSimuMeasMaker implements MeasTypeCons {
                         if (tn.getType() == DsTopoNode.TYPE_PQ) {
                             for (int i : tn.getPhases()) {
                                 double trueValue = cal.calBusPQ(tn, i)[1];
-                                String positionId = tn.getBusNo() + "_" + (i);
+                                String positionId = tn.getTnNo() + "_" + (i);
                                 MeasureInfo injectionQ = new MeasureInfo(positionId, TYPE_BUS_REACTIVE_POWER, 0);
                                 SimuMeasMaker.formMeasure(trueValue, errorDistribution, ratio, injectionQ);
                                 sm.addEfficientMeasure(injectionQ);
@@ -95,13 +95,13 @@ public class DsSimuMeasMaker implements MeasTypeCons {
                             if (island.isVCartesian()) {
                                 //double trueValue = Math.sqrt(v[0] * v[0] + v[1] * v[1]);
                                 double trueValue = v[0] * v[0] + v[1] * v[1]; //todo;
-                                String positionId = tn.getBusNo() + "_" + (i);
+                                String positionId = tn.getTnNo() + "_" + (i);
                                 MeasureInfo busV = new MeasureInfo(positionId, TYPE_BUS_VOLOTAGE, 0);
                                 SimuMeasMaker.formMeasure(trueValue, errorDistribution, ratio, busV);
                                 sm.addEfficientMeasure(busV);
                             } else {
                                 double trueValue = v[0];
-                                String positionId = tn.getBusNo() + "_" + (i);
+                                String positionId = tn.getTnNo() + "_" + (i);
                                 MeasureInfo busV = new MeasureInfo(positionId, TYPE_BUS_VOLOTAGE, 0);
                                 SimuMeasMaker.formMeasure(trueValue, errorDistribution, ratio, busV);
                                 sm.addEfficientMeasure(busV);
@@ -142,7 +142,7 @@ public class DsSimuMeasMaker implements MeasTypeCons {
                         MapObject obj = island.getIdToBranch().get(branchId);
                         DsTopoNode tn1 = island.getGraph().getEdgeSource(obj);
                         DsTopoNode tn2 = island.getGraph().getEdgeTarget(obj);
-                        DsTopoNode tn = tn1.getBusNo() > tn2.getBusNo() ? tn1 : tn2;
+                        DsTopoNode tn = tn1.getTnNo() > tn2.getTnNo() ? tn1 : tn2;
                         if(!island.getBusV().containsKey(tn))
                             continue;
                         for (int i = 0; i < 3; i++) {
@@ -161,7 +161,7 @@ public class DsSimuMeasMaker implements MeasTypeCons {
                         MapObject obj = island.getIdToBranch().get(branchId);
                         DsTopoNode tn1 = island.getGraph().getEdgeSource(obj);
                         DsTopoNode tn2 = island.getGraph().getEdgeTarget(obj);
-                        DsTopoNode tn = tn1.getBusNo() > tn2.getBusNo() ? tn1 : tn2;
+                        DsTopoNode tn = tn1.getTnNo() > tn2.getTnNo() ? tn1 : tn2;
                         if(!island.getBusV().containsKey(tn))
                             continue;
                         for (int i = 0; i < 3; i++) {

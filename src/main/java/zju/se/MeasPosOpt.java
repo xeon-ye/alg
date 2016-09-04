@@ -211,7 +211,7 @@ public class MeasPosOpt implements MeasTypeCons {
                     case TYPE_LINE_FROM_ACTIVE:
                         MapObject br = dsIsland.getIdToBranch().get(Integer.parseInt(idAndPhase[0]));
                         DsTopoNode tn = dsIsland.getGraph().getEdgeSource(br);
-                        BusData bus = vertexToBus.get(tn.getBusNo() + "-" + Integer.parseInt(idAndPhase[1]));
+                        BusData bus = vertexToBus.get(tn.getTnNo() + "-" + Integer.parseInt(idAndPhase[1]));
                         for(BranchData branch : devIdToBranch.get(idAndPhase[0])) {
                             //注意,这里要求ieee模型的首末段顺序要和ds模型一致
                             if(branch.getTapBusNumber() == bus.getBusNumber()) {
@@ -223,7 +223,7 @@ public class MeasPosOpt implements MeasTypeCons {
                     case TYPE_LINE_TO_ACTIVE:
                         br = dsIsland.getIdToBranch().get(Integer.parseInt(idAndPhase[0]));
                         tn = dsIsland.getGraph().getEdgeTarget(br);
-                        bus = vertexToBus.get(tn.getBusNo() + "-" + Integer.parseInt(idAndPhase[1]));
+                        bus = vertexToBus.get(tn.getTnNo() + "-" + Integer.parseInt(idAndPhase[1]));
                         for(BranchData branch : devIdToBranch.get(idAndPhase[0])) {
                             //注意,这里要求ieee模型的首末段顺序要和ds模型一致
                             if(branch.getTapBusNumber() == bus.getBusNumber()) {
@@ -235,7 +235,7 @@ public class MeasPosOpt implements MeasTypeCons {
                     case TYPE_LINE_FROM_REACTIVE:
                         br = dsIsland.getIdToBranch().get(Integer.parseInt(idAndPhase[0]));
                         tn = dsIsland.getGraph().getEdgeSource(br);
-                        bus = vertexToBus.get(tn.getBusNo() + "-" + Integer.parseInt(idAndPhase[1]));
+                        bus = vertexToBus.get(tn.getTnNo() + "-" + Integer.parseInt(idAndPhase[1]));
                         for(BranchData branch : devIdToBranch.get(idAndPhase[0])) {
                             //注意,这里要求ieee模型的首末段顺序要和ds模型一致
                             if(branch.getTapBusNumber() == bus.getBusNumber()) {
@@ -256,7 +256,7 @@ public class MeasPosOpt implements MeasTypeCons {
                     case TYPE_LINE_TO_REACTIVE:
                         br = dsIsland.getIdToBranch().get(Integer.parseInt(idAndPhase[0]));
                         tn = dsIsland.getGraph().getEdgeTarget(br);
-                        bus = vertexToBus.get(tn.getBusNo() + "-" + Integer.parseInt(idAndPhase[1]));
+                        bus = vertexToBus.get(tn.getTnNo() + "-" + Integer.parseInt(idAndPhase[1]));
                         for(BranchData branch : devIdToBranch.get(idAndPhase[0])) {
                             //注意,这里要求ieee模型的首末段顺序要和ds模型一致
                             if(branch.getTapBusNumber() == bus.getBusNumber()) {
@@ -277,7 +277,7 @@ public class MeasPosOpt implements MeasTypeCons {
                     case TYPE_LINE_FROM_CURRENT:
                         br = dsIsland.getIdToBranch().get(Integer.parseInt(idAndPhase[0]));
                         tn = dsIsland.getGraph().getEdgeSource(br);
-                        bus = vertexToBus.get(tn.getBusNo() + "-" + Integer.parseInt(idAndPhase[1]));
+                        bus = vertexToBus.get(tn.getTnNo() + "-" + Integer.parseInt(idAndPhase[1]));
                         for(BranchData branch : devIdToBranch.get(idAndPhase[0])) {
                             //注意,这里要求ieee模型的首末段顺序要和ds模型一致
                             if(branch.getTapBusNumber() == bus.getBusNumber()) {
@@ -291,7 +291,7 @@ public class MeasPosOpt implements MeasTypeCons {
                     case TYPE_LINE_TO_CURRENT:
                         br = dsIsland.getIdToBranch().get(Integer.parseInt(idAndPhase[0]));
                         tn = dsIsland.getGraph().getEdgeTarget(br);
-                        bus = vertexToBus.get(tn.getBusNo() + "-" + Integer.parseInt(idAndPhase[1]));
+                        bus = vertexToBus.get(tn.getTnNo() + "-" + Integer.parseInt(idAndPhase[1]));
                         for(BranchData branch : devIdToBranch.get(idAndPhase[0])) {
                             //注意,这里要求ieee模型的首末段顺序要和ds模型一致
                             if(branch.getTapBusNumber() == bus.getBusNumber()) {
@@ -380,9 +380,9 @@ public class MeasPosOpt implements MeasTypeCons {
             binaryNum = ds_candPos.length;
             Ds = new ASparseMatrixLink2D[binaryNum + 1];
             H0 = formH_ds(Y, bApos, ds_existMeasTypes, ds_existMeasPos);
-            H0.printOnScreen2();
+            //H0.printOnScreen2();
             Ds[0] = formHTWH(H0, ds_existMeasWeight, element_count);
-            Ds[0].printOnScreen2();
+            //Ds[0].printOnScreen2();
 
             for (String[] pos : ds_candPos) {
                 int[][] measTypes = ds_measTypesPerPos.get(i - 1);

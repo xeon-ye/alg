@@ -125,11 +125,11 @@ public class DsPowerflowTest extends TestCase implements DsModelCons {
         FeederAndLoadTest.trans_polar2rect_deg(v_node2);
         FeederAndLoadTest.trans_polar2rect_deg(v_node3);
         FeederAndLoadTest.trans_polar2rect_deg(v_node4);
-        busV = transPhaseToLL(island.getBusV().get(island.getBusNoToTn().get(2)));
+        busV = transPhaseToLL(island.getBusV().get(island.getTnNoToTn().get(2)));
         assertTrue(DoubleMatrixToolkit.isDoubleMatrixEqual(busV, v_node2, 10));
-        busV = island.getBusV().get(island.getBusNoToTn().get(3));
+        busV = island.getBusV().get(island.getTnNoToTn().get(3));
         assertTrue(DoubleMatrixToolkit.isDoubleMatrixEqual(busV, v_node3, 1));
-        busV = island.getBusV().get(island.getBusNoToTn().get(4));
+        busV = island.getBusV().get(island.getTnNoToTn().get(4));
         assertTrue(DoubleMatrixToolkit.isDoubleMatrixEqual(busV, v_node4, 5));
     }
 
@@ -146,11 +146,11 @@ public class DsPowerflowTest extends TestCase implements DsModelCons {
         FeederAndLoadTest.trans_polar2rect_deg(v_node2);
         FeederAndLoadTest.trans_polar2rect_deg(v_node3);
         FeederAndLoadTest.trans_polar2rect_deg(v_node4);
-        busV = transPhaseToLL(island.getBusV().get(island.getBusNoToTn().get(2)));
+        busV = transPhaseToLL(island.getBusV().get(island.getTnNoToTn().get(2)));
         assertTrue(DoubleMatrixToolkit.isDoubleMatrixEqual(busV, v_node2, 10));
-        busV = island.getBusV().get(island.getBusNoToTn().get(3));
+        busV = island.getBusV().get(island.getTnNoToTn().get(3));
         assertTrue(DoubleMatrixToolkit.isDoubleMatrixEqual(busV, v_node3, 5));
-        busV = island.getBusV().get(island.getBusNoToTn().get(4));
+        busV = island.getBusV().get(island.getTnNoToTn().get(4));
         assertTrue(DoubleMatrixToolkit.isDoubleMatrixEqual(busV, v_node4, 5));
     }
 
@@ -167,13 +167,13 @@ public class DsPowerflowTest extends TestCase implements DsModelCons {
         FeederAndLoadTest.trans_polar2rect_deg(v_node2);
         FeederAndLoadTest.trans_polar2rect_deg(v_node3);
         FeederAndLoadTest.trans_polar2rect_deg(v_node4);
-        busV = transPhaseToLL(island.getBusV().get(island.getBusNoToTn().get(2)));
+        busV = transPhaseToLL(island.getBusV().get(island.getTnNoToTn().get(2)));
         assertTrue(DoubleMatrixToolkit.isDoubleMatrixEqual(busV, v_node2, 10));
         if (isLoopPf)
             return;
-        busV = transPhaseToLL(island.getBusV().get(island.getBusNoToTn().get(3)));
+        busV = transPhaseToLL(island.getBusV().get(island.getTnNoToTn().get(3)));
         assertTrue(DoubleMatrixToolkit.isDoubleMatrixEqual(busV, v_node3, 5));
-        busV = transPhaseToLL(island.getBusV().get(island.getBusNoToTn().get(4)));
+        busV = transPhaseToLL(island.getBusV().get(island.getTnNoToTn().get(4)));
         assertTrue(DoubleMatrixToolkit.isDoubleMatrixEqual(busV, v_node4, 5));
     }
 
@@ -190,13 +190,13 @@ public class DsPowerflowTest extends TestCase implements DsModelCons {
         FeederAndLoadTest.trans_polar2rect_deg(v_node2);
         FeederAndLoadTest.trans_polar2rect_deg(v_node3);
         FeederAndLoadTest.trans_polar2rect_deg(v_node4);
-        busV = transPhaseToLL(island.getBusV().get(island.getBusNoToTn().get(2)));
+        busV = transPhaseToLL(island.getBusV().get(island.getTnNoToTn().get(2)));
         assertTrue(DoubleMatrixToolkit.isDoubleMatrixEqual(busV, v_node2, 5));
         if (isLoopPf)
             return;
-        busV = transPhaseToLL(island.getBusV().get(island.getBusNoToTn().get(3)));
+        busV = transPhaseToLL(island.getBusV().get(island.getTnNoToTn().get(3)));
         assertTrue(DoubleMatrixToolkit.isDoubleMatrixEqual(busV, v_node3, 5));
-        busV = transPhaseToLL(island.getBusV().get(island.getBusNoToTn().get(4)));
+        busV = transPhaseToLL(island.getBusV().get(island.getTnNoToTn().get(4)));
         assertTrue(DoubleMatrixToolkit.isDoubleMatrixEqual(busV, v_node4, 5));
     }
 
@@ -213,11 +213,11 @@ public class DsPowerflowTest extends TestCase implements DsModelCons {
         FeederAndLoadTest.trans_polar2rect_deg(v_node2);
         FeederAndLoadTest.trans_polar2rect_deg(v_node3);
         FeederAndLoadTest.trans_polar2rect_deg(v_node4);
-        busV = island.getBusV().get(island.getBusNoToTn().get(2));
+        busV = island.getBusV().get(island.getTnNoToTn().get(2));
         assertTrue(DoubleMatrixToolkit.isDoubleMatrixEqual(busV, v_node2, 5));
-        busV = island.getBusV().get(island.getBusNoToTn().get(3));
+        busV = island.getBusV().get(island.getTnNoToTn().get(3));
         assertTrue(DoubleMatrixToolkit.isDoubleMatrixEqual(busV, v_node3, 5));
-        busV = island.getBusV().get(island.getBusNoToTn().get(4));
+        busV = island.getBusV().get(island.getTnNoToTn().get(4));
         assertTrue(DoubleMatrixToolkit.isDoubleMatrixEqual(busV, v_node4, 5));
     }
 
@@ -230,11 +230,11 @@ public class DsPowerflowTest extends TestCase implements DsModelCons {
         FeederAndLoadTest.trans_polar2rect_deg(v_node2);
         FeederAndLoadTest.trans_polar2rect_deg(v_node3);
         FeederAndLoadTest.trans_polar2rect_deg(v_node4);
-        double[][] busV = island.getBusV().get(island.getBusNoToTn().get(2));
+        double[][] busV = island.getBusV().get(island.getTnNoToTn().get(2));
         assertTrue(DoubleMatrixToolkit.isDoubleMatrixEqual(busV, v_node2, 5));
-        busV = island.getBusV().get(island.getBusNoToTn().get(3));
+        busV = island.getBusV().get(island.getTnNoToTn().get(3));
         assertTrue(DoubleMatrixToolkit.isDoubleMatrixEqual(busV, v_node3, 5));
-        busV = island.getBusV().get(island.getBusNoToTn().get(4));
+        busV = island.getBusV().get(island.getTnNoToTn().get(4));
         assertTrue(DoubleMatrixToolkit.isDoubleMatrixEqual(busV, v_node4, 5));
     }
 
@@ -340,7 +340,7 @@ public class DsPowerflowTest extends TestCase implements DsModelCons {
         DsTopoNode tn2;
         for (DsTopoNode tn : island1.getBusV().keySet()) {
             v1 = island1.getBusV().get(tn);
-            tn2 = island2.getBusNoToTn().get(tn.getBusNo());
+            tn2 = island2.getTnNoToTn().get(tn.getTnNo());
             if (!island2.getBusV().containsKey(tn2))
                 continue;
             v2 = island2.getBusV().get(tn2);
@@ -392,7 +392,7 @@ public class DsPowerflowTest extends TestCase implements DsModelCons {
             MapObject obj = dsIsland.getIdToBranch().get(branchNo);
             DsTopoNode father = dsIsland.getGraph().getEdgeSource(obj);
             DsTopoNode tn = dsIsland.getGraph().getEdgeTarget(obj);
-            if (father.getBusNo() > tn.getBusNo()) {
+            if (father.getTnNo() > tn.getTnNo()) {
                 tmpTn = tn;
                 tn = father;
                 father = tmpTn;

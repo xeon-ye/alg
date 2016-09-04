@@ -20,7 +20,7 @@ public class DsTopoNode implements Serializable {
 
     private int[] connectedBusNo;
 
-    private int busNo;
+    private int tnNo;
 
     private double baseKv;
 
@@ -49,6 +49,7 @@ public class DsTopoNode implements Serializable {
                     }
             }
         }
+        //通过分析连在节点上的线路，通过@GeneralBranch的containsPhase方法判断是否包含某相
         phases = new int[phaseNum];
         phaseNum = 0;
         for(int i = 0; i < 3; i++) {
@@ -64,9 +65,7 @@ public class DsTopoNode implements Serializable {
     }
 
     /**
-     * <br>通过分析连在节点上的线路，通过@GeneralBranch的containsPhase方法判断是否包含某相</br>
-     * 此方法效率不高，不适合在多重循环中或大量使用
-     *
+     * 判断是否包含某一相位
      * @param phase 相位
      * @return 是否包含某一相位
      */
@@ -93,12 +92,12 @@ public class DsTopoNode implements Serializable {
         this.connectivityNodes = connectivityNodes;
     }
 
-    public int getBusNo() {
-        return busNo;
+    public int getTnNo() {
+        return tnNo;
     }
 
-    public void setBusNo(int busNo) {
-        this.busNo = busNo;
+    public void setTnNo(int tnNo) {
+        this.tnNo = tnNo;
     }
 
     public double getBaseKv() {

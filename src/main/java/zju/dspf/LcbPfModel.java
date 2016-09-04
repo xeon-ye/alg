@@ -329,19 +329,19 @@ public class LcbPfModel implements NewtonModel, DsModelCons {
             pos = edgeIndex.get(edge);
             if (phase1 == 3) {//大地节点或是不接地Y接法中心点
                 tnNo2 = Integer.parseInt(id2.substring(0, id2.lastIndexOf("-")));
-                tn2 = island.getBusNoToTn().get(tnNo2);
+                tn2 = island.getTnNoToTn().get(tnNo2);
                 state.setValue(pos, island.getBusV().get(tn2)[phase2][0]);
                 state.setValue(pos + dimension, island.getBusV().get(tn2)[phase2][1]);
             } else if (phase2 == 3) {
                 tnNo1 = Integer.parseInt(id1.substring(0, id1.lastIndexOf("-")));
-                tn1 = island.getBusNoToTn().get(tnNo1);
+                tn1 = island.getTnNoToTn().get(tnNo1);
                 state.setValue(pos, island.getBusV().get(tn1)[phase1][0]);
                 state.setValue(pos + dimension, island.getBusV().get(tn1)[phase1][1]);
             } else {
                 tnNo1 = Integer.parseInt(id1.substring(0, id1.lastIndexOf("-")));
                 tnNo2 = Integer.parseInt(id2.substring(0, id2.lastIndexOf("-")));
-                tn1 = island.getBusNoToTn().get(tnNo1);
-                tn2 = island.getBusNoToTn().get(tnNo2);
+                tn1 = island.getTnNoToTn().get(tnNo1);
+                tn2 = island.getTnNoToTn().get(tnNo2);
                 if (phase1 > phase2) {
                     tmpTn = tn1;
                     tn1 = tn2;
@@ -882,7 +882,7 @@ public class LcbPfModel implements NewtonModel, DsModelCons {
             }
             switch (edge.getEdgeType()) {
                 case DetailedEdge.EDGE_TYPE_SUPPLIER:
-                    tn = island.getBusNoToTn().get(edge.getTnNo1());
+                    tn = island.getTnNoToTn().get(edge.getTnNo1());
                     vertexIdToV.put(v2, island.getBusV().get(tn));
                     return;
             }
@@ -891,7 +891,7 @@ public class LcbPfModel implements NewtonModel, DsModelCons {
             if (phase2 > 2)
                 return;
             busNo = Integer.parseInt(v2.substring(0, v2.length() - 2));
-            tn = island.getBusNoToTn().get(busNo);
+            tn = island.getTnNoToTn().get(busNo);
             if (!island.getBusV().containsKey(tn))
                 island.getBusV().put(tn, new double[3][2]);
             vertexIdToV.put(v2, island.getBusV().get(tn));
@@ -929,7 +929,7 @@ public class LcbPfModel implements NewtonModel, DsModelCons {
         v[1] = 0;
         switch (edge.getEdgeType()) {
             case DetailedEdge.EDGE_TYPE_SUPPLIER:
-                DsTopoNode tn = island.getBusNoToTn().get(edge.getTnNo1());
+                DsTopoNode tn = island.getTnNoToTn().get(edge.getTnNo1());
                 v[0] -= island.getBusV().get(tn)[edge.getPhase()][0];
                 v[1] -= island.getBusV().get(tn)[edge.getPhase()][1];
                 break;
@@ -1272,7 +1272,7 @@ public class LcbPfModel implements NewtonModel, DsModelCons {
         for (DsTopoNode tn : island.getBusV().keySet()) {
             isFilled = false;
             for (int i = 0; i < 3; i++) {
-                if (busVFiller.vertexIdToV.containsKey(tn.getBusNo() + "-" + i)) {
+                if (busVFiller.vertexIdToV.containsKey(tn.getTnNo() + "-" + i)) {
                     isFilled = true;
                     break;
                 }
@@ -1427,8 +1427,8 @@ public class LcbPfModel implements NewtonModel, DsModelCons {
                                 state.setValue(i + dimension, -value * branchI[(e.getPhase() + 1) % 3][1] / tf.getNt());
                                 break;
                             case Transformer.CONN_TYPE_D_D:
-                                DsTopoNode tn1 = island.getBusNoToTn().get(e.getTnNo1());
-                                DsTopoNode tn2 = island.getBusNoToTn().get(e.getOtherEdgeOfTf().getTnNo1());
+                                DsTopoNode tn1 = island.getTnNoToTn().get(e.getTnNo1());
+                                DsTopoNode tn2 = island.getTnNoToTn().get(e.getOtherEdgeOfTf().getTnNo1());
                                 double vx1 = island.getBusV().get(tn1)[phase][0] - island.getBusV().get(tn1)[(phase + 1) % 3][0];
                                 double vy1 = island.getBusV().get(tn1)[phase][1] - island.getBusV().get(tn1)[(phase + 1) % 3][1];
                                 double vx2 = island.getBusV().get(tn2)[phase][0] - island.getBusV().get(tn2)[(phase + 1) % 3][0];
@@ -1462,8 +1462,8 @@ public class LcbPfModel implements NewtonModel, DsModelCons {
                                 state.setValue(i + dimension, value * branchI[phase][1]);
                                 break;
                             case Transformer.CONN_TYPE_D_D:
-                                DsTopoNode tn1 = island.getBusNoToTn().get(e.getOtherEdgeOfTf().getTnNo1());
-                                DsTopoNode tn2 = island.getBusNoToTn().get(e.getTnNo1());
+                                DsTopoNode tn1 = island.getTnNoToTn().get(e.getOtherEdgeOfTf().getTnNo1());
+                                DsTopoNode tn2 = island.getTnNoToTn().get(e.getTnNo1());
                                 double vx1 = island.getBusV().get(tn1)[phase][0] - island.getBusV().get(tn1)[(phase + 1) % 3][0];
                                 double vy1 = island.getBusV().get(tn1)[phase][1] - island.getBusV().get(tn1)[(phase + 1) % 3][1];
                                 double vx2 = island.getBusV().get(tn2)[phase][0] - island.getBusV().get(tn2)[(phase + 1) % 3][0];
@@ -1495,7 +1495,7 @@ public class LcbPfModel implements NewtonModel, DsModelCons {
                     break;
                 case DetailedEdge.EDGE_TYPE_LOAD:
                     busNo1 = e.getTnNo1();
-                    tn = island.getBusNoToTn().get(busNo1);
+                    tn = island.getTnNoToTn().get(busNo1);
                     tnV = island.getBusV().get(tn);
                     if (Integer.parseInt(v1.substring(v1.length() - 1)) != phase)
                         value = -1.0;
@@ -1542,7 +1542,7 @@ public class LcbPfModel implements NewtonModel, DsModelCons {
         for (DetailedEdge edge : windingEdges) {
             tf = (Transformer) island.getBranches().get(island.getDevices().get(edge.getDevId()));
             pos = edgeIndex.get(edge);
-            tn = island.getBusNoToTn().get(edge.getTnNo1());
+            tn = island.getTnNoToTn().get(edge.getTnNo1());
             tnV = island.getBusV().get(tn);
             switch (tf.getConnType()) {
                 case Transformer.CONN_TYPE_Y_D:
@@ -1566,7 +1566,7 @@ public class LcbPfModel implements NewtonModel, DsModelCons {
             }
         }
         for (DetailedEdge edge : nonZLoadEdges) {
-            tn = island.getBusNoToTn().get(edge.getTnNo1());
+            tn = island.getTnNoToTn().get(edge.getTnNo1());
             pos = edgeIndex.get(edge);
             tnV = island.getBusV().get(tn);
             if (edge.isLoadD()) {

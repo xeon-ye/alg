@@ -1,11 +1,12 @@
 package zju.se;
 
 import junit.framework.TestCase;
+import zju.devmodel.MapObject;
 import zju.dsmodel.DistriSys;
 import zju.dsmodel.DsTopoIsland;
+import zju.dsmodel.DsTopoNode;
 import zju.dsmodel.IeeeDsInHand;
 import zju.dspf.DsPowerflowTest;
-import zju.dspf.DsSimuMeasMaker;
 import zju.measure.MeasTypeCons;
 import zju.measure.MeasVectorCreator;
 import zju.measure.MeasureFileRw;
@@ -74,72 +75,13 @@ public class MeasPosOptTest extends TestCase implements MeasTypeCons {
         mc.getMeasureVector(sm, true);
 
         MeasPosOpt mpo = new MeasPosOpt(dsIsland);
-
-        String[][] candPos = new String[2][];
-        candPos[0] = new String[6];
-        candPos[0][0] = "1_0";
-        candPos[0][1] = "1_1";
-        candPos[0][2] = "1_2";
-        candPos[0][3] = "1_0";
-        candPos[0][4] = "1_1";
-        candPos[0][5] = "1_2";
-        candPos[1] = new String[6];
-        candPos[1][0] = "3_0";
-        candPos[1][1] = "3_1";
-        candPos[1][2] = "3_2";
-        candPos[1][3] = "2_0";
-        candPos[1][4] = "2_1";
-        candPos[1][5] = "2_2";
-        List<int[][]> measTypePerPos = new ArrayList<>(candPos.length);
-        double[][] weights = new double[candPos.length][];
-        for (int i = 0; i < candPos.length; i++) {
-            int[][] ts = new int[candPos[i].length][3];
-            weights[i] = new double[candPos[i].length * 3];
-            measTypePerPos.add(ts);
-            int count = 0;
-            for (int j = 0; j < 3; j++) {
-                ts[j] = new int[3];
-                ts[j][0] = TYPE_BUS_ACTIVE_POWER;
-                ts[j][1] = TYPE_BUS_REACTIVE_POWER;
-                ts[j][2] = TYPE_BUS_VOLOTAGE;
-                weights[i][count] = 0.58;
-                weights[i][count + 1] = 0.50;
-                weights[i][count + 2] = 0.80;
-                count += 3;
-            }
-            if(i < 1 && candPos[i].length > 3) {
-                for (int j = 3; j < 6; j++) {
-                    ts[j] = new int[3];
-                    ts[j][0] = TYPE_LINE_FROM_ACTIVE;
-                    ts[j][1] = TYPE_LINE_FROM_REACTIVE;
-                    ts[j][2] = TYPE_LINE_FROM_CURRENT;
-                    weights[i][count] = 0.58;
-                    weights[i][count + 1] = 0.50;
-                    weights[i][count + 2] = 0.80;
-                    count += 3;
-                }
-            } else if(candPos[i].length > 3){
-                for (int j = 3; j < 6; j++) {
-                    ts[j] = new int[3];
-                    ts[j][0] = TYPE_LINE_TO_ACTIVE;
-                    ts[j][1] = TYPE_LINE_TO_REACTIVE;
-                    ts[j][2] = TYPE_LINE_TO_CURRENT;
-                    weights[i][count] = 0.58;
-                    weights[i][count + 1] = 0.50;
-                    weights[i][count + 2] = 0.80;
-                    count += 3;
-                }
-            }
-        }
-
-        mpo.setDs_candPos(candPos);
-        mpo.setDs_measTypesPerPos(measTypePerPos);
-        mpo.setDs_measWeight(weights);
         mpo.setDs_existMeasPos(mc.measPosWithPhase);
         mpo.setDs_existMeasTypes(mc.measTypes);
         mpo.setDs_existMeasWeight(mc.weights);
-        mpo.setMaxDevNum(1);
 
+        setIduMeasures(dsIsland, new int[]{1, 3}, new int[]{1, 2}, new double[]{0.58, 0.5, 0.8, 0.58, 0.5, 0.8}, mpo);
+        //setIduMeasures(dsIsland, new int[]{}, new int[]{}, new double[]{}, mpo);
+        mpo.setMaxDevNum(1);
         mpo.doOpt(true);
     }
 
@@ -159,61 +101,115 @@ public class MeasPosOptTest extends TestCase implements MeasTypeCons {
         mc.getMeasureVector(sm, true);
 
         MeasPosOpt mpo = new MeasPosOpt(dsIsland);
+        mpo.setDs_existMeasPos(mc.measPosWithPhase);
+        mpo.setDs_existMeasTypes(mc.measTypes);
+        mpo.setDs_existMeasWeight(mc.weights);
 
+        setIduMeasures(dsIsland, new int[]{}, new int[]{}, new double[]{}, mpo);
+        mpo.setMaxDevNum(1);
+        mpo.doOpt(true);
+    }
 
-        String[][] candPos = new String[0][];
-        //candPos[0] = new String[6];
-        //candPos[0][0] = "1_0";
-        //candPos[0][1] = "1_1";
-        //candPos[0][2] = "1_2";
-        //candPos[0][3] = "1_0";
-        //candPos[0][4] = "1_1";
-        //candPos[0][5] = "1_2";
-        //candPos[1] = new String[6];
-        //candPos[1][0] = "3_0";
-        //candPos[1][1] = "3_1";
-        //candPos[1][2] = "3_2";
-        //candPos[1][3] = "2_0";
-        //candPos[1][4] = "2_1";
-        //candPos[1][5] = "2_2";
+    public void testDscase34() {
+        InputStream ieeeFile = IeeeDsInHand.class.getResourceAsStream("/dsfiles/case34-notrans.txt");
+        DistriSys sys = IeeeDsInHand.createDs(ieeeFile, "800", 24.9 / sqrt3);
+        //计算潮流
+        DsPowerflowTest.testConverged(sys, false);
+        DsTopoIsland dsIsland = sys.getActiveIslands()[0];
+        //形成量测
+        //DsSimuMeasMaker smMaker = new DsSimuMeasMaker();
+        //SystemMeasure sm = smMaker.createFullMeasure(dsIsland, 1, 0.02);
+        //MeasureFileRw.writeFileSimple(sm, "/home/arno/alg/src/test/resources/dsfiles/case34-notrans-measure.txt");
+        //读取量测
+        SystemMeasure sm = MeasureFileRw.parse(getClass().getResourceAsStream("/dsfiles/case34-notrans-measure.txt"));
+        MeasVectorCreator mc = new MeasVectorCreator();
+        mc.getMeasureVector(sm, true);
+
+        MeasPosOpt mpo = new MeasPosOpt(dsIsland);
+        mpo.setDs_existMeasPos(mc.measPosWithPhase);
+        mpo.setDs_existMeasTypes(mc.measTypes);
+        mpo.setDs_existMeasWeight(mc.weights);
+
+        setIduMeasures(dsIsland, new int[]{}, new int[]{}, new double[]{}, mpo);
+        mpo.setMaxDevNum(1);
+        mpo.doOpt(true);
+    }
+
+    /**
+     * 设置量测位置，以及权重
+     * @param island 配电网拓扑分析之后的电气岛
+     * @param tnIds 量测所在的节点（节点编号通过广度优先搜索而来，见DsIsland的initialIsland方法）
+     * @param branchIds 量测所在的支路（编号方法见上）
+     * @param weight 每种量测的权重
+     * @param mpo 需要设置的对象
+     */
+    private void setIduMeasures(DsTopoIsland island, int[] tnIds, int[] branchIds, double[] weight, MeasPosOpt mpo) {
+
+        int busMeasureNum = 3; //某一节点某一相对应的量测数目
+        int branchMeasureNum = 3; //某一支路某一相对应的量测数目
+        String[][] candPos = new String[tnIds.length][];
         List<int[][]> measTypePerPos = new ArrayList<>(candPos.length);
         double[][] weights = new double[candPos.length][];
-        for (int i = 0; i < candPos.length; i++) {
-            int[][] ts = new int[candPos[i].length][3];
-            weights[i] = new double[candPos[i].length * 3];
+        for(int i = 0; i < tnIds.length; i++) {
+            int count1 = 0;
+            int count2 = 0;
+            //首先统计有多少个位置可以装量测
+            DsTopoNode tn = island.getTnNoToTn().get(tnIds[i]);
+            if(tn != null)
+                for(int phase = 0; phase < 3; phase++)
+                    if(tn.containsPhase(phase))
+                        count1 ++;
+            MapObject branchObj = island.getIdToBranch().get(branchIds[i]);
+            if(branchObj != null)
+                for(int phase = 0; phase < 3; phase++)
+                    if(island.getBranches().get(branchObj).containsPhase(phase))
+                        count2 ++;
+            //开辟内存
+            candPos[i] = new String[count1 + count2]; //量测的位置
+            weights[i] = new double[count1 * busMeasureNum + count2 * branchMeasureNum];
+            int[][] ts = new int[candPos[i].length][];
             measTypePerPos.add(ts);
             int count = 0;
-            for (int j = 0; j < 3; j++) {
-                ts[j] = new int[3];
-                ts[j][0] = TYPE_BUS_ACTIVE_POWER;
-                ts[j][1] = TYPE_BUS_REACTIVE_POWER;
-                ts[j][2] = TYPE_BUS_VOLOTAGE;
-                weights[i][count] = 0.58;
-                weights[i][count + 1] = 0.50;
-                weights[i][count + 2] = 0.80;
-                count += 3;
-            }
-            if(i < 1 && candPos[i].length > 3) {
-                for (int j = 3; j < 6; j++) {
-                    ts[j] = new int[3];
-                    ts[j][0] = TYPE_LINE_FROM_ACTIVE;
-                    ts[j][1] = TYPE_LINE_FROM_REACTIVE;
-                    ts[j][2] = TYPE_LINE_FROM_CURRENT;
-                    weights[i][count] = 0.58;
-                    weights[i][count + 1] = 0.50;
-                    weights[i][count + 2] = 0.80;
-                    count += 3;
+            count1 = 0; count2 = 0;
+            if(tn != null) {
+                for (int phase = 0; phase < 3; phase++) {
+                    if (tn.containsPhase(phase)) {
+                        int j = 0;
+                        candPos[i][count] = tnIds[i] + "_" + phase;
+                        ts[count] = new int[busMeasureNum];
+                        ts[count][j++] = TYPE_BUS_ACTIVE_POWER;
+                        ts[count][j++] = TYPE_BUS_REACTIVE_POWER;
+                        ts[count][j] = TYPE_BUS_VOLOTAGE;
+                        weights[i][count1 * busMeasureNum] = weight[0];
+                        weights[i][count1 * busMeasureNum + 1] = weight[1];
+                        weights[i][count1 * busMeasureNum + 2] = weight[2];
+                        count++;
+                        count1++;
+                    }
                 }
-            } else if(candPos[i].length > 3){
-                for (int j = 3; j < 6; j++) {
-                    ts[j] = new int[3];
-                    ts[j][0] = TYPE_LINE_TO_ACTIVE;
-                    ts[j][1] = TYPE_LINE_TO_REACTIVE;
-                    ts[j][2] = TYPE_LINE_TO_CURRENT;
-                    weights[i][count] = 0.58;
-                    weights[i][count + 1] = 0.50;
-                    weights[i][count + 2] = 0.80;
-                    count += 3;
+            }
+            if(branchObj != null) {
+                for (int phase = 0; phase < 3; phase++) {
+                    int j = 0;
+                    if (island.getBranches().get(branchObj).containsPhase(phase)) {
+                        candPos[i][count] = branchIds[i] + "_" + phase;
+                        ts[count] = new int[branchMeasureNum];
+                        if(island.getGraph().getEdgeSource(branchObj) == tn) {
+                            ts[count][j++] = TYPE_LINE_FROM_ACTIVE;
+                            ts[count][j++] = TYPE_LINE_FROM_REACTIVE;
+                            ts[count][j] = TYPE_LINE_FROM_CURRENT;
+                        } else {
+                            ts[count][j++] = TYPE_LINE_TO_ACTIVE;
+                            ts[count][j++] = TYPE_LINE_TO_REACTIVE;
+                            ts[count][j] = TYPE_LINE_TO_CURRENT;
+                        }
+                        j = 0;
+                        weights[i][count1 * busMeasureNum + count2 * branchMeasureNum + j++] = weight[3];
+                        weights[i][count1 * busMeasureNum + count2 * branchMeasureNum + j++] = weight[4];
+                        weights[i][count1 * busMeasureNum + count2 * branchMeasureNum + j] = weight[5];
+                        count++;
+                        count2++;
+                    }
                 }
             }
         }
@@ -221,11 +217,5 @@ public class MeasPosOptTest extends TestCase implements MeasTypeCons {
         mpo.setDs_candPos(candPos);
         mpo.setDs_measTypesPerPos(measTypePerPos);
         mpo.setDs_measWeight(weights);
-        mpo.setDs_existMeasPos(mc.measPosWithPhase);
-        mpo.setDs_existMeasTypes(mc.measTypes);
-        mpo.setDs_existMeasWeight(mc.weights);
-        mpo.setMaxDevNum(1);
-
-        mpo.doOpt(true);
     }
 }

@@ -89,18 +89,18 @@ public class DsPowerflow implements DsModelCons {
             int size = island.isBalanced() ? 1 : 3;
             double[][] v0 = new double[size][2];
             for (int bus = 1; bus < island.getTns().size(); bus++) {
-                DsTopoNode tn = island.getBusNoToTn().get(bus);
+                DsTopoNode tn = island.getTnNoToTn().get(bus);
                 for (int son : tn.getConnectedBusNo()) {
                     if (son < bus)
                         continue;
-                    double[][] sonV = island.getBusV().get(island.getBusNoToTn().get(son));
+                    double[][] sonV = island.getBusV().get(island.getTnNoToTn().get(son));
                     for (int i = 0; i < sonV.length; i++) {
                         v0[i][0] = sonV[i][0];
                         v0[i][1] = sonV[i][1];
                     }
 
                     double[][] fatherV = island.getBusV().get(tn);
-                    MapObject edge = island.getGraph().getEdge(tn, island.getBusNoToTn().get(son));
+                    MapObject edge = island.getGraph().getEdge(tn, island.getTnNoToTn().get(son));
                     GeneralBranch branch = island.getBranches().get(edge);
                     branch.calTailV(fatherV, island.getBranchTailI().get(edge), sonV);
 
@@ -172,10 +172,10 @@ public class DsPowerflow implements DsModelCons {
         double[][] v;
         GeneralBranch branch;
         for (int bus = island.getTns().size(); bus > 1; bus--) {
-            DsTopoNode tn = island.getBusNoToTn().get(bus);
+            DsTopoNode tn = island.getTnNoToTn().get(bus);
             for (int anotherBus : tn.getConnectedBusNo()) {
-                if (tn.getBusNo() > anotherBus) {
-                    curEdge = island.getGraph().getEdge(tn, island.getBusNoToTn().get(anotherBus));
+                if (tn.getTnNo() > anotherBus) {
+                    curEdge = island.getGraph().getEdge(tn, island.getTnNoToTn().get(anotherBus));
                     break;
                 }
             }
@@ -194,8 +194,8 @@ public class DsPowerflow implements DsModelCons {
             }
             //计算流入子节点的电流
             for (int anotherBus : tn.getConnectedBusNo()) {
-                if (tn.getBusNo() < anotherBus) {
-                    MapObject subEdge = island.getGraph().getEdge(tn, island.getBusNoToTn().get(anotherBus));
+                if (tn.getTnNo() < anotherBus) {
+                    MapObject subEdge = island.getGraph().getEdge(tn, island.getTnNoToTn().get(anotherBus));
                     DoubleMatrixToolkit.selfAdd(tailI, island.getBranchHeadI().get(subEdge));
                 }
             }

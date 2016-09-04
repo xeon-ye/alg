@@ -1,7 +1,6 @@
 package zju.dsse;
 
 import cern.colt.function.IntIntDoubleFunction;
-import cern.colt.matrix.DoubleMatrix2D;
 import zju.dsmodel.DetailedEdge;
 import zju.dsmodel.DsTopoIsland;
 import zju.dsmodel.DsTopoNode;
@@ -161,7 +160,7 @@ public class IpoptLcbSe extends IpoptSeAlg {
                         key = String.valueOf(num);
                         tn1 = dsIsland.getGraph().getEdgeSource(dsIsland.getDevices().get(key));
                         tn2 = dsIsland.getGraph().getEdgeTarget(dsIsland.getDevices().get(key));
-                        e = dsIsland.getDetailedG().getEdge(tn1.getBusNo() + "-" + phase, tn2.getBusNo() + "-" + phase);
+                        e = dsIsland.getDetailedG().getEdge(tn1.getTnNo() + "-" + phase, tn2.getTnNo() + "-" + phase);
                         meas.getZ_estimate().setValue(index, calPowerOfBranch(e, false, false));
                     }
                     break;
@@ -172,7 +171,7 @@ public class IpoptLcbSe extends IpoptSeAlg {
                         key = String.valueOf(num);
                         tn1 = dsIsland.getGraph().getEdgeSource(dsIsland.getDevices().get(key));
                         tn2 = dsIsland.getGraph().getEdgeTarget(dsIsland.getDevices().get(key));
-                        e = dsIsland.getDetailedG().getEdge(tn1.getBusNo() + "-" + phase, tn2.getBusNo() + "-" + phase);
+                        e = dsIsland.getDetailedG().getEdge(tn1.getTnNo() + "-" + phase, tn2.getTnNo() + "-" + phase);
                         meas.getZ_estimate().setValue(index, calPowerOfBranch(e, false, true));
                     }
                     break;
@@ -183,7 +182,7 @@ public class IpoptLcbSe extends IpoptSeAlg {
                         key = String.valueOf(num);
                         tn1 = dsIsland.getGraph().getEdgeSource(dsIsland.getDevices().get(key));
                         tn2 = dsIsland.getGraph().getEdgeTarget(dsIsland.getDevices().get(key));
-                        e = dsIsland.getDetailedG().getEdge(tn1.getBusNo() + "-" + phase, tn2.getBusNo() + "-" + phase);
+                        e = dsIsland.getDetailedG().getEdge(tn1.getTnNo() + "-" + phase, tn2.getTnNo() + "-" + phase);
                         meas.getZ_estimate().setValue(index, calPowerOfBranch(e, true, false));
                     }
                     break;
@@ -194,7 +193,7 @@ public class IpoptLcbSe extends IpoptSeAlg {
                         key = String.valueOf(num);
                         tn1 = dsIsland.getGraph().getEdgeSource(dsIsland.getDevices().get(key));
                         tn2 = dsIsland.getGraph().getEdgeTarget(dsIsland.getDevices().get(key));
-                        e = dsIsland.getDetailedG().getEdge(tn1.getBusNo() + "-" + phase, tn2.getBusNo() + "-" + phase);
+                        e = dsIsland.getDetailedG().getEdge(tn1.getTnNo() + "-" + phase, tn2.getTnNo() + "-" + phase);
                         meas.getZ_estimate().setValue(index, calPowerOfBranch(e, true, true));
                     }
                     break;
@@ -205,7 +204,7 @@ public class IpoptLcbSe extends IpoptSeAlg {
                         key = String.valueOf(num);
                         tn1 = dsIsland.getGraph().getEdgeSource(dsIsland.getDevices().get(key));
                         tn2 = dsIsland.getGraph().getEdgeTarget(dsIsland.getDevices().get(key));
-                        e = dsIsland.getDetailedG().getEdge(tn1.getBusNo() + "-" + phase, tn2.getBusNo() + "-" + phase);
+                        e = dsIsland.getDetailedG().getEdge(tn1.getTnNo() + "-" + phase, tn2.getTnNo() + "-" + phase);
                         branchNo = pfModel.getEdgeToNo().get(e);
                         pfModel.calCurrent(branchNo, tempI);
                         meas.getZ_estimate().setValue(index, tempI[0] * tempI[0] + tempI[1] * tempI[1]);
@@ -410,12 +409,12 @@ public class IpoptLcbSe extends IpoptSeAlg {
         int capacity = 2 * (v_size + i_from_size + i_to_size) + 4 * (p_from_size + q_from_size + p_to_size + q_to_size);
         for (int i = 0; i < meas.getBus_p_pos().length; i++) {
             int num = meas.getBus_p_pos()[i];//num starts from 1
-            //DsTopoNode tn = island.getBusNoToTn().get(num);
+            //DsTopoNode tn = island.getTnNoToTn().get(num);
             //capacity += (2 * tn.getConnectedBusNo().length + 2);
         }
         for (int i = 0; i < meas.getBus_q_pos().length; i++) {
             int num = meas.getBus_q_pos()[i];//num starts from 1
-            //DsTopoNode tn = island.getBusNoToTn().get(num);
+            //DsTopoNode tn = island.getTnNoToTn().get(num);
             //capacity += (2 * tn.getConnectedBusNo().length + 2);
         }
         return capacity;
@@ -459,7 +458,7 @@ public class IpoptLcbSe extends IpoptSeAlg {
                         key = String.valueOf(num);
                         tn1 = dsIsland.getGraph().getEdgeSource(dsIsland.getDevices().get(key));
                         tn2 = dsIsland.getGraph().getEdgeTarget(dsIsland.getDevices().get(key));
-                        e = dsIsland.getDetailedG().getEdge(tn1.getBusNo() + "-" + phase, tn2.getBusNo() + "-" + phase);
+                        e = dsIsland.getDetailedG().getEdge(tn1.getTnNo() + "-" + phase, tn2.getTnNo() + "-" + phase);
                         branchNo = pfModel.getEdgeToNo().get(e);
                         pfModel.calCurrent(branchNo, pfModel.getState(), tempI);
                         calV(num + "-" + phase, DsTopoIsland.EARTH_NODE_ID, tempV);
@@ -497,7 +496,7 @@ public class IpoptLcbSe extends IpoptSeAlg {
                         key = String.valueOf(num);
                         tn1 = dsIsland.getGraph().getEdgeSource(dsIsland.getDevices().get(key));
                         tn2 = dsIsland.getGraph().getEdgeTarget(dsIsland.getDevices().get(key));
-                        e = dsIsland.getDetailedG().getEdge(tn1.getBusNo() + "-" + phase, tn2.getBusNo() + "-" + phase);
+                        e = dsIsland.getDetailedG().getEdge(tn1.getTnNo() + "-" + phase, tn2.getTnNo() + "-" + phase);
                         branchNo = pfModel.getEdgeToNo().get(e);
                         int tmpK = pfModel.getB().getJA2()[branchNo], i;
                         pfModel.calCurrent(branchNo, tempI);

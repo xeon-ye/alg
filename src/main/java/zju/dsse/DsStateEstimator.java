@@ -62,7 +62,7 @@ public class DsStateEstimator implements DsModelCons {
             count = 0;
             for (DsTopoNode tn : island.getTns())
                 if (tn.getType() == DsTopoNode.TYPE_LINK)
-                    linkBuses[count++] = tn.getBusNo();
+                    linkBuses[count++] = tn.getTnNo();
             MeasVector meas = new MeasVectorCreator().getMeasureVector(sm, true);//todo: check it
             alg.setSlackBusNum(1);//todo:
             if(alg instanceof IpoptDsSe) {

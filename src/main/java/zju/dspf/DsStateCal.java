@@ -45,7 +45,7 @@ public class DsStateCal implements MeasTypeCons {//todo: test is needed and not 
                     for (int i = 0; i < meas.getBus_v_pos().length; i++, index++) {
                         int num = meas.getBus_v_pos()[i];
                         int phase = meas.getBus_v_phase()[i];
-                        double[] v = island.getBusV().get(island.getBusNoToTn().get(num))[phase];
+                        double[] v = island.getBusV().get(island.getTnNoToTn().get(num))[phase];
                         if (island.isVCartesian())
                             result.setValue(index, v[0] * v[0] + v[1] * v[1]);//todo:
                         else
@@ -57,7 +57,7 @@ public class DsStateCal implements MeasTypeCons {//todo: test is needed and not 
                     for (int i = 0; i < meas.getBus_p_pos().length; i++, index++) {
                         int num = meas.getBus_p_pos()[i];//num starts from 1
                         int phase = meas.getBus_p_phase()[i];
-                        result.setValue(index, calBusPQ(island.getBusNoToTn().get(num), phase)[0]);
+                        result.setValue(index, calBusPQ(island.getTnNoToTn().get(num), phase)[0]);
                     }
                     break;
                 //to get the estimated bus reactive power
@@ -65,7 +65,7 @@ public class DsStateCal implements MeasTypeCons {//todo: test is needed and not 
                     for (int i = 0; i < meas.getBus_q_pos().length; i++, index++) {
                         int num = meas.getBus_q_pos()[i];
                         int phase = meas.getBus_q_phase()[i];
-                        result.setValue(index, calBusPQ(island.getBusNoToTn().get(num), phase)[1]);
+                        result.setValue(index, calBusPQ(island.getTnNoToTn().get(num), phase)[1]);
                     }
                     break;
                 //to get the estimated line active power from the bus
@@ -136,9 +136,9 @@ public class DsStateCal implements MeasTypeCons {//todo: test is needed and not 
     public double[] calBusPQ(DsTopoNode tn, int phase) {
         double[] value = new double[2];
         for (int b : tn.getConnectedBusNo()) {//branch number = tail bus's number - 1
-            DsTopoNode tn2 = tn.getIsland().getBusNoToTn().get(b);
+            DsTopoNode tn2 = tn.getIsland().getTnNoToTn().get(b);
             MapObject edge = tn.getIsland().getGraph().getEdge(tn, tn2);
-            if (tn.getBusNo() < b) {
+            if (tn.getTnNo() < b) {
                 double[] doubles = calLinePQFrom(edge, phase);
                 value[0] += doubles[0];
                 value[1] += doubles[1];
@@ -161,7 +161,7 @@ public class DsStateCal implements MeasTypeCons {//todo: test is needed and not 
     public double[] calLinePQFrom(MapObject pos, int phase) {
         DsTopoNode tn1 = island.getGraph().getEdgeSource(pos);
         DsTopoNode tn2 = island.getGraph().getEdgeTarget(pos);
-        DsTopoNode tn = tn1.getBusNo() < tn2.getBusNo() ? tn1 : tn2;
+        DsTopoNode tn = tn1.getTnNo() < tn2.getTnNo() ? tn1 : tn2;
         double[] v = island.getBusV().get(tn)[phase];
         if (!island.isVCartesian()) {
             MathUtil.trans_polar2rect(v, tmpV);
@@ -188,7 +188,7 @@ public class DsStateCal implements MeasTypeCons {//todo: test is needed and not 
     public double[] calLinePQTo(MapObject pos, int phase) {
         DsTopoNode tn1 = island.getGraph().getEdgeSource(pos);
         DsTopoNode tn2 = island.getGraph().getEdgeTarget(pos);
-        DsTopoNode tn = tn1.getBusNo() > tn2.getBusNo() ? tn1 : tn2;
+        DsTopoNode tn = tn1.getTnNo() > tn2.getTnNo() ? tn1 : tn2;
         double[] v = island.getBusV().get(tn)[phase];
         if (!island.isVCartesian()) {
             MathUtil.trans_polar2rect(v, tmpV);

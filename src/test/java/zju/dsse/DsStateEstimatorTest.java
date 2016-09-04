@@ -103,7 +103,7 @@ public class DsStateEstimatorTest extends TestCase implements DsModelCons {
         DsTopoIsland refIsland = ref.getActiveIslands()[0];
         for (DsTopoNode tn : island.getTns()) {
             double[][] a = island.getBusV().get(tn);
-            double[][] b = refIsland.getBusV().get(refIsland.getBusNoToTn().get(tn.getBusNo()));
+            double[][] b = refIsland.getBusV().get(refIsland.getTnNoToTn().get(tn.getTnNo()));
             assertTrue(FeederAndLoadTest.isDoubleMatrixEqual(a, b, tol));
         }
     }

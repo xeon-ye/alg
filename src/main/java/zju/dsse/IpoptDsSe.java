@@ -55,7 +55,7 @@ public class IpoptDsSe extends IpoptSeAlg {
         for (int busNo = 1; busNo <= busNumber; busNo++) {
             nodeOffset[busNo - 1] = dimension;
             //电压实部和虚部作为状态变量
-            dimension += 2 * dsIsland.getBusNoToTn().get(busNo).getPhases().length;
+            dimension += 2 * dsIsland.getTnNoToTn().get(busNo).getPhases().length;
         }
         int branchNum = dsIsland.getIdToBranch().size();
         MapObject obj;
@@ -80,7 +80,7 @@ public class IpoptDsSe extends IpoptSeAlg {
         }
         //联络节点电流约束方程个数
         for (int busNo : zeroPBuses)
-            pfConstraintsNum += 2 * dsIsland.getBusNoToTn().get(busNo).getPhases().length;
+            pfConstraintsNum += 2 * dsIsland.getTnNoToTn().get(busNo).getPhases().length;
         m = getMeas().getZ().getN() + pfConstraintsNum; //量测方程约束个数
 
         nele_jac = 0;
@@ -164,8 +164,8 @@ public class IpoptDsSe extends IpoptSeAlg {
             }
         }
         for (int busNo = 1; busNo <= busNumber; busNo++) {
-            double[][] v = dsIsland.getBusV().get(dsIsland.getBusNoToTn().get(busNo));
-            DsTopoNode tn = dsIsland.getBusNoToTn().get(busNo);
+            double[][] v = dsIsland.getBusV().get(dsIsland.getTnNoToTn().get(busNo));
+            DsTopoNode tn = dsIsland.getTnNoToTn().get(busNo);
             for (int i : tn.getPhases()) {
                 x[nodeOffset[busNo - 1] + tn.getPhaseIndex(i)] = v[i][0];
                 x[nodeOffset[busNo - 1] + tn.getPhaseIndex(i) + tn.getPhases().length] = v[i][1];
@@ -206,7 +206,7 @@ public class IpoptDsSe extends IpoptSeAlg {
             father = dsIsland.getGraph().getEdgeSource(obj);
             //注意电流正方向是节点编号小的流向大的
             //todo: 对于环状网络的变压器支路可能是错误的
-            if (father.getBusNo() > tn.getBusNo()) {
+            if (father.getTnNo() > tn.getTnNo()) {
                 tmpTn = father;
                 father = tn;
                 tn = tmpTn;
@@ -238,9 +238,9 @@ public class IpoptDsSe extends IpoptSeAlg {
 
         //计算联络节点电流约束
         for (int busNo : zeroPBuses) {
-            tn = dsIsland.getBusNoToTn().get(busNo);
+            tn = dsIsland.getTnNoToTn().get(busNo);
             for (int anotherBus : tn.getConnectedBusNo()) {
-                obj = dsIsland.getGraph().getEdge(tn, dsIsland.getBusNoToTn().get(anotherBus));
+                obj = dsIsland.getGraph().getEdge(tn, dsIsland.getTnNoToTn().get(anotherBus));
                 for (int p : tn.getPhases()) {
                     if (anotherBus < busNo) {
                         if (!dsIsland.getBranches().get(obj).containsPhase(p))
@@ -301,7 +301,7 @@ public class IpoptDsSe extends IpoptSeAlg {
             }
         }
         for (int i = 0; i < busNumber; i++) {
-            DsTopoNode tn = dsIsland.getBusNoToTn().get(i + 1);
+            DsTopoNode tn = dsIsland.getTnNoToTn().get(i + 1);
             for (int p : tn.getPhases()) {
                 index = nodeOffset[i] + tn.getPhaseIndex(p);
                 dsIsland.getBusV().get(tn)[p][0] = x[index];
@@ -334,7 +334,7 @@ public class IpoptDsSe extends IpoptSeAlg {
             father = dsIsland.getGraph().getEdgeSource(obj);
             //注意电流正方向是节点编号小的流向大的
             //todo: 对于环状网络的变压器支路可能是错误的
-            if (father.getBusNo() > tn.getBusNo()) {
+            if (father.getTnNo() > tn.getTnNo()) {
                 tmpTn = father;
                 father = tn;
                 tn = tmpTn;
@@ -346,10 +346,10 @@ public class IpoptDsSe extends IpoptSeAlg {
                 feeder = (Feeder) gb;
                 //计算电压方程约束 VLNABC = a * VLNabc + b * Iabc的Jacobian;
                 for (int i : feeder.getPhases()) {
-                    this.jacobian.setQuick(row, nodeOffset[tn.getBusNo() - 1] + tn.getPhaseIndex(i), 1.0);
-                    this.jacobian.setQuick(row + 1, nodeOffset[tn.getBusNo() - 1] + tn.getPhases().length + tn.getPhaseIndex(i), 1.0);
-                    this.jacobian.setQuick(row, nodeOffset[father.getBusNo() - 1] + father.getPhaseIndex(i), -1.0);
-                    this.jacobian.setQuick(row + 1, nodeOffset[father.getBusNo() - 1] + father.getPhaseIndex(i) + father.getPhases().length, -1.0);
+                    this.jacobian.setQuick(row, nodeOffset[tn.getTnNo() - 1] + tn.getPhaseIndex(i), 1.0);
+                    this.jacobian.setQuick(row + 1, nodeOffset[tn.getTnNo() - 1] + tn.getPhases().length + tn.getPhaseIndex(i), 1.0);
+                    this.jacobian.setQuick(row, nodeOffset[father.getTnNo() - 1] + father.getPhaseIndex(i), -1.0);
+                    this.jacobian.setQuick(row + 1, nodeOffset[father.getTnNo() - 1] + father.getPhaseIndex(i) + father.getPhases().length, -1.0);
                     for (int j : feeder.getPhases()) {
                         if (j != i && Math.abs(feeder.getZ_real()[i][j]) < DsModelCons.ZERO_LIMIT
                                 && Math.abs(feeder.getZ_imag()[i][j]) < DsModelCons.ZERO_LIMIT)
@@ -363,12 +363,12 @@ public class IpoptDsSe extends IpoptSeAlg {
                 }
             } else if (gb instanceof Transformer) {
                 transformer = (Transformer) gb;
-                tmpPos[0] = nodeOffset[tn.getBusNo() - 1];
-                tmpPos[1] = nodeOffset[tn.getBusNo() - 1] + 3;
+                tmpPos[0] = nodeOffset[tn.getTnNo() - 1];
+                tmpPos[1] = nodeOffset[tn.getTnNo() - 1] + 3;
                 tmpPos[2] = branchOffset[branchId - 1] + 3;
                 tmpPos[3] = branchOffset[branchId - 1] + 9;
-                tmpPos[4] = nodeOffset[father.getBusNo() - 1];
-                tmpPos[5] = nodeOffset[father.getBusNo() - 1] + 3;
+                tmpPos[4] = nodeOffset[father.getTnNo() - 1];
+                tmpPos[5] = nodeOffset[father.getTnNo() - 1] + 3;
                 //计算电压方程约束 VLNABC = a * VLNabc + b * Iabc的Jacobian;
                 transformer.fillJacOfHeadV(jacobian, tmpPos, row);
                 row += 6;
@@ -385,9 +385,9 @@ public class IpoptDsSe extends IpoptSeAlg {
         //计算联络节点电流约束的Jacobian
         double v;
         for (int busNo : zeroPBuses) {
-            tn = dsIsland.getBusNoToTn().get(busNo);
+            tn = dsIsland.getTnNoToTn().get(busNo);
             for (int anotherBus : tn.getConnectedBusNo()) {
-                obj = dsIsland.getGraph().getEdge(tn, dsIsland.getBusNoToTn().get(anotherBus));
+                obj = dsIsland.getGraph().getEdge(tn, dsIsland.getTnNoToTn().get(anotherBus));
                 int branchNo = Integer.parseInt(obj.getId());
 
                 gb = dsIsland.getBranches().get(obj);
@@ -429,9 +429,9 @@ public class IpoptDsSe extends IpoptSeAlg {
         MapObject obj;
         GeneralBranch gb;
         for (int busNum : zeroPBuses) {
-            tn = dsIsland.getBusNoToTn().get(busNum);
+            tn = dsIsland.getTnNoToTn().get(busNum);
             for (int anotherBus : tn.getConnectedBusNo()) {
-                obj = dsIsland.getGraph().getEdge(tn, dsIsland.getBusNoToTn().get(anotherBus));
+                obj = dsIsland.getGraph().getEdge(tn, dsIsland.getTnNoToTn().get(anotherBus));
                 gb = dsIsland.getBranches().get(obj);
                 if (gb instanceof Feeder) {
                     capacity += 2 * ((Feeder) gb).getPhases().length;
@@ -454,12 +454,12 @@ public class IpoptDsSe extends IpoptSeAlg {
         int capacity = 2 * (v_size + i_from_size + i_to_size) + 4 * (p_from_size + q_from_size + p_to_size + q_to_size);
         for (int i = 0; i < meas.getBus_p_pos().length; i++) {
             int num = meas.getBus_p_pos()[i];//num starts from 1
-            DsTopoNode tn = dsIsland.getBusNoToTn().get(num);
+            DsTopoNode tn = dsIsland.getTnNoToTn().get(num);
             capacity += (2 * tn.getConnectedBusNo().length + 2);
         }
         for (int i = 0; i < meas.getBus_q_pos().length; i++) {
             int num = meas.getBus_q_pos()[i];//num starts from 1
-            DsTopoNode tn = dsIsland.getBusNoToTn().get(num);
+            DsTopoNode tn = dsIsland.getTnNoToTn().get(num);
             capacity += (2 * tn.getConnectedBusNo().length + 2);
         }
         return capacity;
@@ -478,7 +478,7 @@ public class IpoptDsSe extends IpoptSeAlg {
                     for (int i = 0; i < meas.getBus_v_pos().length; i++, index++) {
                         busNo = meas.getBus_v_pos()[i];
                         phase = meas.getBus_v_phase()[i];
-                        tn = dsIsland.getBusNoToTn().get(busNo);
+                        tn = dsIsland.getTnNoToTn().get(busNo);
                         v = dsIsland.getBusV().get(tn)[phase];
                         vRealPos = nodeOffset[busNo - 1] + tn.getPhaseIndex(phase);
                         vImagPos = nodeOffset[busNo - 1] + tn.getPhaseIndex(phase) + tn.getPhases().length;
@@ -490,14 +490,14 @@ public class IpoptDsSe extends IpoptSeAlg {
                     for (int i = 0; i < meas.getBus_p_pos().length; i++, index++) {
                         busNo = meas.getBus_p_pos()[i];//num starts from 1
                         phase = meas.getBus_p_phase()[i];
-                        tn = dsIsland.getBusNoToTn().get(busNo);
+                        tn = dsIsland.getTnNoToTn().get(busNo);
                         v = dsIsland.getBusV().get(tn)[phase];
                         vRealPos = nodeOffset[busNo - 1] + tn.getPhaseIndex(phase);
                         vImagPos = nodeOffset[busNo - 1] + tn.getPhaseIndex(phase) + tn.getPhases().length;
                         jacOfVReal = 0.0;
                         jacOfVImage = 0.0;
                         for (int b : tn.getConnectedBusNo()) {
-                            obj = dsIsland.getGraph().getEdge(tn, dsIsland.getBusNoToTn().get(b));
+                            obj = dsIsland.getGraph().getEdge(tn, dsIsland.getTnNoToTn().get(b));
                             branchNo = Integer.parseInt(obj.getId());
                             if(!dsIsland.getBranches().get(obj).containsPhase(phase))
                                 continue;
@@ -522,14 +522,14 @@ public class IpoptDsSe extends IpoptSeAlg {
                     for (int i = 0; i < meas.getBus_q_pos().length; i++, index++) {
                         busNo = meas.getBus_q_pos()[i];
                         phase = meas.getBus_q_phase()[i];
-                        tn = dsIsland.getBusNoToTn().get(busNo);
+                        tn = dsIsland.getTnNoToTn().get(busNo);
                         v = dsIsland.getBusV().get(tn)[phase];
                         vRealPos = nodeOffset[busNo - 1] + tn.getPhaseIndex(phase);
                         vImagPos = nodeOffset[busNo - 1] + tn.getPhaseIndex(phase) + tn.getPhases().length;
                         jacOfVReal = 0.0;
                         jacOfVImage = 0.0;
                         for (int b : tn.getConnectedBusNo()) {
-                            obj = dsIsland.getGraph().getEdge(tn, dsIsland.getBusNoToTn().get(b));
+                            obj = dsIsland.getGraph().getEdge(tn, dsIsland.getTnNoToTn().get(b));
                             branchNo = Integer.parseInt(obj.getId());
                             if(!dsIsland.getBranches().get(obj).containsPhase(phase))
                                 continue;
@@ -556,10 +556,10 @@ public class IpoptDsSe extends IpoptSeAlg {
                         phase = meas.getLine_from_p_phase()[k];
                         obj = dsIsland.getIdToBranch().get(branchNo);
                         DsTopoNode src = dsIsland.getGraph().getEdgeSource(obj);
-                        if (src.getBusNo() > dsIsland.getGraph().getEdgeTarget(obj).getBusNo())
+                        if (src.getTnNo() > dsIsland.getGraph().getEdgeTarget(obj).getTnNo())
                             src = dsIsland.getGraph().getEdgeTarget(obj);
-                        vRealPos = nodeOffset[src.getBusNo() - 1] + src.getPhaseIndex(phase);
-                        vImagPos = nodeOffset[src.getBusNo() - 1] + src.getPhaseIndex(phase) + src.getPhases().length;
+                        vRealPos = nodeOffset[src.getTnNo() - 1] + src.getPhaseIndex(phase);
+                        vImagPos = nodeOffset[src.getTnNo() - 1] + src.getPhaseIndex(phase) + src.getPhases().length;
                         v = dsIsland.getBusV().get(src)[phase];
                         c = dsIsland.getBranchHeadI().get(obj)[phase];
                         getIPos(branchNo, phase, true, iPos);
@@ -575,10 +575,10 @@ public class IpoptDsSe extends IpoptSeAlg {
                         phase = meas.getLine_from_q_phase()[k];
                         obj = dsIsland.getIdToBranch().get(branchNo);
                         DsTopoNode src = dsIsland.getGraph().getEdgeSource(obj);
-                        if (src.getBusNo() > dsIsland.getGraph().getEdgeTarget(obj).getBusNo())
+                        if (src.getTnNo() > dsIsland.getGraph().getEdgeTarget(obj).getTnNo())
                             src = dsIsland.getGraph().getEdgeTarget(obj);
-                        vRealPos = nodeOffset[src.getBusNo() - 1] + src.getPhaseIndex(phase);
-                        vImagPos = nodeOffset[src.getBusNo() - 1] + src.getPhaseIndex(phase) + src.getPhases().length;
+                        vRealPos = nodeOffset[src.getTnNo() - 1] + src.getPhaseIndex(phase);
+                        vImagPos = nodeOffset[src.getTnNo() - 1] + src.getPhaseIndex(phase) + src.getPhases().length;
                         v = dsIsland.getBusV().get(src)[phase];
                         c = dsIsland.getBranchHeadI().get(obj)[phase];
                         getIPos(branchNo, phase, true, iPos);
@@ -594,10 +594,10 @@ public class IpoptDsSe extends IpoptSeAlg {
                         phase = meas.getLine_to_p_phase()[k];
                         obj = dsIsland.getIdToBranch().get(branchNo);
                         DsTopoNode tar = dsIsland.getGraph().getEdgeTarget(obj);
-                        if (dsIsland.getGraph().getEdgeSource(obj).getBusNo() > tar.getBusNo())
+                        if (dsIsland.getGraph().getEdgeSource(obj).getTnNo() > tar.getTnNo())
                             tar = dsIsland.getGraph().getEdgeSource(obj);
-                        vRealPos = nodeOffset[tar.getBusNo() - 1] + tar.getPhaseIndex(phase);
-                        vImagPos = nodeOffset[tar.getBusNo() - 1] + tar.getPhaseIndex(phase) + tar.getPhases().length;
+                        vRealPos = nodeOffset[tar.getTnNo() - 1] + tar.getPhaseIndex(phase);
+                        vImagPos = nodeOffset[tar.getTnNo() - 1] + tar.getPhaseIndex(phase) + tar.getPhases().length;
                         v = dsIsland.getBusV().get(tar)[phase];
                         c = dsIsland.getBranchTailI().get(obj)[phase];
                         getIPos(branchNo, phase, false, iPos);
@@ -613,10 +613,10 @@ public class IpoptDsSe extends IpoptSeAlg {
                         phase = meas.getLine_to_q_phase()[k];
                         obj = dsIsland.getIdToBranch().get(branchNo);
                         DsTopoNode tar = dsIsland.getGraph().getEdgeTarget(obj);
-                        if (dsIsland.getGraph().getEdgeSource(obj).getBusNo() > tar.getBusNo())
+                        if (dsIsland.getGraph().getEdgeSource(obj).getTnNo() > tar.getTnNo())
                             tar = dsIsland.getGraph().getEdgeSource(obj);
-                        vRealPos = nodeOffset[tar.getBusNo() - 1] + tar.getPhaseIndex(phase);
-                        vImagPos = nodeOffset[tar.getBusNo() - 1] + tar.getPhaseIndex(phase) + tar.getPhases().length;
+                        vRealPos = nodeOffset[tar.getTnNo() - 1] + tar.getPhaseIndex(phase);
+                        vImagPos = nodeOffset[tar.getTnNo() - 1] + tar.getPhaseIndex(phase) + tar.getPhases().length;
                         v = dsIsland.getBusV().get(tar)[phase];
                         c = dsIsland.getBranchTailI().get(obj)[phase];
                         getIPos(branchNo, phase, false, iPos);
@@ -665,7 +665,7 @@ public class IpoptDsSe extends IpoptSeAlg {
                     for (int i = 0; i < meas.getBus_v_pos().length; i++) {
                         busNo = meas.getBus_v_pos()[i];
                         phase = meas.getBus_v_phase()[i];
-                        tn = dsIsland.getBusNoToTn().get(busNo);
+                        tn = dsIsland.getTnNoToTn().get(busNo);
                         vRealPos = nodeOffset[busNo - 1] + tn.getPhaseIndex(phase);
                         vImagPos = nodeOffset[busNo - 1] + tn.getPhaseIndex(phase) + tn.getPhases().length;
                         hessian.addQuick(vRealPos, vRealPos, 2.0);
@@ -676,11 +676,11 @@ public class IpoptDsSe extends IpoptSeAlg {
                     for (int i = 0; i < meas.getBus_p_pos().length; i++) {
                         busNo = meas.getBus_p_pos()[i];//num starts from 1
                         phase = meas.getBus_p_phase()[i];
-                        tn = dsIsland.getBusNoToTn().get(busNo);
+                        tn = dsIsland.getTnNoToTn().get(busNo);
                         vRealPos = nodeOffset[busNo - 1] + tn.getPhaseIndex(phase);
                         vImagPos = nodeOffset[busNo - 1] + tn.getPhaseIndex(phase) + tn.getPhases().length;
                         for (int b : tn.getConnectedBusNo()) {
-                            obj = dsIsland.getGraph().getEdge(tn, dsIsland.getBusNoToTn().get(b));
+                            obj = dsIsland.getGraph().getEdge(tn, dsIsland.getTnNoToTn().get(b));
                             branchNo = Integer.parseInt(obj.getId());
                             if(!dsIsland.getBranches().get(obj).containsPhase(phase))
                                 continue;
@@ -703,11 +703,11 @@ public class IpoptDsSe extends IpoptSeAlg {
                     for (int i = 0; i < meas.getBus_q_pos().length; i++) {
                         busNo = meas.getBus_q_pos()[i];
                         phase = meas.getBus_q_phase()[i];
-                        tn = dsIsland.getBusNoToTn().get(busNo);
+                        tn = dsIsland.getTnNoToTn().get(busNo);
                         vRealPos = nodeOffset[busNo - 1] + tn.getPhaseIndex(phase);
                         vImagPos = nodeOffset[busNo - 1] + tn.getPhaseIndex(phase) + tn.getPhases().length;
                         for (int b : tn.getConnectedBusNo()) {
-                            obj = dsIsland.getGraph().getEdge(tn, dsIsland.getBusNoToTn().get(b));
+                            obj = dsIsland.getGraph().getEdge(tn, dsIsland.getTnNoToTn().get(b));
                             branchNo = Integer.parseInt(obj.getId());
                             if(!dsIsland.getBranches().get(obj).containsPhase(phase))
                                 continue;
@@ -733,11 +733,11 @@ public class IpoptDsSe extends IpoptSeAlg {
                         obj = dsIsland.getIdToBranch().get(branchNo);
                         DsTopoNode src = dsIsland.getGraph().getEdgeSource(obj);
                         DsTopoNode tar = dsIsland.getGraph().getEdgeTarget(obj);
-                        if (src.getBusNo() > tar.getBusNo())
+                        if (src.getTnNo() > tar.getTnNo())
                             src = tar;
                         getIPos(branchNo, phase, true, iPos);
-                        vRealPos = nodeOffset[src.getBusNo() - 1] + src.getPhaseIndex(phase);
-                        vImagPos = nodeOffset[src.getBusNo() - 1] + src.getPhaseIndex(phase) + src.getPhases().length;
+                        vRealPos = nodeOffset[src.getTnNo() - 1] + src.getPhaseIndex(phase);
+                        vImagPos = nodeOffset[src.getTnNo() - 1] + src.getPhaseIndex(phase) + src.getPhases().length;
                         hessian.addQuick(iPos[0], vRealPos, 1.0);//(p/(ir,ur)
                         hessian.addQuick(iPos[1], vImagPos, 1.0);//(p/(iim.uim)
                         hessian.addQuick(vRealPos, iPos[0], 1.0); //(p/(ur,ir)
@@ -751,11 +751,11 @@ public class IpoptDsSe extends IpoptSeAlg {
                         obj = dsIsland.getIdToBranch().get(branchNo);
                         DsTopoNode src = dsIsland.getGraph().getEdgeSource(obj);
                         DsTopoNode tar = dsIsland.getGraph().getEdgeTarget(obj);
-                        if (src.getBusNo() > tar.getBusNo())
+                        if (src.getTnNo() > tar.getTnNo())
                             src = tar;
                         getIPos(branchNo, phase, true, iPos);
-                        vRealPos = nodeOffset[src.getBusNo() - 1] + src.getPhaseIndex(phase);
-                        vImagPos = nodeOffset[src.getBusNo() - 1] + src.getPhaseIndex(phase) + src.getPhases().length;
+                        vRealPos = nodeOffset[src.getTnNo() - 1] + src.getPhaseIndex(phase);
+                        vImagPos = nodeOffset[src.getTnNo() - 1] + src.getPhaseIndex(phase) + src.getPhases().length;
                         hessian.addQuick(iPos[0], vImagPos, 1.0);
                         hessian.addQuick(iPos[1], vRealPos, -1.0);
                         hessian.addQuick(vRealPos, iPos[1], -1.0);
@@ -769,11 +769,11 @@ public class IpoptDsSe extends IpoptSeAlg {
                         obj = dsIsland.getIdToBranch().get(branchNo);
                         DsTopoNode src = dsIsland.getGraph().getEdgeSource(obj);
                         DsTopoNode tar = dsIsland.getGraph().getEdgeTarget(obj);
-                        if (src.getBusNo() > tar.getBusNo())
+                        if (src.getTnNo() > tar.getTnNo())
                             tar = src;
                         getIPos(branchNo, phase, false, iPos);
-                        vRealPos = nodeOffset[tar.getBusNo() - 1] + tar.getPhaseIndex(phase);
-                        vImagPos = nodeOffset[tar.getBusNo() - 1] + tar.getPhaseIndex(phase) + tar.getPhases().length;
+                        vRealPos = nodeOffset[tar.getTnNo() - 1] + tar.getPhaseIndex(phase);
+                        vImagPos = nodeOffset[tar.getTnNo() - 1] + tar.getPhaseIndex(phase) + tar.getPhases().length;
                         hessian.addQuick(iPos[0], vRealPos, -1.0);
                         hessian.addQuick(iPos[1], vImagPos, -1.0);
                         hessian.addQuick(vRealPos, iPos[0], -1.0);
@@ -787,11 +787,11 @@ public class IpoptDsSe extends IpoptSeAlg {
                         obj = dsIsland.getIdToBranch().get(branchNo);
                         DsTopoNode src = dsIsland.getGraph().getEdgeSource(obj);
                         DsTopoNode tar = dsIsland.getGraph().getEdgeTarget(obj);
-                        if (src.getBusNo() > tar.getBusNo())
+                        if (src.getTnNo() > tar.getTnNo())
                             tar = src;
                         getIPos(branchNo, phase, false, iPos);
-                        vRealPos = nodeOffset[tar.getBusNo() - 1] + tar.getPhaseIndex(phase);
-                        vImagPos = nodeOffset[tar.getBusNo() - 1] + tar.getPhaseIndex(phase) + tar.getPhases().length;
+                        vRealPos = nodeOffset[tar.getTnNo() - 1] + tar.getPhaseIndex(phase);
+                        vImagPos = nodeOffset[tar.getTnNo() - 1] + tar.getPhaseIndex(phase) + tar.getPhases().length;
                         hessian.addQuick(iPos[0], vImagPos, -1.0);
                         hessian.addQuick(iPos[1], vRealPos, 1.0);
                         hessian.addQuick(vRealPos, iPos[1], 1.0);
@@ -833,7 +833,7 @@ public class IpoptDsSe extends IpoptSeAlg {
                     for (int i = 0; i < meas.getBus_v_pos().length; i++, index++) {
                         busNo = meas.getBus_v_pos()[i];
                         phase = meas.getBus_v_phase()[i];
-                        tn = dsIsland.getBusNoToTn().get(busNo);
+                        tn = dsIsland.getTnNoToTn().get(busNo);
                         vRealPos = nodeOffset[busNo - 1] + tn.getPhaseIndex(phase);
                         vImagPos = nodeOffset[busNo - 1] + tn.getPhaseIndex(phase) + tn.getPhases().length;
                         hessian.addQuick(vRealPos, vRealPos, 2.0 * lambda[index]);
@@ -844,11 +844,11 @@ public class IpoptDsSe extends IpoptSeAlg {
                     for (int i = 0; i < meas.getBus_p_pos().length; i++, index++) {
                         busNo = meas.getBus_p_pos()[i];//num starts from 1
                         phase = meas.getBus_p_phase()[i];
-                        tn = dsIsland.getBusNoToTn().get(busNo);
+                        tn = dsIsland.getTnNoToTn().get(busNo);
                         vRealPos = nodeOffset[busNo - 1] + tn.getPhaseIndex(phase);
                         vImagPos = nodeOffset[busNo - 1] + tn.getPhaseIndex(phase) + tn.getPhases().length;
                         for (int b : tn.getConnectedBusNo()) {
-                            obj = dsIsland.getGraph().getEdge(tn, dsIsland.getBusNoToTn().get(b));
+                            obj = dsIsland.getGraph().getEdge(tn, dsIsland.getTnNoToTn().get(b));
                             branchNo = Integer.parseInt(obj.getId());
                             if(!dsIsland.getBranches().get(obj).containsPhase(phase))
                                 continue;
@@ -871,11 +871,11 @@ public class IpoptDsSe extends IpoptSeAlg {
                     for (int i = 0; i < meas.getBus_q_pos().length; i++, index++) {
                         busNo = meas.getBus_q_pos()[i];
                         phase = meas.getBus_q_phase()[i];
-                        tn = dsIsland.getBusNoToTn().get(busNo);
+                        tn = dsIsland.getTnNoToTn().get(busNo);
                         vRealPos = nodeOffset[busNo - 1] + tn.getPhaseIndex(phase);
                         vImagPos = nodeOffset[busNo - 1] + tn.getPhaseIndex(phase) + tn.getPhases().length;
                         for (int b : tn.getConnectedBusNo()) {
-                            obj = dsIsland.getGraph().getEdge(tn, dsIsland.getBusNoToTn().get(b));
+                            obj = dsIsland.getGraph().getEdge(tn, dsIsland.getTnNoToTn().get(b));
                             branchNo = Integer.parseInt(obj.getId());
                             if(!dsIsland.getBranches().get(obj).containsPhase(phase))
                                 continue;
@@ -900,11 +900,11 @@ public class IpoptDsSe extends IpoptSeAlg {
                         phase = meas.getLine_from_p_phase()[k];
                         obj = dsIsland.getIdToBranch().get(branchNo);
                         DsTopoNode src = dsIsland.getGraph().getEdgeSource(obj);
-                        if (src.getBusNo() > dsIsland.getGraph().getEdgeTarget(obj).getBusNo())
+                        if (src.getTnNo() > dsIsland.getGraph().getEdgeTarget(obj).getTnNo())
                             src = dsIsland.getGraph().getEdgeTarget(obj);
                         getIPos(branchNo, phase, true, iPos);
-                        vRealPos = nodeOffset[src.getBusNo() - 1] + src.getPhaseIndex(phase);
-                        vImagPos = nodeOffset[src.getBusNo() - 1] + src.getPhaseIndex(phase) + src.getPhases().length;
+                        vRealPos = nodeOffset[src.getTnNo() - 1] + src.getPhaseIndex(phase);
+                        vImagPos = nodeOffset[src.getTnNo() - 1] + src.getPhaseIndex(phase) + src.getPhases().length;
                         hessian.addQuick(iPos[0], vRealPos, lambda[index]);//(p/(ir,ur)
                         hessian.addQuick(iPos[1], vImagPos, lambda[index]);//(p/(iim.uim)
                         hessian.addQuick(vRealPos, iPos[0], lambda[index]); //(p/(ur,ir)
@@ -917,11 +917,11 @@ public class IpoptDsSe extends IpoptSeAlg {
                         phase = meas.getLine_from_q_phase()[k];
                         obj = dsIsland.getIdToBranch().get(branchNo);
                         DsTopoNode src = dsIsland.getGraph().getEdgeSource(obj);
-                        if (src.getBusNo() > dsIsland.getGraph().getEdgeTarget(obj).getBusNo())
+                        if (src.getTnNo() > dsIsland.getGraph().getEdgeTarget(obj).getTnNo())
                             src = dsIsland.getGraph().getEdgeTarget(obj);
                         getIPos(branchNo, phase, true, iPos);
-                        vRealPos = nodeOffset[src.getBusNo() - 1] + src.getPhaseIndex(phase);
-                        vImagPos = nodeOffset[src.getBusNo() - 1] + src.getPhaseIndex(phase) + src.getPhases().length;
+                        vRealPos = nodeOffset[src.getTnNo() - 1] + src.getPhaseIndex(phase);
+                        vImagPos = nodeOffset[src.getTnNo() - 1] + src.getPhaseIndex(phase) + src.getPhases().length;
                         hessian.addQuick(iPos[0], vImagPos, lambda[index]);
                         hessian.addQuick(iPos[1], vRealPos, -lambda[index]);
                         hessian.addQuick(vRealPos, iPos[1], -lambda[index]);
@@ -934,11 +934,11 @@ public class IpoptDsSe extends IpoptSeAlg {
                         phase = meas.getLine_to_p_phase()[k];
                         obj = dsIsland.getIdToBranch().get(branchNo);
                         DsTopoNode tar = dsIsland.getGraph().getEdgeTarget(obj);
-                        if (dsIsland.getGraph().getEdgeSource(obj).getBusNo() > tar.getBusNo())
+                        if (dsIsland.getGraph().getEdgeSource(obj).getTnNo() > tar.getTnNo())
                             tar = dsIsland.getGraph().getEdgeSource(obj);
                         getIPos(branchNo, phase, false, iPos);
-                        vRealPos = nodeOffset[tar.getBusNo() - 1] + tar.getPhaseIndex(phase);
-                        vImagPos = nodeOffset[tar.getBusNo() - 1] + tar.getPhaseIndex(phase) + tar.getPhases().length;
+                        vRealPos = nodeOffset[tar.getTnNo() - 1] + tar.getPhaseIndex(phase);
+                        vImagPos = nodeOffset[tar.getTnNo() - 1] + tar.getPhaseIndex(phase) + tar.getPhases().length;
                         hessian.addQuick(iPos[0], vRealPos, -lambda[index]);
                         hessian.addQuick(iPos[1], vImagPos, -lambda[index]);
                         hessian.addQuick(vRealPos, iPos[0], -lambda[index]);
@@ -951,11 +951,11 @@ public class IpoptDsSe extends IpoptSeAlg {
                         phase = meas.getLine_to_q_phase()[k];
                         obj = dsIsland.getIdToBranch().get(branchNo);
                         DsTopoNode tar = dsIsland.getGraph().getEdgeTarget(obj);
-                        if (dsIsland.getGraph().getEdgeSource(obj).getBusNo() > tar.getBusNo())
+                        if (dsIsland.getGraph().getEdgeSource(obj).getTnNo() > tar.getTnNo())
                             tar = dsIsland.getGraph().getEdgeSource(obj);
                         getIPos(branchNo, phase, false, iPos);
-                        vRealPos = nodeOffset[tar.getBusNo() - 1] + tar.getPhaseIndex(phase);
-                        vImagPos = nodeOffset[tar.getBusNo() - 1] + tar.getPhaseIndex(phase) + tar.getPhases().length;
+                        vRealPos = nodeOffset[tar.getTnNo() - 1] + tar.getPhaseIndex(phase);
+                        vImagPos = nodeOffset[tar.getTnNo() - 1] + tar.getPhaseIndex(phase) + tar.getPhases().length;
                         hessian.addQuick(iPos[0], vImagPos, -lambda[index]);
                         hessian.addQuick(iPos[1], vRealPos, lambda[index]);
                         hessian.addQuick(vRealPos, iPos[1], lambda[index]);
