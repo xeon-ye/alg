@@ -8,6 +8,7 @@ import zju.devmodel.MapObject;
 import zju.ieeeformat.BranchData;
 import zju.ieeeformat.BusData;
 import zju.ieeeformat.IEEEDataIsland;
+import zju.ieeeformat.TitleData;
 import zju.matrix.Complex;
 import zju.util.JOFileUtil;
 
@@ -931,9 +932,10 @@ public class DsTopoIsland implements Serializable, DsModelCons {
             index++;
             vertexToBus.put(key, bus);
         }
+        double baseZ = 1.0; //todo: 现在要求feeder的参数是标幺值
         //Map<Feeder, BranchData> feederToBranch = new HashMap<>(branches.size());
         //记录馈线及其对应Branch之间的关系
-       for(DetailedEdge e : detailedG.edgeSet()) {
+        for(DetailedEdge e : detailedG.edgeSet()) {
             if(e.getEdgeType() == DetailedEdge.EDGE_TYPE_FEEDER) {
                 Feeder f = (Feeder) this.branches.get(this.getDevices().get(e.getDevId()));
                 if(devIdToBranch.containsKey(e.getDevId()))
@@ -945,8 +947,8 @@ public class DsTopoIsland implements Serializable, DsModelCons {
                         BusData bus2 = vertexToBus.get(detailedG.getEdgeTarget(e));
                         branch.setTapBusNumber(bus1.getBusNumber());
                         branch.setZBusNumber(bus2.getBusNumber());
-                        branch.setBranchR(f.getZ_real()[e.getPhase()][e.getPhase()]);
-                        branch.setBranchX(f.getZ_imag()[e.getPhase()][e.getPhase()]);
+                        branch.setBranchR(f.getZ_real()[e.getPhase()][e.getPhase()] / baseZ);
+                        branch.setBranchX(f.getZ_imag()[e.getPhase()][e.getPhase()] / baseZ);
                         devIdToBranch.put(e.getDevId(), new BranchData[]{branch});
                         break;
                     case 2:
@@ -980,40 +982,40 @@ public class DsTopoIsland implements Serializable, DsModelCons {
                         BranchData branch1 = new BranchData();
                         branch1.setTapBusNumber(bus1.getBusNumber());
                         branch1.setZBusNumber(bus2.getBusNumber());
-                        branch1.setBranchR(z11.getRe());
-                        branch1.setBranchX(z11.getIm());
+                        branch1.setBranchR(z11.getRe() / baseZ);
+                        branch1.setBranchX(z11.getIm() / baseZ);
 
                         BranchData branch2 = new BranchData();
                         branch2.setTapBusNumber(bus3.getBusNumber());
                         branch2.setZBusNumber(bus4.getBusNumber());
-                        branch2.setBranchR(z22.getRe());
-                        branch2.setBranchX(z22.getIm());
+                        branch2.setBranchR(z22.getRe() / baseZ);
+                        branch2.setBranchX(z22.getIm() / baseZ);
 
                         if(y12.mod() > 1e-6) {
                             Complex z12 = y12.inverse();
                             BranchData branch3 = new BranchData();
                             branch3.setTapBusNumber(bus1.getBusNumber());
                             branch3.setZBusNumber(bus3.getBusNumber());
-                            branch3.setBranchR(-z12.getRe());
-                            branch3.setBranchX(-z12.getIm());
+                            branch3.setBranchR(-z12.getRe() / baseZ);
+                            branch3.setBranchX(-z12.getIm() / baseZ);
 
                             BranchData branch4 = new BranchData();
                             branch4.setTapBusNumber(bus2.getBusNumber());
                             branch4.setZBusNumber(bus4.getBusNumber());
-                            branch4.setBranchR(-z12.getRe());
-                            branch4.setBranchX(-z12.getIm());
+                            branch4.setBranchR(-z12.getRe() / baseZ);
+                            branch4.setBranchX(-z12.getIm() / baseZ);
 
                             BranchData branch5 = new BranchData();
                             branch5.setTapBusNumber(bus1.getBusNumber());
                             branch5.setZBusNumber(bus4.getBusNumber());
-                            branch5.setBranchR(z12.getRe());
-                            branch5.setBranchX(z12.getIm());
+                            branch5.setBranchR(z12.getRe() / baseZ);
+                            branch5.setBranchX(z12.getIm() / baseZ);
 
                             BranchData branch6 = new BranchData();
                             branch6.setTapBusNumber(bus2.getBusNumber());
                             branch6.setZBusNumber(bus3.getBusNumber());
-                            branch6.setBranchR(z12.getRe());
-                            branch6.setBranchX(z12.getIm());
+                            branch6.setBranchR(z12.getRe() / baseZ);
+                            branch6.setBranchX(z12.getIm() / baseZ);
                             devIdToBranch.put(e.getDevId(), new BranchData[]{branch1, branch2, branch3, branch4, branch5, branch6});
                         } else {
                             devIdToBranch.put(e.getDevId(), new BranchData[]{branch1, branch2});
@@ -1051,17 +1053,26 @@ public class DsTopoIsland implements Serializable, DsModelCons {
                         Y[4] = Complex.divide(Complex.subtract(Complex.multiply(z12, z13), Complex.multiply(z11, z23)), tmp9);
                         Y[5] = Complex.divide(Complex.subtract(Complex.multiply(z11, z22), Complex.multiply(z12, z12)), tmp9);
 
+                        //System.out.println(z11.toString() + "\t" + z12.toString() + "\t" + z13.toString());
+                        //System.out.println(z12.toString() + "\t" + z22.toString() + "\t" + z23.toString());
+                        //System.out.println(z13.toString() + "\t" + z23.toString() + "\t" + z33.toString());
+                        //System.out.println("-------------------------------------------------------------");
+                        //System.out.println(Y[0].toString() + "\t" + Y[1].toString() + "\t" + Y[2].toString());
+                        //System.out.println(Y[1].toString() + "\t" + Y[3].toString() + "\t" + Y[4].toString());
+                        //System.out.println(Y[2].toString() + "\t" + Y[4].toString() + "\t" + Y[5].toString());
+
                         BusData[] busArr = new BusData[6];
                         busArr[0] = vertexToBus.get(e.getTnNo1() + "-0");
-                        busArr[1] = vertexToBus.get(e.getTnNo2() + "-0");
-                        busArr[2] = vertexToBus.get(e.getTnNo1() + "-1");
-                        busArr[3] = vertexToBus.get(e.getTnNo2() + "-1");
-                        busArr[4] = vertexToBus.get(e.getTnNo1() + "-2");
+                        busArr[1] = vertexToBus.get(e.getTnNo1() + "-1");
+                        busArr[2] = vertexToBus.get(e.getTnNo1() + "-2");
+                        busArr[3] = vertexToBus.get(e.getTnNo2() + "-0");
+                        busArr[4] = vertexToBus.get(e.getTnNo2() + "-1");
                         busArr[5] = vertexToBus.get(e.getTnNo2() + "-2");
 
                         List<BranchData> brArr = new ArrayList<>(12);
                         //分别对应a->b, a->c, a->a',a->b',a->c',b->c,b->a',b->b',b->c',c->a',c->b',c->c',a'->b', a'->c', b'->c'
                         int[] pos = new int[]{1, 2, 0, 1, 2, 4, 1, 3, 4, 2, 4, 5, 1, 2, 4};
+                        double[] sign = new double[]{-1, -1, 1, 1, 1, -1, 1, 1, 1, 1, 1, 1, -1, -1, -1};
                         int count = 0;
                         for(int i = 0; i < 6; i++) {
                             for(int j = i + 1; j < 6; j++) {
@@ -1073,13 +1084,8 @@ public class DsTopoIsland implements Serializable, DsModelCons {
                                 BranchData br = new BranchData();
                                 br.setTapBusNumber(busArr[i].getBusNumber());
                                 br.setZBusNumber(busArr[j].getBusNumber());
-                                if(i < 3 && j > 2) {
-                                    br.setBranchR(z.getRe());
-                                    br.setBranchX(z.getIm());
-                                } else {
-                                    br.setBranchR(-z.getRe());
-                                    br.setBranchX(-z.getIm());
-                                }
+                                br.setBranchR(sign[count] * z.getRe() / baseZ);
+                                br.setBranchX(sign[count] * z.getIm() / baseZ);
                                 brArr.add(br);
                                 count++;
                             }

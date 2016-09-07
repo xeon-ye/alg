@@ -7,13 +7,21 @@ import zju.dsmodel.DsTopoIsland;
 import zju.dsmodel.DsTopoNode;
 import zju.dsmodel.IeeeDsInHand;
 import zju.dspf.DsPowerflowTest;
+import zju.ieeeformat.BranchData;
+import zju.ieeeformat.BusData;
+import zju.ieeeformat.IEEEDataIsland;
+import zju.matrix.AVector;
 import zju.measure.MeasTypeCons;
 import zju.measure.MeasVectorCreator;
 import zju.measure.MeasureFileRw;
 import zju.measure.SystemMeasure;
+import zju.util.MathUtil;
+import zju.util.StateCalByPolar;
+import zju.util.YMatrixGetter;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import static zju.dsmodel.DsModelCons.sqrt3;
@@ -59,16 +67,79 @@ public class MeasPosOptTest extends TestCase implements MeasTypeCons {
         mpo.doOpt(false);
     }
 
+    public void testDscase4Trans() {
+        InputStream ieeeFile = IeeeDsInHand.class.getResourceAsStream("/dsfiles/case4-notrans.txt");
+        DistriSys sys = IeeeDsInHand.createDs(ieeeFile, "1", 12.47 / sqrt3);
+        sys.setPerUnitSys(true); //设置使用标幺值标志
+        sys.setBaseKva(1000.); //设置基准功率
+        //计算潮流
+        DsPowerflowTest.testConverged(sys, false);
+        //得到电气岛
+        DsTopoIsland dsIsland = sys.getActiveIslands()[0];
+        //生成详细拓扑图
+        dsIsland.buildDetailedGraph();
+        //将配电网转换成等效的IEEE格式
+        HashMap<String, BranchData[]> devIdToBranch = new HashMap<>(dsIsland.getBranches().size());
+        HashMap<String, BusData> vertexToBus = new HashMap<>(dsIsland.getDetailedG().vertexSet().size());
+        IEEEDataIsland island = dsIsland.toIeeeIsland(devIdToBranch, vertexToBus);
+        //将潮流结果赋值到转换后的模型
+        int n = island.getBuses().size();
+        AVector state = new AVector(n * 2);
+        for(DsTopoNode tn : dsIsland.getBusV().keySet()) {
+            double[][] busV = dsIsland.getBusV().get(tn);
+            for(int phase : tn.getPhases()) {
+                BusData bus = vertexToBus.get(tn.getTnNo() + "-" + phase);
+                double[] v = new double[]{busV[phase][0], busV[phase][1]};
+                //转换成极坐标
+                MathUtil.trans_rect2polar(v);
+                //已经是标幺值
+                state.setValue(bus.getBusNumber() - 1, v[0]);
+                state.setValue(bus.getBusNumber() + n - 1, v[1]);
+            }
+        }
+
+        //比较潮流结果
+        YMatrixGetter Y = new YMatrixGetter(island);
+        Y.formYMatrix();
+        for(String devId: devIdToBranch.keySet()) {
+            MapObject br = dsIsland.getIdToBranch().get(Integer.parseInt(devId));
+            DsTopoNode tn = dsIsland.getGraph().getEdgeSource(br);
+            double[][] v = dsIsland.getBusV().get(tn);
+            for(int phase : tn.getPhases()) {
+                BusData bus = vertexToBus.get(tn.getTnNo() + "-" + phase);
+                double p = 0, q = 0;
+                for (BranchData branch : devIdToBranch.get(devId)) {
+                    if (branch.getTapBusNumber() == bus.getBusNumber()) {
+                        p += StateCalByPolar.calLinePFrom(branch.getId(), Y, state);
+                        q += StateCalByPolar.calLineQFrom(branch.getId(), Y, state);
+                    } else if (branch.getZBusNumber() == bus.getBusNumber()) {
+                        p += StateCalByPolar.calLinePTo(branch.getId(), Y, state);
+                        q += StateCalByPolar.calLineQTo(branch.getId(), Y, state);
+                    }
+                }
+                double[][] c = dsIsland.getBranchHeadI().get(br);
+                double p1 = v[phase][0] * c[phase][0] + v[phase][1] * c[phase][1];
+                double q1 = v[phase][1] * c[phase][0] - v[phase][0] * c[phase][1];
+                assertEquals(p, p1, 1e-6);
+                assertEquals(q, q1, 1e-6);
+            }
+        }
+    }
+
     public void testDscase4() {
         InputStream ieeeFile = IeeeDsInHand.class.getResourceAsStream("/dsfiles/case4-notrans.txt");
         DistriSys sys = IeeeDsInHand.createDs(ieeeFile, "1", 12.47 / sqrt3);
+        sys.setPerUnitSys(true); //设置使用标幺值标志
+        sys.setBaseKva(1000.); //设置基准功率
         //计算潮流
-        DsPowerflowTest.testConverged(sys, false);
+        //DsPowerflowTest.testConverged(sys, false);
+        sys.buildDynamicTopo();
+        sys.createCalDevModel();
         DsTopoIsland dsIsland = sys.getActiveIslands()[0];
         //形成量测
         //DsSimuMeasMaker smMaker = new DsSimuMeasMaker();
         //SystemMeasure sm = smMaker.createFullMeasure(dsIsland, 1, 0.02);
-        //MeasureFileRw.writeFileFully(sm, "/home/arno/alg/src/test/resources/dsfiles/case4-notrans-measure.txt");
+        //MeasureFileRw.writeFileSimple(sm, "/home/arno/alg/src/test/resources/dsfiles/case4-notrans-measure.txt");
         //读取量测
         SystemMeasure sm = MeasureFileRw.parse(getClass().getResourceAsStream("/dsfiles/case4-notrans-measure.txt"));
         MeasVectorCreator mc = new MeasVectorCreator();
@@ -79,8 +150,8 @@ public class MeasPosOptTest extends TestCase implements MeasTypeCons {
         mpo.setDs_existMeasTypes(mc.measTypes);
         mpo.setDs_existMeasWeight(mc.weights);
 
-        setIduMeasures(dsIsland, new int[]{1, 3}, new int[]{1, 2}, new double[]{0.58, 0.5, 0.8, 0.58, 0.5, 0.8}, mpo);
-        //setIduMeasures(dsIsland, new int[]{}, new int[]{}, new double[]{}, mpo);
+        //setIduMeasures(dsIsland, new int[]{1, 3}, new int[]{1, 2}, new double[]{0.58, 0.5, 0.8, 0.58, 0.5, 0.8}, mpo);
+        setIduMeasures(dsIsland, new int[]{}, new int[]{}, new double[]{}, mpo);
         mpo.setMaxDevNum(1);
         mpo.doOpt(true);
     }
@@ -88,8 +159,12 @@ public class MeasPosOptTest extends TestCase implements MeasTypeCons {
     public void testDscase13() {
         InputStream ieeeFile = IeeeDsInHand.class.getResourceAsStream("/dsfiles/case13-notrans.txt");
         DistriSys sys = IeeeDsInHand.createDs(ieeeFile, "650", 4.16 / sqrt3);
+        sys.setPerUnitSys(true); //设置使用标幺值标志
+        sys.setBaseKva(1000.); //设置基准功率
         //计算潮流
-        DsPowerflowTest.testConverged(sys, false);
+        //DsPowerflowTest.testConverged(sys, false);
+        sys.buildDynamicTopo();
+        sys.createCalDevModel();
         DsTopoIsland dsIsland = sys.getActiveIslands()[0];
         //形成量测
         //DsSimuMeasMaker smMaker = new DsSimuMeasMaker();
@@ -113,8 +188,12 @@ public class MeasPosOptTest extends TestCase implements MeasTypeCons {
     public void testDscase34() {
         InputStream ieeeFile = IeeeDsInHand.class.getResourceAsStream("/dsfiles/case34-notrans.txt");
         DistriSys sys = IeeeDsInHand.createDs(ieeeFile, "800", 24.9 / sqrt3);
+        sys.setPerUnitSys(true); //设置使用标幺值标志
+        sys.setBaseKva(1000.); //设置基准功率
         //计算潮流
-        DsPowerflowTest.testConverged(sys, false);
+        //DsPowerflowTest.testConverged(sys, false);
+        sys.buildDynamicTopo();
+        sys.createCalDevModel();
         DsTopoIsland dsIsland = sys.getActiveIslands()[0];
         //形成量测
         //DsSimuMeasMaker smMaker = new DsSimuMeasMaker();

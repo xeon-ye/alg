@@ -78,12 +78,11 @@ public class MeasPosOpt implements MeasTypeCons {
 
     private ASparseMatrixLink2D formH(YMatrixGetter Y, ASparseMatrixLink2D bApos, int[] measTypes, int[] pos) {
         int i = 0, n = island.getBuses().size();
-        int size = 2 * n;//状态变量的维数
-        ASparseMatrixLink2D H = new ASparseMatrixLink2D(measTypes.length, size);
+        ASparseMatrixLink2D H = new ASparseMatrixLink2D(measTypes.length, 2 * n);
         for(int measType : measTypes) {
             switch (measType) {
                 case TYPE_BUS_ANGLE:
-                    H.setValue(i, pos[i] + size - 1, 1.0);
+                    H.setValue(i, pos[i] + n - 1, 1.0);
                     break;
                 case TYPE_BUS_VOLOTAGE:
                     H.setValue(i, pos[i] - 1, 1.0);
@@ -100,7 +99,7 @@ public class MeasPosOpt implements MeasTypeCons {
                     k = Y.getAdmittance()[1].getIA()[pos[i] - 1];
                     while (k != -1) {
                         int j = Y.getAdmittance()[1].getJA().get(k);
-                        H.setValue(i, j + n, Y.getAdmittance()[1].getVA().get(k));
+                        H.setValue(i, j, Y.getAdmittance()[1].getVA().get(k));
                         k = Y.getAdmittance()[1].getLINK().get(k);
                     }
                     break;
@@ -126,7 +125,7 @@ public class MeasPosOpt implements MeasTypeCons {
                         b = c * b;
                     }
                     H.setValue(i, branch.getTapBusNumber() - 1, b);
-                    H.setValue(i, branch.getZBusNumber() - 1, b);
+                    H.setValue(i, branch.getZBusNumber() - 1, -b);
                     break;
                 case TYPE_LINE_TO_REACTIVE:
                     branch = island.getId2branch().get(pos[i]);
@@ -140,7 +139,7 @@ public class MeasPosOpt implements MeasTypeCons {
                         b = c * b;
                     }
                     H.setValue(i, branch.getTapBusNumber() - 1, -b);
-                    H.setValue(i, branch.getZBusNumber() - 1, -b);
+                    H.setValue(i, branch.getZBusNumber() - 1, b);
                     break;
                 case TYPE_LINE_FROM_CURRENT:
                     branch = island.getId2branch().get(pos[i]);
@@ -175,11 +174,10 @@ public class MeasPosOpt implements MeasTypeCons {
 
     private ASparseMatrixLink2D formH_ds(YMatrixGetter Y, ASparseMatrixLink2D bApos, int[][] measTypes, String[] pos) {
         int i = 0, n = island.getBuses().size();
-        int size = 2 * n;//状态变量的维数
         int count = 0;
         for(int[] types : measTypes)
             count += types.length;
-        ASparseMatrixLink2D H = new ASparseMatrixLink2D(count, size);
+        ASparseMatrixLink2D H = new ASparseMatrixLink2D(count, 2 * n);
 
         for (count = 0; count < pos.length; count++) {
             //pos[i]这个位置包含了多个量测
@@ -187,13 +185,13 @@ public class MeasPosOpt implements MeasTypeCons {
                 String[] idAndPhase = pos[count].split("_");
                 switch (measType) {
                     case TYPE_BUS_ANGLE:
-                        H.setValue(i, vertexToBus.get(pos[count].replace("_", "-")).getBusNumber() + size - 1, 1.0);
+                        H.setValue(i, vertexToBus.get(idAndPhase[0] + "-" + idAndPhase[1]).getBusNumber() + n - 1, 1.0);
                         break;
                     case TYPE_BUS_VOLOTAGE:
-                        H.setValue(i, vertexToBus.get(pos[count].replace("_", "-")).getBusNumber() - 1, 1.0);
+                        H.setValue(i, vertexToBus.get(idAndPhase[0] + "-" + idAndPhase[1]).getBusNumber() - 1, 1.0);
                         break;
                     case TYPE_BUS_ACTIVE_POWER:
-                        int k = bApos.getIA()[vertexToBus.get(pos[count].replace("_", "-")).getBusNumber() - 1];
+                        int k = bApos.getIA()[vertexToBus.get(idAndPhase[0] + "-" + idAndPhase[1]).getBusNumber() - 1];
                         while (k != -1) {
                             int j = bApos.getJA().get(k);
                             H.setValue(i, j + n, bApos.getVA().get(k));
@@ -201,104 +199,125 @@ public class MeasPosOpt implements MeasTypeCons {
                         }
                         break;
                     case TYPE_BUS_REACTIVE_POWER:
-                        k = Y.getAdmittance()[1].getIA()[vertexToBus.get(pos[count].replace("_", "-")).getBusNumber() - 1];
+                        k = Y.getAdmittance()[1].getIA()[vertexToBus.get(idAndPhase[0] + "-" + idAndPhase[1]).getBusNumber() - 1];
                         while (k != -1) {
                             int j = Y.getAdmittance()[1].getJA().get(k);
-                            H.setValue(i, j + n, Y.getAdmittance()[1].getVA().get(k));
+                            H.setValue(i, j, Y.getAdmittance()[1].getVA().get(k));
                             k = Y.getAdmittance()[1].getLINK().get(k);
                         }
                         break;
                     case TYPE_LINE_FROM_ACTIVE:
-                        MapObject br = dsIsland.getIdToBranch().get(Integer.parseInt(idAndPhase[0]));
-                        DsTopoNode tn = dsIsland.getGraph().getEdgeSource(br);
+                        MapObject f = dsIsland.getIdToBranch().get(Integer.parseInt(idAndPhase[0]));
+                        DsTopoNode tn = dsIsland.getGraph().getEdgeSource(f);
                         BusData bus = vertexToBus.get(tn.getTnNo() + "-" + Integer.parseInt(idAndPhase[1]));
-                        for(BranchData branch : devIdToBranch.get(idAndPhase[0])) {
-                            //注意,这里要求ieee模型的首末段顺序要和ds模型一致
-                            if(branch.getTapBusNumber() == bus.getBusNumber()) {
-                                H.setValue(i, branch.getTapBusNumber() + n - 1, 1.0 / branch.getBranchX());
-                                H.setValue(i, branch.getZBusNumber() + n - 1, -1.0 / branch.getBranchX());
+                        for(BranchData b : devIdToBranch.get(idAndPhase[0])) {
+                            if(b.getTapBusNumber() == bus.getBusNumber()) {
+                                H.increase(i, b.getTapBusNumber() + n - 1, 1.0 / b.getBranchX());
+                                H.increase(i, b.getZBusNumber() + n - 1, -1.0 / b.getBranchX());
+                            } else if(b.getZBusNumber() == bus.getBusNumber()) {
+                                H.increase(i, b.getZBusNumber() + n - 1, 1.0 / b.getBranchX());
+                                H.increase(i, b.getTapBusNumber() + n - 1, -1.0 / b.getBranchX());
                             }
                         }
                         break;
                     case TYPE_LINE_TO_ACTIVE:
-                        br = dsIsland.getIdToBranch().get(Integer.parseInt(idAndPhase[0]));
-                        tn = dsIsland.getGraph().getEdgeTarget(br);
+                        f = dsIsland.getIdToBranch().get(Integer.parseInt(idAndPhase[0]));
+                        tn = dsIsland.getGraph().getEdgeTarget(f);
                         bus = vertexToBus.get(tn.getTnNo() + "-" + Integer.parseInt(idAndPhase[1]));
-                        for(BranchData branch : devIdToBranch.get(idAndPhase[0])) {
-                            //注意,这里要求ieee模型的首末段顺序要和ds模型一致
-                            if(branch.getTapBusNumber() == bus.getBusNumber()) {
-                                H.setValue(i, branch.getTapBusNumber() + n - 1, -1.0 / branch.getBranchX());
-                                H.setValue(i, branch.getZBusNumber() + n - 1, 1.0 / branch.getBranchX());
+                        for(BranchData b : devIdToBranch.get(idAndPhase[0])) {
+                            if(b.getZBusNumber() == bus.getBusNumber()) {
+                                H.increase(i, b.getTapBusNumber() + n - 1, -1.0 / b.getBranchX());
+                                H.increase(i, b.getZBusNumber() + n - 1, 1.0 / b.getBranchX());
+                            } else if(b.getTapBusNumber() == bus.getBusNumber()) {
+                                H.increase(i, b.getZBusNumber() + n - 1, -1.0 / b.getBranchX());
+                                H.increase(i, b.getTapBusNumber() + n - 1, 1.0 / b.getBranchX());
                             }
                         }
                         break;
                     case TYPE_LINE_FROM_REACTIVE:
-                        br = dsIsland.getIdToBranch().get(Integer.parseInt(idAndPhase[0]));
-                        tn = dsIsland.getGraph().getEdgeSource(br);
+                        f = dsIsland.getIdToBranch().get(Integer.parseInt(idAndPhase[0]));
+                        tn = dsIsland.getGraph().getEdgeSource(f);
                         bus = vertexToBus.get(tn.getTnNo() + "-" + Integer.parseInt(idAndPhase[1]));
-                        for(BranchData branch : devIdToBranch.get(idAndPhase[0])) {
-                            //注意,这里要求ieee模型的首末段顺序要和ds模型一致
-                            if(branch.getTapBusNumber() == bus.getBusNumber()) {
-                                double r = branch.getBranchR();
-                                double x = branch.getBranchX();
-                                double b = -x / (r * r + x * x);
-
-                                //general procedure for branchType 0,1,2,3
-                                if (branch.getType() != BranchData.BRANCH_TYPE_ACLINE) {
-                                    double c = 1 / branch.getTransformerRatio();
-                                    b = c * b;
-                                }
-                                H.setValue(i, branch.getTapBusNumber() - 1, b);
-                                H.setValue(i, branch.getZBusNumber() - 1, b);
+                        for(BranchData br : devIdToBranch.get(idAndPhase[0])) {
+                            if(br.getTapBusNumber() != bus.getBusNumber()
+                                    && br.getZBusNumber() != bus.getBusNumber())
+                                continue;
+                            double r = br.getBranchR();
+                            double x = br.getBranchX();
+                            double b = -x / (r * r + x * x);
+                            //general procedure for branchType 0,1,2,3
+                            if (br.getType() != BranchData.BRANCH_TYPE_ACLINE) {
+                                double c = 1 / br.getTransformerRatio();
+                                b = c * b;
+                            }
+                            if(br.getTapBusNumber() == bus.getBusNumber()) {
+                                H.increase(i, br.getTapBusNumber() - 1, b);
+                                H.increase(i, br.getZBusNumber() - 1, -b);
+                            } else {
+                                H.increase(i, br.getTapBusNumber() - 1, -b);
+                                H.increase(i, br.getZBusNumber() - 1, b);
                             }
                         }
                         break;
                     case TYPE_LINE_TO_REACTIVE:
-                        br = dsIsland.getIdToBranch().get(Integer.parseInt(idAndPhase[0]));
-                        tn = dsIsland.getGraph().getEdgeTarget(br);
+                        f = dsIsland.getIdToBranch().get(Integer.parseInt(idAndPhase[0]));
+                        tn = dsIsland.getGraph().getEdgeTarget(f);
                         bus = vertexToBus.get(tn.getTnNo() + "-" + Integer.parseInt(idAndPhase[1]));
-                        for(BranchData branch : devIdToBranch.get(idAndPhase[0])) {
-                            //注意,这里要求ieee模型的首末段顺序要和ds模型一致
-                            if(branch.getTapBusNumber() == bus.getBusNumber()) {
-                                double r = branch.getBranchR();
-                                double x = branch.getBranchX();
-                                double b = -x / (r * r + x * x);
+                        for(BranchData br : devIdToBranch.get(idAndPhase[0])) {
+                            if(br.getZBusNumber() != bus.getBusNumber()
+                                    && br.getTapBusNumber() != bus.getBusNumber())
+                                continue;
+                            double r = br.getBranchR();
+                            double x = br.getBranchX();
+                            double b = -x / (r * r + x * x);
 
-                                //general procedure for branchType 0,1,2,3
-                                if (branch.getType() != BranchData.BRANCH_TYPE_ACLINE) {
-                                    double c = 1 / branch.getTransformerRatio();
-                                    b = c * b;
-                                }
-                                H.setValue(i, branch.getTapBusNumber() - 1, -b);
-                                H.setValue(i, branch.getZBusNumber() - 1, -b);
+                            //general procedure for branchType 0,1,2,3
+                            if (br.getType() != BranchData.BRANCH_TYPE_ACLINE) {
+                                double c = 1 / br.getTransformerRatio();
+                                b = c * b;
+                            }
+                            if(br.getZBusNumber() == bus.getBusNumber()) {
+                                H.increase(i, br.getTapBusNumber() - 1, -b);
+                                H.increase(i, br.getZBusNumber() - 1, b);
+                            } else {
+                                H.increase(i, br.getTapBusNumber() - 1, b);
+                                H.increase(i, br.getZBusNumber() - 1, -b);
                             }
                         }
                         break;
                     case TYPE_LINE_FROM_CURRENT:
-                        br = dsIsland.getIdToBranch().get(Integer.parseInt(idAndPhase[0]));
-                        tn = dsIsland.getGraph().getEdgeSource(br);
+                        f = dsIsland.getIdToBranch().get(Integer.parseInt(idAndPhase[0]));
+                        tn = dsIsland.getGraph().getEdgeSource(f);
                         bus = vertexToBus.get(tn.getTnNo() + "-" + Integer.parseInt(idAndPhase[1]));
-                        for(BranchData branch : devIdToBranch.get(idAndPhase[0])) {
-                            //注意,这里要求ieee模型的首末段顺序要和ds模型一致
-                            if(branch.getTapBusNumber() == bus.getBusNumber()) {
-                                double r = branch.getBranchR();
-                                double x = branch.getBranchX();
-                                H.setValue(i, branch.getTapBusNumber() - 1, 1.0 / (r * r + x * x));
-                                H.setValue(i, branch.getZBusNumber() - 1, -1.0 / (r * r + x * x));
+                        for(BranchData b : devIdToBranch.get(idAndPhase[0])) {
+                            if(b.getTapBusNumber() == bus.getBusNumber()) {
+                                double r = b.getBranchR();
+                                double x = b.getBranchX();
+                                H.increase(i, b.getTapBusNumber() - 1, 1.0 / (r * r + x * x));
+                                H.increase(i, b.getZBusNumber() - 1, -1.0 / (r * r + x * x));
+                            } else if(b.getZBusNumber() == bus.getBusNumber()) {
+                                double r = b.getBranchR();
+                                double x = b.getBranchX();
+                                H.increase(i, b.getZBusNumber() - 1, 1.0 / (r * r + x * x));
+                                H.increase(i, b.getTapBusNumber() - 1, -1.0 / (r * r + x * x));
                             }
                         }
                         break;
                     case TYPE_LINE_TO_CURRENT:
-                        br = dsIsland.getIdToBranch().get(Integer.parseInt(idAndPhase[0]));
-                        tn = dsIsland.getGraph().getEdgeTarget(br);
+                        f = dsIsland.getIdToBranch().get(Integer.parseInt(idAndPhase[0]));
+                        tn = dsIsland.getGraph().getEdgeTarget(f);
                         bus = vertexToBus.get(tn.getTnNo() + "-" + Integer.parseInt(idAndPhase[1]));
-                        for(BranchData branch : devIdToBranch.get(idAndPhase[0])) {
-                            //注意,这里要求ieee模型的首末段顺序要和ds模型一致
-                            if(branch.getTapBusNumber() == bus.getBusNumber()) {
-                                double r = branch.getBranchR();
-                                double x = branch.getBranchX();
-                                H.setValue(i, branch.getTapBusNumber() - 1, -1.0 / (r * r + x * x));
-                                H.setValue(i, branch.getZBusNumber() - 1, 1.0 / (r * r + x * x));
+                        for(BranchData b : devIdToBranch.get(idAndPhase[0])) {
+                            if(b.getZBusNumber() == bus.getBusNumber()) {
+                                double r = b.getBranchR();
+                                double x = b.getBranchX();
+                                H.increase(i, b.getTapBusNumber() - 1, -1.0 / (r * r + x * x));
+                                H.increase(i, b.getZBusNumber() - 1, 1.0 / (r * r + x * x));
+                            } else if(b.getTapBusNumber() == bus.getBusNumber()) {
+                                double r = b.getBranchR();
+                                double x = b.getBranchX();
+                                H.increase(i, b.getZBusNumber() - 1, -1.0 / (r * r + x * x));
+                                H.increase(i, b.getTapBusNumber() - 1, 1.0 / (r * r + x * x));
                             }
                         }
                         break;
@@ -380,9 +399,9 @@ public class MeasPosOpt implements MeasTypeCons {
             binaryNum = ds_candPos.length;
             Ds = new ASparseMatrixLink2D[binaryNum + 1];
             H0 = formH_ds(Y, bApos, ds_existMeasTypes, ds_existMeasPos);
-            //H0.printOnScreen2();
+            H0.printOnScreen2();
             Ds[0] = formHTWH(H0, ds_existMeasWeight, element_count);
-            //Ds[0].printOnScreen2();
+            Ds[0].printOnScreen2();
 
             for (String[] pos : ds_candPos) {
                 int[][] measTypes = ds_measTypesPerPos.get(i - 1);
@@ -395,7 +414,9 @@ public class MeasPosOpt implements MeasTypeCons {
             binaryNum = candPos.length;
             Ds = new ASparseMatrixLink2D[binaryNum + 1];
             H0 = formH(Y, bApos, existMeasTypes, existMeasPos);
+            H0.printOnScreen2();
             Ds[0] = formHTWH(H0, existMeasWeight, element_count);
+            Ds[0].printOnScreen2();
 
             for (int pos : candPos) {
                 int[] measTypes = measTypesPerPos[i - 1];

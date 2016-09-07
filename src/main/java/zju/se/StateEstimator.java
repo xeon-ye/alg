@@ -145,7 +145,7 @@ public class StateEstimator implements SeConstants, MeasTypeCons {
                     int[] vMeasPos = new int[vMeas.length];
                     for (int i = 0; i < vMeasPos.length; i++)
                         vMeasPos[i] = Integer.parseInt(vMeas[i].getPositionId()) - 1;
-                    sm.setBus_v(new HashMap<String, MeasureInfo>(0));
+                    sm.setBus_v(new HashMap<>(0));
                     objFunc.setVMeas(vMeas);
                     objFunc.setVMeasPos(vMeasPos);
 
@@ -155,7 +155,7 @@ public class StateEstimator implements SeConstants, MeasTypeCons {
                         int[] pMeasPos = new int[pMeas.length];
                         for (int i = 0; i < pMeasPos.length; i++)
                             pMeasPos[i] = Integer.parseInt(pMeas[i].getPositionId()) - 1 + 2 * clonedIsland.getBuses().size();
-                        sm.setBus_p(new HashMap<String, MeasureInfo>(0));
+                        sm.setBus_p(new HashMap<>(0));
                         objFunc.setPMeas(pMeas);
                         objFunc.setPMeasPos(pMeasPos);
 
@@ -164,7 +164,7 @@ public class StateEstimator implements SeConstants, MeasTypeCons {
                         int[] qMeasPos = new int[qMeas.length];
                         for (int i = 0; i < qMeasPos.length; i++)
                             qMeasPos[i] = Integer.parseInt(qMeas[i].getPositionId()) - 1 + 3 * clonedIsland.getBuses().size();
-                        sm.setBus_q(new HashMap<String, MeasureInfo>(0));
+                        sm.setBus_q(new HashMap<>(0));
                         objFunc.setQMeas(qMeas);
                         objFunc.setQMeasPos(qMeasPos);
                     }
