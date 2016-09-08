@@ -78,22 +78,38 @@ public class MeasPosOpt implements MeasTypeCons {
 
     private ASparseMatrixLink2D formH(YMatrixGetter Y, ASparseMatrixLink2D bApos, int[] measTypes, int[] pos) {
         int i = 0, n = island.getBuses().size();
-        ASparseMatrixLink2D H = new ASparseMatrixLink2D(measTypes.length, 2 * n);
+        ASparseMatrixLink2D H = new ASparseMatrixLink2D(measTypes.length, 2 * n - 1);
         for(int measType : measTypes) {
             switch (measType) {
                 case TYPE_BUS_ANGLE:
-                    H.setValue(i, pos[i] + n - 1, 1.0);
-                    break;
-                case TYPE_BUS_VOLOTAGE:
-                    H.setValue(i, pos[i] - 1, 1.0);
+                    if(pos[i] < n - 1)
+                        H.setValue(i, pos[i] + n - 1, 1.0);
                     break;
                 case TYPE_BUS_ACTIVE_POWER:
                     int k = bApos.getIA()[pos[i] - 1];
                     while (k != -1) {
                         int j = bApos.getJA().get(k);
-                        H.setValue(i, j + n, bApos.getVA().get(k));
+                        if(j < n - 1)
+                            H.setValue(i, j + n, bApos.getVA().get(k));
                         k = bApos.getLINK().get(k);
                     }
+                    break;
+                case TYPE_LINE_FROM_ACTIVE:
+                    BranchData branch = island.getId2branch().get(pos[i]);
+                    if(branch.getTapBusNumber() < n)
+                        H.setValue(i, branch.getTapBusNumber() + n - 1, 1.0 / branch.getBranchX());
+                    if(branch.getZBusNumber() < n)
+                        H.setValue(i, branch.getZBusNumber() + n - 1, -1.0 / branch.getBranchX());
+                    break;
+                case TYPE_LINE_TO_ACTIVE:
+                    branch = island.getId2branch().get(pos[i]);
+                    if(branch.getTapBusNumber() < n)
+                        H.setValue(i, branch.getTapBusNumber() + n - 1, -1.0 / branch.getBranchX());
+                    if(branch.getZBusNumber() < n)
+                        H.setValue(i, branch.getZBusNumber() + n - 1, 1.0 / branch.getBranchX());
+                    break;
+                case TYPE_BUS_VOLOTAGE:
+                    H.setValue(i, pos[i] - 1, 1.0);
                     break;
                 case TYPE_BUS_REACTIVE_POWER:
                     k = Y.getAdmittance()[1].getIA()[pos[i] - 1];
@@ -102,16 +118,6 @@ public class MeasPosOpt implements MeasTypeCons {
                         H.setValue(i, j, Y.getAdmittance()[1].getVA().get(k));
                         k = Y.getAdmittance()[1].getLINK().get(k);
                     }
-                    break;
-                case TYPE_LINE_FROM_ACTIVE:
-                    BranchData branch = island.getId2branch().get(pos[i]);
-                    H.setValue(i, branch.getTapBusNumber() + n - 1, 1.0 / branch.getBranchX());
-                    H.setValue(i, branch.getZBusNumber() + n - 1, -1.0 / branch.getBranchX());
-                    break;
-                case TYPE_LINE_TO_ACTIVE:
-                    branch = island.getId2branch().get(pos[i]);
-                    H.setValue(i, branch.getTapBusNumber() + n - 1, -1.0 / branch.getBranchX());
-                    H.setValue(i, branch.getZBusNumber() + n - 1, 1.0 / branch.getBranchX());
                     break;
                 case TYPE_LINE_FROM_REACTIVE:
                     branch = island.getId2branch().get(pos[i]);
@@ -177,33 +183,25 @@ public class MeasPosOpt implements MeasTypeCons {
         int count = 0;
         for(int[] types : measTypes)
             count += types.length;
-        ASparseMatrixLink2D H = new ASparseMatrixLink2D(count, 2 * n);
+        ASparseMatrixLink2D H = new ASparseMatrixLink2D(count, 2 * n - 1);
 
         for (count = 0; count < pos.length; count++) {
             //pos[i]这个位置包含了多个量测
             for (int measType : measTypes[count]) {
                 String[] idAndPhase = pos[count].split("_");
-                switch (measType) {
+               switch (measType) {
                     case TYPE_BUS_ANGLE:
-                        H.setValue(i, vertexToBus.get(idAndPhase[0] + "-" + idAndPhase[1]).getBusNumber() + n - 1, 1.0);
-                        break;
-                    case TYPE_BUS_VOLOTAGE:
-                        H.setValue(i, vertexToBus.get(idAndPhase[0] + "-" + idAndPhase[1]).getBusNumber() - 1, 1.0);
+                        int busNumber = vertexToBus.get(idAndPhase[0] + "-" + idAndPhase[1]).getBusNumber();
+                        if(busNumber < n)
+                            H.setValue(i, busNumber + n - 1, 1.0);
                         break;
                     case TYPE_BUS_ACTIVE_POWER:
                         int k = bApos.getIA()[vertexToBus.get(idAndPhase[0] + "-" + idAndPhase[1]).getBusNumber() - 1];
                         while (k != -1) {
                             int j = bApos.getJA().get(k);
-                            H.setValue(i, j + n, bApos.getVA().get(k));
+                            if(j < n - 1)
+                                H.setValue(i, j + n, bApos.getVA().get(k));
                             k = bApos.getLINK().get(k);
-                        }
-                        break;
-                    case TYPE_BUS_REACTIVE_POWER:
-                        k = Y.getAdmittance()[1].getIA()[vertexToBus.get(idAndPhase[0] + "-" + idAndPhase[1]).getBusNumber() - 1];
-                        while (k != -1) {
-                            int j = Y.getAdmittance()[1].getJA().get(k);
-                            H.setValue(i, j, Y.getAdmittance()[1].getVA().get(k));
-                            k = Y.getAdmittance()[1].getLINK().get(k);
                         }
                         break;
                     case TYPE_LINE_FROM_ACTIVE:
@@ -212,11 +210,15 @@ public class MeasPosOpt implements MeasTypeCons {
                         BusData bus = vertexToBus.get(tn.getTnNo() + "-" + Integer.parseInt(idAndPhase[1]));
                         for(BranchData b : devIdToBranch.get(idAndPhase[0])) {
                             if(b.getTapBusNumber() == bus.getBusNumber()) {
-                                H.increase(i, b.getTapBusNumber() + n - 1, 1.0 / b.getBranchX());
-                                H.increase(i, b.getZBusNumber() + n - 1, -1.0 / b.getBranchX());
+                                if(b.getTapBusNumber() < n)
+                                    H.increase(i, b.getTapBusNumber() + n - 1, 1.0 / b.getBranchX());
+                                if(b.getZBusNumber() < n)
+                                    H.increase(i, b.getZBusNumber() + n - 1, -1.0 / b.getBranchX());
                             } else if(b.getZBusNumber() == bus.getBusNumber()) {
-                                H.increase(i, b.getZBusNumber() + n - 1, 1.0 / b.getBranchX());
-                                H.increase(i, b.getTapBusNumber() + n - 1, -1.0 / b.getBranchX());
+                                if(b.getZBusNumber() < n)
+                                    H.increase(i, b.getZBusNumber() + n - 1, 1.0 / b.getBranchX());
+                                if(b.getTapBusNumber() < n)
+                                    H.increase(i, b.getTapBusNumber() + n - 1, -1.0 / b.getBranchX());
                             }
                         }
                         break;
@@ -226,12 +228,27 @@ public class MeasPosOpt implements MeasTypeCons {
                         bus = vertexToBus.get(tn.getTnNo() + "-" + Integer.parseInt(idAndPhase[1]));
                         for(BranchData b : devIdToBranch.get(idAndPhase[0])) {
                             if(b.getZBusNumber() == bus.getBusNumber()) {
-                                H.increase(i, b.getTapBusNumber() + n - 1, -1.0 / b.getBranchX());
-                                H.increase(i, b.getZBusNumber() + n - 1, 1.0 / b.getBranchX());
+                                if(b.getTapBusNumber() < n)
+                                    H.increase(i, b.getTapBusNumber() + n - 1, -1.0 / b.getBranchX());
+                                if(b.getZBusNumber() < n)
+                                    H.increase(i, b.getZBusNumber() + n - 1, 1.0 / b.getBranchX());
                             } else if(b.getTapBusNumber() == bus.getBusNumber()) {
-                                H.increase(i, b.getZBusNumber() + n - 1, -1.0 / b.getBranchX());
-                                H.increase(i, b.getTapBusNumber() + n - 1, 1.0 / b.getBranchX());
+                                if(b.getZBusNumber() < n)
+                                    H.increase(i, b.getZBusNumber() + n - 1, -1.0 / b.getBranchX());
+                                if(b.getTapBusNumber() < n)
+                                    H.increase(i, b.getTapBusNumber() + n - 1, 1.0 / b.getBranchX());
                             }
+                        }
+                        break;
+                    case TYPE_BUS_VOLOTAGE:
+                        H.setValue(i, vertexToBus.get(idAndPhase[0] + "-" + idAndPhase[1]).getBusNumber() - 1, 1.0);
+                        break;
+                    case TYPE_BUS_REACTIVE_POWER:
+                        k = Y.getAdmittance()[1].getIA()[vertexToBus.get(idAndPhase[0] + "-" + idAndPhase[1]).getBusNumber() - 1];
+                        while (k != -1) {
+                            int j = Y.getAdmittance()[1].getJA().get(k);
+                            H.setValue(i, j, Y.getAdmittance()[1].getVA().get(k));
+                            k = Y.getAdmittance()[1].getLINK().get(k);
                         }
                         break;
                     case TYPE_LINE_FROM_REACTIVE:
@@ -382,7 +399,7 @@ public class MeasPosOpt implements MeasTypeCons {
 
     public void doOpt(boolean isThreePhase) {
         int n = island.getBuses().size();
-        int size = 2 * n;//状态变量的维数
+        int size = 2 * n - 1;//状态变量的维数
 
         YMatrixGetter Y = new YMatrixGetter(island);
         Y.formYMatrix();
@@ -399,7 +416,7 @@ public class MeasPosOpt implements MeasTypeCons {
             binaryNum = ds_candPos.length;
             Ds = new ASparseMatrixLink2D[binaryNum + 1];
             H0 = formH_ds(Y, bApos, ds_existMeasTypes, ds_existMeasPos);
-            H0.printOnScreen2();
+            //H0.printOnScreen2();
             Ds[0] = formHTWH(H0, ds_existMeasWeight, element_count);
             Ds[0].printOnScreen2();
 
@@ -414,9 +431,9 @@ public class MeasPosOpt implements MeasTypeCons {
             binaryNum = candPos.length;
             Ds = new ASparseMatrixLink2D[binaryNum + 1];
             H0 = formH(Y, bApos, existMeasTypes, existMeasPos);
-            H0.printOnScreen2();
+            //H0.printOnScreen2();
             Ds[0] = formHTWH(H0, existMeasWeight, element_count);
-            Ds[0].printOnScreen2();
+            //Ds[0].printOnScreen2();
 
             for (int pos : candPos) {
                 int[] measTypes = measTypesPerPos[i - 1];
