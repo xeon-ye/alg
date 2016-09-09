@@ -8,7 +8,6 @@ import zju.devmodel.MapObject;
 import zju.ieeeformat.BranchData;
 import zju.ieeeformat.BusData;
 import zju.ieeeformat.IEEEDataIsland;
-import zju.ieeeformat.TitleData;
 import zju.matrix.Complex;
 import zju.util.JOFileUtil;
 
@@ -916,6 +915,17 @@ public class DsTopoIsland implements Serializable, DsModelCons {
      * @return IEEE潮流模型
      */
     public IEEEDataIsland toIeeeIsland(Map<String, BranchData[]> devIdToBranch, Map<String, BusData> vertexToBus) {
+        return toIeeeIsland(devIdToBranch, vertexToBus, false);
+    }
+
+    /**
+     *
+     * 将三相等效电路转换成IEEE潮流模型
+     * @param devIdToBranch 用于记录两个模型之间线路的对应关系
+     * @param isP2pNeglected 是否忽略相与相之间的互阻抗
+     * @return IEEE潮流模型
+     */
+    public IEEEDataIsland toIeeeIsland(Map<String, BranchData[]> devIdToBranch, Map<String, BusData> vertexToBus, boolean isP2pNeglected) {
         if(detailedG == null)
             buildDetailedGraph();
         IEEEDataIsland island = new IEEEDataIsland();
@@ -925,6 +935,8 @@ public class DsTopoIsland implements Serializable, DsModelCons {
         for(String key : detailedG.vertexSet()) {
             if(key.equals(EARTH_NODE_ID))
                 continue;
+            //detailedG的vertexSet，首先放入的是earth node，然后是supply node
+            //所以电源节点的节点编号排在1这个位置，这点非常重要，影响后面配电网的很多算法
             BusData bus = new BusData();
             bus.setName(key);
             bus.setBusNumber(index);
@@ -940,6 +952,30 @@ public class DsTopoIsland implements Serializable, DsModelCons {
                 Feeder f = (Feeder) this.branches.get(this.getDevices().get(e.getDevId()));
                 if(devIdToBranch.containsKey(e.getDevId()))
                     continue;
+                if(isP2pNeglected) {
+                    int count  = 0;
+                    BranchData[] brArray = new BranchData[f.getPhases().length];
+                    BranchData branch = new BranchData();
+                    BusData bus1 = vertexToBus.get(detailedG.getEdgeSource(e));
+                    BusData bus2 = vertexToBus.get(detailedG.getEdgeTarget(e));
+                    branch.setTapBusNumber(bus1.getBusNumber());
+                    branch.setZBusNumber(bus2.getBusNumber());
+                    branch.setBranchR(f.getZ_real()[e.getPhase()][e.getPhase()] / baseZ);
+                    branch.setBranchX(f.getZ_imag()[e.getPhase()][e.getPhase()] / baseZ);
+                    brArray[count++] = branch;
+                    for(DetailedEdge otherEdage : e.getOtherEdgesOfSameFeeder()) {
+                        branch = new BranchData();
+                        bus1 = vertexToBus.get(detailedG.getEdgeSource(otherEdage));
+                        bus2 = vertexToBus.get(detailedG.getEdgeTarget(otherEdage));
+                        branch.setTapBusNumber(bus1.getBusNumber());
+                        branch.setZBusNumber(bus2.getBusNumber());
+                        branch.setBranchR(f.getZ_real()[otherEdage.getPhase()][otherEdage.getPhase()] / baseZ);
+                        branch.setBranchX(f.getZ_imag()[otherEdage.getPhase()][otherEdage.getPhase()] / baseZ);
+                        brArray[count++] = branch;
+                    }
+                    devIdToBranch.put(e.getDevId(), brArray);
+                    continue;
+                }
                 switch (f.getPhases().length) {
                     case 1:
                         BranchData branch = new BranchData();

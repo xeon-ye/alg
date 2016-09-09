@@ -82,7 +82,7 @@ public class MeasPosOptTest extends TestCase implements MeasTypeCons {
         //将配电网转换成等效的IEEE格式
         HashMap<String, BranchData[]> devIdToBranch = new HashMap<>(dsIsland.getBranches().size());
         HashMap<String, BusData> vertexToBus = new HashMap<>(dsIsland.getDetailedG().vertexSet().size());
-        IEEEDataIsland island = dsIsland.toIeeeIsland(devIdToBranch, vertexToBus);
+        IEEEDataIsland island = dsIsland.toIeeeIsland(devIdToBranch, vertexToBus, false);
         //将潮流结果赋值到转换后的模型
         int n = island.getBuses().size();
         AVector state = new AVector(n * 2);
@@ -151,8 +151,8 @@ public class MeasPosOptTest extends TestCase implements MeasTypeCons {
         mpo.setDs_existMeasTypes(mc.measTypes);
         mpo.setDs_existMeasWeight(mc.weights);
 
-        //setIduMeasures(dsIsland, new int[]{1, 3}, new int[]{1, 2}, new double[]{0.58, 0.5, 0.8, 0.58, 0.5, 0.8}, mpo);
-        setIduMeasures(dsIsland, new int[]{}, new int[]{}, new double[]{}, mpo);
+        setIduMeasures(dsIsland, new int[]{1, 3}, new int[]{1, 2}, new double[]{0.58, 0.5, 0.5, 0.58, 0.5, 0.3}, mpo);
+        //setIduMeasures(dsIsland, new int[]{}, new int[]{}, new double[]{}, mpo);
         mpo.setMaxDevNum(1);
         mpo.doOpt(true);
     }
