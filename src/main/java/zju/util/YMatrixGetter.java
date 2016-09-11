@@ -20,7 +20,7 @@ public class YMatrixGetter {
     public static final int LINE_TO = 1;
 
     private IEEEDataIsland island;
-    private Map<Integer, double[][]> lineAdmittance = new HashMap<Integer, double[][]>();
+    private Map<Integer, double[][]> lineAdmittance = new HashMap<>();
 
     private ASparseMatrixLink[] admittance = new ASparseMatrixLink[2];
 

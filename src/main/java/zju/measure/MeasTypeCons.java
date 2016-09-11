@@ -34,6 +34,11 @@ public interface MeasTypeCons {
     int TYPE_LINE_FROM_CURRENT_ANGLE = 111;
     int TYPE_LINE_TO_CURRENT = 112;
     int TYPE_LINE_TO_CURRENT_ANGLE = 113;
+    //电流实部、虚部
+    int TYPE_LINE_FROM_CURRENT_REAL = 114;
+    int TYPE_LINE_FROM_CURRENT_IMAG = 115;
+    int TYPE_LINE_TO_CURRENT_REAL = 116;
+    int TYPE_LINE_TO_CURRENT_IMAG = 117;
 
     //离散量量测类型定义
     int TYPE_SWITCH_POS = 200;

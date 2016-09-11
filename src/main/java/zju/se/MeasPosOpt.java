@@ -373,20 +373,105 @@ public class MeasPosOpt implements MeasTypeCons {
                                 H.increase(i, b.getTapBusNumber() - 1, 1.0 / Math.sqrt(r * r + x * x));
                             }
                         }
-                        break; case TYPE_LINE_FROM_CURRENT_ANGLE:
+                        break;
+                    case TYPE_LINE_FROM_CURRENT_REAL:
                         f = dsIsland.getIdToBranch().get(Integer.parseInt(idAndPhase[0]));
                         tn = dsIsland.getGraph().getEdgeSource(f);
                         bus = vertexToBus.get(tn.getTnNo() + "-" + Integer.parseInt(idAndPhase[1]));
-                        if (bus.getBusNumber() > 3) {
-                            H.setValue(i, bus.getBusNumber() + n - 1, 1.0);
+                        for(BranchData b : devIdToBranch.get(idAndPhase[0])) {
+                            if(b.getTapBusNumber() == bus.getBusNumber()) {
+                                //得到PI型等值支路的参数
+                                double[] gbG1B1 = Y.getLineAdmittance(b.getId(), YMatrixGetter.LINE_FROM);
+                                H.increase(i, b.getTapBusNumber() - 1, gbG1B1[0] + gbG1B1[2]);
+                                H.increase(i, b.getZBusNumber() - 1, -gbG1B1[0]);
+                                if(b.getTapBusNumber() > 3)
+                                    H.increase(i, b.getTapBusNumber() + n - 1, -gbG1B1[1]);
+                                if(b.getZBusNumber() > 3)
+                                    H.increase(i, b.getZBusNumber() + n - 1, gbG1B1[1]);
+                            } else if(b.getZBusNumber() == bus.getBusNumber()) {
+                                double[] gbG1B1 = Y.getLineAdmittance(b.getId(), YMatrixGetter.LINE_TO);
+                                H.increase(i, b.getZBusNumber() - 1, gbG1B1[0] + gbG1B1[2]);
+                                H.increase(i, b.getTapBusNumber() - 1, -gbG1B1[0]);
+                                if(b.getTapBusNumber() > 3)
+                                    H.increase(i, b.getTapBusNumber() + n - 1, gbG1B1[1]);
+                                if(b.getZBusNumber() > 3)
+                                    H.increase(i, b.getZBusNumber() + n - 1, -gbG1B1[1]);
+                            }
                         }
                         break;
-                    case TYPE_LINE_TO_CURRENT_ANGLE:
+                    case TYPE_LINE_TO_CURRENT_REAL:
                         f = dsIsland.getIdToBranch().get(Integer.parseInt(idAndPhase[0]));
                         tn = dsIsland.getGraph().getEdgeTarget(f);
                         bus = vertexToBus.get(tn.getTnNo() + "-" + Integer.parseInt(idAndPhase[1]));
-                        if (bus.getBusNumber() > 3) {
-                            H.setValue(i, bus.getBusNumber() + n - 1, 1.0);
+                        for(BranchData b : devIdToBranch.get(idAndPhase[0])) {
+                            if(b.getTapBusNumber() == bus.getBusNumber()) {
+                                //得到PI型等值支路的参数
+                                double[] gbG1B1 = Y.getLineAdmittance(b.getId(), YMatrixGetter.LINE_FROM);
+                                H.increase(i, b.getTapBusNumber() - 1, gbG1B1[0] + gbG1B1[2]);
+                                H.increase(i, b.getZBusNumber() - 1, -gbG1B1[0]);
+                                if(b.getTapBusNumber() > 3)
+                                    H.increase(i, b.getTapBusNumber() + n - 1, -gbG1B1[1]);
+                                if(b.getZBusNumber() > 3)
+                                    H.increase(i, b.getZBusNumber() + n - 1, gbG1B1[1]);
+                            } else if(b.getZBusNumber() == bus.getBusNumber()) {
+                                double[] gbG1B1 = Y.getLineAdmittance(b.getId(), YMatrixGetter.LINE_TO);
+                                H.increase(i, b.getZBusNumber() - 1, gbG1B1[0] + gbG1B1[2]);
+                                H.increase(i, b.getTapBusNumber() - 1, -gbG1B1[0]);
+                                if(b.getTapBusNumber() > 3)
+                                    H.increase(i, b.getTapBusNumber() + n - 1, gbG1B1[1]);
+                                if(b.getZBusNumber() > 3)
+                                    H.increase(i, b.getZBusNumber() + n - 1, -gbG1B1[1]);
+                            }
+                        }
+                        break;
+                    case TYPE_LINE_FROM_CURRENT_IMAG:
+                        f = dsIsland.getIdToBranch().get(Integer.parseInt(idAndPhase[0]));
+                        tn = dsIsland.getGraph().getEdgeSource(f);
+                        bus = vertexToBus.get(tn.getTnNo() + "-" + Integer.parseInt(idAndPhase[1]));
+                        for(BranchData b : devIdToBranch.get(idAndPhase[0])) {
+                            if(b.getTapBusNumber() == bus.getBusNumber()) {
+                                //得到PI型等值支路的参数
+                                double[] gbG1B1 = Y.getLineAdmittance(b.getId(), YMatrixGetter.LINE_FROM);
+                                H.increase(i, b.getTapBusNumber() - 1, gbG1B1[1]);
+                                H.increase(i, b.getZBusNumber() - 1, -gbG1B1[1]);
+                                if(b.getTapBusNumber() > 3)
+                                    H.increase(i, b.getTapBusNumber() + n - 1, gbG1B1[0] + gbG1B1[2]);
+                                if(b.getZBusNumber() > 3)
+                                    H.increase(i, b.getZBusNumber() + n - 1, -gbG1B1[0]);
+                            } else if(b.getZBusNumber() == bus.getBusNumber()) {
+                                double[] gbG1B1 = Y.getLineAdmittance(b.getId(), YMatrixGetter.LINE_TO);
+                                H.increase(i, b.getZBusNumber() - 1, gbG1B1[1]);
+                                H.increase(i, b.getTapBusNumber() - 1, -gbG1B1[1]);
+                                if(b.getTapBusNumber() > 3)
+                                    H.increase(i, b.getTapBusNumber() + n - 1, -gbG1B1[0]);
+                                if(b.getZBusNumber() > 3)
+                                    H.increase(i, b.getZBusNumber() + n - 1, gbG1B1[0] + gbG1B1[2]);
+                            }
+                        }
+                        break;
+                    case TYPE_LINE_TO_CURRENT_IMAG:
+                        f = dsIsland.getIdToBranch().get(Integer.parseInt(idAndPhase[0]));
+                        tn = dsIsland.getGraph().getEdgeTarget(f);
+                        bus = vertexToBus.get(tn.getTnNo() + "-" + Integer.parseInt(idAndPhase[1]));
+                        for(BranchData b : devIdToBranch.get(idAndPhase[0])) {
+                            if(b.getTapBusNumber() == bus.getBusNumber()) {
+                                //得到PI型等值支路的参数
+                                double[] gbG1B1 = Y.getLineAdmittance(b.getId(), YMatrixGetter.LINE_FROM);
+                                H.increase(i, b.getTapBusNumber() - 1, gbG1B1[1]);
+                                H.increase(i, b.getZBusNumber() - 1, -gbG1B1[1]);
+                                if(b.getTapBusNumber() > 3)
+                                    H.increase(i, b.getTapBusNumber() + n - 1, gbG1B1[0] + gbG1B1[2]);
+                                if(b.getZBusNumber() > 3)
+                                    H.increase(i, b.getZBusNumber() + n - 1, -gbG1B1[0]);
+                            } else if(b.getZBusNumber() == bus.getBusNumber()) {
+                                double[] gbG1B1 = Y.getLineAdmittance(b.getId(), YMatrixGetter.LINE_TO);
+                                H.increase(i, b.getZBusNumber() - 1, gbG1B1[1]);
+                                H.increase(i, b.getTapBusNumber() - 1, -gbG1B1[1]);
+                                if(b.getTapBusNumber() > 3)
+                                    H.increase(i, b.getTapBusNumber() + n - 1, -gbG1B1[0]);
+                                if(b.getZBusNumber() > 3)
+                                    H.increase(i, b.getZBusNumber() + n - 1, gbG1B1[0] + gbG1B1[2]);
+                            }
                         }
                         break;
                     default:

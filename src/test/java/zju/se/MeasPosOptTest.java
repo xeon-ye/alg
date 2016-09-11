@@ -278,13 +278,13 @@ public class MeasPosOptTest extends TestCase implements MeasTypeCons {
                         if(island.getGraph().getEdgeSource(branchObj) == tn) {
                             ts[count][j++] = TYPE_LINE_FROM_ACTIVE;
                             ts[count][j++] = TYPE_LINE_FROM_REACTIVE;
-                            ts[count][j] = TYPE_LINE_FROM_CURRENT;
-                            ts[count][j] = TYPE_LINE_FROM_CURRENT_ANGLE;
+                            ts[count][j] = TYPE_LINE_FROM_CURRENT_REAL;
+                            ts[count][j] = TYPE_LINE_FROM_CURRENT_IMAG;
                         } else {
                             ts[count][j++] = TYPE_LINE_TO_ACTIVE;
                             ts[count][j++] = TYPE_LINE_TO_REACTIVE;
-                            ts[count][j] = TYPE_LINE_TO_CURRENT;
-                            ts[count][j] = TYPE_LINE_TO_CURRENT_ANGLE;
+                            ts[count][j] = TYPE_LINE_TO_CURRENT_REAL;
+                            ts[count][j] = TYPE_LINE_TO_CURRENT_IMAG;
                         }
                         j = 0;
                         weights[i][count1 * busMeasureNum + count2 * branchMeasureNum + j++] = weight[4];
