@@ -10,7 +10,6 @@ import zju.dspf.DsPowerflowTest;
 import zju.ieeeformat.BranchData;
 import zju.ieeeformat.BusData;
 import zju.ieeeformat.IEEEDataIsland;
-import zju.ieeeformat.IcfDataUtil;
 import zju.matrix.AVector;
 import zju.measure.MeasTypeCons;
 import zju.measure.MeasVectorCreator;
@@ -151,7 +150,7 @@ public class MeasPosOptTest extends TestCase implements MeasTypeCons {
         mpo.setDs_existMeasTypes(mc.measTypes);
         mpo.setDs_existMeasWeight(mc.weights);
 
-        setIduMeasures(dsIsland, new int[]{1, 3}, new int[]{1, 2}, new double[]{0.58, 0.5, 0.5, 0.58, 0.5, 0.3}, mpo);
+        setIduMeasures(dsIsland, new int[]{1, 3}, new int[]{1, 2}, new double[]{0.58, 0.5, 0.5, 0.58, 0.58, 0.5, 0.3, 0.58,}, mpo);
         //setIduMeasures(dsIsland, new int[]{}, new int[]{}, new double[]{}, mpo);
         mpo.setMaxDevNum(1);
         mpo.doOpt(true);
@@ -225,8 +224,8 @@ public class MeasPosOptTest extends TestCase implements MeasTypeCons {
      */
     private void setIduMeasures(DsTopoIsland island, int[] tnIds, int[] branchIds, double[] weight, MeasPosOpt mpo) {
 
-        int busMeasureNum = 3; //某一节点某一相对应的量测数目
-        int branchMeasureNum = 3; //某一支路某一相对应的量测数目
+        int busMeasureNum = 4; //某一节点某一相对应的量测数目
+        int branchMeasureNum = 4; //某一支路某一相对应的量测数目
         String[][] candPos = new String[tnIds.length][];
         List<int[][]> measTypePerPos = new ArrayList<>(candPos.length);
         double[][] weights = new double[candPos.length][];
@@ -260,9 +259,11 @@ public class MeasPosOptTest extends TestCase implements MeasTypeCons {
                         ts[count][j++] = TYPE_BUS_ACTIVE_POWER;
                         ts[count][j++] = TYPE_BUS_REACTIVE_POWER;
                         ts[count][j] = TYPE_BUS_VOLOTAGE;
+                        ts[count][j] = TYPE_BUS_ANGLE;
                         weights[i][count1 * busMeasureNum] = weight[0];
                         weights[i][count1 * busMeasureNum + 1] = weight[1];
                         weights[i][count1 * busMeasureNum + 2] = weight[2];
+                        weights[i][count1 * busMeasureNum + 3] = weight[3];
                         count++;
                         count1++;
                     }
@@ -278,15 +279,18 @@ public class MeasPosOptTest extends TestCase implements MeasTypeCons {
                             ts[count][j++] = TYPE_LINE_FROM_ACTIVE;
                             ts[count][j++] = TYPE_LINE_FROM_REACTIVE;
                             ts[count][j] = TYPE_LINE_FROM_CURRENT;
+                            ts[count][j] = TYPE_LINE_FROM_CURRENT_ANGLE;
                         } else {
                             ts[count][j++] = TYPE_LINE_TO_ACTIVE;
                             ts[count][j++] = TYPE_LINE_TO_REACTIVE;
                             ts[count][j] = TYPE_LINE_TO_CURRENT;
+                            ts[count][j] = TYPE_LINE_TO_CURRENT_ANGLE;
                         }
                         j = 0;
-                        weights[i][count1 * busMeasureNum + count2 * branchMeasureNum + j++] = weight[3];
                         weights[i][count1 * busMeasureNum + count2 * branchMeasureNum + j++] = weight[4];
-                        weights[i][count1 * busMeasureNum + count2 * branchMeasureNum + j] = weight[5];
+                        weights[i][count1 * busMeasureNum + count2 * branchMeasureNum + j++] = weight[5];
+                        weights[i][count1 * busMeasureNum + count2 * branchMeasureNum + j++] = weight[6];
+                        weights[i][count1 * busMeasureNum + count2 * branchMeasureNum + j] = weight[7];
                         count++;
                         count2++;
                     }

@@ -173,6 +173,20 @@ public class MeasPosOpt implements MeasTypeCons {
                     H.setValue(i, branch.getTapBusNumber() - 1, -1.0 / sqrtG2B2);
                     H.setValue(i, branch.getZBusNumber() - 1, 1.0 / sqrtG2B2);
                     break;
+                case TYPE_LINE_FROM_CURRENT_ANGLE:
+                    branch = island.getId2branch().get(pos[i]);
+                    if (branch.getTapBusNumber() < n - 1) {
+                        H.setValue(i, branch.getTapBusNumber() + n - 1, 1.0); //todo:角度还有待
+                        H.setValue(i, branch.getZBusNumber() + n - 1, 1.0);
+                    }
+                    break;
+                case TYPE_LINE_TO_CURRENT_ANGLE:
+                    branch = island.getId2branch().get(pos[i]);
+                    if (branch.getZBusNumber() < n - 1) {
+                        H.setValue(i, branch.getTapBusNumber() + n - 1, 1.0);
+                        H.setValue(i, branch.getZBusNumber() + n - 1, 1.0);
+                    }
+                    break;
                 default:
                     break;
             }
@@ -358,6 +372,21 @@ public class MeasPosOpt implements MeasTypeCons {
                                 H.increase(i, b.getZBusNumber() - 1, -1.0 / Math.sqrt(r * r + x * x));
                                 H.increase(i, b.getTapBusNumber() - 1, 1.0 / Math.sqrt(r * r + x * x));
                             }
+                        }
+                        break; case TYPE_LINE_FROM_CURRENT_ANGLE:
+                        f = dsIsland.getIdToBranch().get(Integer.parseInt(idAndPhase[0]));
+                        tn = dsIsland.getGraph().getEdgeSource(f);
+                        bus = vertexToBus.get(tn.getTnNo() + "-" + Integer.parseInt(idAndPhase[1]));
+                        if (bus.getBusNumber() > 3) {
+                            H.setValue(i, bus.getBusNumber() + n - 1, 1.0);
+                        }
+                        break;
+                    case TYPE_LINE_TO_CURRENT_ANGLE:
+                        f = dsIsland.getIdToBranch().get(Integer.parseInt(idAndPhase[0]));
+                        tn = dsIsland.getGraph().getEdgeTarget(f);
+                        bus = vertexToBus.get(tn.getTnNo() + "-" + Integer.parseInt(idAndPhase[1]));
+                        if (bus.getBusNumber() > 3) {
+                            H.setValue(i, bus.getBusNumber() + n - 1, 1.0);
                         }
                         break;
                     default:
