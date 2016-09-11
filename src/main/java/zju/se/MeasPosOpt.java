@@ -29,7 +29,7 @@ public class MeasPosOpt implements MeasTypeCons {
     // --------------- 三相平衡的电网 ---------
     private IEEEDataIsland island;
 
-    boolean isVAmplOnly = true;
+    boolean isVAmplOnly = false;
 
     //已经安装的量测：类型，位置和权重
     private int[] existMeasTypes;
@@ -60,13 +60,13 @@ public class MeasPosOpt implements MeasTypeCons {
         this.island = island;
     }
 
-    public MeasPosOpt(DsTopoIsland dsIsland) {
+    public MeasPosOpt(DsTopoIsland dsIsland, boolean isP2pNeglected) {
         this.dsIsland = dsIsland;
         if(dsIsland.getDetailedG() == null)
             dsIsland.buildDetailedGraph();
         devIdToBranch = new HashMap<>(dsIsland.getBranches().size());
         vertexToBus = new HashMap<>(dsIsland.getDetailedG().vertexSet().size());
-        island = dsIsland.toIeeeIsland(devIdToBranch, vertexToBus);
+        island = dsIsland.toIeeeIsland(devIdToBranch, vertexToBus, isP2pNeglected);
     }
 
     private ASparseMatrixLink2D formH(YMatrixGetter Y, ASparseMatrixLink2D bApos, int[] measTypes, int pos) {
@@ -385,17 +385,17 @@ public class MeasPosOpt implements MeasTypeCons {
                                 H.increase(i, b.getTapBusNumber() - 1, gbG1B1[0] + gbG1B1[2]);
                                 H.increase(i, b.getZBusNumber() - 1, -gbG1B1[0]);
                                 if(b.getTapBusNumber() > 3)
-                                    H.increase(i, b.getTapBusNumber() + n - 1, -gbG1B1[1]);
+                                    H.increase(i, b.getTapBusNumber() + n - 4, -gbG1B1[1]);
                                 if(b.getZBusNumber() > 3)
-                                    H.increase(i, b.getZBusNumber() + n - 1, gbG1B1[1]);
+                                    H.increase(i, b.getZBusNumber() + n - 4, gbG1B1[1]);
                             } else if(b.getZBusNumber() == bus.getBusNumber()) {
                                 double[] gbG1B1 = Y.getLineAdmittance(b.getId(), YMatrixGetter.LINE_TO);
                                 H.increase(i, b.getZBusNumber() - 1, gbG1B1[0] + gbG1B1[2]);
                                 H.increase(i, b.getTapBusNumber() - 1, -gbG1B1[0]);
                                 if(b.getTapBusNumber() > 3)
-                                    H.increase(i, b.getTapBusNumber() + n - 1, gbG1B1[1]);
+                                    H.increase(i, b.getTapBusNumber() + n - 4, gbG1B1[1]);
                                 if(b.getZBusNumber() > 3)
-                                    H.increase(i, b.getZBusNumber() + n - 1, -gbG1B1[1]);
+                                    H.increase(i, b.getZBusNumber() + n - 4, -gbG1B1[1]);
                             }
                         }
                         break;
@@ -410,17 +410,17 @@ public class MeasPosOpt implements MeasTypeCons {
                                 H.increase(i, b.getTapBusNumber() - 1, gbG1B1[0] + gbG1B1[2]);
                                 H.increase(i, b.getZBusNumber() - 1, -gbG1B1[0]);
                                 if(b.getTapBusNumber() > 3)
-                                    H.increase(i, b.getTapBusNumber() + n - 1, -gbG1B1[1]);
+                                    H.increase(i, b.getTapBusNumber() + n - 4, -gbG1B1[1]);
                                 if(b.getZBusNumber() > 3)
-                                    H.increase(i, b.getZBusNumber() + n - 1, gbG1B1[1]);
+                                    H.increase(i, b.getZBusNumber() + n - 4, gbG1B1[1]);
                             } else if(b.getZBusNumber() == bus.getBusNumber()) {
                                 double[] gbG1B1 = Y.getLineAdmittance(b.getId(), YMatrixGetter.LINE_TO);
                                 H.increase(i, b.getZBusNumber() - 1, gbG1B1[0] + gbG1B1[2]);
                                 H.increase(i, b.getTapBusNumber() - 1, -gbG1B1[0]);
                                 if(b.getTapBusNumber() > 3)
-                                    H.increase(i, b.getTapBusNumber() + n - 1, gbG1B1[1]);
+                                    H.increase(i, b.getTapBusNumber() + n - 4, gbG1B1[1]);
                                 if(b.getZBusNumber() > 3)
-                                    H.increase(i, b.getZBusNumber() + n - 1, -gbG1B1[1]);
+                                    H.increase(i, b.getZBusNumber() + n - 4, -gbG1B1[1]);
                             }
                         }
                         break;
@@ -435,17 +435,17 @@ public class MeasPosOpt implements MeasTypeCons {
                                 H.increase(i, b.getTapBusNumber() - 1, gbG1B1[1]);
                                 H.increase(i, b.getZBusNumber() - 1, -gbG1B1[1]);
                                 if(b.getTapBusNumber() > 3)
-                                    H.increase(i, b.getTapBusNumber() + n - 1, gbG1B1[0] + gbG1B1[2]);
+                                    H.increase(i, b.getTapBusNumber() + n - 4, gbG1B1[0] + gbG1B1[2]);
                                 if(b.getZBusNumber() > 3)
-                                    H.increase(i, b.getZBusNumber() + n - 1, -gbG1B1[0]);
+                                    H.increase(i, b.getZBusNumber() + n - 4, -gbG1B1[0]);
                             } else if(b.getZBusNumber() == bus.getBusNumber()) {
                                 double[] gbG1B1 = Y.getLineAdmittance(b.getId(), YMatrixGetter.LINE_TO);
                                 H.increase(i, b.getZBusNumber() - 1, gbG1B1[1]);
                                 H.increase(i, b.getTapBusNumber() - 1, -gbG1B1[1]);
                                 if(b.getTapBusNumber() > 3)
-                                    H.increase(i, b.getTapBusNumber() + n - 1, -gbG1B1[0]);
+                                    H.increase(i, b.getTapBusNumber() + n - 4, -gbG1B1[0]);
                                 if(b.getZBusNumber() > 3)
-                                    H.increase(i, b.getZBusNumber() + n - 1, gbG1B1[0] + gbG1B1[2]);
+                                    H.increase(i, b.getZBusNumber() + n - 4, gbG1B1[0] + gbG1B1[2]);
                             }
                         }
                         break;
@@ -460,17 +460,17 @@ public class MeasPosOpt implements MeasTypeCons {
                                 H.increase(i, b.getTapBusNumber() - 1, gbG1B1[1]);
                                 H.increase(i, b.getZBusNumber() - 1, -gbG1B1[1]);
                                 if(b.getTapBusNumber() > 3)
-                                    H.increase(i, b.getTapBusNumber() + n - 1, gbG1B1[0] + gbG1B1[2]);
+                                    H.increase(i, b.getTapBusNumber() + n - 4, gbG1B1[0] + gbG1B1[2]);
                                 if(b.getZBusNumber() > 3)
-                                    H.increase(i, b.getZBusNumber() + n - 1, -gbG1B1[0]);
+                                    H.increase(i, b.getZBusNumber() + n - 4, -gbG1B1[0]);
                             } else if(b.getZBusNumber() == bus.getBusNumber()) {
                                 double[] gbG1B1 = Y.getLineAdmittance(b.getId(), YMatrixGetter.LINE_TO);
                                 H.increase(i, b.getZBusNumber() - 1, gbG1B1[1]);
                                 H.increase(i, b.getTapBusNumber() - 1, -gbG1B1[1]);
                                 if(b.getTapBusNumber() > 3)
-                                    H.increase(i, b.getTapBusNumber() + n - 1, -gbG1B1[0]);
+                                    H.increase(i, b.getTapBusNumber() + n - 4, -gbG1B1[0]);
                                 if(b.getZBusNumber() > 3)
-                                    H.increase(i, b.getZBusNumber() + n - 1, gbG1B1[0] + gbG1B1[2]);
+                                    H.increase(i, b.getZBusNumber() + n - 4, gbG1B1[0] + gbG1B1[2]);
                             }
                         }
                         break;
@@ -826,5 +826,9 @@ public class MeasPosOpt implements MeasTypeCons {
 
     public void setDs_existMeasWeight(double[] ds_existMeasWeight) {
         this.ds_existMeasWeight = ds_existMeasWeight;
+    }
+
+    public void setVAmplOnly(boolean VAmplOnly) {
+        isVAmplOnly = VAmplOnly;
     }
 }
