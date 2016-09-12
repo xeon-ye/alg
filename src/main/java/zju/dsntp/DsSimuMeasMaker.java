@@ -1,4 +1,4 @@
-package zju.dspf;
+package zju.dsntp;
 
 import zju.devmodel.MapObject;
 import zju.dsmodel.DsTopoIsland;

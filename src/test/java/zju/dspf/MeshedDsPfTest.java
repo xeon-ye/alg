@@ -3,6 +3,7 @@ package zju.dspf;
 import junit.framework.TestCase;
 import zju.devmodel.MapObject;
 import zju.dsmodel.*;
+import zju.dsntp.DsPowerflow;
 
 import java.io.InputStream;
 import java.util.Map;

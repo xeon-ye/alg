@@ -3,6 +3,8 @@ package zju.dspf;
 import junit.framework.TestCase;
 import zju.devmodel.MapObject;
 import zju.dsmodel.*;
+import zju.dsntp.DsPowerflow;
+import zju.dsntp.LcbPfModel;
 import zju.matrix.AVector;
 import zju.util.DoubleMatrixToolkit;
 

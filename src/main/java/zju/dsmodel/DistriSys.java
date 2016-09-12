@@ -444,4 +444,8 @@ public class DistriSys implements DsModelCons, Serializable {
         for (DsTopoIsland island : activeIslands)
             calModelBuilder.createCalDevModel(island);
     }
+
+    public UndirectedGraph<DsConnectNode, MapObject> getOrigGraph() {
+        return origGraph;
+    }
 }

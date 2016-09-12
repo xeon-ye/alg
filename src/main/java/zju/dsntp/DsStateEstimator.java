@@ -1,4 +1,4 @@
-package zju.dsse;
+package zju.dsntp;
 
 import org.apache.log4j.Logger;
 import zju.dsmodel.DistriSys;

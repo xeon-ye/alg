@@ -1,6 +1,6 @@
 package zju.dsmodel;
 
-import zju.dspf.LcbPfModel;
+import zju.dsntp.LcbPfModel;
 import zju.matrix.ASparseMatrixLink2D;
 
 import java.io.Serializable;

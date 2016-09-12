@@ -1,4 +1,4 @@
-package zju.dsse;
+package zju.dsntp;
 
 import cern.colt.function.IntIntDoubleFunction;
 import cern.colt.matrix.DoubleMatrix2D;

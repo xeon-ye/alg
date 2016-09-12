@@ -1,4 +1,4 @@
-package zju.dspf;
+package zju.dsntp;
 
 import org.apache.log4j.Logger;
 import zju.common.NewtonSolver;

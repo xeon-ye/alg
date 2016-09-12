@@ -4,7 +4,7 @@ import junit.framework.TestCase;
 import org.jgrapht.UndirectedGraph;
 import org.jgrapht.alg.ConnectivityInspector;
 import zju.devmodel.MapObject;
-import zju.dspf.LcbPfModel;
+import zju.dsntp.LcbPfModel;
 
 /**
  * CalModeBridge Tester.
