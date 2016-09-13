@@ -726,6 +726,10 @@ public class DsTopoIsland implements Serializable, DsModelCons {
             tn.setTnNo(count);
             tns.add(tn);
             tn.setIsland(this);
+            StringBuilder sb = new StringBuilder();
+            for(DsConnectNode cn : tn.getConnectivityNodes())
+            sb.append(cn.getId()).append("\t");
+            log.debug(sb.toString() + "---->" + tn.getTnNo());
             count++;
         }
         idToBranch = new HashMap<>(graph.edgeSet().size());
@@ -740,6 +744,7 @@ public class DsTopoIsland implements Serializable, DsModelCons {
                 if (connected[count] > tn.getTnNo()) {
                     edge.setId(String.valueOf(branchId));
                     idToBranch.put(branchId, edge);
+                    log.debug(t1.getTnNo() + " ---> " + t2.getTnNo() + " =============== " + branchId);
                     branchId++;
                 }
                 count++;
