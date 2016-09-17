@@ -175,7 +175,8 @@ public class MeasPosOptTest extends TestCase implements MeasTypeCons {
         MeasVectorCreator mc = new MeasVectorCreator();
         mc.getMeasureVector(sm, true);
 
-        MeasPosOpt mpo = new MeasPosOpt(dsIsland, false);
+        MeasPosOpt mpo = new MeasPosOpt(dsIsland, true);
+        //mpo.setVAmplOnly(true);
         mpo.setDs_existMeasPos(mc.measPosWithPhase);
         mpo.setDs_existMeasTypes(mc.measTypes);
         mpo.setDs_existMeasWeight(mc.weights);

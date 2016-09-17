@@ -979,6 +979,7 @@ public class DsTopoIsland implements Serializable, DsModelCons {
                         brArray[count++] = branch;
                     }
                     devIdToBranch.put(e.getDevId(), brArray);
+                    Collections.addAll(branches, brArray);
                     continue;
                 }
                 switch (f.getPhases().length) {
