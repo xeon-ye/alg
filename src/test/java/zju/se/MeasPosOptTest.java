@@ -175,12 +175,13 @@ public class MeasPosOptTest extends TestCase implements MeasTypeCons {
         MeasVectorCreator mc = new MeasVectorCreator();
         mc.getMeasureVector(sm, true);
 
-        MeasPosOpt mpo = new MeasPosOpt(dsIsland, false);
+        MeasPosOpt mpo = new MeasPosOpt(dsIsland, true);
+        //mpo.setVAmplOnly(true);
         mpo.setDs_existMeasPos(mc.measPosWithPhase);
         mpo.setDs_existMeasTypes(mc.measTypes);
         mpo.setDs_existMeasWeight(mc.weights);
 
-        setIduMeasures(dsIsland, new int[]{1,2}, new int[]{1,3}, new double[]{0.58, 0.5, 0.5, 0.58, 0.58, 0.5, 0.3, 0.58,}, mpo);
+        setIduMeasures(dsIsland, new int[]{1,2,3,4}, new int[]{2,3,5,3}, new double[]{0.58, 0.5, 0.5, 0.58, 0.58, 0.5, 0.3, 0.58,}, mpo);
         mpo.setMaxDevNum(1);
         mpo.doOpt(true);
     }
