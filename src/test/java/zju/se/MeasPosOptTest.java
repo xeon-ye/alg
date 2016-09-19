@@ -180,7 +180,7 @@ public class MeasPosOptTest extends TestCase implements MeasTypeCons {
         mpo.setDs_existMeasTypes(mc.measTypes);
         mpo.setDs_existMeasWeight(mc.weights);
 
-        setIduMeasures(dsIsland, new int[]{}, new int[]{}, new double[]{}, mpo);
+        setIduMeasures(dsIsland, new int[]{1,2}, new int[]{1,3}, new double[]{0.58, 0.5, 0.5, 0.58, 0.58, 0.5, 0.3, 0.58,}, mpo);
         mpo.setMaxDevNum(1);
         mpo.doOpt(true);
     }
