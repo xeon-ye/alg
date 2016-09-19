@@ -1,5 +1,6 @@
 package zju.dsntp;
 
+import org.apache.log4j.Logger;
 import org.jgrapht.UndirectedGraph;
 import zju.devmodel.MapObject;
 import zju.dsmodel.DistriSys;
@@ -13,6 +14,9 @@ import java.util.*;
  * Date: 2016/9/12
  */
 public class PathBasedModel {
+
+    private static boolean isDebug = false; //置成true, 打印调试信息
+
     //配电系统
     DistriSys sys;
     //路径,起始点都是电源
@@ -39,22 +43,22 @@ public class PathBasedModel {
         int i, count = 0;
         boolean flag1, flag2;
         supplyStart = new int[supplies.length];
-        for(String supply : supplies) {
+        for (String supply : supplies) {
             supplyStart[count++] = pathes.size();
             DsConnectNode supplyCn = sys.getCns().get(supply);
             stack.push(supplyCn);//先将电源节点压入栈内
-            while(!stack.isEmpty()) {
-                DsConnectNode cn = (DsConnectNode)stack.peek();    //对栈顶元素深度搜索路径
+            while (!stack.isEmpty()) {
+                DsConnectNode cn = (DsConnectNode) stack.peek();    //对栈顶元素深度搜索路径
                 flag1 = true;
-                for(MapObject e : g.edgesOf(cn)) {
+                for (MapObject e : g.edgesOf(cn)) {
                     DsConnectNode cn1 = g.getEdgeSource(e);
                     DsConnectNode cn2 = g.getEdgeTarget(e);
-                    if(cn1.equals(cn)) {
+                    if (cn1.equals(cn)) {
                         flag2 = true;
-                        if(stack.contains(cn2))
+                        if (stack.contains(cn2))
                             continue;
-                        for(String scn : supplies)
-                            if(scn.equals(cn2.getId())) {
+                        for (String scn : supplies)
+                            if (scn.equals(cn2.getId())) {
                                 flag2 = false;
                                 break;
                             }
@@ -62,9 +66,9 @@ public class PathBasedModel {
                         i = stack.size() - 2;
                         Iterator<Object> Iter = stack.iterator();
                         p = new MapObject[stack.size()];
-                        p[p.length-1] = g.getEdge(cn1, cn2);
+                        p[p.length - 1] = g.getEdge(cn1, cn2);
                         DsConnectNode temp1 = (DsConnectNode) Iter.next();
-                        while(Iter.hasNext()) {
+                        while (Iter.hasNext()) {
                             DsConnectNode temp2 = (DsConnectNode) Iter.next();
                             p[i] = g.getEdge(temp2, temp1);
                             temp1 = temp2;
@@ -84,22 +88,21 @@ public class PathBasedModel {
                             pathes.add(p);  //增加一条路径
                             break;
                         }
-                    }
-                    else {
+                    } else {
                         flag2 = true;
-                        if(stack.contains(cn1))
+                        if (stack.contains(cn1))
                             continue;
-                        for(String scn : supplies)
-                            if(scn.equals(cn1.getId()) ) {
+                        for (String scn : supplies)
+                            if (scn.equals(cn1.getId())) {
                                 flag2 = false;
                                 break;
                             }
                         i = stack.size() - 2;
                         Iterator<Object> Iter = stack.iterator();
                         p = new MapObject[stack.size()];
-                        p[p.length-1] = g.getEdge(cn2, cn1);
+                        p[p.length - 1] = g.getEdge(cn2, cn1);
                         DsConnectNode temp1 = (DsConnectNode) Iter.next();
-                        while(Iter.hasNext()) {
+                        while (Iter.hasNext()) {
                             DsConnectNode temp2 = (DsConnectNode) Iter.next();
                             p[i] = g.getEdge(temp2, temp1);
                             temp1 = temp2;
@@ -118,7 +121,7 @@ public class PathBasedModel {
                         }
                     }
                 }
-                if(flag1)
+                if (flag1)
                     stack.pop();
             }
         }
@@ -128,94 +131,98 @@ public class PathBasedModel {
 
         //START:这部分输出每条路径，测试用
         buildEdgesAndNodes();
-        int j = 0;
-        boolean Sourceissupply;
-        System.out.println("Number of pathes is " + pathes.size());
-        for(i = 0; i <= pathes.size() - 1; i++){
-            Sourceissupply = false;
-            System.out.println("Length of "+ i +"th path is " + pathes.get(i).length + ":");
+        int j;
+        boolean isSupply;
+        if(isDebug) {
+            System.out.println("Number of pathes is " + pathes.size());
+            for (i = 0; i <= pathes.size() - 1; i++) {
+                isSupply = false;
+                System.out.println("Length of " + i + "th path is " + pathes.get(i).length + ":");
 
-            String temp;
-            for(String scn : supplies){
-                if(scn.equals(g.getEdgeSource(pathes.get(i)[0]).getId())){
-                    Sourceissupply = true;
-                    break;
+                String temp;
+                for (String scn : supplies) {
+                    if (scn.equals(g.getEdgeSource(pathes.get(i)[0]).getId())) {
+                        isSupply = true;
+                        break;
+                    }
                 }
-            }
-            if(Sourceissupply){
-                temp = g.getEdgeSource(pathes.get(i)[0]).getId();
-                System.out.printf("%s", g.getEdgeSource(pathes.get(i)[0]).getId());
-            }
-            else{
-                temp = g.getEdgeTarget(pathes.get(i)[0]).getId();
-                System.out.printf("%s", temp);
-            }
+                if (isSupply) {
+                    temp = g.getEdgeSource(pathes.get(i)[0]).getId();
+                    System.out.printf("%s", g.getEdgeSource(pathes.get(i)[0]).getId());
+                } else {
+                    temp = g.getEdgeTarget(pathes.get(i)[0]).getId();
+                    System.out.printf("%s", temp);
+                }
 
-            for(j = 0; j <= pathes.get(i).length - 1; j++){
-                if(temp.equals(g.getEdgeTarget(pathes.get(i)[j]).getId()))
-                    temp = g.getEdgeSource(pathes.get(i)[j]).getId();
-                else
-                    temp = g.getEdgeTarget(pathes.get(i)[j]).getId();
-                System.out.printf("-%s", temp);
+                for (j = 0; j <= pathes.get(i).length - 1; j++) {
+                    if (temp.equals(g.getEdgeTarget(pathes.get(i)[j]).getId()))
+                        temp = g.getEdgeSource(pathes.get(i)[j]).getId();
+                    else
+                        temp = g.getEdgeTarget(pathes.get(i)[j]).getId();
+                    System.out.printf("-%s", temp);
+                }
+                System.out.printf("\n");
             }
-            System.out.printf("\n");
+            //END
+            if (isDebug)
+                System.out.println("-----END-----");
         }
-        //END
-        System.out.println("-----END-----");
 
         //START:输出以某个结点为终点的所有路径
-        String Cn = "9";
-        for(int k = 0; k <= cns.size() - 1; k++) {
-            Cn = cns.get(k).getId();
-            boolean Cnissupply = false;
-            for(String scn : supplies){
-                if (Cn.equals(scn)){
-                    Cnissupply = true;
+        String cn;
+        for (int k = 0; k <= cns.size() - 1; k++) {
+            cn = cns.get(k).getId();
+            boolean isCnSupply = false;
+            for (String scn : supplies) {
+                if (cn.equals(scn)) {
+                    isCnSupply = true;
                 }
             }
-            if(!Cnissupply){
-
-                System.out.println("The path ending by " + Cn + ":");
+            if (!isCnSupply) {
+                if(isDebug)
+                    System.out.println("The path ending by " + cn + ":");
                 for (i = 0; i <= pathes.size() - 1; i++) {
                     boolean flag = false;
                     String lastID = g.getEdgeTarget(pathes.get(i)[pathes.get(i).length - 1]).getId();
                     if (pathes.get(i).length == 1) {
                         for (String scn : supplies) {
-                            if (lastID == scn) {
+                            if (Objects.equals(lastID, scn)) {
                                 flag = true;
                                 lastID = g.getEdgeSource(pathes.get(i)[pathes.get(i).length - 1]).getId();
                                 break;
                             }
                         }
-                        if (Cn.equals(lastID)) {
-                            if (flag)
+                        if(cn.equals(lastID)) {
+                            if (flag && isDebug)
                                 System.out.println(g.getEdgeTarget(pathes.get(i)[pathes.get(i).length - 1]).getId() + "-" + lastID);
-                            else
+                            else if(isDebug)
                                 System.out.println(g.getEdgeSource(pathes.get(i)[pathes.get(i).length - 1]).getId() + "-" + lastID);
                             continue;
                         } else
                             continue;
                     }
 
-                    if (lastID == g.getEdgeSource(pathes.get(i)[pathes.get(i).length - 2]).getId() || lastID == g.getEdgeTarget(pathes.get(i)[pathes.get(i).length - 2]).getId()) {
+                    if (Objects.equals(lastID, g.getEdgeSource(pathes.get(i)[pathes.get(i).length - 2]).getId()) || Objects.equals(lastID, g.getEdgeTarget(pathes.get(i)[pathes.get(i).length - 2]).getId())) {
                         lastID = g.getEdgeSource(pathes.get(i)[pathes.get(i).length - 1]).getId();
                     }
 
-                    if (Cn.equals(lastID)) {
+                    if (cn.equals(lastID)) {
                         String temp;
-                        Sourceissupply = false;
+                        isSupply = false;
                         for (String scn : supplies) {
                             if (scn.equals(g.getEdgeSource(pathes.get(i)[0]).getId())) {
-                                Sourceissupply = true;
+                                isSupply = true;
                                 break;
                             }
                         }
-                        if (Sourceissupply) {
+                        if (isSupply) {
                             temp = g.getEdgeSource(pathes.get(i)[0]).getId();
-                            System.out.printf("%s", g.getEdgeSource(pathes.get(i)[0]).getId());
+                            if(isDebug)
+                                System.out.printf("%s", g.getEdgeSource(pathes.get(i)[0]).getId());
                         } else {
                             temp = g.getEdgeTarget(pathes.get(i)[0]).getId();
-                            System.out.printf("%s", temp);
+                            if(isDebug)
+                                System.out.printf("%s", temp);
                         }
 
                         for (j = 0; j <= pathes.get(i).length - 1; j++) {
@@ -223,19 +230,23 @@ public class PathBasedModel {
                                 temp = g.getEdgeSource(pathes.get(i)[j]).getId();
                             else
                                 temp = g.getEdgeTarget(pathes.get(i)[j]).getId();
-                            System.out.printf("-%s", temp);
+                            if(isDebug)
+                                System.out.printf("-%s", temp);
                         }
-                        System.out.printf("\n");
+                        if(isDebug)
+                            System.out.println();
                     }
                 }
             }
         }
         //End
-        System.out.println("-----END-----");
+        if(isDebug)
+            System.out.println("-----END-----");
 
         //START:输出通过某条边的所有路径
-        for(int k = 0; k <= edges.size() - 1; k++) {
-            System.out.println("The pathes including " + g.getEdgeSource(edges.get(k)).getId() + "-"+g.getEdgeTarget(edges.get(k)).getId()+":");
+        for (int k = 0; k <= edges.size() - 1; k++) {
+            if(isDebug)
+                System.out.println("The pathes including " + g.getEdgeSource(edges.get(k)).getId() + "-" + g.getEdgeTarget(edges.get(k)).getId() + ":");
             for (i = 0; i <= pathes.size() - 1; i++) {
                 boolean flag = false;
                 for (j = 0; j <= pathes.get(i).length - 1; j++)
@@ -244,20 +255,22 @@ public class PathBasedModel {
                         break;
                     }
                 if (flag) {
-                    Sourceissupply = false;
+                    isSupply = false;
                     String temp;
                     for (String scn : supplies) {
                         if (scn.equals(g.getEdgeSource(pathes.get(i)[0]).getId())) {
-                            Sourceissupply = true;
+                            isSupply = true;
                             break;
                         }
                     }
-                    if (Sourceissupply) {
+                    if (isSupply) {
                         temp = g.getEdgeSource(pathes.get(i)[0]).getId();
-                        System.out.printf("%s", g.getEdgeSource(pathes.get(i)[0]).getId());
+                        if(isDebug)
+                            System.out.printf("%s", g.getEdgeSource(pathes.get(i)[0]).getId());
                     } else {
                         temp = g.getEdgeTarget(pathes.get(i)[0]).getId();
-                        System.out.printf("%s", temp);
+                        if(isDebug)
+                            System.out.printf("%s", temp);
                     }
 
                     for (j = 0; j <= pathes.get(i).length - 1; j++) {
@@ -265,13 +278,16 @@ public class PathBasedModel {
                             temp = g.getEdgeSource(pathes.get(i)[j]).getId();
                         else
                             temp = g.getEdgeTarget(pathes.get(i)[j]).getId();
-                        System.out.printf("-%s", temp);
+                        if(isDebug)
+                            System.out.printf("-%s", temp);
                     }
-                    System.out.printf("\n");
+                    if(isDebug)
+                        System.out.printf("\n");
                 }
             }
         }
-        System.out.println("-----END-----");
+        if(isDebug)
+            System.out.println("-----END-----");
     }
 
     public List<MapObject[]> getPathes() {
@@ -292,7 +308,7 @@ public class PathBasedModel {
         Deque<Object> stack = new ArrayDeque<>();
         stack.push(supply0);
         boolean flag;
-        while(!stack.isEmpty()) {
+        while (!stack.isEmpty()) {
             flag = true;
             cn = (DsConnectNode) stack.peek();
             for (MapObject edge : g.edgesOf(cn)) {
@@ -306,22 +322,21 @@ public class PathBasedModel {
                         flag = false;
                         break;
                     }
-                }
-                else
-                if (!cns.contains(cn1) && !stack.contains(cn1)) {
+                } else if (!cns.contains(cn1) && !stack.contains(cn1)) {
                     stack.push(cn1);
                     flag = false;
                     break;
                 }
             }
-            if(flag) {
-                if(!cns.contains(stack.peek()))
+            if (flag) {
+                if (!cns.contains(stack.peek()))
                     cns.add((DsConnectNode) stack.peek());
                 stack.pop();
             }
         }
-        for(int i = 0; i < cns.size(); i++)
-            System.out.println(cns.get(i).getId());
+        if(isDebug)
+            for (DsConnectNode cn3 : cns)
+                System.out.println(cn3.getId());
         //System.out.printf("%d", cns.size());
     }
 }

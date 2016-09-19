@@ -148,6 +148,9 @@ public class DistriSys implements DsModelCons, Serializable {
         //dealRegurators();//todo:
     }
 
+    /**
+     * 根据开关状态分析配电网拓扑岛
+     */
     public void buildDynamicTopo() {
         cnToTn = new HashMap<>(cns.size());
         //先把开关打开的边去掉
