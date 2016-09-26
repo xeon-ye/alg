@@ -23,7 +23,7 @@ public class PathBasedModel {
     //每个电源点在上边数组的位置
     int[] supplyStart;
     //图中除了电源以外所有的节点
-    List<DsConnectNode> cns;
+    List<DsConnectNode> nodes;
     //图中所有的边
     List<MapObject> edges;
     //以某个节点为终点的所有路径，按cns中存储节点的顺序排列
@@ -34,6 +34,10 @@ public class PathBasedModel {
     List<MapObject[]> edgepathes;
     //每条边在edgepathes中的位置
     int[] edgeStart;
+    //cnpathes中路径在pathes中对应的序号
+    int[] cnpathesIndex;
+    //edgepathes中路径在pathes中对应的序号
+    List<Integer> edgepathesIndex;
 
     public PathBasedModel(DistriSys sys) {
         this.sys = sys;
@@ -148,12 +152,13 @@ public class PathBasedModel {
         String[] supplies = sys.getSupplyCns();
         UndirectedGraph<DsConnectNode, MapObject> g = sys.getOrigGraph();
         cnpathes = new ArrayList<>(pathes.size());
+        cnpathesIndex = new int[pathes.size()];
         int i,k;
         String cn, lastID;
-        cnStart = new int[cns.size()];
-        for (k = 0; k <= cns.size() - 1; k++) {
+        cnStart = new int[nodes.size()];
+        for (k = 0; k <= nodes.size() - 1; k++) {
             cnStart[k] = cnpathes.size();
-            cn = cns.get(k).getId();
+            cn = nodes.get(k).getId();
             for (i = 0; i <= pathes.size() - 1; i++) {
                 lastID = g.getEdgeTarget(pathes.get(i)[pathes.get(i).length - 1]).getId();
                 if (pathes.get(i).length == 1) {
@@ -163,15 +168,19 @@ public class PathBasedModel {
                             break;
                         }
                     }
-                    if (cn.equals(lastID))
+                    if (cn.equals(lastID)) {
                         cnpathes.add(pathes.get(i));
+                        cnpathesIndex[cnpathesIndex.length] = i;
+                    }
                 }
                 else {
                     //如果路径上倒数第二条边有节点与lastID相同，则lastID应取最后一条边的另一个端点才是路径上的最后一个点
                     if (lastID.equals(g.getEdgeSource(pathes.get(i)[pathes.get(i).length - 2]).getId()) || lastID.equals(g.getEdgeTarget(pathes.get(i)[pathes.get(i).length - 2]).getId()))
                         lastID = g.getEdgeSource(pathes.get(i)[pathes.get(i).length - 1]).getId();
-                    if (cn.equals(lastID))
+                    if (cn.equals(lastID)) {
                         cnpathes.add(pathes.get(i));
+                        cnpathesIndex[cnpathesIndex.length] = i;
+                    }
                 }
             }
         }
@@ -187,6 +196,7 @@ public class PathBasedModel {
     public void buildedgePathes() {
         UndirectedGraph<DsConnectNode, MapObject> g = sys.getOrigGraph();
         edgepathes = new ArrayList<>();//todo: not efficient
+        edgepathesIndex = new ArrayList<>();//todo: not efficient
         int i, j, k;
         edgeStart = new int[edges.size()];
         for (k = 0; k <= edges.size() - 1; k++) {
@@ -195,6 +205,7 @@ public class PathBasedModel {
                 for (j = 0; j <= pathes.get(i).length - 1; j++)
                     if (edges.get(k) == pathes.get(i)[j]) {
                         edgepathes.add(pathes.get(i));
+                        edgepathesIndex.add(i);
                         break;
                     }
             }
@@ -236,7 +247,7 @@ public class PathBasedModel {
         String[] supplies = sys.getSupplyCns();
         UndirectedGraph<DsConnectNode, MapObject> g = sys.getOrigGraph();
         edges = new ArrayList<>();//todo: not efficient
-        cns = new ArrayList<>();//todo: not efficient
+        nodes = new ArrayList<>();//todo: not efficient
         boolean issupply;
         DsConnectNode supply0 = sys.getCns().get(supplies[0]);  // 从某一个电源开始深度优先搜索
         DsConnectNode cn1, cn2, cn;
@@ -252,12 +263,12 @@ public class PathBasedModel {
                 cn1 = g.getEdgeSource(edge);
                 cn2 = g.getEdgeTarget(edge);
                 if (cn1 == cn) {
-                    if (!cns.contains(cn2) && !stack.contains(cn2)) {
+                    if (!nodes.contains(cn2) && !stack.contains(cn2)) {
                         stack.push(cn2);
                         flag = false;
                         break;
                     }
-                } else if (!cns.contains(cn1) && !stack.contains(cn1)) {
+                } else if (!nodes.contains(cn1) && !stack.contains(cn1)) {
                     stack.push(cn1);
                     flag = false;
                     break;
@@ -265,7 +276,7 @@ public class PathBasedModel {
             }
             if (flag) {
                 //节点出栈时判断是否存储：不是电源节点且还未存储过，则存入cns中
-                if (!cns.contains(stack.peek())) {
+                if (!nodes.contains(stack.peek())) {
                     issupply = false;
                     for(String scn : supplies)
                         if(((DsConnectNode) stack.peek()).getId().equals(scn)) {
@@ -273,15 +284,15 @@ public class PathBasedModel {
                             break;
                         }
                     if(!issupply)
-                        cns.add((DsConnectNode) stack.peek());
+                        nodes.add((DsConnectNode) stack.peek());
                 }
                 stack.pop();
             }
         }
         if (isDebug) {
-            for (DsConnectNode cn3 : cns)
+            for (DsConnectNode cn3 : nodes)
                 System.out.println(cn3.getId());
-            System.out.printf("%d", cns.size());
+            System.out.printf("%d", nodes.size());
         }
     }
 
