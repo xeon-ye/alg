@@ -93,6 +93,7 @@ public class LoadTransferOpt extends PathBasedModel {
         //todo:对上面这些参数赋值
         //求开关最少的次数
         //所有支路的通断状态
+        int rowLowerLen = 0, rowUpperLen = 0, elementLen = 0, columnLen = 0, startsLen = 0;
         int[] edgesStatues = new int[edges.size()];
         //路径的通断，即问题中的状态变量。按pathes中的顺序排列
         int[] w = new int[pathes.size()];
@@ -124,12 +125,12 @@ public class LoadTransferOpt extends PathBasedModel {
                     if(nodes.get(j).equals(g.getEdgeSource(edges.get(i))) || nodes.get(j).equals(g.getEdgeTarget(edges.get(i)))) {
                         if(j == nodes.size()-1) {
                             for (k = cnStart[j]; k < cnpathes.size(); k++) {
-                                objValue[cnpathesIndex[k]]++;
+                                objValue[cnpathesIndex.get(k)]++;
                             }
                         }
                         else {
                             for (k = cnStart[j]; k < cnStart[j + 1]; k++) {
-                                objValue[cnpathesIndex[k]]++;
+                                objValue[cnpathesIndex.get(k)]++;
                             }
                         }
                     }
@@ -141,12 +142,12 @@ public class LoadTransferOpt extends PathBasedModel {
                     if(nodes.get(j).equals(g.getEdgeSource(edges.get(i))) || nodes.get(j).equals(g.getEdgeTarget(edges.get(i)))) {
                         if(j == nodes.size()-1) {
                             for (k = cnStart[j]; k < cnpathes.size(); k++) {
-                                objValue[cnpathesIndex[k]]--;
+                                objValue[cnpathesIndex.get(k)]--;
                             }
                         }
                         else {
                             for (k = cnStart[j]; k < cnStart[j + 1]; k++) {
-                                objValue[cnpathesIndex[k]]--;
+                                objValue[cnpathesIndex.get(k)]--;
                             }
                         }
                     }
@@ -155,20 +156,20 @@ public class LoadTransferOpt extends PathBasedModel {
         }
         //约束条件：对每个负荷节点，有且只有一条路径供电
         for(i = 0; i < nodes.size(); i++) {
-            starts[starts.length] = element.length;
+            starts[startsLen++] = elementLen;
             //等式约束，将上下限设成相同
-            rowLower[rowLower.length] = 1;
-            rowUpper[rowUpper.length] = 1;
+            rowLower[rowLowerLen++] = 1;
+            rowUpper[rowUpperLen++] = 1;
             if(i == nodes.size()-1) {
                 for(j = cnStart[i]; j < cnpathes.size(); j++) {
-                    element[element.length] = 1;
-                    column[element.length] = cnpathesIndex[j];
+                    element[elementLen++] = 1;
+                    column[elementLen++] = cnpathesIndex.get(j);
                 }
             }
             else {
                 for (j = cnStart[i]; j < cnStart[i + 1]; j++) {
-                    element[element.length] = 1;
-                    column[element.length] = cnpathesIndex[j];
+                    element[elementLen++] = 1;
+                    column[elementLen++] = cnpathesIndex.get(j);
                 }
             }
         }
@@ -181,20 +182,20 @@ public class LoadTransferOpt extends PathBasedModel {
             else
                 endIndex = supplyStart[k+1];
             for (i = supplyStart[k]+1; i < endIndex; i++) {
-                starts[starts.length] = element.length;
+                starts[startsLen++] = elementLen;
                 j = i - 1;
-                rowLower[rowLower.length] = 0;
-                rowUpper[rowUpper.length] = 1;  //状态变量只取0和1，可令约束上限为1
-                element[element.length] = 1;
-                element[element.length] = -1;
+                rowLower[rowLowerLen++] = 0;
+                rowUpper[rowUpperLen++] = 1;  //状态变量只取0和1，可令约束上限为1
+                element[elementLen++] = 1;
+                element[elementLen++] = -1;
                 if (pathes.get(i).length > pathes.get(j).length) {
-                    column[column.length] = j;
-                    column[column.length] = i;
+                    column[columnLen++] = j;
+                    column[columnLen++] = i;
                 } else {
                     while (pathes.get(i).length <= pathes.get(j).length)
                         j--;
-                    column[column.length] = j;
-                    column[column.length] = i;
+                    column[columnLen++] = j;
+                    column[columnLen++] = i;
                 }
             }
         }
@@ -203,17 +204,17 @@ public class LoadTransferOpt extends PathBasedModel {
         double[] supplyCapacity = new double[supplyStart.length];   //todo 读入
         String[] supplies = sys.getSupplyCns();
         for(i = 0; i < supplyStart.length; i++) {
-            starts[starts.length] = element.length;
-            rowUpper[rowUpper.length] = supplyCapacity[i];
-            rowLower[rowLower.length] = 0;
+            starts[startsLen++] = elementLen;
+            rowUpper[rowUpperLen++] = supplyCapacity[i];
+            rowLower[rowLowerLen++] = 0;
             if(i == supplyStart.length-1)
                 endIndex = pathes.size();
             else
                 endIndex = supplyStart[i+1];
             for(j = supplyStart[i]; j < endIndex; j++) {
                 //找出路径在cnpathes中对应的序号
-                for(k = 0; k < cnpathesIndex.length; k++) {
-                    if(cnpathesIndex[k] == j)
+                for(k = 0; k < cnpathesIndex.size(); k++) {
+                    if(cnpathesIndex.get(k) == j)
                         break;
                 }
                 //找出路径cnpathes[k]的末尾节点
@@ -222,10 +223,10 @@ public class LoadTransferOpt extends PathBasedModel {
                         break;
                 }
                 if(cnStart[l] > k)
-                    element[element.length] = loads[l-1];
+                    element[elementLen++] = loads[l-1];
                 else
-                    element[element.length] = loads[cnStart.length-1];
-                column[column.length] = j;
+                    element[elementLen++] = loads[cnStart.length-1];
+                column[columnLen++] = j;
             }
         }
         //约束条件：每一条供电线路不能过载
@@ -233,9 +234,9 @@ public class LoadTransferOpt extends PathBasedModel {
         String lastID;
         double[] feederCapacity = new double[edges.size()]; //todo 读入
         for(i = 0; i < edges.size(); i++) {
-            starts[starts.length] = element.length;
-            rowUpper[rowUpper.length] = feederCapacity[i];
-            rowLower[rowLower.length] = 0;
+            starts[startsLen++] = elementLen;
+            rowUpper[rowUpperLen++] = feederCapacity[i];
+            rowLower[rowLowerLen++] = 0;
             if(i == edgeStart.length-1)
                 endIndex = pathes.size();
             else
@@ -259,8 +260,8 @@ public class LoadTransferOpt extends PathBasedModel {
                 for(k = 0; k < nodes.size(); k++)
                     if(lastID == nodes.get(k).getId())
                         break;
-                element[element.length] = loads[k];
-                column[column.length] = edgepathesIndex.get(j);
+                element[elementLen++] = loads[k];
+                column[columnLen++] = edgepathesIndex.get(j);
             }
         }
 

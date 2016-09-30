@@ -35,7 +35,7 @@ public class PathBasedModel {
     //每条边在edgepathes中的位置
     int[] edgeStart;
     //cnpathes中路径在pathes中对应的序号
-    int[] cnpathesIndex;
+    List<Integer> cnpathesIndex;
     //edgepathes中路径在pathes中对应的序号
     List<Integer> edgepathesIndex;
 
@@ -152,7 +152,7 @@ public class PathBasedModel {
         String[] supplies = sys.getSupplyCns();
         UndirectedGraph<DsConnectNode, MapObject> g = sys.getOrigGraph();
         cnpathes = new ArrayList<>(pathes.size());
-        cnpathesIndex = new int[pathes.size()];
+        cnpathesIndex = new ArrayList<>(pathes.size());
         int i,k;
         String cn, lastID;
         cnStart = new int[nodes.size()];
@@ -170,7 +170,7 @@ public class PathBasedModel {
                     }
                     if (cn.equals(lastID)) {
                         cnpathes.add(pathes.get(i));
-                        cnpathesIndex[cnpathesIndex.length] = i;
+                        cnpathesIndex.add(i);
                     }
                 }
                 else {
@@ -179,7 +179,7 @@ public class PathBasedModel {
                         lastID = g.getEdgeSource(pathes.get(i)[pathes.get(i).length - 1]).getId();
                     if (cn.equals(lastID)) {
                         cnpathes.add(pathes.get(i));
-                        cnpathesIndex[cnpathesIndex.length] = i;
+                        cnpathesIndex.add(i);
                     }
                 }
             }
@@ -290,9 +290,9 @@ public class PathBasedModel {
             }
         }
         if (isDebug) {
-            for (DsConnectNode cn3 : nodes)
-                System.out.println(cn3.getId());
-            System.out.printf("%d", nodes.size());
+//            for (DsConnectNode cn3 : nodes)
+//                System.out.println(cn3.getId());
+//            System.out.printf("%d", nodes.size());
         }
     }
 
