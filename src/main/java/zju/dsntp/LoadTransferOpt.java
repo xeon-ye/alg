@@ -8,6 +8,7 @@ import zju.dsmodel.DistriSys;
 import zju.dsmodel.DsConnectNode;
 import zju.dsmodel.DsDevices;
 
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -67,6 +68,9 @@ public class LoadTransferOpt extends PathBasedModel {
         //重新形成拓扑图
         sys.buildOrigTopo(devices);
 
+        //生成路径
+        super.buildPathes();
+
         //开始构造线性规划模型
         //状态变量是所有路径的通断状态
         //objValue 是优化问题中的变量的系数,　如min Cx 中 C矩阵里的系数。
@@ -101,6 +105,11 @@ public class LoadTransferOpt extends PathBasedModel {
         int i, j, k, l, offNum = 0;
         //负荷的功率，按nodes中的顺序排列
         double[] loads = new double[nodes.size()]; //todo 读入
+        try {
+            readLoads(loads,"C:\\Users\\Administrator.2013-20160810IY\\Desktop\\ieee配电网-2013");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         //所有状态变量上限为1，下限为0，都是整数
         for(i = 0; i < columnLower.length; i++) {
             columnLower[i] = 0;
@@ -204,6 +213,11 @@ public class LoadTransferOpt extends PathBasedModel {
         //约束条件：由某一电源供电的所有负荷功率之和应小于电源容量
         //电源容量
         double[] supplyCapacity = new double[supplyStart.length];   //todo 读入
+        try {
+            readSupplyCapacity(supplyCapacity, "C:\\Users\\Administrator.2013-20160810IY\\Desktop\\ieee配电网-2013");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         String[] supplies = sys.getSupplyCns();
         for(i = 0; i < supplyStart.length; i++) {
             starts[startsLen++] = elementLen;
@@ -235,6 +249,11 @@ public class LoadTransferOpt extends PathBasedModel {
         //线容量
         String lastID;
         double[] feederCapacity = new double[edges.size()]; //todo 读入
+        try {
+            readFeederCapacity(feederCapacity,"C:\\Users\\Administrator.2013-20160810IY\\Desktop\\ieee配电网-2013");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         for(i = 0; i < edges.size(); i++) {
             starts[startsLen++] = elementLen;
             rowUpper[rowUpperLen++] = feederCapacity[i];
@@ -267,7 +286,6 @@ public class LoadTransferOpt extends PathBasedModel {
             }
         }
 
-
         int numberRows = rowLower.length;
         int numberColumns = columnLower.length;
         double result[] = new double[numberColumns];
@@ -280,6 +298,91 @@ public class LoadTransferOpt extends PathBasedModel {
             log.warn("计算不收敛.");
         } else { //状态位显示计算收敛
             log.info("计算结果.");
+        }
+    }
+
+    //读取各节点带的负载
+    public void readLoads(double[] loads, String path) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(path)));
+        String data;
+        String[] newdata;
+        String cnId;
+        double cnLoad;
+        int i,j;
+
+        for(i = 1; i <= nodes.size(); i++) {
+            data = br.readLine();
+            newdata = data.split(" ", 2);
+            cnId = newdata[0];
+            cnLoad = Double.parseDouble(newdata[1]);
+            for(j = 0; j < nodes.size(); j++) {
+                if(nodes.get(j).getId().equals(cnId)) {
+                    loads[j] = cnLoad;
+                    break;
+                }
+            }
+        }
+    }
+
+    //读取馈线容量
+    public void readFeederCapacity(double[] feederCapacity, String path) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(path)));
+        String data;
+        String[] newdata;
+        String cnId1, cnId2;
+        double feederLoad;
+        MapObject edge;
+        DsConnectNode cn1 = null, cn2 = null;
+        UndirectedGraph<DsConnectNode, MapObject> g = sys.getOrigGraph();
+        int i,j;
+
+        for(i = 1; i <= nodes.size(); i++) {
+            data = br.readLine();
+            newdata = data.split(" ", 3);
+            try{
+                cnId1 = newdata[0];
+                cnId2 = newdata[1];
+                feederLoad = Double.parseDouble(newdata[2]);
+                for(j = 0; j < nodes.size(); j++) {
+                    if(nodes.get(j).getId().equals(cnId1))
+                        cn1 = nodes.get(j);
+                    if(nodes.get(j).getId().equals(cnId2))
+                        cn2 = nodes.get(j);
+                }
+                edge = g.getEdge(cn1, cn2);
+                for(j = 0; j < edges.size(); j++) {
+                    if(edge.equals(edges.get(j))) {
+                        feederCapacity[j] = feederLoad;
+                        break;
+                    }
+                }
+            } catch (Exception e) {
+                System.out.println("ERROR LINE:" + data);
+            }
+        }
+    }
+
+    //读取电源容量
+    public void readSupplyCapacity(double[] supplyCapacity, String path) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(path)));
+        String data;
+        String[] newdata;
+        String supplyId;
+        double supplyLoad;
+        String[] supplies = sys.getSupplyCns();
+        int i,j;
+
+        for(i = 0; i < supplies.length; i++) {
+            data = br.readLine();
+            newdata = data.split(" ", 2);
+            supplyId = newdata[0];
+            supplyLoad = Double.parseDouble(newdata[1]);
+            for(j = 0; j < supplies.length; j++) {
+                if(supplies[j].equals(supplyId)) {
+                    supplyCapacity[j] = supplyLoad;
+                    break;
+                }
+            }
         }
     }
 
