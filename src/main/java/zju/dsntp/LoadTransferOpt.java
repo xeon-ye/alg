@@ -120,24 +120,26 @@ public class LoadTransferOpt extends PathBasedModel {
         for(i = 0; i < edgesStatues.length; i++) {
             if(edgesStatues[i] == 0) {
                 offNum++;
-                //以该支路两端节点为终点的所有路径的状态变量系数加1
+                //以该支路两端节点为终点且通过该支路的所有路径的状态变量系数加1
                 for(j = 0; j < nodes.size(); j++) {
                     if(nodes.get(j).equals(g.getEdgeSource(edges.get(i))) || nodes.get(j).equals(g.getEdgeTarget(edges.get(i)))) {
                         if(j == nodes.size()-1) {
                             for (k = cnStart[j]; k < cnpathes.size(); k++) {
-                                objValue[cnpathesIndex.get(k)]++;
+                                if(cnpathes.get(k)[cnpathes.get(k).length-1].equals(edges.get(i)))
+                                    objValue[cnpathesIndex.get(k)]++;
                             }
                         }
                         else {
                             for (k = cnStart[j]; k < cnStart[j + 1]; k++) {
-                                objValue[cnpathesIndex.get(k)]++;
+                                if(cnpathes.get(k)[cnpathes.get(k).length-1].equals(edges.get(i)))
+                                    objValue[cnpathesIndex.get(k)]++;
                             }
                         }
                     }
                 }
             }
             else {
-                //以该支路两端节点为终点的所有路径的状态变量系数减1
+                //以该支路两端节点为终点且通过该支路的所有路径的状态变量系数减1
                 for(j = 0; j < nodes.size(); j++) {
                     if(nodes.get(j).equals(g.getEdgeSource(edges.get(i))) || nodes.get(j).equals(g.getEdgeTarget(edges.get(i)))) {
                         if(j == nodes.size()-1) {
