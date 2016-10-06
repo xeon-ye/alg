@@ -69,7 +69,7 @@ public class LoadTransferOpt extends PathBasedModel {
         sys.buildOrigTopo(devices);
 
         //生成路径
-        super.buildPathes();
+        buildPathes();
 
         //开始构造线性规划模型
         //状态变量是所有路径的通断状态
@@ -79,34 +79,32 @@ public class LoadTransferOpt extends PathBasedModel {
         double columnLower[] = new double[objValue.length];
         //状态变量上限
         double columnUpper[] = new double[objValue.length];
-        //指明那些是整数
+        //指明哪些是整数
         int whichInt[] = new int[objValue.length];
 
         //约束下限
-        double rowLower[] = new double[nodes.size()+pathes.size()+supplyStart.length+edges.size()];
+        double rowLower[] = new double[nodes.size()+(pathes.size()-supplyStart.length)+supplyStart.length+edges.size()];
         //约束上限
         double rowUpper[] = new double[rowLower.length];
         //约束中非零元系数
-        double element[] = new double[cnpathes.size()+pathes.size()*2+pathes.size()+edgepathes.size()];
+        double element[] = new double[cnpathes.size()+(pathes.size()-supplyStart.length)*2+pathes.size()+edgepathes.size()];
         //上面系数对应的列
         int column[] = new int[element.length];
         //每一行起始位置
-        int starts[] = new int[rowLower.length + 1];
-        starts[0] = 0;
-
-        //todo:对上面这些参数赋值
+        int starts[] = new int[rowLower.length+1];
         //求开关最少的次数
         //所有支路的通断状态
-        int rowLowerLen = 0, rowUpperLen = 0, elementLen = 0, columnLen = 0, startsLen = 0;
         int[] edgesStatues = new int[edges.size()];
+        //记录数组中存储元素的个数
+        int rowLowerLen = 0, rowUpperLen = 0, elementLen = 0, columnLen = 0, startsLen = 0;
         //路径的通断，即问题中的状态变量。按pathes中的顺序排列
         int[] w = new int[pathes.size()];
         UndirectedGraph<DsConnectNode, MapObject> g = sys.getOrigGraph();
-        int i, j, k, l, offNum = 0;
+        int i, j, k, l;
         //负荷的功率，按nodes中的顺序排列
-        double[] loads = new double[nodes.size()]; //todo 读入
+        double[] loads = new double[nodes.size()];
         try {
-            readLoads(loads,"C:\\Users\\Administrator.2013-20160810IY\\Desktop\\ieee配电网-2013");
+            readLoads(loads,"C:\\Users\\Administrator.2013-20160810IY\\Desktop\\ieee配电网-2013\\loads.txt");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -128,7 +126,6 @@ public class LoadTransferOpt extends PathBasedModel {
         //设置状态变量的系数值
         for(i = 0; i < edgesStatues.length; i++) {
             if(edgesStatues[i] == 0) {
-                offNum++;
                 //以该支路两端节点为终点且通过该支路的所有路径的状态变量系数加1
                 for(j = 0; j < nodes.size(); j++) {
                     if(nodes.get(j).equals(g.getEdgeSource(edges.get(i))) || nodes.get(j).equals(g.getEdgeTarget(edges.get(i)))) {
@@ -153,12 +150,14 @@ public class LoadTransferOpt extends PathBasedModel {
                     if(nodes.get(j).equals(g.getEdgeSource(edges.get(i))) || nodes.get(j).equals(g.getEdgeTarget(edges.get(i)))) {
                         if(j == nodes.size()-1) {
                             for (k = cnStart[j]; k < cnpathes.size(); k++) {
-                                objValue[cnpathesIndex.get(k)]--;
+                                if(cnpathes.get(k)[cnpathes.get(k).length-1].equals(edges.get(i)))
+                                    objValue[cnpathesIndex.get(k)]--;
                             }
                         }
                         else {
                             for (k = cnStart[j]; k < cnStart[j + 1]; k++) {
-                                objValue[cnpathesIndex.get(k)]--;
+                                if(cnpathes.get(k)[cnpathes.get(k).length-1].equals(edges.get(i)))
+                                    objValue[cnpathesIndex.get(k)]--;
                             }
                         }
                     }
@@ -174,13 +173,13 @@ public class LoadTransferOpt extends PathBasedModel {
             if(i == nodes.size()-1) {
                 for(j = cnStart[i]; j < cnpathes.size(); j++) {
                     element[elementLen++] = 1;
-                    column[elementLen++] = cnpathesIndex.get(j);
+                    column[columnLen++] = cnpathesIndex.get(j);
                 }
             }
             else {
                 for (j = cnStart[i]; j < cnStart[i + 1]; j++) {
                     element[elementLen++] = 1;
-                    column[elementLen++] = cnpathesIndex.get(j);
+                    column[columnLen++] = cnpathesIndex.get(j);
                 }
             }
         }
@@ -212,9 +211,9 @@ public class LoadTransferOpt extends PathBasedModel {
         }
         //约束条件：由某一电源供电的所有负荷功率之和应小于电源容量
         //电源容量
-        double[] supplyCapacity = new double[supplyStart.length];   //todo 读入
+        double[] supplyCapacity = new double[supplyStart.length];
         try {
-            readSupplyCapacity(supplyCapacity, "C:\\Users\\Administrator.2013-20160810IY\\Desktop\\ieee配电网-2013");
+            readSupplyCapacity(supplyCapacity, "C:\\Users\\Administrator.2013-20160810IY\\Desktop\\ieee配电网-2013\\supplyCapacity.txt");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -238,19 +237,16 @@ public class LoadTransferOpt extends PathBasedModel {
                     if(cnStart[l] > k)
                         break;
                 }
-                if(cnStart[l] > k)
-                    element[elementLen++] = loads[l-1];
-                else
-                    element[elementLen++] = loads[cnStart.length-1];
+                element[elementLen++] = loads[l-1];
                 column[columnLen++] = j;
             }
         }
         //约束条件：每一条供电线路不能过载
         //线容量
         String lastID;
-        double[] feederCapacity = new double[edges.size()]; //todo 读入
+        double[] feederCapacity = new double[edges.size()];
         try {
-            readFeederCapacity(feederCapacity,"C:\\Users\\Administrator.2013-20160810IY\\Desktop\\ieee配电网-2013");
+            readFeederCapacity(feederCapacity,"C:\\Users\\Administrator.2013-20160810IY\\Desktop\\ieee配电网-2013\\feederCapacity.txt");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -259,32 +255,42 @@ public class LoadTransferOpt extends PathBasedModel {
             rowUpper[rowUpperLen++] = feederCapacity[i];
             rowLower[rowLowerLen++] = 0;
             if(i == edgeStart.length-1)
-                endIndex = pathes.size();
+                endIndex = edgepathes.size();
             else
                 endIndex = edgeStart[i+1];
             for(j = edgeStart[i]; j < endIndex; j++) {
                 //找出路径edgepathes[j]的末尾节点
                 lastID = g.getEdgeTarget(edgepathes.get(j)[edgepathes.get(j).length-1]).getId();
-                if (edgepathes.get(i).length == 1) {
+                if (edgepathes.get(j).length == 1) {
                     for (String scn : supplies) {
                         if (scn.equals(lastID)) {
-                            lastID = g.getEdgeSource(pathes.get(i)[pathes.get(i).length - 1]).getId();
+                            lastID = g.getEdgeSource(edgepathes.get(j)[edgepathes.get(j).length - 1]).getId();
                             break;
                         }
                     }
                 }
                 else {
                     //如果路径上倒数第二条边有节点与lastID相同，则lastID应取最后一条边的另一个端点才是路径上的最后一个点
-                    if (lastID.equals(g.getEdgeSource(pathes.get(i)[pathes.get(i).length - 2]).getId()) || lastID.equals(g.getEdgeTarget(pathes.get(i)[pathes.get(i).length - 2]).getId()))
-                        lastID = g.getEdgeSource(pathes.get(i)[pathes.get(i).length - 1]).getId();
+                    if (lastID.equals(g.getEdgeSource(edgepathes.get(j)[edgepathes.get(j).length - 2]).getId()) || lastID.equals(g.getEdgeTarget(edgepathes.get(j)[edgepathes.get(j).length - 2]).getId()))
+                        lastID = g.getEdgeSource(edgepathes.get(j)[edgepathes.get(j).length - 1]).getId();
                 }
                 for(k = 0; k < nodes.size(); k++)
-                    if(lastID == nodes.get(k).getId())
+                    if (nodes.get(k).getId().equals(lastID))
                         break;
                 element[elementLen++] = loads[k];
                 column[columnLen++] = edgepathesIndex.get(j);
             }
         }
+//        for(i = 0; i < columnLower.length; i++){
+//            System.out.printf("%.0f %.0f %.0f %d\n", objValue[i], columnLower[i], columnUpper[i], whichInt[i]);
+//        }
+//        for(i = 0; i < rowLower.length; i++)
+//            System.out.printf("%.0f %.0f %d\n", rowLower[i], rowUpper[i], starts[i]);
+//        for(i = 0; i < element.length; i++)
+//            System.out.printf("%3.0f ", element[i]);
+//        System.out.printf("\n");
+//        for(i = 0; i < column.length; i++)
+//            System.out.printf("%3d ", column[i]);
 
         int numberRows = rowLower.length;
         int numberColumns = columnLower.length;
@@ -299,6 +305,9 @@ public class LoadTransferOpt extends PathBasedModel {
         } else { //状态位显示计算收敛
             log.info("计算结果.");
         }
+
+        for(i = 0; i < result.length; i++)
+            System.out.printf("%.0f ", result[i]);
     }
 
     //读取各节点带的负载
@@ -332,32 +341,23 @@ public class LoadTransferOpt extends PathBasedModel {
         String cnId1, cnId2;
         double feederLoad;
         MapObject edge;
-        DsConnectNode cn1 = null, cn2 = null;
+        DsConnectNode cn1, cn2;
         UndirectedGraph<DsConnectNode, MapObject> g = sys.getOrigGraph();
-        int i,j;
+        int i;
 
-        for(i = 1; i <= nodes.size(); i++) {
-            data = br.readLine();
+        while((data = br.readLine()) != null) {
             newdata = data.split(" ", 3);
-            try{
-                cnId1 = newdata[0];
-                cnId2 = newdata[1];
-                feederLoad = Double.parseDouble(newdata[2]);
-                for(j = 0; j < nodes.size(); j++) {
-                    if(nodes.get(j).getId().equals(cnId1))
-                        cn1 = nodes.get(j);
-                    if(nodes.get(j).getId().equals(cnId2))
-                        cn2 = nodes.get(j);
+            cnId1 = newdata[0];
+            cnId2 = newdata[1];
+            feederLoad = Double.parseDouble(newdata[2]);
+            cn1 = sys.getCns().get(cnId1);
+            cn2 = sys.getCns().get(cnId2);
+            edge = g.getEdge(cn1, cn2);
+            for(i = 0; i < edges.size(); i++) {
+                if(edges.get(i).equals(edge)) {
+                    feederCapacity[i] = feederLoad;
+                    break;
                 }
-                edge = g.getEdge(cn1, cn2);
-                for(j = 0; j < edges.size(); j++) {
-                    if(edge.equals(edges.get(j))) {
-                        feederCapacity[j] = feederLoad;
-                        break;
-                    }
-                }
-            } catch (Exception e) {
-                System.out.println("ERROR LINE:" + data);
             }
         }
     }
@@ -370,16 +370,14 @@ public class LoadTransferOpt extends PathBasedModel {
         String supplyId;
         double supplyLoad;
         String[] supplies = sys.getSupplyCns();
-        int i,j;
-
-        for(i = 0; i < supplies.length; i++) {
-            data = br.readLine();
+        int i;
+        while((data = br.readLine()) != null) {
             newdata = data.split(" ", 2);
             supplyId = newdata[0];
             supplyLoad = Double.parseDouble(newdata[1]);
-            for(j = 0; j < supplies.length; j++) {
-                if(supplies[j].equals(supplyId)) {
-                    supplyCapacity[j] = supplyLoad;
+            for(i = 0; i < supplies.length; i++) {
+                if(supplies[i].equals(supplyId)) {
+                    supplyCapacity[i] = supplyLoad;
                     break;
                 }
             }

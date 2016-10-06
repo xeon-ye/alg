@@ -136,15 +136,15 @@ public class PathBasedModel {
                     stack.pop();
             }
         }
+        if(isDebug) {
+//            System.out.printf("\nAll the pathes started from a specific supply\n");
+//            printPathes(pathes);
+        }
         //sys.getOrigGraph().getEdge();
         //origGraph.getEdgeSource()
         buildEdgesAndNodes();
         buildCnsPathes();
         buildedgePathes();
-        if(isDebug) {
-//            System.out.printf("\nAll the pathes started from a specific supply\n");
-//            printPathes(pathes);
-        }
     }
 
     //以某个结点为终点的所有路径
@@ -248,7 +248,6 @@ public class PathBasedModel {
         UndirectedGraph<DsConnectNode, MapObject> g = sys.getOrigGraph();
         edges = new ArrayList<>();//todo: not efficient
         nodes = new ArrayList<>();//todo: not efficient
-        boolean issupply;
         DsConnectNode supply0 = sys.getCns().get(supplies[0]);  // 从某一个电源开始深度优先搜索
         DsConnectNode cn1, cn2, cn;
         Deque<Object> stack = new ArrayDeque<>();
@@ -275,24 +274,24 @@ public class PathBasedModel {
                 }
             }
             if (flag) {
-                //节点出栈时判断是否存储：不是电源节点且还未存储过，则存入cns中
-                if (!nodes.contains(stack.peek())) {
-                    issupply = false;
-                    for(String scn : supplies)
-                        if(((DsConnectNode) stack.peek()).getId().equals(scn)) {
-                            issupply = true;
-                            break;
-                        }
-                    if(!issupply)
-                        nodes.add((DsConnectNode) stack.peek());
-                }
+                //节点出栈时判断是否存储：还未存储过，则存入nodes中
+                if (!nodes.contains(stack.peek()))
+                    nodes.add((DsConnectNode) stack.peek());
                 stack.pop();
             }
         }
+        //删除电源节点
+        for(String scn : supplies)
+            for(int i = 0; i < nodes.size(); i++)
+                if(nodes.get(i).getId().equals(scn)) {
+                    nodes.remove(i);
+                    break;
+                }
         if (isDebug) {
 //            for (DsConnectNode cn3 : nodes)
 //                System.out.println(cn3.getId());
-//            System.out.printf("%d", nodes.size());
+//            for(MapObject edge : edges)
+//                System.out.printf("%s %s\n", g.getEdgeSource(edge).getId(), g.getEdgeTarget(edge).getId());
         }
     }
 
