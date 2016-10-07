@@ -75,11 +75,11 @@ public class DefaultIcfParser {
         BufferedReader reader = new BufferedReader(in);
         TitleData title = new TitleData();
 
-        ArrayList<BusData> buses = new ArrayList<BusData>();
-        ArrayList<BranchData> branches = new ArrayList<BranchData>();
-        ArrayList<LossZoneData> lossZones = new ArrayList<LossZoneData>();
-        ArrayList<InterchangeData> interchanges = new ArrayList<InterchangeData>();
-        ArrayList<TieLineData> tieLines = new ArrayList<TieLineData>();
+        ArrayList<BusData> buses = new ArrayList<>();
+        ArrayList<BranchData> branches = new ArrayList<>();
+        ArrayList<LossZoneData> lossZones = new ArrayList<>();
+        ArrayList<InterchangeData> interchanges = new ArrayList<>();
+        ArrayList<TieLineData> tieLines = new ArrayList<>();
 
         busNumberStr = new StringBuilder(50000);
         try {
