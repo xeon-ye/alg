@@ -11,13 +11,13 @@ import java.util.List;
  */
 public class ASparseMatrixLU {
 
-    List<Double> U = new ArrayList<Double>();//
-    List<Integer> JU = new ArrayList<Integer>();//
-    List<Integer> IU = new ArrayList<Integer>();//
-    List<Double> L = new ArrayList<Double>(); //
-    List<Integer> JL = new ArrayList<Integer>();//
-    List<Integer> IL = new ArrayList<Integer>();//
-    List<Double> D = new ArrayList<Double>();//
+    List<Double> U = new ArrayList<>();//
+    List<Integer> JU = new ArrayList<>();//
+    List<Integer> IU = new ArrayList<>();//
+    List<Double> L = new ArrayList<>(); //
+    List<Integer> JL = new ArrayList<>();//
+    List<Integer> IL = new ArrayList<>();//
+    List<Double> D = new ArrayList<>();//
 
     int n;
 
