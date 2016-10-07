@@ -306,8 +306,9 @@ public class LoadTransferOpt extends PathBasedModel {
             log.info("计算结果.");
         }
 
-//        for(i = 0; i < result.length; i++)
-//            System.out.printf("%.0f ", result[i]);
+        for(i = 0; i < result.length; i++)
+            System.out.printf("%.0f ", result[i]);
+        System.out.printf("\n");
         int[] newedgesStatues = new int[edges.size()];
         for(i = 0; i < pathes.size(); i++) {
             if(result[i] == 1) {
@@ -321,6 +322,7 @@ public class LoadTransferOpt extends PathBasedModel {
         }
         for(i = 0; i < edges.size(); i++)
             System.out.printf("%d ", newedgesStatues[i]);
+        System.out.printf("\n");
     }
 
     //读取各节点带的负载
