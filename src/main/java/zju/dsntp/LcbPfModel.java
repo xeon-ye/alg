@@ -97,15 +97,15 @@ public class LcbPfModel implements NewtonModel, DsModelCons {
 
     private void initialB() {
         UndirectedGraph<String, DetailedEdge> g = island.getDetailedG();
-        edgeToNo = new HashMap<DetailedEdge, Integer>(g.edgeSet().size());
-        noToEdge = new HashMap<Integer, DetailedEdge>(g.edgeSet().size());
+        edgeToNo = new HashMap<>(g.edgeSet().size());
+        noToEdge = new HashMap<>(g.edgeSet().size());
 
         //广度优先便利之后，edgeIdToNo中会填好树枝的数据
         Set<String> vertexSet = g.vertexSet();
         if (vertexSet.size() > 0) {
             BreadthFirstIterator<String, DetailedEdge> iter =
-                    new BreadthFirstIterator<String, DetailedEdge>(g, null);
-            iter.addTraversalListener(new MyTraversalListener<String, DetailedEdge>(g));
+                    new BreadthFirstIterator<>(g, null);
+            iter.addTraversalListener(new MyTraversalListener<>(g));
             while (iter.hasNext())
                 iter.next();
         }
@@ -134,10 +134,10 @@ public class LcbPfModel implements NewtonModel, DsModelCons {
             }
         }
         //将变压器支路和非恒阻抗支路电压在状态变量中的位置进行编号
-        windingEdges = new ArrayList<DetailedEdge>(tfWindingCount);
-        nonZLoadEdges = new ArrayList<DetailedEdge>(loadCount);
-        dgEdges = new ArrayList<DetailedEdge>(dgCount);
-        edgeIndex = new HashMap<DetailedEdge, Integer>(tfWindingCount + loadCount);
+        windingEdges = new ArrayList<>(tfWindingCount);
+        nonZLoadEdges = new ArrayList<>(loadCount);
+        dgEdges = new ArrayList<>(dgCount);
+        edgeIndex = new HashMap<>(tfWindingCount + loadCount);
         int tfIndex = 0, loadIndex = 0;
         //状态变量顺序为：回路电流，变压器绕组电压，负荷支路电压，异步电机序电压
         for (DetailedEdge edge : g.edgeSet()) {
@@ -805,9 +805,9 @@ public class LcbPfModel implements NewtonModel, DsModelCons {
     private class MyTraversalListener<V, E> extends TraversalListenerAdapter<V, E> {
         private MyTraversalListener(UndirectedGraph<V, E> g) {
             this.g = g;
-            vertexIdToNo = new HashMap<String, Integer>(g.vertexSet().size());
-            vertexNoToId = new HashMap<Integer, String>(g.vertexSet().size());
-            sonToFather = new HashMap<Integer, Integer>(g.vertexSet().size());
+            vertexIdToNo = new HashMap<>(g.vertexSet().size());
+            vertexNoToId = new HashMap<>(g.vertexSet().size());
+            sonToFather = new HashMap<>(g.vertexSet().size());
         }
 
         private UndirectedGraph<V, E> g;
@@ -815,9 +815,9 @@ public class LcbPfModel implements NewtonModel, DsModelCons {
         private int verteNoCount = 0;
 
         @Override
-        public void edgeTraversed(EdgeTraversalEvent<V, E> e) {
-            V v1 = g.getEdgeSource(e.getEdge());
-            V v2 = g.getEdgeTarget(e.getEdge());
+        public void edgeTraversed(EdgeTraversalEvent e) {
+            V v1 = g.getEdgeSource((E) e.getEdge());
+            V v2 = g.getEdgeTarget((E) e.getEdge());
             if (!vertexIdToNo.containsKey(v1.toString())) {
                 V tmpV = v2;
                 v2 = v1;
@@ -863,12 +863,12 @@ public class LcbPfModel implements NewtonModel, DsModelCons {
         Map<String, double[][]> vertexIdToV;
 
         private MyTraversalListener2() {
-            vertexIdToV = new HashMap<String, double[][]>(island.getDetailedG().vertexSet().size());
+            vertexIdToV = new HashMap<>(island.getDetailedG().vertexSet().size());
             vertexIdToV.put(DsTopoIsland.EARTH_NODE_ID, new double[][]{{0., 0.}});
         }
 
         @Override
-        public void edgeTraversed(EdgeTraversalEvent<V, E> e) {
+        public void edgeTraversed(EdgeTraversalEvent e) {
             edge = (DetailedEdge) e.getEdge();
             v1 = island.getDetailedG().getEdgeSource(edge);
             v2 = island.getDetailedG().getEdgeTarget(edge);
@@ -1262,12 +1262,12 @@ public class LcbPfModel implements NewtonModel, DsModelCons {
             return;
         UndirectedGraph<String, DetailedEdge> g = island.getDetailedG();
         BreadthFirstIterator<String, DetailedEdge> iter =
-                new BreadthFirstIterator<String, DetailedEdge>(g, DsTopoIsland.EARTH_NODE_ID);
+                new BreadthFirstIterator<>(g, DsTopoIsland.EARTH_NODE_ID);
         MyTraversalListener2<String, DetailedEdge> busVFiller = new MyTraversalListener2<String, DetailedEdge>();
         iter.addTraversalListener(busVFiller);
         while (iter.hasNext())
             iter.next();
-        List<DsTopoNode> unFillTns = new ArrayList<DsTopoNode>();
+        List<DsTopoNode> unFillTns = new ArrayList<>();
         boolean isFilled;
         for (DsTopoNode tn : island.getBusV().keySet()) {
             isFilled = false;
@@ -1283,8 +1283,8 @@ public class LcbPfModel implements NewtonModel, DsModelCons {
         for (DsTopoNode tn : unFillTns)
             island.getBusV().remove(tn);
 
-        island.setBranchHeadI(new HashMap<MapObject, double[][]>(island.getBranches().size()));
-        island.setBranchTailI(new HashMap<MapObject, double[][]>(island.getBranches().size()));
+        island.setBranchHeadI(new HashMap<>(island.getBranches().size()));
+        island.setBranchTailI(new HashMap<>(island.getBranches().size()));
         for (MapObject obj : island.getBranches().keySet()) {
             island.getBranchHeadI().put(obj, new double[3][2]);
             if (island.getBranches().get(obj) instanceof Transformer) {

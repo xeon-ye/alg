@@ -18,12 +18,12 @@ import java.util.Map;
  */
 public class MapObject implements Serializable, Cloneable, Transferable {
 
-    static final String TYPE_SEPARATOR = "-!-";
+    public static final String TYPE_SEPARATOR = "-!-";
     public static final String KEY_ID = "id";
-    private static final String KEY_NAME = "name";
-    static final String KEY_CLASS = "class";
-    private static final String KEY_TYPE = "type";
-    private static final String KEY_CONTAINER = "container";
+    public static final String KEY_NAME = "name";
+    public static final String KEY_CLASS = "class";
+    public static final String KEY_TYPE = "type";
+    public static final String KEY_CONTAINER = "container";
 
     private static int NEW_OBJ_COUNT = 1;
 
