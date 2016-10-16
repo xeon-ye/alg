@@ -212,22 +212,12 @@ public class LoadTransferOptTest extends TestCase implements DsModelCons {
         model.loadMax(loadsPath, supplyCapacityPath, feederCapacityPath, "1");
         Assert.assertEquals(3495, model.maxLoad, 0.001);
         model.loadMax(loadsPath, supplyCapacityPath, feederCapacityPath, "20");
-        Assert.assertEquals(7610, model.maxLoad, 0.001);
+        Assert.assertEquals(6480, model.maxLoad, 0.001);
         model.loadMax(loadsPath, supplyCapacityPath, feederCapacityPath, "19");
-        Assert.assertEquals(9410, model.maxLoad, 0.001);
+        Assert.assertEquals(7635, model.maxLoad, 0.001);
         model.loadMax(loadsPath, supplyCapacityPath, feederCapacityPath, "23");
-        Assert.assertEquals(7610, model.maxLoad, 0.001);
+        Assert.assertEquals(5835, model.maxLoad, 0.001);
         model.loadMax(loadsPath, supplyCapacityPath, feederCapacityPath, "7");
-        Assert.assertEquals(6080, model.maxLoad, 0.001);
-//        model.loadMax(loadsPath, supplyCapacityPath, feederCapacityPath, "L6");
-//        Assert.assertEquals(10, model.maxLoad, 0.001);
-//        model.loadMax(loadsPath, supplyCapacityPath, feederCapacityPath, "L7");
-//        Assert.assertEquals(10, model.maxLoad, 0.001);
-//        model.loadMax(loadsPath, supplyCapacityPath, feederCapacityPath, "L8");
-//        Assert.assertEquals(20, model.maxLoad, 0.001);
-//        model.loadMax(loadsPath, supplyCapacityPath, feederCapacityPath, "L9");
-//        Assert.assertEquals(80, model.maxLoad, 0.001);
-//        model.loadMax(loadsPath, supplyCapacityPath, feederCapacityPath, "L10");
-//        Assert.assertEquals(60, model.maxLoad, 0.001);
+        Assert.assertEquals(4320, model.maxLoad, 0.001);
     }
 }

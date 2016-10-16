@@ -626,35 +626,6 @@ public class LoadTransferOpt extends PathBasedModel {
         }
         starts[startsLen++] = elementLen;
 
-        //Z - L <= (1-W)M       Z-L+WM <= M
-//        starts[startsLen++] = elementLen;
-//        rowUpper[rowUpperLen++] = LMax;
-//        rowLower[rowLowerLen++] = -LMax;
-//        element[elementLen++] = 1;
-//        element[elementLen++] = -1;
-//        element[elementLen++] = LMax;
-//        column[columnLen++] = 7;
-//        column[columnLen++] = columnLower.length-1;
-//        column[columnLen++] = 3;
-//        //Z-L >= -(1-W)M      Z-L-WM >= -M
-//        starts[startsLen++] = elementLen;
-//        rowUpper[rowUpperLen++] = 0;
-//        rowLower[rowLowerLen++] = -LMax;
-//        element[elementLen++] = 1;
-//        element[elementLen++] = -1;
-//        element[elementLen++] = -LMax;
-//        column[columnLen++] = 7;
-//        column[columnLen++] = columnLower.length-1;
-//        column[columnLen++] = 3;
-
-//        starts[startsLen++] = elementLen;
-//        rowUpper[rowUpperLen++] = 0;
-//        rowLower[rowLowerLen++] = 0;
-//        element[elementLen++] = 1;
-//        element[elementLen++] = -1;
-//        column[columnLen++] = 7;
-//        column[columnLen++] = columnLower.length-1;
-
 //        for(i = 0; i < columnLower.length; i++){
 //            System.out.printf("%.0f %.0f %.0f\n", objValue[i], columnLower[i], columnUpper[i]);
 //        }
@@ -680,23 +651,8 @@ public class LoadTransferOpt extends PathBasedModel {
         }
 
         maxLoad = result[numberColumns-1];
-        for(i = 0; i < result.length; i++)
-            System.out.printf("%.0f ", result[i]);
-//        System.out.printf("\n");
-//        int[] newedgesStatues = new int[edges.size()];
-//        for(i = 0; i < pathes.size(); i++) {
-//            if(result[i] == 1) {
-//                for(j = 0; j < edges.size(); j++) {
-//                    if(pathes.get(i)[pathes.get(i).length-1].equals(edges.get(j))) {
-//                        newedgesStatues[j] = 1;
-//                        break;
-//                    }
-//                }
-//            }
-//        }
-//        for(i = 0; i < edges.size(); i++)
-//            System.out.printf("%d ", newedgesStatues[i]);
-//        System.out.printf("\n");
+//        for(i = 0; i < result.length; i++)
+//            System.out.printf("%.0f ", result[i]);
     }
 
     //求一个节点的最大负载。需要将所有的电源都分别切除并求出负载最大值，最后在这些最大值取最小的一个
@@ -742,22 +698,22 @@ public class LoadTransferOpt extends PathBasedModel {
         //每一行起始位置
         int starts[] = new int[rowLower.length+1];
 
+        UndirectedGraph<DsConnectNode, MapObject> g = sys.getOrigGraph();
         //电源容量
         String[] supplies = sys.getSupplyCns();
         double[] supplyCapacity = new double[supplyStart.length];
-        try {
-            readSupplyCapacity(supplyCapacity, supplyCapacityPath);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        maxLoad = 0;
-        for(i = 0; i < supplyCapacity.length; i++) {
-            supplyCapacity[i] = 0;
+        maxLoad = Double.MAX_VALUE;
+        for(int count = 0; count < supplyCapacity.length; count++) {
+            try {
+                readSupplyCapacity(supplyCapacity, supplyCapacityPath);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            supplyCapacity[count] = 0;
 
             //求节点可带的最大负荷
             //记录数组中存储元素的个数
             int rowLowerLen = 0, rowUpperLen = 0, elementLen = 0, columnLen = 0, startsLen = 0;
-            UndirectedGraph<DsConnectNode, MapObject> g = sys.getOrigGraph();
 
             //负荷的功率，按nodes中的顺序排列
             double[] loads = new double[nodes.size()];
@@ -981,26 +937,11 @@ public class LoadTransferOpt extends PathBasedModel {
             } else { //状态位显示计算收敛
                 log.info("计算结果.");
             }
-            if (maxLoad < result[numberColumns - 1])
+            if (status >= 0 && maxLoad > result[numberColumns - 1])
                 maxLoad = result[numberColumns - 1];
         }
 //        for(i = 0; i < result.length; i++)
 //            System.out.printf("%.0f ", result[i]);
-//        System.out.printf("\n");
-//        int[] newedgesStatues = new int[edges.size()];
-//        for(i = 0; i < pathes.size(); i++) {
-//            if(result[i] == 1) {
-//                for(j = 0; j < edges.size(); j++) {
-//                    if(pathes.get(i)[pathes.get(i).length-1].equals(edges.get(j))) {
-//                        newedgesStatues[j] = 1;
-//                        break;
-//                    }
-//                }
-//            }
-//        }
-//        for(i = 0; i < edges.size(); i++)
-//            System.out.printf("%d ", newedgesStatues[i]);
-//        System.out.printf("\n");
     }
 
     //求所有节点的负载最大值
