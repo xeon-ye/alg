@@ -940,8 +940,6 @@ public class LoadTransferOpt extends PathBasedModel {
             if (status >= 0 && maxLoad > result[numberColumns - 1])
                 maxLoad = result[numberColumns - 1];
         }
-//        for(i = 0; i < result.length; i++)
-//            System.out.printf("%.0f ", result[i]);
     }
 
     //求所有节点的负载最大值
