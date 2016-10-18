@@ -756,6 +756,7 @@ public class MeasPosOpt implements MeasTypeCons {
         //进行求解
         LinearSolver solver = new LinearSolver();
         solver.setDrive(LinearSolver.MLP_DRIVE_CBC);
+        log.debug("numberColumns = " + numberColumns + " numberRows = " + numberRows + " whichIntSize = " + binaryNum);
         int status = solver.solveMlp(numberColumns, numberRows, objValue,
                 columnLower, columnUpper, rowLower, rowUpper, element, column, starts, whichInt, result);
         if (status < 0) {

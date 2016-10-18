@@ -251,6 +251,7 @@ public class MeasPosOptTest extends TestCase implements MeasTypeCons {
             measTypePerPos.add(ts);
             int count = 0;
             count1 = 0; count2 = 0;
+            //开始设置量测的类型
             if(tn != null) {
                 for (int phase = 0; phase < 3; phase++) {
                     if (tn.containsPhase(phase)) {
