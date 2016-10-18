@@ -24,7 +24,7 @@ import java.util.Map;
 public class MeasPosOpt implements MeasTypeCons {
 
     private static Logger log = Logger.getLogger(MeasPosOpt.class);
-    private int maxDevNum;
+    protected int maxDevNum;
 
     // --------------- 三相平衡的电网 ---------
     private IEEEDataIsland island;
@@ -533,21 +533,25 @@ public class MeasPosOpt implements MeasTypeCons {
         return r;
     }
 
-    public void doOpt(boolean isThreePhase) {
+    //约束中非零元的个数
+    protected int[] element_count = new int[]{0};
+    //0/1变量的个数
+    protected int binaryNum;
+    //状态变量的维数
+    protected int size;
+    //信息矩阵的组成
+    protected ASparseMatrixLink2D[] Ds;
+
+    protected void prepare(boolean isThreePhase) {
         int n = island.getBuses().size();
 
         YMatrixGetter Y = new YMatrixGetter(island);
         Y.formYMatrix();
         ASparseMatrixLink2D bApos = Y.formBApostrophe(false, n);
 
-        //约束中非零元的个数
-        int[] element_count = new int[]{0};
 
-        int binaryNum;
-        ASparseMatrixLink2D[] Ds;
         ASparseMatrixLink2D H0;
         int i = 1;
-        int size;//状态变量的维数
         if(isThreePhase) {
             if(isVAmplOnly)
                 size = n;
@@ -587,7 +591,11 @@ public class MeasPosOpt implements MeasTypeCons {
                 i++;
             }
         }
+    }
 
+    public void doOpt(boolean isThreePhase) {
+        //生成信息矩阵
+        prepare(isThreePhase);
 
         //开始开辟内存
 
@@ -615,7 +623,7 @@ public class MeasPosOpt implements MeasTypeCons {
         //开始赋值
 
         //给目标函数中的系数赋值
-        for(i = 0; i < objValue.length; i++) {
+        for(int i = 0; i < objValue.length; i++) {
             if(i < binaryNum) {
                 columnLower[i] = 0;
                 columnUpper[i] = 1;
@@ -684,7 +692,7 @@ public class MeasPosOpt implements MeasTypeCons {
         index = nonZeroOfRow;
         double bigM = 1000; //todo:
         int nonZeroInM = (size - 1) * (size + 2) / 2 + 1;
-        for(i = 1; i < Ds.length; i++) {
+        for(int i = 1; i < Ds.length; i++) {
             for(int row = 0; row < size; row++) {
                 for(col = row; col < size; col++) {
                     //处理约束Zi = bi * zi
@@ -742,7 +750,7 @@ public class MeasPosOpt implements MeasTypeCons {
         rowLower[rowInA - 1] = 0;
         starts[rowInA] = starts[rowInA - 1] + binaryNum;
 
-        for(i = 0; i < binaryNum; i++) {
+        for(int i = 0; i < binaryNum; i++) {
             //01变量放在最前面的位置
             whichInt[i] = i;
             //设备个数的限制
@@ -771,7 +779,7 @@ public class MeasPosOpt implements MeasTypeCons {
                 obj += zii;
             }
             System.out.println("优化结果: " + obj);
-            for(i = 0; i < binaryNum; i++)
+            for(int i = 0; i < binaryNum; i++)
                 System.out.print(result[i] + "\t");
             System.out.println();
         }

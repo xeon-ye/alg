@@ -150,7 +150,7 @@ public abstract class Bonmin extends Ipopt {
      * @return false if the option could not be set (e.g., if keyword is unknown)
      * @see #setIntegerOption(String, int)
      */
-    protected boolean setStringOption(String keyword, String val) {
+    public boolean setStringOption(String keyword, String val) {
         if (bonmin != 0)
             return AddBonminStrOption(bonmin, keyword, val.toLowerCase());
         else
