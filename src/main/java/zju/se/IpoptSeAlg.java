@@ -446,14 +446,11 @@ public class IpoptSeAlg extends AbstractSeAlg implements MeasTypeCons, IpoptMode
         updateJacobian(x, new_x);
         final int[] count = {0};
         if (values == null) {
-            jacobian.forEachNonZero(new IntIntDoubleFunction() {
-                @Override
-                public double apply(int row, int col, double v) {
-                    iRow[count[0]] = row;
-                    jCol[count[0]] = col;
-                    count[0]++;
-                    return v;
-                }
+            jacobian.forEachNonZero((row, col, v) -> {
+                iRow[count[0]] = row;
+                jCol[count[0]] = col;
+                count[0]++;
+                return v;
             });
             for (int i = 0; i < meas.getZ().getN(); i++) {
                 iRow[count[0]] = i;
@@ -461,13 +458,10 @@ public class IpoptSeAlg extends AbstractSeAlg implements MeasTypeCons, IpoptMode
                 count[0]++;
             }
         } else {
-            jacobian.forEachNonZero(new IntIntDoubleFunction() {
-                @Override
-                public double apply(int row, int col, double v) {
-                    values[count[0]] = v;
-                    count[0]++;
-                    return v;
-                }
+            jacobian.forEachNonZero((row, col, v) -> {
+                values[count[0]] = v;
+                count[0]++;
+                return v;
             });
             for (int i = 0; i < meas.getZ().getN(); i++) {
                 values[count[0]] = 1.0;

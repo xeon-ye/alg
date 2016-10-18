@@ -4,6 +4,7 @@ import org.coinor.Bonmin;
 import zju.dsmodel.DsTopoIsland;
 import zju.ieeeformat.IEEEDataIsland;
 import zju.matrix.ASparseMatrixLink2D;
+import zju.matrix.MySparseDoubleMatrix2D;
 import zju.se.MeasPosOpt;
 
 /**
@@ -21,6 +22,8 @@ public class MeasPosOptByBonmin extends MeasPosOpt {
     }
 
     class Solver extends Bonmin {
+        protected MySparseDoubleMatrix2D jacobian, hessian;
+
         public Solver() {
             int n = binaryNum + (size * size + size) / 2;
             int m = (size * size + size) / 2 + 1;
@@ -143,43 +146,21 @@ public class MeasPosOptByBonmin extends MeasPosOpt {
 
         @Override
         protected boolean eval_jac_g(int n, double[] x, boolean new_x, int m, int nele_jac, int[] iRow, int[] jCol, double[] values) {
-            //对约束的参数赋值
-            int k, col, index, count, rowInA = 1;
-            int nonZeroOfRow = 0, nonZeroOfCol[] = new int[size], nonZeroOfCurrent;
-            for (int row = 0; row < size; row++) {
-                for (int j = row; j < size; j++, rowInA++) {
-                    //记录当前行的前j列共有多少个非零元
-                    nonZeroOfCol[j] = 0;
-                    for (ASparseMatrixLink2D d : Ds)
-                        nonZeroOfCol[j] += d.getNA()[row] * (j - row + 1);
-                }
-
-                nonZeroOfCurrent = 0;//记录当前
-                count = 0; //记录当前矩阵的位置
-                for (ASparseMatrixLink2D d : Ds) {
-                    k = d.getIA()[row];
-                    while (k != -1) {
-                        col = d.getJA().get(k);
-                        for (int j = row; j < size; j++) {
-                            index = nonZeroOfRow + nonZeroOfCurrent;
-                            if (j > row)
-                                index += nonZeroOfCol[j - 1];
-                            values[index] = d.getVA().get(k);
-                            if (col > j) {
-                                iRow[index] = row;
-                                jCol[index] = binaryNum + count * (size - 1) * (size + 2) / 2 + j * size - j * (j + 1) / 2 + col;
-                            } else {
-                                jCol[index] = binaryNum + count * (size - 1) * (size + 2) / 2 + col * size - col * (col + 1) / 2 + j;
-                            }
-                            nonZeroOfCurrent++;
-                            k = d.getLINK().get(k);
-                        }
-                        count++;
-                    }
-                }
-                //记录前row行一共多少个非零元
-                for (ASparseMatrixLink2D d : Ds)
-                    nonZeroOfRow += d.getNA()[row] * (size - row);
+            updateJacobian(x, new_x);
+            final int[] count = {0};
+            if (values == null) {
+                jacobian.forEachNonZero((row, col, v) -> {
+                    iRow[count[0]] = row;
+                    jCol[count[0]] = col;
+                    count[0]++;
+                    return v;
+                });
+            } else {
+                jacobian.forEachNonZero((row, col, v) -> {
+                    values[count[0]] = v;
+                    count[0]++;
+                    return v;
+                });
             }
             return true;
         }
@@ -187,6 +168,34 @@ public class MeasPosOptByBonmin extends MeasPosOpt {
         @Override
         protected boolean eval_h(int n, double[] x, boolean new_x, double obj_factor, int m, double[] lambda, boolean new_lambda, int nele_hess, int[] iRow, int[] jCol, double[] values) {
             return false;
+        }
+
+        protected void updateJacobian(double[] x, boolean isNewX) {
+            int k, col;
+            for (int row = 0; row < size; row++) {
+                for(int i = 0; i < Ds.length; i++) {
+                    ASparseMatrixLink2D d = Ds[i];
+                    k = d.getIA()[row];
+                    while (k != -1) {
+                        col = d.getJA().get(k);
+                        for (int j = row; j < size; j++) {
+                            int rowInJac = row * size - row * (row + 1) / 2 + j;
+                            int varIndex;
+                            if (col > j) {
+                                varIndex = binaryNum + j * size - j * (j + 1) / 2 + col;
+                            } else {
+                                varIndex = binaryNum + col * size - col * (col + 1) / 2 + j;
+                            }
+                            if(i > 0)
+                                jacobian.setQuick(rowInJac, i - 1, x[varIndex] * d.getVA().get(k));
+                            else
+                                jacobian.addQuick(rowInJac, varIndex, d.getVA().get(k));
+
+                        }
+                        k = d.getLINK().get(k);
+                    }
+                }
+            }
         }
     }
 
