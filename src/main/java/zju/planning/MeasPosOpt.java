@@ -1,4 +1,4 @@
-package zju.se;
+package zju.planning;
 
 import jpscpu.LinearSolver;
 import org.apache.log4j.Logger;

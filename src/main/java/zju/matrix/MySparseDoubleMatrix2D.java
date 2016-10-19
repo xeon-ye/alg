@@ -1,5 +1,6 @@
 package zju.matrix;
 
+import cern.colt.function.IntIntDoubleFunction;
 import cern.colt.map.AbstractIntDoubleMap;
 import cern.colt.matrix.impl.SparseDoubleMatrix2D;
 
@@ -57,5 +58,12 @@ public class MySparseDoubleMatrix2D extends SparseDoubleMatrix2D {
 
     public String toString() {
         return "Matrix: row:" + rows + "\tcol:" + columns;
+    }
+
+    public void printOnScree() {
+        this.forEachNonZero((i, j, v) -> {
+            System.out.println(i + "\t" + j + "\t" + v);
+            return v;
+        });
     }
 }

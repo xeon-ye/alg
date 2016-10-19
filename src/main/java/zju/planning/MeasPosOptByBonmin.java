@@ -1,17 +1,20 @@
 package zju.planning;
 
+import org.apache.log4j.Logger;
 import org.coinor.Bonmin;
 import zju.dsmodel.DsTopoIsland;
 import zju.ieeeformat.IEEEDataIsland;
 import zju.matrix.ASparseMatrixLink2D;
 import zju.matrix.MySparseDoubleMatrix2D;
-import zju.se.MeasPosOpt;
+import zju.util.MatrixUtil;
 
 /**
  * Created by arno on 16-10-17.
  * @author Dong Shufeng
  */
 public class MeasPosOptByBonmin extends MeasPosOpt {
+
+    private static Logger log = Logger.getLogger(MeasPosOptByBonmin.class);
 
     public MeasPosOptByBonmin(IEEEDataIsland island) {
         super(island);
@@ -27,8 +30,20 @@ public class MeasPosOptByBonmin extends MeasPosOpt {
         public Solver() {
             int n = binaryNum + (size * size + size) / 2;
             int m = (size * size + size) / 2 + 1;
-            int nele_jac = 0;//todo
-            int nele_hess = 0;
+            //
+            jacobian = new MySparseDoubleMatrix2D(m, n);
+            double[] ini_x = new double[n];
+            get_starting_point(n, true, ini_x, false, null, null, m, false, null);
+            updateJacobian(ini_x, true);
+            for(int i = 0; i < binaryNum; i++)
+                jacobian.setQuick(m - 1, i, 1.0);
+            //为Hessian开辟内存
+            hessian = new MySparseDoubleMatrix2D(n, n);
+            updateHessian(null);
+
+            int nele_jac = jacobian.cardinality();//todo
+            int nele_hess = hessian.cardinality();
+
             createBonmin(n, m, nele_jac, nele_hess, C_STYLE);
         }
 
@@ -167,10 +182,27 @@ public class MeasPosOptByBonmin extends MeasPosOpt {
 
         @Override
         protected boolean eval_h(int n, double[] x, boolean new_x, double obj_factor, int m, double[] lambda, boolean new_lambda, int nele_hess, int[] iRow, int[] jCol, double[] values) {
-            return false;
+            final int[] idx = new int[]{0};
+            if (values == null) {
+                hessian.forEachNonZero((i, j, v) -> {
+                    iRow[idx[0]] = i;
+                    jCol[idx[0]] = j;
+                    idx[0]++;
+                    return v;
+                });
+            } else {
+                updateHessian(lambda);
+                hessian.forEachNonZero((i, j, v) -> {
+                    values[idx[0]] = v;
+                    idx[0]++;
+                    return v;
+                });
+            }
+            return true;
         }
 
-        protected void updateJacobian(double[] x, boolean isNewX) {
+        private void updateHessian(double[] lambda) {
+            hessian.forEachNonZero((i, i2, v) -> 0.0);
             int k, col;
             for (int row = 0; row < size; row++) {
                 for(int i = 0; i < Ds.length; i++) {
@@ -186,16 +218,54 @@ public class MeasPosOptByBonmin extends MeasPosOpt {
                             } else {
                                 varIndex = binaryNum + col * size - col * (col + 1) / 2 + j;
                             }
-                            if(i > 0)
-                                jacobian.setQuick(rowInJac, i - 1, x[varIndex] * d.getVA().get(k));
-                            else
-                                jacobian.addQuick(rowInJac, varIndex, d.getVA().get(k));
-
+                            if(i > 0) {
+                                if(lambda != null) {
+                                    hessian.addQuick(i - 1, varIndex, d.getVA().get(k) * lambda[rowInJac]);
+                                    hessian.addQuick(varIndex, i - 1, d.getVA().get(k) * lambda[rowInJac]);
+                                } else {
+                                    hessian.addQuick(i - 1, varIndex, d.getVA().get(k));
+                                    hessian.addQuick(varIndex, i - 1, d.getVA().get(k));
+                                }
+                            }
                         }
                         k = d.getLINK().get(k);
                     }
                 }
             }
+            System.out.println("============= hessian ====================");
+            hessian.printOnScree();//todo:
+        }
+
+        protected void updateJacobian(double[] x, boolean isNewX) {
+            if(!isNewX)
+                return;
+            int k, col;
+            for (int row = 0; row < size; row++) {
+                for(int i = 0; i < Ds.length; i++) {
+                    ASparseMatrixLink2D d = Ds[i];
+                    k = d.getIA()[row];
+                    while (k != -1) {
+                        col = d.getJA().get(k);
+                        for (int j = row; j < size; j++) {
+                            int rowInJac = row * size - row * (row + 1) / 2 + j;
+                            int varIndex;
+                            if (col > j) {
+                                varIndex = binaryNum + j * size - j * (j + 1) / 2 + col;
+                            } else {
+                                varIndex = binaryNum + col * size - col * (col + 1) / 2 + j;
+                            }
+                            if(i > 0) {
+                                jacobian.addQuick(rowInJac, i - 1, x[varIndex] * d.getVA().get(k));
+                                jacobian.addQuick(rowInJac, varIndex, x[i - 1] * d.getVA().get(k));
+                            } else
+                                jacobian.addQuick(rowInJac, varIndex, d.getVA().get(k));
+                        }
+                        k = d.getLINK().get(k);
+                    }
+                }
+            }
+            System.out.println("================= jacobian ===========");
+            jacobian.printOnScree();//todo:
         }
     }
 
@@ -211,10 +281,17 @@ public class MeasPosOptByBonmin extends MeasPosOpt {
         //solver.setStringOption("bonmin.algorithm","B-Ecp");
         //solver.setStringOption("bonmin.algorithm","B-iFP");
 
-        solver.OptimizeMINLP();
-        //Below see results
-        double x[] = solver.getState();
-
+        int status = solver.OptimizeMINLP();
+        if (status < 0) {
+            log.warn("计算不收敛.");
+        } else { //状态位显示计算收敛
+            log.info("计算结果.");
+            //Below see results
+            double x[] = solver.getState();
+            for (int i = 0; i < binaryNum; i++)
+                System.out.print(x[i] + "\t");
+            System.out.println();
+        }
         solver.dispose();
     }
 }

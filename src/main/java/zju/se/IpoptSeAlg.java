@@ -476,25 +476,19 @@ public class IpoptSeAlg extends AbstractSeAlg implements MeasTypeCons, IpoptMode
         final int[] idx = new int[]{0};
         if (values == null) {
             objFunc.getHessStruc(iRow, jCol, hessian, dimension);
-            hessian.forEachNonZero(new IntIntDoubleFunction() {
-                @Override
-                public double apply(int i, int j, double v) {
-                    iRow[idx[0]] = i;
-                    jCol[idx[0]] = j;
-                    idx[0]++;
-                    return v;
-                }
+            hessian.forEachNonZero((i, j, v) -> {
+                iRow[idx[0]] = i;
+                jCol[idx[0]] = j;
+                idx[0]++;
+                return v;
             });
         } else {
             updateHessian(x, obj_factor, lambda);
             objFunc.fillHessian(x, values, hessian, obj_factor, dimension);
-            hessian.forEachNonZero(new IntIntDoubleFunction() {
-                @Override
-                public double apply(int i, int j, double v) {
-                    values[idx[0]] = v;
-                    idx[0]++;
-                    return v;
-                }
+            hessian.forEachNonZero((i, j, v) -> {
+                values[idx[0]] = v;
+                idx[0]++;
+                return v;
             });
         }
         return true;

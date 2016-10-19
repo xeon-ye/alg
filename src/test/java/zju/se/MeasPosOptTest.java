@@ -15,6 +15,8 @@ import zju.measure.MeasTypeCons;
 import zju.measure.MeasVectorCreator;
 import zju.measure.MeasureFileRw;
 import zju.measure.SystemMeasure;
+import zju.planning.MeasPosOpt;
+import zju.planning.MeasPosOptByBonmin;
 import zju.util.MathUtil;
 import zju.util.StateCalByPolar;
 import zju.util.YMatrixGetter;
@@ -34,7 +36,7 @@ public class MeasPosOptTest extends TestCase implements MeasTypeCons {
 
 
     public void testCase4() {
-        MeasPosOpt mpo = new MeasPosOpt(SeTest_case4.island);
+        MeasPosOpt mpo = new MeasPosOptByBonmin(SeTest_case4.island);
 
         SystemMeasure sm = MeasureFileRw.parse(this.getClass().getResourceAsStream("/measfiles/case4_meas.txt"));
         MeasVectorCreator mc = new MeasVectorCreator();
@@ -175,7 +177,7 @@ public class MeasPosOptTest extends TestCase implements MeasTypeCons {
         MeasVectorCreator mc = new MeasVectorCreator();
         mc.getMeasureVector(sm, true);
 
-        MeasPosOpt mpo = new MeasPosOpt(dsIsland, true);
+        MeasPosOpt mpo = new MeasPosOptByBonmin(dsIsland, true);
         //mpo.setVAmplOnly(true);
         mpo.setDs_existMeasPos(mc.measPosWithPhase);
         mpo.setDs_existMeasTypes(mc.measTypes);
