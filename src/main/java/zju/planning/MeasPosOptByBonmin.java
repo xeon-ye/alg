@@ -25,12 +25,14 @@ public class MeasPosOptByBonmin extends MeasPosOpt {
     }
 
     class Solver extends Bonmin {
+
+        int n, m;
         protected MySparseDoubleMatrix2D jacobian, hessian;
 
         public Solver() {
-            int n = binaryNum + (size * size + size) / 2;
-            int m = (size * size + size) / 2 + 1;
-            //
+            n = binaryNum + (size * size + size) / 2;
+            m = (size * size + size) / 2 + 1;
+            //填充jacobian矩阵
             jacobian = new MySparseDoubleMatrix2D(m, n);
             double[] ini_x = new double[n];
             get_starting_point(n, true, ini_x, false, null, null, m, false, null);
@@ -161,7 +163,6 @@ public class MeasPosOptByBonmin extends MeasPosOpt {
 
         @Override
         protected boolean eval_jac_g(int n, double[] x, boolean new_x, int m, int nele_jac, int[] iRow, int[] jCol, double[] values) {
-            updateJacobian(x, new_x);
             final int[] count = {0};
             if (values == null) {
                 jacobian.forEachNonZero((row, col, v) -> {
@@ -171,6 +172,7 @@ public class MeasPosOptByBonmin extends MeasPosOpt {
                     return v;
                 });
             } else {
+                updateJacobian(x, new_x);
                 jacobian.forEachNonZero((row, col, v) -> {
                     values[count[0]] = v;
                     count[0]++;
@@ -239,6 +241,12 @@ public class MeasPosOptByBonmin extends MeasPosOpt {
         protected void updateJacobian(double[] x, boolean isNewX) {
             if(!isNewX)
                 return;
+            jacobian.forEachNonZero((i, j, v) -> {
+                if(i < m - 1)
+                    return 0.0;
+                else
+                    return v;
+            });
             int k, col;
             for (int row = 0; row < size; row++) {
                 for(int i = 0; i < Ds.length; i++) {
