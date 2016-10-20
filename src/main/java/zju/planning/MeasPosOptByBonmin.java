@@ -6,7 +6,6 @@ import zju.dsmodel.DsTopoIsland;
 import zju.ieeeformat.IEEEDataIsland;
 import zju.matrix.ASparseMatrixLink2D;
 import zju.matrix.MySparseDoubleMatrix2D;
-import zju.util.MatrixUtil;
 
 /**
  * Created by arno on 16-10-17.
@@ -113,6 +112,7 @@ public class MeasPosOptByBonmin extends MeasPosOpt {
 
         @Override
         protected boolean eval_f(int n, double[] x, boolean new_x, double[] obj_value) {
+            obj_value[0] = 0.0;
             for(int row = 0; row < size; row++)
                 obj_value[0] += x[binaryNum + row * size - row * (row + 1)/2 + row];
             return true;
@@ -131,7 +131,7 @@ public class MeasPosOptByBonmin extends MeasPosOpt {
         protected boolean eval_g(int n, double[] x, boolean new_x, int m, double[] g) {
             for(int i = 0; i < m; i++)
                 g[i] = 0.;
-            int k, col;
+            int k, col, index, indexInG;
             for (int row = 0; row < size; row++) {
                 for(int i = 0; i < Ds.length; i++) {
                     ASparseMatrixLink2D d = Ds[i];
@@ -139,16 +139,19 @@ public class MeasPosOptByBonmin extends MeasPosOpt {
                     while (k != -1) {
                         col = d.getJA().get(k);
                         for (int j = row; j < size; j++) {
-                            if (col > j)
+                            indexInG = row * size - row * (row + 1) / 2 + j;
+                            if (col > j) {
+                                index = binaryNum + j * size - j * (j + 1) / 2 + col;
                                 if(i > 0)
-                                    g[row * size - row * (row + 1)/2 + j] += x[i - 1] * x[binaryNum +  j * size - j * (j + 1) / 2 + col] * d.getVA().get(k);
+                                    g[indexInG] += x[i - 1] * x[index] * d.getVA().get(k);
                                 else
-                                    g[row * size - row * (row + 1)/2 + j] += x[binaryNum +  j * size - j * (j + 1) / 2 + col] * d.getVA().get(k);
-                            else {
+                                    g[indexInG] += x[index] * d.getVA().get(k);
+                            } else {
+                                index = binaryNum + col * size - col * (col + 1) / 2 + j;
                                 if(i > 0)
-                                    g[row * size - row * (row + 1)/2 + j] += x[i - 1] * x[binaryNum + col * size - col * (col + 1) / 2 + j] * d.getVA().get(k);
+                                    g[indexInG] += x[i - 1] * x[index] * d.getVA().get(k);
                                 else
-                                    g[row * size - row * (row + 1)/2 + j] += x[binaryNum + col * size - col * (col + 1) / 2 + j] * d.getVA().get(k);
+                                    g[indexInG] += x[index] * d.getVA().get(k);
                             }
                         }
                         k = d.getLINK().get(k);
@@ -234,8 +237,8 @@ public class MeasPosOptByBonmin extends MeasPosOpt {
                     }
                 }
             }
-            System.out.println("============= hessian ====================");
-            hessian.printOnScree();//todo:
+            //System.out.println("============= hessian ====================");
+            //hessian.printOnScree();//todo:
         }
 
         protected void updateJacobian(double[] x, boolean isNewX) {
@@ -272,8 +275,8 @@ public class MeasPosOptByBonmin extends MeasPosOpt {
                     }
                 }
             }
-            System.out.println("================= jacobian ===========");
-            jacobian.printOnScree();//todo:
+            //System.out.println("================= jacobian ===========");
+            //jacobian.printOnScree();//todo:
         }
     }
 
@@ -283,8 +286,8 @@ public class MeasPosOptByBonmin extends MeasPosOpt {
 
         Solver solver = new Solver();
         //solver.setStringOption("bonmin.algorithm","B-BB");
-        solver.setStringOption("bonmin.algorithm","B-OA");
-        //solver.setStringOption("bonmin.algorithm","B-QG");
+        //solver.setStringOption("bonmin.algorithm","B-OA");
+        solver.setStringOption("bonmin.algorithm","B-QG");
         //solver.setStringOption("bonmin.algorithm","B-Hyb");
         //solver.setStringOption("bonmin.algorithm","B-Ecp");
         //solver.setStringOption("bonmin.algorithm","B-iFP");
