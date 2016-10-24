@@ -42,7 +42,7 @@ public class MeasPosOptByBonmin extends MeasPosOpt {
             hessian = new MySparseDoubleMatrix2D(n, n);
             updateHessian(null);
 
-            int nele_jac = jacobian.cardinality();//todo
+            int nele_jac = jacobian.cardinality();
             int nele_hess = hessian.cardinality();
 
             createBonmin(n, m, nele_jac, nele_hess, C_STYLE);
@@ -202,10 +202,10 @@ public class MeasPosOptByBonmin extends MeasPosOpt {
         }
 
         private void updateHessian(double[] lambda) {
-            hessian.forEachNonZero((i, i2, v) -> 0.0);
+            hessian.forEachNonZero((i, j, v) -> 0.0);
             int k, col;
             for (int row = 0; row < size; row++) {
-                for(int i = 0; i < Ds.length; i++) {
+                for(int i = 1; i < Ds.length; i++) {
                     ASparseMatrixLink2D d = Ds[i];
                     k = d.getIA()[row];
                     while (k != -1) {
@@ -215,8 +215,14 @@ public class MeasPosOptByBonmin extends MeasPosOpt {
                             int varIndex;
                             if (col > j) {
                                 varIndex = binaryNum + j * size - j * (j + 1) / 2 + col;
-                            } else {
+                            } else
                                 varIndex = binaryNum + col * size - col * (col + 1) / 2 + j;
+                            if(lambda != null) {
+                                hessian.addQuick(i - 1, varIndex, d.getVA().get(k) * lambda[rowInJac]);
+                                //hessian.addQuick(varIndex, i - 1, d.getVA().get(k) * lambda[rowInJac]);
+                            } else {
+                                hessian.addQuick(i - 1, varIndex, d.getVA().get(k));
+                                //hessian.addQuick(varIndex, i - 1, d.getVA().get(k));
                             }
                             if(i > 0) {
                                 if(lambda != null) {

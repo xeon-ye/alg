@@ -42,9 +42,9 @@ public class MeasPosOptTest extends TestCase implements MeasTypeCons {
         MeasVectorCreator mc = new MeasVectorCreator();
         mc.getMeasureVector(sm);
 
-        int[] candPos = new int[1];
+        int[] candPos = new int[2];
         candPos[0] = 2;
-        //candPos[1] = 4;
+        candPos[1] = 4;
         int[][] measTypePerPos = new int[candPos.length][];
         double[][] weights = new double[candPos.length][];
         for(int i = 0; i < measTypePerPos.length; i++) {
@@ -178,12 +178,11 @@ public class MeasPosOptTest extends TestCase implements MeasTypeCons {
         MeasVectorCreator mc = new MeasVectorCreator();
         mc.getMeasureVector(sm, true);
 
-        MeasPosOpt mpo = new MeasPosOptByBonmin(dsIsland, true);
-        //mpo.setVAmplOnly(true);
+        MeasPosOpt mpo = new MeasPosOpt(dsIsland, true);
+        mpo.setVAmplOnly(true);
         mpo.setDs_existMeasPos(mc.measPosWithPhase);
         mpo.setDs_existMeasTypes(mc.measTypes);
         mpo.setDs_existMeasWeight(mc.weights);
-
         setIduMeasures(dsIsland, new int[]{1,2,3,4}, new int[]{2,3,5,3}, new double[]{0.58, 0.5, 0.5, 0.58, 0.58, 0.5, 0.3, 0.58,}, mpo);
         mpo.setMaxDevNum(2);
         mpo.doOpt(true);
