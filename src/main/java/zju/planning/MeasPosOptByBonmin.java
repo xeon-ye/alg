@@ -142,17 +142,12 @@ public class MeasPosOptByBonmin extends MeasPosOpt {
                             indexInG = row * size - row * (row + 1) / 2 + j;
                             if (col > j) {
                                 index = binaryNum + j * size - j * (j + 1) / 2 + col;
-                                if(i > 0)
-                                    g[indexInG] += x[i - 1] * x[index] * d.getVA().get(k);
-                                else
-                                    g[indexInG] += x[index] * d.getVA().get(k);
-                            } else {
+                            } else
                                 index = binaryNum + col * size - col * (col + 1) / 2 + j;
-                                if(i > 0)
-                                    g[indexInG] += x[i - 1] * x[index] * d.getVA().get(k);
-                                else
-                                    g[indexInG] += x[index] * d.getVA().get(k);
-                            }
+                            if(i > 0)
+                                g[indexInG] += x[i - 1] * x[index] * d.getVA().get(k);
+                            else
+                                g[indexInG] += x[index] * d.getVA().get(k);
                         }
                         k = d.getLINK().get(k);
                     }
@@ -226,10 +221,10 @@ public class MeasPosOptByBonmin extends MeasPosOpt {
                             if(i > 0) {
                                 if(lambda != null) {
                                     hessian.addQuick(i - 1, varIndex, d.getVA().get(k) * lambda[rowInJac]);
-                                    hessian.addQuick(varIndex, i - 1, d.getVA().get(k) * lambda[rowInJac]);
+                                    //hessian.addQuick(varIndex, i - 1, d.getVA().get(k) * lambda[rowInJac]);
                                 } else {
                                     hessian.addQuick(i - 1, varIndex, d.getVA().get(k));
-                                    hessian.addQuick(varIndex, i - 1, d.getVA().get(k));
+                                    //hessian.addQuick(varIndex, i - 1, d.getVA().get(k));
                                 }
                             }
                         }
