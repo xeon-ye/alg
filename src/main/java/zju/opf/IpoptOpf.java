@@ -264,12 +264,7 @@ public class IpoptOpf extends IpoptPf {
             return;
         }
         //先置零
-        hessian.forEachNonZero(new IntIntDoubleFunction() {
-            @Override
-            public double apply(int i, int i2, double v) {
-                return 0.0;
-            }
-        });
+        hessian.forEachNonZero((i, j, v) -> 0.0);
         fill_hessian_obj(x, obj_factor);
         for (int i = 0; i < busNumber; i++) {
             //if (Math.abs(lambda[i]) > 1e-10)
