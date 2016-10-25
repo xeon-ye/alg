@@ -1,0 +1,26 @@
+Line Segment Data	14 items	feet
+1	2	250	Switch
+2	3	250	Switch
+3	4	250	Switch
+4	5	250	Switch
+4	6	250	Switch
+6	10	250	Switch
+7	8	250	Switch
+8	9	250	Switch
+9	10	250	Switch
+10	11	250	Switch
+12	1	250	4
+13	5	250	Switch
+14	7	250	Switch
+15	11	250	Switch
+-999
+Spot Loads	0 items
+-999
+Distributed Loads	0 items
+-999
+Shunt Capacitors	0 items
+-999
+Transformer	0 item
+-999
+Regulator	0 item
+-999

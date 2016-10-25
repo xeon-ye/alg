@@ -5,7 +5,6 @@ import org.junit.Assert;
 import zju.devmodel.MapObject;
 import zju.dsmodel.DistriSys;
 import zju.dsmodel.DsModelCons;
-import zju.dsmodel.IeeeDsInHand;
 
 import java.io.InputStream;
 
@@ -31,7 +30,7 @@ public class LoadTransferOptTest extends TestCase implements DsModelCons {
     public void testCase1() {
         DistriSys testsys;
         String[] supplyID;
-        InputStream ieeeFile = IeeeDsInHand.class.getResourceAsStream("/dsieee/mytest/testcase1/graphtest.txt");
+        InputStream ieeeFile = this.getClass().getResourceAsStream("/loadtransferfiles/testcase1/graphtest.txt");
         testsys = createDs(ieeeFile, "S1", 100);
         for (MapObject obj : testsys.getDevices().getSwitches()) {
             if (obj.getProperty(KEY_CONNECTED_NODE).equals("L2;L9"))
@@ -51,13 +50,13 @@ public class LoadTransferOptTest extends TestCase implements DsModelCons {
         LoadTransferOpt model = new LoadTransferOpt(testsys);
         model.setErrorFeeder(ErrorEdge);
         model.setErrorSupply(ErrorSupply);
-        String loadsPath = "C:\\Users\\Administrator.2013-20160810IY\\IdeaProjects\\alg\\src\\main\\resources\\dsieee\\mytest\\testcase1\\loads.txt";
-        String supplyCapacityPath = "C:\\Users\\Administrator.2013-20160810IY\\IdeaProjects\\alg\\src\\main\\resources\\dsieee\\mytest\\testcase1\\supplyCapacity.txt";
-        String feederCapacityPath = "C:\\Users\\Administrator.2013-20160810IY\\IdeaProjects\\alg\\src\\main\\resources\\dsieee\\mytest\\testcase1\\feederCapacity.txt";
+        String loadsPath = this.getClass().getResource("/loadtransferfiles/testcase1/loads.txt").getPath();
+        String supplyCapacityPath = this.getClass().getResource("/loadtransferfiles/testcase1/supplyCapacity.txt").getPath();
+        String feederCapacityPath = this.getClass().getResource("/loadtransferfiles/testcase1/feederCapacity.txt").getPath();
         model.doOpt(loadsPath, supplyCapacityPath, feederCapacityPath);
         Assert.assertEquals(3, model.minSwitch);
 
-        ieeeFile = IeeeDsInHand.class.getResourceAsStream("/dsieee/mytest/testcase1/graphtest.txt");
+        ieeeFile = this.getClass().getResourceAsStream("/loadtransferfiles/testcase1/graphtest.txt");
         testsys = createDs(ieeeFile, "S1", 100);
         testsys.setSupplyCns(supplyID);
         testsys.setSupplyCnBaseKv(supplyBaseKv);
@@ -87,7 +86,7 @@ public class LoadTransferOptTest extends TestCase implements DsModelCons {
     public void testCase2() {
         DistriSys testsys;
         String[] supplyID;
-        InputStream ieeeFile = IeeeDsInHand.class.getResourceAsStream("/dsieee/mytest/testcase2/graphtest.txt");
+        InputStream ieeeFile = this.getClass().getResourceAsStream("/loadtransferfiles/testcase2/graphtest.txt");
         testsys = createDs(ieeeFile, "S1", 100);
         for (MapObject obj : testsys.getDevices().getSwitches()) {
             if (obj.getProperty(KEY_CONNECTED_NODE).equals("L1;L2"))
@@ -107,13 +106,13 @@ public class LoadTransferOptTest extends TestCase implements DsModelCons {
         LoadTransferOpt model = new LoadTransferOpt(testsys);
         model.setErrorFeeder(ErrorEdge);
         model.setErrorSupply(ErrorSupply);
-        String loadsPath = "C:\\Users\\Administrator.2013-20160810IY\\IdeaProjects\\alg\\src\\main\\resources\\dsieee\\mytest\\testcase2\\loads.txt";
-        String supplyCapacityPath = "C:\\Users\\Administrator.2013-20160810IY\\IdeaProjects\\alg\\src\\main\\resources\\dsieee\\mytest\\testcase2\\supplyCapacity.txt";
-        String feederCapacityPath = "C:\\Users\\Administrator.2013-20160810IY\\IdeaProjects\\alg\\src\\main\\resources\\dsieee\\mytest\\testcase2\\feederCapacity.txt";
+        String loadsPath = this.getClass().getResource("/loadtransferfiles/testcase2/loads.txt").getPath();
+        String supplyCapacityPath = this.getClass().getResource("/loadtransferfiles/testcase2/supplyCapacity.txt").getPath();
+        String feederCapacityPath = this.getClass().getResource("/loadtransferfiles/testcase2/feederCapacity.txt").getPath();
         model.doOpt(loadsPath, supplyCapacityPath, feederCapacityPath);
         Assert.assertEquals(1, model.minSwitch);
 
-        ieeeFile = IeeeDsInHand.class.getResourceAsStream("/dsieee/mytest/testcase2/graphtest.txt");
+        ieeeFile = this.getClass().getResourceAsStream("/loadtransferfiles/testcase2/graphtest.txt");
         testsys = createDs(ieeeFile, "S1", 100);
         testsys.setSupplyCns(supplyID);
         testsys.setSupplyCnBaseKv(supplyBaseKv);
@@ -126,18 +125,15 @@ public class LoadTransferOptTest extends TestCase implements DsModelCons {
         Assert.assertEquals(10, model.maxLoad, 0.001);
     }
 
-    public void testallLoadMax() {
-        String loadsPath = "C:\\Users\\Administrator.2013-20160810IY\\IdeaProjects\\alg\\src\\main\\resources\\dsieee\\mytest\\testcase1\\loads.txt";
-        String supplyCapacityPath = "C:\\Users\\Administrator.2013-20160810IY\\IdeaProjects\\alg\\src\\main\\resources\\dsieee\\mytest\\testcase1\\supplyCapacity.txt";
-        String feederCapacityPath = "C:\\Users\\Administrator.2013-20160810IY\\IdeaProjects\\alg\\src\\main\\resources\\dsieee\\mytest\\testcase1\\feederCapacity.txt";
+    public void testAllLoadMax() {
+        String loadsPath = this.getClass().getResource("/loadtransferfiles/testcase1/loads.txt").getPath();
+        String supplyCapacityPath = this.getClass().getResource("/loadtransferfiles/testcase1/supplyCapacity.txt").getPath();
+        String feederCapacityPath = this.getClass().getResource("/loadtransferfiles/testcase1/feederCapacity.txt").getPath();
         DistriSys testsys;
         String[] supplyID = new String[]{"S1", "S2", "S3"};
         Double[] supplyBaseKv = new Double[]{100., 200., 100.};
 
-        String[] ErrorSupply = new String[]{"S3"};
-        int[] ErrorEdge = {0};
-
-        InputStream ieeeFile = IeeeDsInHand.class.getResourceAsStream("/dsieee/mytest/testcase1/graphtest.txt");
+        InputStream ieeeFile = this.getClass().getResourceAsStream("/loadtransferfiles/testcase1/graphtest.txt");
         testsys = createDs(ieeeFile, "S1", 100);
         testsys.setSupplyCns(supplyID);
         testsys.setSupplyCnBaseKv(supplyBaseKv);
@@ -148,7 +144,7 @@ public class LoadTransferOptTest extends TestCase implements DsModelCons {
     public void testCase3() {
         DistriSys testsys;
         String[] supplyID;
-        InputStream ieeeFile = IeeeDsInHand.class.getResourceAsStream("/dsieee/mytest/testcase3/graphtest.txt");
+        InputStream ieeeFile = this.getClass().getResourceAsStream("/loadtransferfiles/testcase3/graphtest.txt");
         testsys = createDs(ieeeFile, "12", 100);
         for (MapObject obj : testsys.getDevices().getSwitches()) {
             if (obj.getProperty(KEY_CONNECTED_NODE).equals("3;4"))
@@ -168,32 +164,26 @@ public class LoadTransferOptTest extends TestCase implements DsModelCons {
         LoadTransferOpt model = new LoadTransferOpt(testsys);
         model.setErrorFeeder(ErrorEdge);
         model.setErrorSupply(ErrorSupply);
-        String loadsPath = "C:\\Users\\Administrator.2013-20160810IY\\IdeaProjects\\alg\\src\\main\\resources\\dsieee\\mytest\\testcase3\\loads.txt";
-        String supplyCapacityPath = "C:\\Users\\Administrator.2013-20160810IY\\IdeaProjects\\alg\\src\\main\\resources\\dsieee\\mytest\\testcase3\\supplyCapacity.txt";
-        String feederCapacityPath = "C:\\Users\\Administrator.2013-20160810IY\\IdeaProjects\\alg\\src\\main\\resources\\dsieee\\mytest\\testcase3\\feederCapacity.txt";
+        String loadsPath = this.getClass().getResource("/loadtransferfiles/testcase3/loads.txt").getPath();
+        String supplyCapacityPath = this.getClass().getResource("/loadtransferfiles/testcase3/supplyCapacity.txt").getPath();
+        String feederCapacityPath = this.getClass().getResource("/loadtransferfiles/testcase3/feederCapacity.txt").getPath();
         model.doOpt(loadsPath, supplyCapacityPath, feederCapacityPath);
         Assert.assertEquals(2, model.minSwitch);
 
-        ieeeFile = IeeeDsInHand.class.getResourceAsStream("/dsieee/mytest/testcase3/graphtest.txt");
+        ieeeFile = this.getClass().getResourceAsStream("/loadtransferfiles/testcase3/graphtest.txt");
         testsys = createDs(ieeeFile, "12", 100);
         testsys.setSupplyCns(supplyID);
         testsys.setSupplyCnBaseKv(supplyBaseKv);
         model = new LoadTransferOpt(testsys);
-//        model.allLoadMax(loadsPath, supplyCapacityPath, feederCapacityPath);
+        model.allLoadMax(loadsPath, supplyCapacityPath, feederCapacityPath);
         model.loadMax(loadsPath, supplyCapacityPath, feederCapacityPath, "6");
-//        Assert.assertEquals(6480, model.maxLoad, 0.001);
-//        model.loadMax(loadsPath, supplyCapacityPath, feederCapacityPath, "19");
-//        Assert.assertEquals(7635, model.maxLoad, 0.001);
-//        model.loadMax(loadsPath, supplyCapacityPath, feederCapacityPath, "23");
-//        Assert.assertEquals(5835, model.maxLoad, 0.001);
-//        model.loadMax(loadsPath, supplyCapacityPath, feederCapacityPath, "7");
-//        Assert.assertEquals(4320, model.maxLoad, 0.001);
+        Assert.assertEquals(8167, model.maxLoad, 0.001);
     }
 
     public void testCase4() {
         DistriSys testsys;
         String[] supplyID;
-        InputStream ieeeFile = IeeeDsInHand.class.getResourceAsStream("/dsieee/mytest/testcase4/graphtest.txt");
+        InputStream ieeeFile = this.getClass().getResourceAsStream("/loadtransferfiles/testcase4/graphtest.txt");
         testsys = createDs(ieeeFile, "24", 100);
         for (MapObject obj : testsys.getDevices().getSwitches()) {
             if (obj.getProperty(KEY_CONNECTED_NODE).equals("8;9"))
@@ -217,33 +207,33 @@ public class LoadTransferOptTest extends TestCase implements DsModelCons {
         LoadTransferOpt model = new LoadTransferOpt(testsys);
         model.setErrorFeeder(ErrorEdge);
         model.setErrorSupply(ErrorSupply);
-        String loadsPath = "C:\\Users\\Administrator.2013-20160810IY\\IdeaProjects\\alg\\src\\main\\resources\\dsieee\\mytest\\testcase4\\loads.txt";
-        String supplyCapacityPath = "C:\\Users\\Administrator.2013-20160810IY\\IdeaProjects\\alg\\src\\main\\resources\\dsieee\\mytest\\testcase4\\supplyCapacity.txt";
-        String feederCapacityPath = "C:\\Users\\Administrator.2013-20160810IY\\IdeaProjects\\alg\\src\\main\\resources\\dsieee\\mytest\\testcase4\\feederCapacity.txt";
+        String loadsPath = this.getClass().getResource("/loadtransferfiles/testcase4/loads.txt").getPath();
+        String supplyCapacityPath = this.getClass().getResource("/loadtransferfiles/testcase4/supplyCapacity.txt").getPath();
+        String feederCapacityPath = this.getClass().getResource("/loadtransferfiles/testcase4/feederCapacity.txt").getPath();
         model.doOpt(loadsPath, supplyCapacityPath, feederCapacityPath);
-//        Assert.assertEquals(3, model.minSwitch);
+        Assert.assertEquals(3, model.minSwitch);
 
-        ieeeFile = IeeeDsInHand.class.getResourceAsStream("/dsieee/mytest/testcase4/graphtest.txt");
+        ieeeFile = this.getClass().getResourceAsStream("/loadtransferfiles/testcase4/graphtest.txt");
         testsys = createDs(ieeeFile, "24", 100);
         testsys.setSupplyCns(supplyID);
         testsys.setSupplyCnBaseKv(supplyBaseKv);
         model = new LoadTransferOpt(testsys);
-//        model.loadMax(loadsPath, supplyCapacityPath, feederCapacityPath, "1");
-//        Assert.assertEquals(7829, model.maxLoad, 0.001);
+        model.loadMax(loadsPath, supplyCapacityPath, feederCapacityPath, "1");
+        Assert.assertEquals(7829, model.maxLoad, 0.001);
         model.loadMax(loadsPath, supplyCapacityPath, feederCapacityPath, "18");
-//        Assert.assertEquals(1404, model.maxLoad, 0.001);
-//        model.loadMax(loadsPath, supplyCapacityPath, feederCapacityPath, "19");
-//        Assert.assertEquals(2559, model.maxLoad, 0.001);
-//        model.loadMax(loadsPath, supplyCapacityPath, feederCapacityPath, "23");
-//        Assert.assertEquals(1639, model.maxLoad, 0.001);
-//        model.loadMax(loadsPath, supplyCapacityPath, feederCapacityPath, "7");
-//        Assert.assertEquals(8654, model.maxLoad, 0.001);
+        Assert.assertEquals(1409, model.maxLoad, 0.001);
+        model.loadMax(loadsPath, supplyCapacityPath, feederCapacityPath, "19");
+        Assert.assertEquals(2559, model.maxLoad, 0.001);
+        model.loadMax(loadsPath, supplyCapacityPath, feederCapacityPath, "23");
+        Assert.assertEquals(1639, model.maxLoad, 0.001);
+        model.loadMax(loadsPath, supplyCapacityPath, feederCapacityPath, "7");
+        Assert.assertEquals(8654, model.maxLoad, 0.001);
     }
 
     public void testCase4AllNode() {
         DistriSys testsys;
         String[] supplyID;
-        InputStream ieeeFile = IeeeDsInHand.class.getResourceAsStream("/dsieee/mytest/testcase4/graphtest.txt");
+        InputStream ieeeFile = this.getClass().getResourceAsStream("/loadtransferfiles/testcase4/graphtest.txt");
         testsys = createDs(ieeeFile, "24", 100);
         for (MapObject obj : testsys.getDevices().getSwitches()) {
             if (obj.getProperty(KEY_CONNECTED_NODE).equals("8;9"))
@@ -267,27 +257,27 @@ public class LoadTransferOptTest extends TestCase implements DsModelCons {
         LoadTransferOpt model = new LoadTransferOpt(testsys);
         model.setErrorFeeder(ErrorEdge);
         model.setErrorSupply(ErrorSupply);
-        String loadsPath = "C:\\Users\\Administrator.2013-20160810IY\\IdeaProjects\\alg\\src\\main\\resources\\dsieee\\mytest\\testcase4\\loads.txt";
-        String supplyCapacityPath = "C:\\Users\\Administrator.2013-20160810IY\\IdeaProjects\\alg\\src\\main\\resources\\dsieee\\mytest\\testcase4\\supplyCapacity.txt";
-        String feederCapacityPath = "C:\\Users\\Administrator.2013-20160810IY\\IdeaProjects\\alg\\src\\main\\resources\\dsieee\\mytest\\testcase4\\feederCapacity.txt";
+        String loadsPath = this.getClass().getResource("/loadtransferfiles/testcase4/loads.txt").getPath();
+        String supplyCapacityPath = this.getClass().getResource("/loadtransferfiles/testcase4/supplyCapacity.txt").getPath();
+        String feederCapacityPath = this.getClass().getResource("/loadtransferfiles/testcase4/feederCapacity.txt").getPath();
         model.doOpt(loadsPath, supplyCapacityPath, feederCapacityPath);
         Assert.assertEquals(3, model.minSwitch);
 
-        ieeeFile = IeeeDsInHand.class.getResourceAsStream("/dsieee/mytest/testcase4/graphtest.txt");
+        ieeeFile = this.getClass().getResourceAsStream("/loadtransferfiles/testcase4/graphtest.txt");
         testsys = createDs(ieeeFile, "24", 100);
         testsys.setSupplyCns(supplyID);
         testsys.setSupplyCnBaseKv(supplyBaseKv);
         model = new LoadTransferOpt(testsys);
-        model.allLoadMax(loadsPath, supplyCapacityPath, feederCapacityPath);
-//        model.loadMax(loadsPath, supplyCapacityPath, feederCapacityPath, "1");
-//        Assert.assertEquals(7829, model.maxLoad, 0.001);
-//        model.loadMax(loadsPath, supplyCapacityPath, feederCapacityPath, "20");
-//        Assert.assertEquals(6480, model.maxLoad, 0.001);
-//        model.loadMax(loadsPath, supplyCapacityPath, feederCapacityPath, "19");
-//        Assert.assertEquals(7635, model.maxLoad, 0.001);
-//        model.loadMax(loadsPath, supplyCapacityPath, feederCapacityPath, "23");
-//        Assert.assertEquals(5835, model.maxLoad, 0.001);
-//        model.loadMax(loadsPath, supplyCapacityPath, feederCapacityPath, "7");
-//        Assert.assertEquals(4320, model.maxLoad, 0.001);
+//        model.allLoadMax(loadsPath, supplyCapacityPath, feederCapacityPath);
+        model.loadMax(loadsPath, supplyCapacityPath, feederCapacityPath, "1");
+        Assert.assertEquals(7829, model.maxLoad, 0.001);
+        model.loadMax(loadsPath, supplyCapacityPath, feederCapacityPath, "20");
+        Assert.assertEquals(1404, model.maxLoad, 0.001);
+        model.loadMax(loadsPath, supplyCapacityPath, feederCapacityPath, "19");
+        Assert.assertEquals(2559, model.maxLoad, 0.001);
+        model.loadMax(loadsPath, supplyCapacityPath, feederCapacityPath, "23");
+        Assert.assertEquals(1639, model.maxLoad, 0.001);
+        model.loadMax(loadsPath, supplyCapacityPath, feederCapacityPath, "7");
+        Assert.assertEquals(8654, model.maxLoad, 0.001);
     }
 }
