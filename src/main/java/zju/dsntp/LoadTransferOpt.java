@@ -331,7 +331,7 @@ public class LoadTransferOpt extends PathBasedModel {
         minSwitch = 0;
         System.out.printf("To switch less,we can change the statues of switchs in the edges:\n");
         for(i = 0; i < edges.size(); i++) {
-            //System.out.printf("%d ", newedgesStatues[i]);
+//            System.out.printf("%d ", newedgesStatues[i]);
             if(newedgesStatues[i] != edgesStatues[i]) {
                 minSwitch++;
                 System.out.printf("%s ", g.getEdgeSource(edges.get(i)).getId());
@@ -947,7 +947,7 @@ public class LoadTransferOpt extends PathBasedModel {
         buildPathes();
         for(int i = 0; i < nodes.size(); i++) {
             loadMax(loadsPath, supplyCapacityPath, feederCapacityPath, nodes.get(i).getId());
-            System.out.printf("The max load in node %s is: %.0f\n", nodes.get(i).getId(), maxLoad);
+            System.out.printf("The max load in node %s is: %.2f\n", nodes.get(i).getId(), maxLoad);
         }
     }
 
