@@ -347,7 +347,7 @@ public class LoadTransferOpt extends PathBasedModel {
         }
     }
 
-    public void doOptNew() {
+    private void doOptNew() {
 
         sys = originSys;
 
@@ -1380,5 +1380,9 @@ public class LoadTransferOpt extends PathBasedModel {
 
     public Map<String, Double> getMaxLoadResult() {
         return maxLoadResult;
+    }
+
+    public LoadTransferOptResult getOptResult() {
+        return optResult;
     }
 }
