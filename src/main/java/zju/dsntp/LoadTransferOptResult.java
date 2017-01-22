@@ -17,7 +17,7 @@ public class LoadTransferOptResult {
     public LoadTransferOptResult(int supplyNum, int loadNum) {
         this.supplyId = new String[supplyNum];
         this.minSwitch = new int[supplyNum];
-        this.switchChanged = new ArrayList<String[]>(supplyNum);
+        this.switchChanged = new ArrayList<>(supplyNum);
         this.loadId = new String[loadNum];
         this.maxLoad = new double[loadNum];
     }
@@ -30,8 +30,8 @@ public class LoadTransferOptResult {
         this.minSwitch[index] = minSwitch;
     }
 
-    public void setSwitchChanged(int index, String[] switchChanged) {
-        this.switchChanged.set(index, switchChanged);
+    public void setSwitchChanged(String[] switchChanged) {
+        this.switchChanged.add(switchChanged);
     }
 
     public void setLoadId(String[] loadId) {
