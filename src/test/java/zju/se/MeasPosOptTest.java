@@ -1,5 +1,6 @@
 package zju.se;
 
+import Jama.Matrix;
 import junit.framework.TestCase;
 import zju.devmodel.MapObject;
 import zju.dsmodel.DistriSys;
@@ -10,6 +11,7 @@ import zju.dspf.DsPowerflowTest;
 import zju.ieeeformat.BranchData;
 import zju.ieeeformat.BusData;
 import zju.ieeeformat.IEEEDataIsland;
+import zju.matrix.ASparseMatrixLink2D;
 import zju.matrix.AVector;
 import zju.measure.MeasTypeCons;
 import zju.measure.MeasVectorCreator;
@@ -24,6 +26,7 @@ import zju.util.YMatrixGetter;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 
 import static zju.dsmodel.DsModelCons.sqrt3;
@@ -185,8 +188,80 @@ public class MeasPosOptTest extends TestCase implements MeasTypeCons {
         mpo.setDs_existMeasWeight(mc.weights);
         setIduMeasures(dsIsland, new int[]{1,2,3,4}, new int[]{2,3,5,3}, new double[]{0.58, 0.5, 0.5, 0.58, 0.58, 0.5, 0.3, 0.58,}, mpo);
         mpo.setMaxDevNum(2);
+        mpo.prepare(true);
+//        System.out.println("信息矩阵大小："+mpo.Ds.length);
+//        for(int i=0 ; i < mpo.Ds.length ; i++){
+//            System.out.println(mpo.Ds[i].);
+//        }
+
         mpo.doOpt(true);
     }
+
+    public void testDscase13ByDPSO() {
+        InputStream ieeeFile = IeeeDsInHand.class.getResourceAsStream("/dsfiles/case13-notrans.txt");
+        DistriSys sys = IeeeDsInHand.createDs(ieeeFile, "650", 4.16 / sqrt3);
+        sys.setPerUnitSys(true); //设置使用标幺值标志
+        sys.setBaseKva(1000.); //设置基准功率
+        //计算潮流
+        //DsPowerflowTest.testConverged(sys, false);
+        sys.buildDynamicTopo();
+        sys.createCalDevModel();
+        DsTopoIsland dsIsland = sys.getActiveIslands()[0];
+        //形成量测
+        //DsSimuMeasMaker smMaker = new DsSimuMeasMaker();
+        //SystemMeasure sm = smMaker.createFullMeasure(dsIsland, 1, 0.02);
+        //MeasureFileRw.writeFileSimple(sm, "/home/arno/alg/src/test/resources/dsfiles/case13-notrans-measure.txt");
+        //读取量测
+        SystemMeasure sm = MeasureFileRw.parse(getClass().getResourceAsStream("/dsfiles/case13-notrans-measure.txt"));
+        MeasVectorCreator mc = new MeasVectorCreator();
+        mc.getMeasureVector(sm, true);
+
+        MeasPosOpt mpo = new MeasPosOpt(dsIsland, true);
+        mpo.setVAmplOnly(true);
+        mpo.setDs_existMeasPos(mc.measPosWithPhase);
+        mpo.setDs_existMeasTypes(mc.measTypes);
+        mpo.setDs_existMeasWeight(mc.weights);
+        setIduMeasures(dsIsland, new int[]{1,2,3}, new int[]{2,3,5}, new double[]{106, 100, 100, 106, 106, 100, 60, 106}, mpo);
+        mpo.setMaxDevNum(2);
+        mpo.prepare(true);
+
+        List<Matrix> matrixList = new LinkedList<>();
+
+        if(mpo.getDs()[0].getN() != mpo.getDs()[0].getM()){
+            System.out.println("ALARM:N!=M!");
+        }
+        int matrixDimension = mpo.getDs()[0].getM();
+        for(ASparseMatrixLink2D aSparseMatrixLink2D : mpo.getDs()){
+            double[][] matrix = new double[matrixDimension][matrixDimension];
+            //set zero
+            for(int j = 0 ; j < matrixDimension ; j++){
+                for(int k = 0 ; k < matrixDimension ; k++){
+                    matrix[j][k] = 0;
+                }
+            }
+            //2阶矩阵构造
+            for (int i = 0; i < aSparseMatrixLink2D.getM(); i++) {
+                int k = aSparseMatrixLink2D.getIA()[i];
+                while (k != -1) {
+                    int j = aSparseMatrixLink2D.getJA().get(k);
+                    double v = aSparseMatrixLink2D.getVA().get(k);
+                    matrix[i][j] = v;
+                    k = aSparseMatrixLink2D.getLINK().get(k);
+                }
+            }
+            //矩阵加入list
+            matrixList.add(new Matrix(matrix));
+        }
+        Parameter.setMatrixList(matrixList);
+
+        DPSO dpso = new DPSO();
+        dpso.initial();
+        dpso.run();
+        dpso.showResult();
+    }
+
+
+
 
     public void testDscase34() {
         InputStream ieeeFile = IeeeDsInHand.class.getResourceAsStream("/dsfiles/case34-notrans.txt");
@@ -307,3 +382,7 @@ public class MeasPosOptTest extends TestCase implements MeasTypeCons {
         mpo.setDs_measWeight(weights);
     }
 }
+
+
+
+
