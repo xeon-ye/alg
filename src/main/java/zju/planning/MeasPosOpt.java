@@ -539,10 +539,15 @@ public class MeasPosOpt implements MeasTypeCons {
     protected int binaryNum;
     //状态变量的维数
     protected int size;
+
+    public ASparseMatrixLink2D[] getDs() {
+        return Ds;
+    }
+
     //信息矩阵的组成
     protected ASparseMatrixLink2D[] Ds;
 
-    protected void prepare(boolean isThreePhase) {
+    public void prepare(boolean isThreePhase) {//2017.3.25 protected->public
         int n = island.getBuses().size();
 
         YMatrixGetter Y = new YMatrixGetter(island);
@@ -761,10 +766,14 @@ public class MeasPosOpt implements MeasTypeCons {
         int numberRows = rowLower.length;
         int numberColumns = columnLower.length;
         double result[] = new double[numberColumns];
+
         //进行求解
         LinearSolver solver = new LinearSolver();
+        //设置驱动
         solver.setDrive(LinearSolver.MLP_DRIVE_CBC);
+
         log.debug("numberColumns = " + numberColumns + " numberRows = " + numberRows + " whichIntSize = " + binaryNum);
+
         int status = solver.solveMlp(numberColumns, numberRows, objValue,
                 columnLower, columnUpper, rowLower, rowUpper, element, column, starts, whichInt, result);
         if (status < 0) {
