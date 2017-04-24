@@ -199,4 +199,26 @@ public class DsCase33 implements DsModelCons {
         island.getGraph().addEdge(tns.get(branchSplit[1]), tns.get(branchSplit[2]), obj);
         island.getBranches().put(obj, feeder);
     }
+
+    public static void deleteFeeder(DsTopoIsland island, Map<String, DsTopoNode> tns, String buffer) {
+        String[] branchSplit = buffer.split("-");
+
+//        MapObject obj = new MapObject(branchSplit[0] + "-" + branchSplit[1]);
+//        obj.setProperty(KEY_RESOURCE_TYPE, RESOURCE_FEEDER);
+        //tns.get(lineNodes.get(i)[0]).getConnectivityNodes().get(0).getConnectedObjs().add(obj);
+        //tns.get(lineNodes.get(i)[1]).getConnectivityNodes().get(1).getConnectedObjs().add(obj);
+        if(island.getGraph().removeEdge(tns.get(branchSplit[0]), tns.get(branchSplit[1]))==null){
+            System.out.println("can't remove");
+        }
+        MapObject obj = null;
+        for(MapObject i : island.getBranches().keySet()){
+            if(i.getProperties().get("name").equals(buffer)){
+                obj = i;
+                break;
+            }
+        }
+        if(island.getBranches().remove(obj)==null){
+            System.out.println("can't remove");
+        };
+    }
 }
