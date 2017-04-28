@@ -3,7 +3,8 @@ package zju.dspf;
 import zju.dsmodel.DsTopoIsland;
 
 /**
- *粒子群类
+ * 粒子群类
+ *
  * @author
  */
 class DPSOInReconfig {
@@ -13,10 +14,11 @@ class DPSOInReconfig {
     int particlesAmount;//粒子的数量
 
     DsTopoIsland originIsland;
+
     /**
      * 粒子群初始化
      */
-    public DPSOInReconfig(DsTopoIsland island){
+    public DPSOInReconfig(DsTopoIsland island) {
         originIsland = island;
     }
 
@@ -55,14 +57,15 @@ class DPSOInReconfig {
             globalBestPosition[i] = particles[index].getPosition()[i];//更新全局最优位置，根据index
         }
     }
+
     /**
      * 粒子群的运行
      */
     public void run() {
         int runTimes = 1;//运行次数是1
         int index;//index
-        //todo:最大迭代次数，当前值为500
-        while (runTimes <= 200) {//确定迭代次数
+        //todo:最大迭代次数
+        while (runTimes <= 50) {//确定迭代次数
             index = -1;
             //每个粒子更新位置和适应值
             for (int i = 0; i < particlesAmount; ++i) {
@@ -79,24 +82,35 @@ class DPSOInReconfig {
                     globalBestPosition[i] = particles[index].getPosition()[i];//若index不是-1，则记录位置
                 }
                 //打印结果
-                System.out.println("第"+runTimes+"次迭代发现更好解：");
-                System.out.println("globalBestFitness:"+globalBestFitness);
-                for (int i =0 ; i < ParticleInReconfig.getDimension(); i++){
-                    System.out.println("position[" + i + "]:" +particles[index].getPosition()[i]);//输出最优的粒子的位置
+                System.out.println("第" + runTimes + "次迭代发现更好解：");
+                System.out.println("globalBestFitness:" + globalBestFitness);
+                for (int i = 0; i < ParticleInReconfig.getDimension(); i++) {
+                    //System.out.println("position[" + i + "]:" +particles[index].getPosition()[i]);//输出最优的粒子的位置
+                    if (particles[index].getPosition()[i] == 1) {
+                        System.out.println("改变线路" + originIsland.getIdToBranch().get(i + 1).getName() + "状态");
+                    }
                 }
             }
             //System.out.println(runTimes);
             runTimes++;
         }
     }
+
     /**
      * 显示程序求解结果
      */
     public void showResult() {
-        System.out.println("全局最小值" + globalBestFitness);
+        System.out.println("全局最小值：" + globalBestFitness);
         System.out.println("全局最小值时坐标：");
         for (int i = 0; i < ParticleInReconfig.getDimension(); ++i) {
-            System.out.println(globalBestPosition[i]);
+            //System.out.println(globalBestPosition[i]);
+            if (globalBestPosition[i] == 1) {
+                System.out.println("改变线路" + originIsland.getIdToBranch().get(i + 1).getName() + "状态");
+            }
         }
+    }
+
+    public static double[] getGlobalBestPosition() {
+        return globalBestPosition;
     }
 }
