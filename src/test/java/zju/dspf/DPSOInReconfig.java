@@ -2,6 +2,9 @@ package zju.dspf;
 
 import zju.dsmodel.DsTopoIsland;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * 粒子群类
  *
@@ -10,7 +13,9 @@ import zju.dsmodel.DsTopoIsland;
 class DPSOInReconfig {
     ParticleInReconfig[] particles;//粒子群，一个Particle的对象
     double globalBestFitness;//全局最优解
-    public static double[] globalBestPosition;//所有粒子找到的最好位置
+    static double[] globalBestPosition;//所有粒子找到的最好位置
+    static List<double[]> globalBestPositionList;
+
     int particlesAmount;//粒子的数量
 
     DsTopoIsland originIsland;
@@ -40,14 +45,15 @@ class DPSOInReconfig {
         particles = new ParticleInReconfig[this.particlesAmount];//开辟内存，确定该数组对象的大小
         globalBestFitness = 1e6;//全局最优适应值
         globalBestPosition = new double[ParticleInReconfig.getDimension()];//开辟内存，全局最优位置，存储全局最优位置的数组长度应等于粒子的维数.
-        int index = -1;//记录最优位置
+        globalBestPositionList = new ArrayList<>();
 
+        int index = -1;//记录最优位置
         for (int i = 0; i < particlesAmount; ++i) {
             particles[i] = new ParticleInReconfig();//particles中每个元素，都是Particle类型的对象
             particles[i].initial(ParticleInReconfig.getDimension());//调用Particle中的方法，对每个粒子进行维度的初始化
 
             particles[i].evaluateFitness();//调用评估适应值的方法
-            if (globalBestFitness > particles[i].getFitness()) {//将求得的每个粒子更新的适应值比原来的全局变量大
+            if (globalBestFitness - particles[i].getFitness()>1e-6) {//将求得的每个粒子更新的适应值比原来的全局变量大
                 globalBestFitness = particles[i].getFitness();//则更新全局变量
                 index = i;//记录全局最优是哪个粒子
             }
@@ -65,22 +71,25 @@ class DPSOInReconfig {
         int runTimes = 1;//运行次数是1
         int index;//index
         //todo:最大迭代次数
-        while (runTimes <= 50) {//确定迭代次数
+        while (runTimes <= 700) {//确定迭代次数
             index = -1;
             //每个粒子更新位置和适应值
             for (int i = 0; i < particlesAmount; ++i) {
                 particles[i].updatePosAndVel();//更新每个粒子的位置和速度
                 particles[i].evaluateFitness();//更新每个粒子的适应值
-                if (globalBestFitness > particles[i].getFitness()) {
+                if (globalBestFitness - particles[i].getFitness()>1e-6) {
                     globalBestFitness = particles[i].getFitness();
                     index = i;//更新全局最优适应值，并记录最优的粒子
                 }
             }
             //发现更好的解
             if (index != -1) {
+                double[] position = new double[ParticleInReconfig.getDimension()];
                 for (int i = 0; i < ParticleInReconfig.getDimension(); ++i) {
                     globalBestPosition[i] = particles[index].getPosition()[i];//若index不是-1，则记录位置
+                    position[i] = particles[index].getPosition()[i];
                 }
+                globalBestPositionList.add(0,position);
                 //打印结果
                 System.out.println("第" + runTimes + "次迭代发现更好解：");
                 System.out.println("globalBestFitness:" + globalBestFitness);
@@ -91,7 +100,6 @@ class DPSOInReconfig {
                     }
                 }
             }
-            //System.out.println(runTimes);
             runTimes++;
         }
     }
@@ -100,17 +108,32 @@ class DPSOInReconfig {
      * 显示程序求解结果
      */
     public void showResult() {
+        //打印全局最优解
         System.out.println("全局最小值：" + globalBestFitness);
         System.out.println("全局最小值时坐标：");
-        for (int i = 0; i < ParticleInReconfig.getDimension(); ++i) {
+        for (int i = 0; i < ParticleInReconfig.getDimension(); i++) {
             //System.out.println(globalBestPosition[i]);
             if (globalBestPosition[i] == 1) {
                 System.out.println("改变线路" + originIsland.getIdToBranch().get(i + 1).getName() + "状态");
+            }
+        }
+        //打印最优解list
+        System.out.println("最优解List：");
+        for(int i = 0; i < globalBestPositionList.size();i++){
+            System.out.println("第"+i+"优解：");
+            for(int j =0;j<globalBestPositionList.get(i).length;j++){
+                if(globalBestPositionList.get(i)[j]==1){
+                    System.out.println("改变线路"+originIsland.getIdToBranch().get(j+1).getName()+"状态");
+                }
             }
         }
     }
 
     public static double[] getGlobalBestPosition() {
         return globalBestPosition;
+    }
+
+    public static List<double[]> getGlobalBestPositionList() {
+        return globalBestPositionList;
     }
 }

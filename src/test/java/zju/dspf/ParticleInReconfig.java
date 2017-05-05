@@ -176,7 +176,6 @@ class ParticleInReconfig {
                 fitness = 1e6;
             }
         }
-
         if (fitness < pBestFitness) {
             pBestFitness = fitness;//假如计算出的适应值比历史最优适应值好，则用新计算出的适应值函数替代历史最优适应值
             for (int i = 0; i < dimension; ++i) {

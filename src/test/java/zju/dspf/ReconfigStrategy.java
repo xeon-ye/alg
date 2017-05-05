@@ -18,9 +18,7 @@ import java.util.Set;
  */
 public class ReconfigStrategy {
     private static Map<String, String> branchesInfo = new HashMap<>();
-    private static double maxCurrent = 60;
-
-    private static YMatrix yMatrix;
+    private static double maxCurrent = 58;
 
     static {
         branchesInfo.put("1-2", "1 1 2 0.0935 0.0477 0.0933 0.0475 0.0931 0.0474 0.0009 0.0004 0.0013 0.0007 0.0011 0.0005");
@@ -62,10 +60,6 @@ public class ReconfigStrategy {
         branchesInfo.put("25-29", "37 25 29 0.5 0.5 0.5 0.5 0.5 0.5 0. 0. 0. 0. 0. 0.");
     }
 
-    public static void initial(YMatrix matrix) {
-        yMatrix = matrix;
-    }
-
     public static String getReconfigStrategy(DsTopoIsland calIsland, List<String> toOpenBranches, List<String> toCloseBranches) {
         String strategy = null;
         String toCloseBranch = null;
@@ -86,6 +80,7 @@ public class ReconfigStrategy {
 
             //增加线路
             DsCase33.addFeeder(calIsland, tns, branchesInfo.get(toCloseBranch));
+
             calIsland.initialIsland();
             DsPowerflow pf = new DsPowerflow();
             pf.setTolerance(1e-1);
@@ -107,7 +102,10 @@ public class ReconfigStrategy {
                 surgeCurrentAmp[j] = 2 * Math.sqrt(branchI[j][0] * branchI[j][0] + branchI[j][1] * branchI[j][1]);
             }
 
-
+            System.out.println("尝试闭合："+toCloseBranch);
+            System.out.println("A相冲击电流幅值："+surgeCurrentAmp[0]);
+            System.out.println("B相冲击电流幅值："+surgeCurrentAmp[1]);
+            System.out.println("C相冲击电流幅值："+surgeCurrentAmp[2]);
 //            //计算三相电压差
 //            double[][] nodeV1 = null;
 //            double[][] nodeV2 = null;
@@ -157,7 +155,7 @@ public class ReconfigStrategy {
 //            }
 
             if (surgeCurrentAmp[0] < maxCurrent && surgeCurrentAmp[1] < maxCurrent && surgeCurrentAmp[2] < maxCurrent) {
-                System.out.println("尝试闭合：" + toCloseBranch);
+                System.out.println(toCloseBranch+"合环校验通过");
                 //默认肯定可以找到对应的断开开关
                 for (int j = 0; j < toOpenBranches.size(); j++) {
                     toOpenBranch = toOpenBranches.get(j);
@@ -171,7 +169,7 @@ public class ReconfigStrategy {
                         DsCase33.addFeeder(calIsland, tns, branchesInfo.get(toOpenBranch));
                     }
                 }
-                System.out.println("尝试断开：" + toOpenBranch);
+                System.out.println("尝试断开：" + toOpenBranch+"\n");
                 //去除列表中的内容
                 toCloseBranches.remove(toCloseBranch);
                 toOpenBranches.remove(toOpenBranch);
@@ -184,17 +182,18 @@ public class ReconfigStrategy {
                 }
 
                 if (strategy != null) {
-                    return strategy + "闭合" + toCloseBranch + "断开" + toOpenBranch;
+                    return "闭合" + toCloseBranch + "断开" + toOpenBranch + strategy;
                 } else {
                     //还原
-                    System.out.println("尝试失败!");
+                    System.out.println("尝试失败!\n");
                     toCloseBranches.add(toCloseBranch);
                     toOpenBranches.add(toOpenBranch);
 
-                    DsCase33.deleteFeeder(calIsland,tns,toCloseBranch);
-                    DsCase33.addFeeder(calIsland,tns,branchesInfo.get(toOpenBranch));
+                    DsCase33.deleteFeeder(calIsland, tns, toCloseBranch);
+                    DsCase33.addFeeder(calIsland, tns, branchesInfo.get(toOpenBranch));
                 }
             } else {
+                System.out.println(toCloseBranch+"冲击电流幅值过大，合环校验不通过！\n");
                 DsCase33.deleteFeeder(calIsland, tns, toCloseBranch);
             }
         }

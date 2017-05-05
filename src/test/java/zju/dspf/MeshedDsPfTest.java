@@ -84,87 +84,92 @@ public class MeshedDsPfTest extends TestCase implements DsModelCons {
         dpsoInReconfig.run();
         dpsoInReconfig.showResult();
 
-        //获取最终配网拓扑
-        DsTopoIsland finalIsland = completeIsland.clone();
-        tns = DsCase33.createTnMap(finalIsland);
-        for (int i = 0; i < DPSOInReconfig.getGlobalBestPosition().length; i++) {
-            if (DPSOInReconfig.getGlobalBestPosition()[i] == 1) {
-                String toOpenBranch = finalIsland.getIdToBranch().get(i + 1).getName();
-                DsCase33.deleteFeeder(finalIsland, tns, toOpenBranch);
-            }
-        }
-        finalIsland.initialIsland();
-
         //获取初始配网拓扑
         DsTopoIsland originIsland = DsCase33.createRadicalCase33();
         originIsland.initialIsland();
 
-        //获取切断线路
-        List<String> toOpenBranches = new ArrayList<>();
-        for (MapObject branch1 : originIsland.getIdToBranch().values()) {
-            boolean flag = false;
-            for (MapObject branch2 : finalIsland.getIdToBranch().values()) {
-                if (branch1.getName().equals(branch2.getName())) {
-                    flag = true;
-                    break;
+        int count = 0;
+        for (double[] bestPosition : DPSOInReconfig.getGlobalBestPositionList()) {
+            count++;
+            System.out.println("==============第"+count+"次第二层优化==============");
+            //更新标号（必要操作，影响断开、闭合线路的提取。ReconfigStrategy在加入一条branch后，会进行一次更新）
+            originIsland.initialIsland();
+
+            //获取优解对应的配网拓扑
+            DsTopoIsland finalIsland = completeIsland.clone();
+            tns = DsCase33.createTnMap(finalIsland);
+            for (int i = 0; i < bestPosition.length; i++) {
+                if (bestPosition[i] == 1) {
+                    String toOpenBranch = finalIsland.getIdToBranch().get(i + 1).getName();
+                    DsCase33.deleteFeeder(finalIsland, tns, toOpenBranch);
                 }
             }
-            if (!flag) {
-                toOpenBranches.add(branch1.getName());
-            }
-        }
+            finalIsland.initialIsland();
 
-        //获取闭合线路
-        List<String> toCloseBranches = new ArrayList<>();
-        for (MapObject branch1 : finalIsland.getIdToBranch().values()) {
-            boolean flag = false;
-            for (MapObject branch2 : originIsland.getIdToBranch().values()) {
-                if (branch1.getName().equals(branch2.getName())) {
-                    flag = true;
-                    break;
+            //获取切断线路
+            List<String> toOpenBranches = new ArrayList<>();
+            for (MapObject branch1 : originIsland.getIdToBranch().values()) {
+                boolean flag = false;
+                for (MapObject branch2 : finalIsland.getIdToBranch().values()) {
+                    if (branch1.getName().equals(branch2.getName())) {
+                        flag = true;
+                        break;
+                    }
+                }
+                if (!flag) {
+                    toOpenBranches.add(branch1.getName());
                 }
             }
-            if (!flag) {
-                toCloseBranches.add(branch1.getName());
+
+            //获取闭合线路
+            List<String> toCloseBranches = new ArrayList<>();
+            for (MapObject branch1 : finalIsland.getIdToBranch().values()) {
+                boolean flag = false;
+                for (MapObject branch2 : originIsland.getIdToBranch().values()) {
+                    if (branch1.getName().equals(branch2.getName())) {
+                        flag = true;
+                        break;
+                    }
+                }
+                if (!flag) {
+                    toCloseBranches.add(branch1.getName());
+                }
+            }
+
+            System.out.println("断开线路");
+            for (String i : toOpenBranches) {
+                System.out.println(i);
+            }
+            System.out.println("闭合线路");
+            for (String i : toCloseBranches) {
+                System.out.println(i);
+            }
+            String result;
+            result = ReconfigStrategy.getReconfigStrategy(originIsland, toOpenBranches, toCloseBranches);
+            if(result != null){
+                System.out.println("实施策略："+result);
+                break;
+            }else{
+                System.out.println("==============第"+count+"次第二层优化失败==============");
             }
         }
-
-        System.out.println("断开线路");
-        for (String i : toOpenBranches) {
-            System.out.println(i);
-        }
-        System.out.println("闭合线路");
-        for (String i : toCloseBranches) {
-            System.out.println(i);
-        }
-
-        YMatrix yMatrix = new YMatrix(completeIsland.getBranches(),tns.size());
-        yMatrix.formInitYMatrix();
-        for(String toOpenBranch : toOpenBranches){
-            yMatrix.deleteBranch(toOpenBranch);
-        }
-
-        ReconfigStrategy.initial(yMatrix);
-        System.out.println(ReconfigStrategy.getReconfigStrategy(originIsland,toOpenBranches,toCloseBranches));
-
     }
 
-    public void testCalZMatrix(){
+    public void testCalZMatrix() {
         Matrix[] matrices = new Matrix[3];
-        double[][] ele = {{1,0,2,-1,1,1},{0,1,1,1,1,2},{-1,1,1,0,1,0}};
+        double[][] ele = {{1, 0, 2, -1, 1, 1}, {0, 1, 1, 1, 1, 2}, {-1, 1, 1, 0, 1, 0}};
         matrices[0] = new Matrix(ele);
         matrices[1] = new Matrix(ele);
         matrices[2] = new Matrix(ele);
 
-        Matrix[][] result = ReconfigStrategy.calZMatrix(3,matrices);
+        Matrix[][] result = ReconfigStrategy.calZMatrix(3, matrices);
 
-        for(int i=0;i<3;i++){
-            result[i][0].print(5,4);
-            result[i][1].print(5,4);
+        for (int i = 0; i < 3; i++) {
+            result[i][0].print(5, 4);
+            result[i][1].print(5, 4);
         }
 
     }
-
 
 
     public void testLoopedPf_case33() {
