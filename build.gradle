@@ -19,6 +19,9 @@ dependencies {
     testCompile "junit:junit:4.12"
     //compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     //testCompile "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
+
+    // https://mvnrepository.com/artifact/gov.nist.math/jama
+    compile group: 'gov.nist.math', name: 'jama', version: '1.0.3'
 }
 
 // 3. 编码设置
