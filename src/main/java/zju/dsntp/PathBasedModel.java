@@ -38,6 +38,8 @@ public class PathBasedModel {
     List<Integer> cnpathesIndex;
     //edgepathes中路径在pathes中对应的序号
     List<Integer> edgepathesIndex;
+    //与电源直接相连的节点数
+    int supplyCnNum;
 
     public PathBasedModel(DistriSys sys) {
         this.sys = sys;
@@ -50,10 +52,11 @@ public class PathBasedModel {
         Deque<Object> stack = new ArrayDeque<>();
         pathes = new ArrayList<>();//todo: not efficient
         //生成的新的路径
-        MapObject[] p = new MapObject[0];
+        MapObject[] p;
         int i, count = 0;
         boolean flag1, flag2;
         supplyStart = new int[supplies.length];
+        supplyCnNum = 0;
         for (String supply : supplies) {
             supplyStart[count++] = pathes.size();
             DsConnectNode supplyCn = sys.getCns().get(supply);
@@ -97,6 +100,8 @@ public class PathBasedModel {
                             flag1 = false;
                             //将路径加入pathes
                             pathes.add(p);  //增加一条路径
+                            if(p.length == 1)
+                                supplyCnNum++;
                             break;
                         }
                     } else {
@@ -128,6 +133,8 @@ public class PathBasedModel {
                             stack.push(cn1);
                             flag1 = false;
                             pathes.add(p);  //增加一条路径
+                            if(p.length == 1)
+                                supplyCnNum++;
                             break;
                         }
                     }
@@ -136,15 +143,18 @@ public class PathBasedModel {
                     stack.pop();
             }
         }
-        if(isDebug) {
+//        if(isDebug) {
 //            System.out.printf("\nAll the pathes started from a specific supply\n");
 //            printPathes(pathes);
-        }
+//        }
         //sys.getOrigGraph().getEdge();
         //origGraph.getEdgeSource()
         buildEdgesAndNodes();
         buildCnsPathes();
         buildedgePathes();
+//        if(isDebug) {
+//            printPathes(edgepathes);
+//        }
     }
 
     //以某个结点为终点的所有路径
@@ -305,7 +315,7 @@ public class PathBasedModel {
         System.out.println("Number of pathes is " + pathes.size());
         for (i = 0; i <= pathes.size() - 1; i++) {
             isSupply = false;
-            System.out.println("Length of " + i + "th path is " + pathes.get(i).length + ":");
+//            System.out.println("Length of " + i + "th path is " + pathes.get(i).length + ":");
             for (String scn : supplies) {
                 if (scn.equals(g.getEdgeSource(pathes.get(i)[0]).getId())) {
                     isSupply = true;
@@ -331,4 +341,10 @@ public class PathBasedModel {
         //END
         System.out.println("-----END-----");
     }
+
+    //返回与电源直接相连的节点数
+    public int getSupplyCnNum() {
+        return supplyCnNum;
+    }
+
 }
