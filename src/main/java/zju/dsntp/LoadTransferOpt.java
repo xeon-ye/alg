@@ -106,11 +106,11 @@ public class LoadTransferOpt extends PathBasedModel {
         int whichInt[] = new int[objValue.length];
 
         //约束下限
-        double rowLower[] = new double[nodes.size()+(pathes.size()-supplyStart.length)+supplyStart.length+edges.size()];
+        double rowLower[] = new double[nodes.size()+(pathes.size()-supplyCnNum)+supplyStart.length+edges.size()];
         //约束上限
         double rowUpper[] = new double[rowLower.length];
         //约束中非零元系数
-        double element[] = new double[cnpathes.size()+(pathes.size()-supplyStart.length)*2+pathes.size()+edgepathes.size()];
+        double element[] = new double[cnpathes.size()+(pathes.size()-supplyCnNum)*2+pathes.size()+edgepathes.size()];
         //上面系数对应的列
         int column[] = new int[element.length];
         //每一行起始位置
@@ -208,12 +208,14 @@ public class LoadTransferOpt extends PathBasedModel {
         //约束条件：若某路径为通路，那么包括在该路径内的任意路径也是通路
         //对pathes进行类似深度搜索的方式实现
         int endIndex;
+        boolean lenEqualOne;
         for(k = 0; k < supplyStart.length; k++) {
             if(k == supplyStart.length-1)
                 endIndex = pathes.size();
             else
                 endIndex = supplyStart[k+1];
             for (i = supplyStart[k]+1; i < endIndex; i++) {
+                lenEqualOne = false;
                 starts[startsLen++] = elementLen;
                 j = i - 1;
                 rowLower[rowLowerLen++] = 0;
@@ -223,9 +225,22 @@ public class LoadTransferOpt extends PathBasedModel {
                 if (pathes.get(i).length > pathes.get(j).length) {
                     column[columnLen++] = j;
                     column[columnLen++] = i;
-                } else {
-                    while (pathes.get(i).length <= pathes.get(j).length)
+                }
+                else {
+                    while (pathes.get(i).length <= pathes.get(j).length) {
                         j--;
+                        if(j < 0) {
+                            lenEqualOne = true;
+                            break;
+                        }
+                    }
+                    if(lenEqualOne) {
+                        startsLen--;
+                        rowLowerLen--;
+                        rowUpperLen--;
+                        elementLen -= 2;
+                        continue;
+                    }
                     column[columnLen++] = j;
                     column[columnLen++] = i;
                 }
@@ -481,11 +496,11 @@ public class LoadTransferOpt extends PathBasedModel {
         int whichInt[] = new int[objValue.length];
 
         //约束下限
-        double rowLower[] = new double[nodes.size()+(pathes.size()-supplyStart.length)+supplyStart.length+edges.size()];
+        double rowLower[] = new double[nodes.size()+(pathes.size()-supplyCnNum)+supplyStart.length+edges.size()];
         //约束上限
         double rowUpper[] = new double[rowLower.length];
         //约束中非零元系数
-        double element[] = new double[cnpathes.size()+(pathes.size()-supplyStart.length)*2+pathes.size()+edgepathes.size()];
+        double element[] = new double[cnpathes.size()+(pathes.size()-supplyCnNum)*2+pathes.size()+edgepathes.size()];
         //上面系数对应的列
         int column[] = new int[element.length];
         //每一行起始位置
@@ -584,12 +599,14 @@ public class LoadTransferOpt extends PathBasedModel {
         //约束条件：若某路径为通路，那么包括在该路径内的任意路径也是通路
         //对pathes进行类似深度搜索的方式实现
         int endIndex;
+        boolean lenEqualOne;
         for(k = 0; k < supplyStart.length; k++) {
             if(k == supplyStart.length-1)
                 endIndex = pathes.size();
             else
                 endIndex = supplyStart[k+1];
             for (i = supplyStart[k]+1; i < endIndex; i++) {
+                lenEqualOne = false;
                 starts[startsLen++] = elementLen;
                 j = i - 1;
                 rowLower[rowLowerLen++] = 0;
@@ -599,9 +616,22 @@ public class LoadTransferOpt extends PathBasedModel {
                 if (pathes.get(i).length > pathes.get(j).length) {
                     column[columnLen++] = j;
                     column[columnLen++] = i;
-                } else {
-                    while (pathes.get(i).length <= pathes.get(j).length)
+                }
+                else {
+                    while (pathes.get(i).length <= pathes.get(j).length) {
                         j--;
+                        if(j < 0) {
+                            lenEqualOne = true;
+                            break;
+                        }
+                    }
+                    if(lenEqualOne) {
+                        startsLen--;
+                        rowLowerLen--;
+                        rowUpperLen--;
+                        elementLen -= 2;
+                        continue;
+                    }
                     column[columnLen++] = j;
                     column[columnLen++] = i;
                 }
@@ -727,7 +757,8 @@ public class LoadTransferOpt extends PathBasedModel {
             int switchChangedCount = 0;
             for (i = 0; i < edges.size(); i++) {
                 if (newedgesStatues[i] != edgesStatues[i]) {
-                    switchChanged[switchChangedCount++] = g.getEdgeSource(edges.get(i)).getId() + "-" + g.getEdgeTarget(edges.get(i)).getId();
+                    switchChanged[switchChangedCount++] = edges.get(i).getId();
+//                    switchChanged[switchChangedCount++] = g.getEdgeSource(edges.get(i)).getId() + "-" + g.getEdgeTarget(edges.get(i)).getId();
 //                switchChanged[i] = edges.get(i).getId();
                 }
             }
@@ -757,7 +788,7 @@ public class LoadTransferOpt extends PathBasedModel {
         }
     }
 
-//    求一个节点的最大负载。需要将所有的电源都分别切除并求出负载最大值，最后在这些最大值取最小的一个
+//    求一个节点N-1可装容量。需要将所有的电源都分别切除并求出负载最大值，最后在这些最大值取最小的一个
 //    每次切除电源，只需要把相应的电源容量置成0，避免多次重新生成图
     public void loadMax(String loadsPath, String supplyCapacityPath, String feederCapacityPath, String node) {
         //生成路径
@@ -1075,11 +1106,11 @@ public class LoadTransferOpt extends PathBasedModel {
         int whichInt[] = new int[pathes.size()];
 
         //约束下限
-        double rowLower[] = new double[nodes.size()+(pathes.size()-supplyStart.length)+supplyStart.length+edges.size()+4*loadPathes.size()];
+        double rowLower[] = new double[nodes.size()+(pathes.size()-supplyCnNum)+supplyStart.length+edges.size()+4*loadPathes.size()];
         //约束上限
         double rowUpper[] = new double[rowLower.length];
         //约束中非零元系数
-        double element[] = new double[cnpathes.size()+(pathes.size()-supplyStart.length)*2+pathes.size()+edgepathes.size()+10*loadPathes.size()];
+        double element[] = new double[cnpathes.size()+(pathes.size()-supplyCnNum)*2+pathes.size()+edgepathes.size()+10*loadPathes.size()];
         //上面系数对应的列
         int column[] = new int[element.length];
         //每一行起始位置
@@ -1156,12 +1187,14 @@ public class LoadTransferOpt extends PathBasedModel {
             }
             //约束条件：若某路径为通路，那么包括在该路径内的任意路径也是通路
             //对pathes进行类似深度搜索的方式实现
-            for (k = 0; k < supplyStart.length; k++) {
-                if (k == supplyStart.length - 1)
+            boolean lenEqualOne;
+            for(k = 0; k < supplyStart.length; k++) {
+                if(k == supplyStart.length-1)
                     endIndex = pathes.size();
                 else
-                    endIndex = supplyStart[k + 1];
-                for (i = supplyStart[k] + 1; i < endIndex; i++) {
+                    endIndex = supplyStart[k+1];
+                for (i = supplyStart[k]+1; i < endIndex; i++) {
+                    lenEqualOne = false;
                     starts[startsLen++] = elementLen;
                     j = i - 1;
                     rowLower[rowLowerLen++] = 0;
@@ -1171,9 +1204,22 @@ public class LoadTransferOpt extends PathBasedModel {
                     if (pathes.get(i).length > pathes.get(j).length) {
                         column[columnLen++] = j;
                         column[columnLen++] = i;
-                    } else {
-                        while (pathes.get(i).length <= pathes.get(j).length)
+                    }
+                    else {
+                        while (pathes.get(i).length <= pathes.get(j).length) {
                             j--;
+                            if(j < 0) {
+                                lenEqualOne = true;
+                                break;
+                            }
+                        }
+                        if(lenEqualOne) {
+                            startsLen--;
+                            rowLowerLen--;
+                            rowUpperLen--;
+                            elementLen -= 2;
+                            continue;
+                        }
                         column[columnLen++] = j;
                         column[columnLen++] = i;
                     }
@@ -1334,9 +1380,9 @@ public class LoadTransferOpt extends PathBasedModel {
                 log.info("计算结果.");
             }
             if (status >= 0 && maxLoad > result[numberColumns - 1]) {
-                maxLoad = result[numberColumns - 1];
+                maxLoad = result[numberColumns - 1] - loadArray[loadIndex];
             }
-            else if(status < 0){
+            else if(status < 0) {
                 maxLoad = 0;
                 break;
             }
@@ -1374,7 +1420,7 @@ public class LoadTransferOpt extends PathBasedModel {
         }
     }
 
-    //求所有节点的负载最大值
+    //求所有节点的N-1可装容量
     public void allLoadMaxNew() {
         buildPathes();
         String[] supplies = sys.getSupplyCns();
@@ -1455,12 +1501,174 @@ public class LoadTransferOpt extends PathBasedModel {
                 maxFeederLoad.put(edges.get(i).getId(), feederLoad[i] + minFeederLoadChanged[i]);
                 for (j = 0; j < supplies.length; j++) {
                     if (g.getEdgeSource(edges.get(i)).getId().equals(supplies[j]) || g.getEdgeTarget(edges.get(i)).getId().equals(supplies[j])) {
-                        maxCircuitLoad.put(edges.get(i).getId(), feederLoad[i] + minFeederLoadChanged[i]);
+                        maxCircuitLoad.put(edges.get(i).getId(), minFeederLoadChanged[i]);
+//                        maxCircuitLoad.put(edges.get(i).getId(), feederLoad[i] + minFeederLoadChanged[i]);
                         break;
                     }
                 }
             }
 //        }
+    }
+
+    public void loadMaxN(String node) {
+        int loadIndex,endIndex, i, j, k, l, pathOnIndex;
+        //电源容量
+        String[] supplies = sys.getSupplyCns();
+        double[] supplyCapacity = new double[supplyStart.length];
+        for(i = 0; i < supplyCapacity.length; i++) {
+            supplyCapacity[i] = this.supplyCap.get(supplies[i]);
+        }
+        //负荷的功率，按nodes中的顺序排列
+        double[] loadArray = new double[nodes.size()];
+        for(i = 0; i < nodes.size(); i++) {
+            loadArray[i] = this.load.get(nodes.get(i).getId());
+        }
+        //找到负荷节点
+        for(loadIndex = 0; loadIndex < nodes.size(); loadIndex++) {
+            if(nodes.get(loadIndex).getId().equals(node))
+                break;
+        }
+        if(loadIndex == nodes.size()-1)
+            endIndex = cnpathes.size();
+        else
+            endIndex = cnStart[loadIndex + 1];
+        //找到node的供电路径为通的那条路径
+        for(i = cnStart[loadIndex]; i < endIndex; i++) {
+            boolean pathStatues = true; //路径的通断状态
+            for(j = 0; j < cnpathes.get(i).length; j++) {
+                if(cnpathes.get(i)[j].getProperty(KEY_SWITCH_STATUS).equals(SWITCH_OFF)) {
+                    pathStatues = false;
+                    break;
+                }
+            }
+            if(pathStatues == true)
+                break;
+        }
+        pathOnIndex = cnpathesIndex.get(i);
+
+        int supplyIndex;    //为node供电的电源序号
+        for(i = 1; i < supplyStart.length; i++) {
+            if(supplyStart[i] > pathOnIndex)
+                break;
+        }
+        supplyIndex = i - 1;
+
+        if(supplyIndex == supplyStart.length - 1)
+            endIndex = pathes.size();
+        else
+            endIndex = supplyStart[supplyIndex + 1];
+
+        int[] pathsStatue = new int[endIndex - supplyStart[supplyIndex]];   //该电源所有路径的通断状态
+
+        maxLoad = supplyCapacity[supplyIndex];
+
+        for(i = 0; i < pathsStatue.length; i++)
+            pathsStatue[i] = 1;
+        for(i = supplyStart[supplyIndex]; i < endIndex; i++) {
+            for(j = 0; j < pathes.get(i).length; j++) {
+                if(pathes.get(i)[j].getProperty(KEY_SWITCH_STATUS).equals(SWITCH_OFF)) {
+                    pathsStatue[i - supplyStart[supplyIndex]] = 0;
+                    break;
+                }
+            }
+            if(pathsStatue[i - supplyStart[supplyIndex]] == 1) {
+                //找出路径在cnpathes中对应的序号
+                for (k = 0; k < cnpathesIndex.size(); k++) {
+                    if (cnpathesIndex.get(k) == i)
+                        break;
+                }
+                //找出路径cnpathes[k]的末尾节点
+                for (l = 1; l < cnStart.length; l++) {
+                    if (cnStart[l] > k)
+                        break;
+                }
+                maxLoad -= loadArray[l - 1];
+            }
+        }
+    }
+
+    //求所有节点的非N-1可装容量
+    public void allLoadMaxN() {
+        buildPathes();
+        String[] supplies = sys.getSupplyCns();
+        UndirectedGraph<DsConnectNode, MapObject> g = sys.getOrigGraph();
+        maxLoadResult = new HashMap<String, Double>(nodes.size());
+        for(int i = 0; i < nodes.size(); i++) {
+            loadMaxN(nodes.get(i).getId());
+            System.out.printf("The max load in node %s is: %.2f\n", nodes.get(i).getId(), maxLoad);
+            maxLoadResult.put(nodes.get(i).getId(), maxLoad);
+        }
+
+        double[] maxLoadChanged = new double[nodes.size()];
+        double[] minFeederLoadChanged = new double[edges.size()];
+        for (int i = 0; i < nodes.size(); i++) {
+            maxLoadChanged[i] = maxLoadResult.get(nodes.get(i).getId()) - load.get(nodes.get(i).getId());
+
+            //可装容量小于0怎么办
+            if (maxLoadChanged[i] < 0)
+                maxLoadChanged[i] = 0;
+
+        }
+        String lastID;
+        int endIndex, i, j, k, l;
+        boolean isON;   //路径的通断状态
+        maxFeederLoad = new HashMap<String, Double>(edges.size());
+        maxCircuitLoad = new HashMap<String, Double>(supplies.length);
+        double[] feederLoad = new double[edges.size()];
+        for (i = 0; i < edges.size(); i++) {
+            minFeederLoadChanged[i] = Double.MAX_VALUE;
+            if (i == edgeStart.length - 1)
+                endIndex = edgepathes.size();
+            else
+                endIndex = edgeStart[i + 1];
+            for (j = edgeStart[i]; j < endIndex; j++) {
+                //判断路径的通断
+                isON = true;
+                for (l = 0; l < edgepathes.get(j).length; l++) {
+                    if (edgepathes.get(j)[l].getProperty(KEY_SWITCH_STATUS).equals(SWITCH_OFF)) {
+                        isON = false;
+                        break;
+                    }
+                }
+                if (isON) {
+                    //找出路径edgepathes[j]的末尾节点
+                    lastID = g.getEdgeTarget(edgepathes.get(j)[edgepathes.get(j).length - 1]).getId();
+                    if (edgepathes.get(j).length == 1) {
+                        for (String scn : supplies) {
+                            if (scn.equals(lastID)) {
+                                lastID = g.getEdgeSource(edgepathes.get(j)[edgepathes.get(j).length - 1]).getId();
+                                break;
+                            }
+                        }
+                    } else {
+                        //如果路径上倒数第二条边有节点与lastID相同，则lastID应取最后一条边的另一个端点才是路径上的最后一个点
+                        if (lastID.equals(g.getEdgeSource(edgepathes.get(j)[edgepathes.get(j).length - 2]).getId()) || lastID.equals(g.getEdgeTarget(edgepathes.get(j)[edgepathes.get(j).length - 2]).getId()))
+                            lastID = g.getEdgeSource(edgepathes.get(j)[edgepathes.get(j).length - 1]).getId();
+                    }
+                    for (k = 0; k < nodes.size(); k++) {
+                        if (nodes.get(k).getId().equals(lastID)) {
+                            break;
+                        }
+                    }
+                    feederLoad[i] += load.get(lastID);
+                    if (minFeederLoadChanged[i] > maxLoadChanged[k]) {
+                        minFeederLoadChanged[i] = maxLoadChanged[k];
+//                        System.out.println(12345);
+//                        System.out.println(maxLoadChanged[k]);
+                    }
+                }
+            }
+        }
+        for (i = 0; i < feederLoad.length; i++) {
+            maxFeederLoad.put(edges.get(i).getId(), feederLoad[i] + minFeederLoadChanged[i]);
+            for (j = 0; j < supplies.length; j++) {
+                if (g.getEdgeSource(edges.get(i)).getId().equals(supplies[j]) || g.getEdgeTarget(edges.get(i)).getId().equals(supplies[j])) {
+                    maxCircuitLoad.put(edges.get(i).getId(), minFeederLoadChanged[i]);
+//                        maxCircuitLoad.put(edges.get(i).getId(), feederLoad[i] + minFeederLoadChanged[i]);
+                    break;
+                }
+            }
+        }
     }
 
     //读取各节点带的负载

@@ -63,33 +63,33 @@ public class LoadTransferOptTest extends TestCase implements DsModelCons {
         String supplyCapacityPath = this.getClass().getResource("/loadtransferfiles/testcase1/supplyCapacity.txt").getPath();
         String feederCapacityPath = this.getClass().getResource("/loadtransferfiles/testcase1/feederCapacity.txt").getPath();
         model.doOpt(loadsPath, supplyCapacityPath, feederCapacityPath);
-        Assert.assertEquals(3, model.minSwitch);
-
-        ieeeFile = this.getClass().getResourceAsStream("/loadtransferfiles/testcase1/graphtest.txt");
-        testsys = createDs(ieeeFile, "S1", 100);
-        testsys.setSupplyCns(supplyID);
-        testsys.setSupplyCnBaseKv(supplyBaseKv);
-        model = new LoadTransferOpt(testsys);
-        model.loadMax(loadsPath, supplyCapacityPath, feederCapacityPath, "L1");
-        Assert.assertEquals(10, model.maxLoad, 0.001);
-        model.loadMax(loadsPath, supplyCapacityPath, feederCapacityPath, "L2");
-        Assert.assertEquals(50, model.maxLoad, 0.001);
-        model.loadMax(loadsPath, supplyCapacityPath, feederCapacityPath, "L3");
-        Assert.assertEquals(30, model.maxLoad, 0.001);
-        model.loadMax(loadsPath, supplyCapacityPath, feederCapacityPath, "L4");
-        Assert.assertEquals(60, model.maxLoad, 0.001);
-        model.loadMax(loadsPath, supplyCapacityPath, feederCapacityPath, "L5");
-        Assert.assertEquals(10, model.maxLoad, 0.001);
-        model.loadMax(loadsPath, supplyCapacityPath, feederCapacityPath, "L6");
-        Assert.assertEquals(10, model.maxLoad, 0.001);
-        model.loadMax(loadsPath, supplyCapacityPath, feederCapacityPath, "L7");
-        Assert.assertEquals(10, model.maxLoad, 0.001);
-        model.loadMax(loadsPath, supplyCapacityPath, feederCapacityPath, "L8");
-        Assert.assertEquals(20, model.maxLoad, 0.001);
-        model.loadMax(loadsPath, supplyCapacityPath, feederCapacityPath, "L9");
-        Assert.assertEquals(80, model.maxLoad, 0.001);
-        model.loadMax(loadsPath, supplyCapacityPath, feederCapacityPath, "L10");
-        Assert.assertEquals(60, model.maxLoad, 0.001);
+//        Assert.assertEquals(3, model.minSwitch);
+//
+//        ieeeFile = this.getClass().getResourceAsStream("/loadtransferfiles/testcase1/graphtest.txt");
+//        testsys = createDs(ieeeFile, "S1", 100);
+//        testsys.setSupplyCns(supplyID);
+//        testsys.setSupplyCnBaseKv(supplyBaseKv);
+//        model = new LoadTransferOpt(testsys);
+//        model.loadMax(loadsPath, supplyCapacityPath, feederCapacityPath, "L1");
+//        Assert.assertEquals(10, model.maxLoad, 0.001);
+//        model.loadMax(loadsPath, supplyCapacityPath, feederCapacityPath, "L2");
+//        Assert.assertEquals(50, model.maxLoad, 0.001);
+//        model.loadMax(loadsPath, supplyCapacityPath, feederCapacityPath, "L3");
+//        Assert.assertEquals(30, model.maxLoad, 0.001);
+//        model.loadMax(loadsPath, supplyCapacityPath, feederCapacityPath, "L4");
+//        Assert.assertEquals(60, model.maxLoad, 0.001);
+//        model.loadMax(loadsPath, supplyCapacityPath, feederCapacityPath, "L5");
+//        Assert.assertEquals(10, model.maxLoad, 0.001);
+//        model.loadMax(loadsPath, supplyCapacityPath, feederCapacityPath, "L6");
+//        Assert.assertEquals(10, model.maxLoad, 0.001);
+//        model.loadMax(loadsPath, supplyCapacityPath, feederCapacityPath, "L7");
+//        Assert.assertEquals(10, model.maxLoad, 0.001);
+//        model.loadMax(loadsPath, supplyCapacityPath, feederCapacityPath, "L8");
+//        Assert.assertEquals(20, model.maxLoad, 0.001);
+//        model.loadMax(loadsPath, supplyCapacityPath, feederCapacityPath, "L9");
+//        Assert.assertEquals(80, model.maxLoad, 0.001);
+//        model.loadMax(loadsPath, supplyCapacityPath, feederCapacityPath, "L10");
+//        Assert.assertEquals(60, model.maxLoad, 0.001);
     }
 
     public void testCase2() {
@@ -486,6 +486,22 @@ public class LoadTransferOptTest extends TestCase implements DsModelCons {
 //        }
     }
 
+    public void testCase9() {
+        DistriSys testsys;
+        String[] supplyID;
+//        for(int i = 1; i < 5; i++) {
+//            long start = System.currentTimeMillis();
+        InputStream ieeeFile = this.getClass().getResourceAsStream("/loadtransferfiles/testcase9/graphtest.txt");
+        testsys = createDs(ieeeFile, "SRC_7", 100);
+        supplyID = new String[]{"SRC_7"};
+        Double[] supplyBaseKv = new Double[]{100.};
+        testsys.setSupplyCns(supplyID);
+        testsys.setSupplyCnBaseKv(supplyBaseKv);
+
+        LoadTransferOpt model = new LoadTransferOpt(testsys);
+        model.buildPathes();
+    }
+
     public void testCase1New() throws IOException {
         DistriSys testsys;
         String[] supplyID;
@@ -625,7 +641,6 @@ public class LoadTransferOptTest extends TestCase implements DsModelCons {
         model.setLoad(load);
         model.setSupplyCap(supplyCap);
         model.allMinSwitch();
-        minSwitchResult = model.getOptResult();
         this.minSwitchResult = model.getOptResult();
         for(int i = 0; i < minSwitchResult.getSupplyId().length; i++) {
             if(minSwitchResult.getSupplyId()[i] != null) {
@@ -635,17 +650,9 @@ public class LoadTransferOptTest extends TestCase implements DsModelCons {
                     System.out.println(minSwitchResult.getSwitchChanged().get(i)[j]);
             }
         }
-//        Assert.assertEquals(1, model.minSwitch);
 
-//        ieeeFile = this.getClass().getResourceAsStream("/loadtransferfiles/testcase1/graphtestNew.txt");
-//        testsys = createDs(ieeeFile, "S1", 100);
-//        testsys.setSupplyCns(supplyID);
-//        testsys.setSupplyCnBaseKv(supplyBaseKv);
-//        model = new LoadTransferOpt(testsys);
-//        model.setFeederCapacityConst(20000);
-//        model.setLoad(load);
-//        model.setSupplyCap(supplyCap);
         model.allLoadMaxNew();
+//        model.allLoadMaxN();
         this.maxLoadResult = model.maxLoadResult;
         for(int i = 0; i < maxLoadResult.size(); i++) {
             System.out.println(model.nodes.get(i).getId());
@@ -656,11 +663,6 @@ public class LoadTransferOptTest extends TestCase implements DsModelCons {
             System.out.println(model.edges.get(i).getId());
             System.out.println(maxCircuitLoad.get(model.edges.get(i).getId()));
         }
-//        this.maxFeederLoad = model.getMaxFeederLoad();
-//        for(int i = 0; i < maxFeederLoad.size(); i++) {
-//            System.out.println(model.edges.get(i).getId());
-//            System.out.println(maxFeederLoad.get(model.edges.get(i).getId()));
-//        }
     }
 
     public void testCase2All() throws IOException {
@@ -690,7 +692,6 @@ public class LoadTransferOptTest extends TestCase implements DsModelCons {
         model.setLoad(load);
         model.setSupplyCap(supplyCap);
         model.allMinSwitch();
-        minSwitchResult = model.getOptResult();
         this.minSwitchResult = model.getOptResult();
         for(int i = 0; i < minSwitchResult.getSupplyId().length; i++) {
             System.out.println(minSwitchResult.getSupplyId()[i]);
@@ -701,15 +702,8 @@ public class LoadTransferOptTest extends TestCase implements DsModelCons {
          //   }
         }
 
-//        ieeeFile = this.getClass().getResourceAsStream("/loadtransferfiles/testcase2/graphtestNew.txt");
-//        testsys = createDs(ieeeFile, "S1", 100);
-//        testsys.setSupplyCns(supplyID);
-//        testsys.setSupplyCnBaseKv(supplyBaseKv);
-//        model = new LoadTransferOpt(testsys);
-//        model.setFeederCapacityConst(20000);
-//        model.setLoad(load);
-//        model.setSupplyCap(supplyCap);
         model.allLoadMaxNew();
+//        model.allLoadMaxN();
         this.maxLoadResult = model.getMaxLoadResult();
         for(int i = 0; i < maxLoadResult.size(); i++) {
             System.out.println(model.nodes.get(i).getId());
@@ -720,11 +714,6 @@ public class LoadTransferOptTest extends TestCase implements DsModelCons {
             System.out.println(model.edges.get(i).getId());
             System.out.println(maxCircuitLoad.get(model.edges.get(i).getId()));
         }
-//        this.maxFeederLoad = model.getMaxFeederLoad();
-//        for(int i = 0; i < maxFeederLoad.size(); i++) {
-//            System.out.println(model.edges.get(i).getId());
-//            System.out.println(maxFeederLoad.get(model.edges.get(i).getId()));
-//        }
     }
 
     public void testCase3All() throws IOException {
@@ -754,7 +743,6 @@ public class LoadTransferOptTest extends TestCase implements DsModelCons {
         model.setLoad(load);
         model.setSupplyCap(supplyCap);
         model.allMinSwitch();
-        minSwitchResult = model.getOptResult();
         this.minSwitchResult = model.getOptResult();
         for(int i = 0; i < minSwitchResult.getSupplyId().length; i++) {
             System.out.println(minSwitchResult.getSupplyId()[i]);
@@ -765,15 +753,8 @@ public class LoadTransferOptTest extends TestCase implements DsModelCons {
             //   }
         }
 
-//        ieeeFile = this.getClass().getResourceAsStream("/loadtransferfiles/testcase3/graphtestNew.txt");
-//        testsys = createDs(ieeeFile, "12", 100);
-//        testsys.setSupplyCns(supplyID);
-//        testsys.setSupplyCnBaseKv(supplyBaseKv);
-//        model = new LoadTransferOpt(testsys);
-//        model.setFeederCapacityConst(20000);
-//        model.setLoad(load);
-//        model.setSupplyCap(supplyCap);
         model.allLoadMaxNew();
+//        model.allLoadMaxN();
         this.maxLoadResult = model.maxLoadResult;
         for(int i = 0; i < maxLoadResult.size(); i++) {
             System.out.println(model.nodes.get(i).getId());
@@ -784,11 +765,6 @@ public class LoadTransferOptTest extends TestCase implements DsModelCons {
             System.out.println(model.edges.get(i).getId());
             System.out.println(maxCircuitLoad.get(model.edges.get(i).getId()));
         }
-//        this.maxFeederLoad = model.getMaxFeederLoad();
-//        for(int i = 0; i < maxFeederLoad.size(); i++) {
-//            System.out.println(model.edges.get(i).getId());
-//            System.out.println(maxFeederLoad.get(model.edges.get(i).getId()));
-//        }
     }
 
     public void testCase4All() throws IOException {
@@ -822,7 +798,6 @@ public class LoadTransferOptTest extends TestCase implements DsModelCons {
         model.setLoad(load);
         model.setSupplyCap(supplyCap);
         model.allMinSwitch();
-        minSwitchResult = model.getOptResult();
         this.minSwitchResult = model.getOptResult();
         for(int i = 0; i < minSwitchResult.getSupplyId().length; i++) {
             System.out.println(minSwitchResult.getSupplyId()[i]);
@@ -833,14 +808,6 @@ public class LoadTransferOptTest extends TestCase implements DsModelCons {
             //   }
         }
 
-//        ieeeFile = this.getClass().getResourceAsStream("/loadtransferfiles/testcase4/graphtestNew.txt");
-//        testsys = createDs(ieeeFile, "24", 100);
-//        testsys.setSupplyCns(supplyID);
-//        testsys.setSupplyCnBaseKv(supplyBaseKv);
-//        model = new LoadTransferOpt(testsys);
-//        model.setFeederCapacityConst(20000);
-//        model.setLoad(load);
-//        model.setSupplyCap(supplyCap);
         model.allLoadMaxNew();
         this.maxLoadResult = model.maxLoadResult;
         for(int i = 0; i < maxLoadResult.size(); i++) {
@@ -852,11 +819,234 @@ public class LoadTransferOptTest extends TestCase implements DsModelCons {
             System.out.println(model.edges.get(i).getId());
             System.out.println(maxCircuitLoad.get(model.edges.get(i).getId()));
         }
-//        this.maxFeederLoad = model.getMaxFeederLoad();
-//        for(int i = 0; i < maxFeederLoad.size(); i++) {
-//            System.out.println(model.edges.get(i).getId());
-//            System.out.println(maxFeederLoad.get(model.edges.get(i).getId()));
-//        }
+    }
+
+    public void testCase11() throws IOException {
+        DistriSys testsys;
+        String[] supplyID;
+        InputStream ieeeFile = this.getClass().getResourceAsStream("/loadtransferfiles/testcase11/graphtestNew.txt");
+        testsys = createDs(ieeeFile, "24", 100);
+        for (MapObject obj : testsys.getDevices().getSwitches()) {
+            if (obj.getProperty(KEY_CONNECTED_NODE).equals("8;9"))
+                obj.setProperty(KEY_SWITCH_STATUS, SWITCH_OFF);
+            else if (obj.getProperty(KEY_CONNECTED_NODE).equals("10;12"))
+                obj.setProperty(KEY_SWITCH_STATUS, SWITCH_OFF);
+            else if (obj.getProperty(KEY_CONNECTED_NODE).equals("13;21"))
+                obj.setProperty(KEY_SWITCH_STATUS, SWITCH_OFF);
+            else if (obj.getProperty(KEY_CONNECTED_NODE).equals("17;18"))
+                obj.setProperty(KEY_SWITCH_STATUS, SWITCH_OFF);
+            else if (obj.getProperty(KEY_CONNECTED_NODE).equals("18;23"))
+                obj.setProperty(KEY_SWITCH_STATUS, SWITCH_OFF);
+        }
+        supplyID = new String[]{"24", "25", "26", "27", "28"};
+        Double[] supplyBaseKv = new Double[]{100., 200., 100., 100., 100.};
+        testsys.setSupplyCns(supplyID);
+        testsys.setSupplyCnBaseKv(supplyBaseKv);
+
+        LoadTransferOpt model = new LoadTransferOpt(testsys);
+        String loadsPath = this.getClass().getResource("/loadtransferfiles/testcase11/loads.txt").getPath();
+        String supplyCapacityPath = this.getClass().getResource("/loadtransferfiles/testcase11/supplyCapacity.txt").getPath();
+        readSupplyCapacity(supplyCapacityPath);
+        readLoads(loadsPath);
+        model.setFeederCapacityConst(21032.76);
+        model.setLoad(load);
+        model.setSupplyCap(supplyCap);
+        model.allMinSwitch();
+        this.minSwitchResult = model.getOptResult();
+        for(int i = 0; i < minSwitchResult.getSupplyId().length; i++) {
+            System.out.println(minSwitchResult.getSupplyId()[i]);
+            System.out.println(minSwitchResult.getMinSwitch()[i]);
+            // if(minSwitchResult.getSupplyId()[i] != null) {
+            for (int j = 0; j < minSwitchResult.getMinSwitch()[i]; j++)
+                System.out.println(minSwitchResult.getSwitchChanged().get(i)[j]);
+            //   }
+        }
+
+        model.allLoadMaxNew();
+        this.maxLoadResult = model.maxLoadResult;
+        String writePath = "C:\\Users\\Administrator.2013-20160810IY\\Desktop\\算例校验-5联络组\\输出.txt";
+        exportFile(new File(writePath), model);
+    }
+
+    public void testCase12() throws IOException {
+        DistriSys testsys;
+        String[] supplyID;
+        InputStream ieeeFile = this.getClass().getResourceAsStream("/loadtransferfiles/testcase12/graphtestNew.txt");
+        testsys = createDs(ieeeFile, "26", 100);
+        for (MapObject obj : testsys.getDevices().getSwitches()) {
+            if (obj.getProperty(KEY_CONNECTED_NODE).equals("8;12"))
+                obj.setProperty(KEY_SWITCH_STATUS, SWITCH_OFF);
+            else if (obj.getProperty(KEY_CONNECTED_NODE).equals("12;13"))
+                obj.setProperty(KEY_SWITCH_STATUS, SWITCH_OFF);
+            else if (obj.getProperty(KEY_CONNECTED_NODE).equals("17;18"))
+                obj.setProperty(KEY_SWITCH_STATUS, SWITCH_OFF);
+            else if (obj.getProperty(KEY_CONNECTED_NODE).equals("15;22"))
+                obj.setProperty(KEY_SWITCH_STATUS, SWITCH_OFF);
+        }
+        supplyID = new String[]{"26", "27", "28", "29", "30"};
+        Double[] supplyBaseKv = new Double[]{100., 200., 100., 100., 100.};
+        testsys.setSupplyCns(supplyID);
+        testsys.setSupplyCnBaseKv(supplyBaseKv);
+
+        LoadTransferOpt model = new LoadTransferOpt(testsys);
+        String loadsPath = this.getClass().getResource("/loadtransferfiles/testcase12/loads.txt").getPath();
+        String supplyCapacityPath = this.getClass().getResource("/loadtransferfiles/testcase12/supplyCapacity.txt").getPath();
+        readSupplyCapacity(supplyCapacityPath);
+        readLoads(loadsPath);
+        model.setFeederCapacityConst(20000);
+        model.setLoad(load);
+        model.setSupplyCap(supplyCap);
+        model.allMinSwitch();
+        this.minSwitchResult = model.getOptResult();
+        for(int i = 0; i < minSwitchResult.getSupplyId().length; i++) {
+            System.out.println(minSwitchResult.getSupplyId()[i]);
+            System.out.println(minSwitchResult.getMinSwitch()[i]);
+            // if(minSwitchResult.getSupplyId()[i] != null) {
+            for (int j = 0; j < minSwitchResult.getMinSwitch()[i]; j++)
+                System.out.println(minSwitchResult.getSwitchChanged().get(i)[j]);
+            //   }
+        }
+
+        model.allLoadMaxNew();
+        this.maxLoadResult = model.maxLoadResult;
+        String writePath = "C:\\Users\\Administrator.2013-20160810IY\\Desktop\\算例校验-5联络组\\输出.txt";
+        exportFile(new File(writePath), model);
+    }
+
+    public void testCase13() throws IOException {
+        DistriSys testsys;
+        String[] supplyID;
+        InputStream ieeeFile = this.getClass().getResourceAsStream("/loadtransferfiles/testcase13/graphtestNew.txt");
+        testsys = createDs(ieeeFile, "26", 100);
+        for (MapObject obj : testsys.getDevices().getSwitches()) {
+            if (obj.getProperty(KEY_CONNECTED_NODE).equals("8;12"))
+                obj.setProperty(KEY_SWITCH_STATUS, SWITCH_OFF);
+            else if (obj.getProperty(KEY_CONNECTED_NODE).equals("12;13"))
+                obj.setProperty(KEY_SWITCH_STATUS, SWITCH_OFF);
+            else if (obj.getProperty(KEY_CONNECTED_NODE).equals("17;18"))
+                obj.setProperty(KEY_SWITCH_STATUS, SWITCH_OFF);
+            else if (obj.getProperty(KEY_CONNECTED_NODE).equals("15;22"))
+                obj.setProperty(KEY_SWITCH_STATUS, SWITCH_OFF);
+        }
+        supplyID = new String[]{"26", "27", "28", "29", "30"};
+        Double[] supplyBaseKv = new Double[]{100., 200., 100., 100., 100.};
+        testsys.setSupplyCns(supplyID);
+        testsys.setSupplyCnBaseKv(supplyBaseKv);
+
+        LoadTransferOpt model = new LoadTransferOpt(testsys);
+        String loadsPath = this.getClass().getResource("/loadtransferfiles/testcase13/loads.txt").getPath();
+        String supplyCapacityPath = this.getClass().getResource("/loadtransferfiles/testcase13/supplyCapacity.txt").getPath();
+        readSupplyCapacity(supplyCapacityPath);
+        readLoads(loadsPath);
+        model.setFeederCapacityConst(20000);
+        model.setLoad(load);
+        model.setSupplyCap(supplyCap);
+        model.allMinSwitch();
+        this.minSwitchResult = model.getOptResult();
+        for(int i = 0; i < minSwitchResult.getSupplyId().length; i++) {
+            System.out.println(minSwitchResult.getSupplyId()[i]);
+            System.out.println(minSwitchResult.getMinSwitch()[i]);
+            // if(minSwitchResult.getSupplyId()[i] != null) {
+            for (int j = 0; j < minSwitchResult.getMinSwitch()[i]; j++)
+                System.out.println(minSwitchResult.getSwitchChanged().get(i)[j]);
+            //   }
+        }
+
+        model.allLoadMaxNew();
+        this.maxLoadResult = model.maxLoadResult;
+        String writePath = "C:\\Users\\Administrator.2013-20160810IY\\Desktop\\算例校验-5联络组\\输出.txt";
+        exportFile(new File(writePath), model);
+    }
+
+    public void testCase14() throws IOException {
+        DistriSys testsys;
+        String[] supplyID;
+        InputStream ieeeFile = this.getClass().getResourceAsStream("/loadtransferfiles/testcase14/graphtestNew.txt");
+        testsys = createDs(ieeeFile, "26", 100);
+        for (MapObject obj : testsys.getDevices().getSwitches()) {
+            if (obj.getProperty(KEY_CONNECTED_NODE).equals("8;12"))
+                obj.setProperty(KEY_SWITCH_STATUS, SWITCH_OFF);
+            else if (obj.getProperty(KEY_CONNECTED_NODE).equals("12;13"))
+                obj.setProperty(KEY_SWITCH_STATUS, SWITCH_OFF);
+            else if (obj.getProperty(KEY_CONNECTED_NODE).equals("17;18"))
+                obj.setProperty(KEY_SWITCH_STATUS, SWITCH_OFF);
+            else if (obj.getProperty(KEY_CONNECTED_NODE).equals("15;22"))
+                obj.setProperty(KEY_SWITCH_STATUS, SWITCH_OFF);
+        }
+        supplyID = new String[]{"26", "27", "28", "29", "30"};
+        Double[] supplyBaseKv = new Double[]{100., 200., 100., 100., 100.};
+        testsys.setSupplyCns(supplyID);
+        testsys.setSupplyCnBaseKv(supplyBaseKv);
+
+        LoadTransferOpt model = new LoadTransferOpt(testsys);
+        String loadsPath = this.getClass().getResource("/loadtransferfiles/testcase14/loads.txt").getPath();
+        String supplyCapacityPath = this.getClass().getResource("/loadtransferfiles/testcase14/supplyCapacity.txt").getPath();
+        readSupplyCapacity(supplyCapacityPath);
+        readLoads(loadsPath);
+        model.setFeederCapacityConst(20000);
+        model.setLoad(load);
+        model.setSupplyCap(supplyCap);
+        model.allMinSwitch();
+        this.minSwitchResult = model.getOptResult();
+        for(int i = 0; i < minSwitchResult.getSupplyId().length; i++) {
+            System.out.println(minSwitchResult.getSupplyId()[i]);
+            System.out.println(minSwitchResult.getMinSwitch()[i]);
+            // if(minSwitchResult.getSupplyId()[i] != null) {
+            for (int j = 0; j < minSwitchResult.getMinSwitch()[i]; j++)
+                System.out.println(minSwitchResult.getSwitchChanged().get(i)[j]);
+            //   }
+        }
+
+        model.allLoadMaxNew();
+        this.maxLoadResult = model.maxLoadResult;
+        String writePath = "C:\\Users\\Administrator.2013-20160810IY\\Desktop\\算例校验-5联络组\\输出.txt";
+        exportFile(new File(writePath), model);
+    }
+
+    public void testCase15() throws IOException {
+        DistriSys testsys;
+        String[] supplyID;
+        InputStream ieeeFile = this.getClass().getResourceAsStream("/loadtransferfiles/testcase15/graphtestNew.txt");
+        testsys = createDs(ieeeFile, "26", 100);
+        for (MapObject obj : testsys.getDevices().getSwitches()) {
+            if (obj.getProperty(KEY_CONNECTED_NODE).equals("8;12"))
+                obj.setProperty(KEY_SWITCH_STATUS, SWITCH_OFF);
+            else if (obj.getProperty(KEY_CONNECTED_NODE).equals("12;13"))
+                obj.setProperty(KEY_SWITCH_STATUS, SWITCH_OFF);
+            else if (obj.getProperty(KEY_CONNECTED_NODE).equals("17;18"))
+                obj.setProperty(KEY_SWITCH_STATUS, SWITCH_OFF);
+            else if (obj.getProperty(KEY_CONNECTED_NODE).equals("15;22"))
+                obj.setProperty(KEY_SWITCH_STATUS, SWITCH_OFF);
+        }
+        supplyID = new String[]{"26", "27", "28", "29", "30"};
+        Double[] supplyBaseKv = new Double[]{100., 200., 100., 100., 100.};
+        testsys.setSupplyCns(supplyID);
+        testsys.setSupplyCnBaseKv(supplyBaseKv);
+
+        LoadTransferOpt model = new LoadTransferOpt(testsys);
+        String loadsPath = this.getClass().getResource("/loadtransferfiles/testcase15/loads.txt").getPath();
+        String supplyCapacityPath = this.getClass().getResource("/loadtransferfiles/testcase15/supplyCapacity.txt").getPath();
+        readSupplyCapacity(supplyCapacityPath);
+        readLoads(loadsPath);
+        model.setFeederCapacityConst(20000);
+        model.setLoad(load);
+        model.setSupplyCap(supplyCap);
+        model.allMinSwitch();
+        this.minSwitchResult = model.getOptResult();
+        for(int i = 0; i < minSwitchResult.getSupplyId().length; i++) {
+            System.out.println(minSwitchResult.getSupplyId()[i]);
+            System.out.println(minSwitchResult.getMinSwitch()[i]);
+            // if(minSwitchResult.getSupplyId()[i] != null) {
+            for (int j = 0; j < minSwitchResult.getMinSwitch()[i]; j++)
+                System.out.println(minSwitchResult.getSwitchChanged().get(i)[j]);
+            //   }
+        }
+
+        model.allLoadMaxNew();
+        this.maxLoadResult = model.maxLoadResult;
+
+        String writePath = "C:\\Users\\Administrator.2013-20160810IY\\Desktop\\算例校验-5联络组\\输出.txt";
+        exportFile(new File(writePath), model);
     }
 
     //读取各节点带的负载
@@ -889,5 +1079,60 @@ public class LoadTransferOptTest extends TestCase implements DsModelCons {
             supplyLoad = new Double(Double.parseDouble(newdata[1]));
             supplyCap.put(supplyId, supplyLoad);
         }
+    }
+
+    /**
+     * 导出
+     *
+     * @param file 文件(路径+文件名)，文件不存在会自动创建
+     * @return
+     */
+    public boolean exportFile(File file, LoadTransferOpt model) {
+        boolean isSucess = false;
+
+        FileOutputStream out = null;
+        OutputStreamWriter osw = null;
+        BufferedWriter bw = null;
+        try {
+            out = new FileOutputStream(file);
+            osw = new OutputStreamWriter(out);
+            bw = new BufferedWriter(osw);
+            if(!maxLoadResult.isEmpty()){
+                for(int i = 0; i < maxLoadResult.size(); i++) {
+                        bw.write(model.nodes.get(i).getId() + "\t");
+                        bw.write(maxLoadResult.get(model.nodes.get(i).getId()) + "\t");
+                        bw.newLine();
+                }
+            }
+            isSucess = true;
+        } catch (Exception e) {
+            isSucess = false;
+        } finally {
+            if(bw != null) {
+                try {
+                    bw.close();
+                    bw = null;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            if(osw != null) {
+                try {
+                    osw.close();
+                    osw = null;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            if(out!=null) {
+                try {
+                    out.close();
+                    out = null;
+                } catch(IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return isSucess;
     }
 }
