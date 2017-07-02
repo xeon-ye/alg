@@ -1122,11 +1122,6 @@ public class LoadTransferOpt extends PathBasedModel {
         double[] supplyCapacity = new double[supplyStart.length];
         maxLoad = Double.MAX_VALUE;
         for(int count = 0; count < supplyCapacity.length; count++) {
-//            try {
-//                readSupplyCapacity(supplyCapacity, supplyCapacityPath);
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
             for(i = 0; i < supplyCapacity.length; i++) {
                 supplyCapacity[i] = this.supplyCap.get(supplies[i]);
             }
@@ -1138,11 +1133,6 @@ public class LoadTransferOpt extends PathBasedModel {
 
             //负荷的功率，按nodes中的顺序排列
             double[] loadArray = new double[nodes.size()];
-//            try {
-//                readLoads(loads, loadsPath);
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
             for(i = 0; i < nodes.size(); i++) {
                 loadArray[i] = this.load.get(nodes.get(i).getId());
             }
@@ -1264,11 +1254,6 @@ public class LoadTransferOpt extends PathBasedModel {
             //线容量
             String lastID;
             double[] feederCapacity = new double[edges.size()];
-//            try {
-//                readFeederCapacity(feederCapacity, feederCapacityPath);
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
             for(i = 0; i < feederCapacity.length; i++) {
                 feederCapacity[i] = feederCapacityConst;
             }
@@ -1379,7 +1364,7 @@ public class LoadTransferOpt extends PathBasedModel {
             } else { //状态位显示计算收敛
                 log.info("计算结果.");
             }
-            if (status >= 0 && maxLoad > result[numberColumns - 1]) {
+            if (status >= 0 && maxLoad > result[numberColumns - 1] - loadArray[loadIndex]) {
                 maxLoad = result[numberColumns - 1] - loadArray[loadIndex];
             }
             else if(status < 0) {
@@ -1429,6 +1414,7 @@ public class LoadTransferOpt extends PathBasedModel {
 //        boolean isConvergent = true;
         for(int i = 0; i < nodes.size(); i++) {
             loadMaxNew(nodes.get(i).getId());
+//            System.out.println(load.get(load.get(i).));
             System.out.printf("The max load in node %s is: %.2f\n", nodes.get(i).getId(), maxLoad);
             maxLoadResult.put(nodes.get(i).getId(), maxLoad);
 //            if(status < 0)
@@ -1437,10 +1423,10 @@ public class LoadTransferOpt extends PathBasedModel {
 //            optResult.setMinSwitch(minSwitch);
         }
 //        if(isConvergent) {
-            double[] maxLoadChanged = new double[nodes.size()];
+            double[] maxLoadChanged = new double[nodes.size()]; //可装容量
             double[] minFeederLoadChanged = new double[edges.size()];
             for (int i = 0; i < nodes.size(); i++) {
-                maxLoadChanged[i] = maxLoadResult.get(nodes.get(i).getId()) - load.get(nodes.get(i).getId());
+                maxLoadChanged[i] = maxLoadResult.get(nodes.get(i).getId());
 
                 //可装容量小于0怎么办
                 if (maxLoadChanged[i] < 0)
@@ -1510,6 +1496,7 @@ public class LoadTransferOpt extends PathBasedModel {
 //        }
     }
 
+    //节点的非N-1可装容量
     public void loadMaxN(String node) {
         int loadIndex,endIndex, i, j, k, l, pathOnIndex;
         //电源容量
@@ -1599,10 +1586,10 @@ public class LoadTransferOpt extends PathBasedModel {
             maxLoadResult.put(nodes.get(i).getId(), maxLoad);
         }
 
-        double[] maxLoadChanged = new double[nodes.size()];
+        double[] maxLoadChanged = new double[nodes.size()]; //可装容量
         double[] minFeederLoadChanged = new double[edges.size()];
         for (int i = 0; i < nodes.size(); i++) {
-            maxLoadChanged[i] = maxLoadResult.get(nodes.get(i).getId()) - load.get(nodes.get(i).getId());
+            maxLoadChanged[i] = maxLoadResult.get(nodes.get(i).getId());
 
             //可装容量小于0怎么办
             if (maxLoadChanged[i] < 0)
@@ -1653,7 +1640,6 @@ public class LoadTransferOpt extends PathBasedModel {
                     feederLoad[i] += load.get(lastID);
                     if (minFeederLoadChanged[i] > maxLoadChanged[k]) {
                         minFeederLoadChanged[i] = maxLoadChanged[k];
-//                        System.out.println(12345);
 //                        System.out.println(maxLoadChanged[k]);
                     }
                 }

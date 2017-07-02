@@ -21,7 +21,6 @@ public class LoadTransferOptTest extends TestCase implements DsModelCons {
     Map<String, Double> load = new HashMap<String, Double>();
     LoadTransferOptResult minSwitchResult;
     Map<String, Double> maxLoadResult;
-    Map<String,Double> maxFeederLoad;
     Map<String,Double> maxCircuitLoad;
 
     public LoadTransferOptTest(String name) {
@@ -545,25 +544,6 @@ public class LoadTransferOptTest extends TestCase implements DsModelCons {
         model.setLoad(load);
         model.setSupplyCap(supplyCap);
         model.loadMaxNew("L1");
-//        Assert.assertEquals(10, model.maxLoad, 0.001);
-//        model.loadMax(loadsPath, supplyCapacityPath, feederCapacityPath, "L2");
-//        Assert.assertEquals(50, model.maxLoad, 0.001);
-//        model.loadMax(loadsPath, supplyCapacityPath, feederCapacityPath, "L3");
-//        Assert.assertEquals(30, model.maxLoad, 0.001);
-//        model.loadMax(loadsPath, supplyCapacityPath, feederCapacityPath, "L4");
-//        Assert.assertEquals(60, model.maxLoad, 0.001);
-//        model.loadMax(loadsPath, supplyCapacityPath, feederCapacityPath, "L5");
-//        Assert.assertEquals(10, model.maxLoad, 0.001);
-//        model.loadMax(loadsPath, supplyCapacityPath, feederCapacityPath, "L6");
-//        Assert.assertEquals(10, model.maxLoad, 0.001);
-//        model.loadMax(loadsPath, supplyCapacityPath, feederCapacityPath, "L7");
-//        Assert.assertEquals(10, model.maxLoad, 0.001);
-//        model.loadMax(loadsPath, supplyCapacityPath, feederCapacityPath, "L8");
-//        Assert.assertEquals(20, model.maxLoad, 0.001);
-//        model.loadMax(loadsPath, supplyCapacityPath, feederCapacityPath, "L9");
-//        Assert.assertEquals(80, model.maxLoad, 0.001);
-//        model.loadMax(loadsPath, supplyCapacityPath, feederCapacityPath, "L10");
-//        Assert.assertEquals(60, model.maxLoad, 0.001);
     }
 
     public void testCase2New() throws IOException {
@@ -753,8 +733,8 @@ public class LoadTransferOptTest extends TestCase implements DsModelCons {
             //   }
         }
 
-        model.allLoadMaxNew();
-//        model.allLoadMaxN();
+//        model.allLoadMaxNew();
+        model.allLoadMaxN();
         this.maxLoadResult = model.maxLoadResult;
         for(int i = 0; i < maxLoadResult.size(); i++) {
             System.out.println(model.nodes.get(i).getId());
