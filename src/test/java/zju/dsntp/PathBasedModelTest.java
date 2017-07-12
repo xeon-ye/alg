@@ -89,25 +89,6 @@ public class PathBasedModelTest extends TestCase implements DsModelCons {
         System.out.println((System.currentTimeMillis() - start) + "ms");
     }
 
-//    public void testCase11() throws IOException {
-//        DistriSys testsys;
-//        String[] supplyID;
-//        String inputFile = "C:\\Users\\Administrator.2013-20160810IY\\Desktop\\Lines.csv";
-//        String filePath = "C:\\Users\\Administrator.2013-20160810IY\\Desktop\\graphtest.txt";
-//        System.out.println(convertFile(inputFile, filePath));
-//        InputStream ieeeFile = this.getClass().getResourceAsStream(filePath);
-//        testsys = createDs(ieeeFile, "150", 100);
-////        supplyID = new String[]{"SRC_7"};
-////        Double[] supplyBaseKv = new Double[]{100.};
-////        testsys.setSupplyCns(supplyID);
-////        testsys.setSupplyCnBaseKv(supplyBaseKv);
-//
-//        PathBasedModel model = new PathBasedModel(testsys);
-//        long start = System.currentTimeMillis();
-//        model.buildPathes();
-//        System.out.println((System.currentTimeMillis() - start) + "ms");
-//    }
-
     public boolean convertFile(String inputFile, String outputFile) throws IOException {
         boolean isSucess = false;
         FileOutputStream out = null;

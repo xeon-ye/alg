@@ -14,7 +14,7 @@ import java.util.*;
  */
 public class PathBasedModel {
 
-    private static boolean isDebug = true; //置成true, 打印调试信息
+    private static boolean isDebug = false; //置成true, 打印调试信息
 
     //配电系统
     DistriSys sys;
@@ -143,18 +143,16 @@ public class PathBasedModel {
                     stack.pop();
             }
         }
-//        if(isDebug) {
-//            System.out.printf("\nAll the pathes started from a specific supply\n");
-//            printPathes(pathes);
-//        }
-        //sys.getOrigGraph().getEdge();
-        //origGraph.getEdgeSource()
+        if(isDebug) {
+            System.out.printf("\nAll the pathes started from a specific supply\n");
+            printPathes(pathes);
+        }
         buildEdgesAndNodes();
         buildCnsPathes();
         buildedgePathes();
-//        if(isDebug) {
-//            printPathes(edgepathes);
-//        }
+        if(isDebug) {
+            printPathes(edgepathes);
+        }
     }
 
     //以某个结点为终点的所有路径
@@ -194,12 +192,6 @@ public class PathBasedModel {
                 }
             }
         }
-        if (isDebug) {
-//            System.out.printf("\nThe end of the pathes is a specific cn\n");
-//            for(i = 0; i < cns.size(); i++)
-//                System.out.printf("The start of the index that the pathes end in the node %s is %d\n", cns.get(i).getId(), cnStart[i]);
-//            printPathes(cnpathes);
-        }
     }
 
     //通过某条边的所有路径
@@ -221,10 +213,10 @@ public class PathBasedModel {
             }
         }
         if(isDebug) {
-//            System.out.printf("\nThe pathes contain a specific edge\n");
-//            for(i = 0; i < edges.size(); i++)
-//                System.out.printf("The start of the index that the pathes contain the edge %s %s is %d\n", g.getEdgeSource(edges.get(i)).getId(), g.getEdgeTarget(edges.get(i)).getId(), edgeStart[i]);
-//            printPathes(edgepathes);
+            System.out.printf("\nThe pathes contain a specific edge\n");
+            for(i = 0; i < edges.size(); i++)
+                System.out.printf("The start of the index that the pathes contain the edge %s %s is %d\n", g.getEdgeSource(edges.get(i)).getId(), g.getEdgeTarget(edges.get(i)).getId(), edgeStart[i]);
+            printPathes(edgepathes);
         }
     }
 
@@ -298,10 +290,10 @@ public class PathBasedModel {
                     break;
                 }
         if (isDebug) {
-//            for (DsConnectNode cn3 : nodes)
-//                System.out.println(cn3.getId());
-//            for(MapObject edge : edges)
-//                System.out.printf("%s %s\n", g.getEdgeSource(edge).getId(), g.getEdgeTarget(edge).getId());
+            for (DsConnectNode cn3 : nodes)
+                System.out.println(cn3.getId());
+            for(MapObject edge : edges)
+                System.out.printf("%s %s\n", g.getEdgeSource(edge).getId(), g.getEdgeTarget(edge).getId());
         }
     }
 
