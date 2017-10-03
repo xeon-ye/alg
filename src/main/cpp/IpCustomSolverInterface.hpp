@@ -232,7 +232,7 @@ namespace Ipopt
 
     void Qsort(int *sort_array, int *position, double *a, int low, int high);
 
-    int count_test=0;
+    // int count_test=0;
   };
 
 } // namespace Ipopt
