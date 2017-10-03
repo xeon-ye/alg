@@ -6,6 +6,19 @@
 #include "IpTNLP.hpp"
 #include "IpIpoptApplication.hpp"
 #include "org_coinor_Ipopt.h"
+#include "IpSparseSymLinearSolverInterface.hpp"
+#include "IpPardisoSolverInterface.hpp"
+#include "IpMumpsSolverInterface.hpp"
+#include "IpCustomSolverInterface.hpp"
+#include "IpMa27TSolverInterface.hpp"
+#include "IpTSymScalingMethod.hpp"
+#include "IpSlackBasedTSymScalingMethod.hpp"
+#include "IpTSymLinearSolver.hpp"
+#include "IpStdAugSystemSolver.hpp"
+#include "IpAlgBuilder.hpp"
+#include "IpInexactAlgBuilder.hpp"
+#include "IpTNLPAdapter.hpp"
+
 
 using namespace std;
 using namespace Ipopt;
