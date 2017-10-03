@@ -786,8 +786,8 @@ namespace Ipopt
       Jnlst().Printf(J_MOREDETAILED, J_LINEAR_ALGEBRA,
                      "Calling MUMPS-3 for solve at cpu time %10.3f (wall %10.3f).\n", CpuTime(), WallclockTime());
 
-      // rhs_vals = Solve2(m, n, nnz, csc_a, csc_asub, csc_xa, rhs_vals, perm_c, etree);      
-      dmumps_c(mumps_data);
+      rhs_vals = Solve2(m, n, nnz, csc_a, csc_asub, csc_xa, rhs_vals, perm_c, etree);      
+      // dmumps_c(mumps_data);
       Jnlst().Printf(J_MOREDETAILED, J_LINEAR_ALGEBRA,
                      "Done with MUMPS-3 for solve at cpu time %10.3f (wall %10.3f).\n", CpuTime(), WallclockTime());
       int error = mumps_data->info[0];
@@ -836,7 +836,7 @@ namespace Ipopt
     
     // count_test++;
     // if(count_test==2) while(1);
-    // return retval;
+    return retval;
   }
 
   double* CustomSolverInterface::Solve2(int m,
