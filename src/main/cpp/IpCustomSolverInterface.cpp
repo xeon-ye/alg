@@ -72,7 +72,8 @@ namespace Ipopt
     DBG_START_METH("CustomSolverInterface::CustomSolverInterface()",
                    dbg_verbosity);
     //initialize mumps
-    DMUMPS_STRUC_C* mumps_ = new DMUMPS_STRUC_C;
+    call_counter = 0;
+    DMUMPS_STRUC_C *mumps_ = new DMUMPS_STRUC_C;
 #ifndef MUMPS_MPI_H
 #if defined(HAVE_MPI_INITIALIZED)
     int mpi_initialized;
@@ -105,8 +106,8 @@ namespace Ipopt
     mumps_->icntl[2] = 0;//QUIETLY!
     mumps_->icntl[3] = 0;
     mumps_ptr_ = (void*)mumps_;
+    // call_counter = 0；
   }
-
 
   CustomSolverInterface::~CustomSolverInterface()
   {
@@ -242,34 +243,13 @@ namespace Ipopt
       DBG_ASSERT(((DMUMPS_STRUC_C *)mumps_ptr_)->jcn == ja);
 
       DMUMPS_STRUC_C *mumps_ = (DMUMPS_STRUC_C *)mumps_ptr_;
-      int m, n, nnz;      
-     
+      int m, n, nnz;
+
+      // cout << new_matrix << endl;
+      
       m = mumps_->n;
       n = mumps_->n;
       nnz = mumps_->nz;
-
-      // double b[m];
-      // int irn_unique[], jcn_unique[];
-
-      // printf("调用求解开始\n");
-      // printf("new_matrix=%d\n",new_matrix);
-      // printf("b向量值为：\n");
-      // for (int i = 0; i < m; i++)
-      // {
-      //     printf("%f\n", rhs_vals[i]);
-      //     // b[i]=rhs_vals[i];
-      // }    
-      // for (int i = 0; i < nnz; i++)
-      // {
-      //   cout << mumps_->irn[i] << " " << mumps_->jcn[i] << " " << mumps_->a[i] << endl;
-      //   // cout << mumps_data->irn[i]<<mumps_data->a[i] << endl;
-      //   // cout << result[i] << endl;
-      // }
-      // cout << endl;
-      // for (int i = 0; i < n; i++)
-      // {
-      //   cout << rhs_vals[i] << endl;
-      // }
 
       std::list<int> irn(ia, ia + nnz);
       std::list<int> jcn(ja, ja + nnz);
@@ -370,16 +350,21 @@ namespace Ipopt
 
       // cout << m << " " << n << " " << nnz << endl;
 
+      //这里在申请内存空间的时候不用自己释放，superlu会destroy。
       double *csc_a;
       int *csc_asub, *csc_xa;
-
+      int asub_index = 0;
+    
       // double csc_a[nnz];
       // int csc_asub[nnz], csc_xa[n+1];
 
-      int asub_index = 0;
-      if ( !(csc_a = doubleMalloc(nnz)) ) ABORT("Malloc fails for a[].");
-      if ( !(csc_asub = intMalloc(nnz)) ) ABORT("Malloc fails for asub[].");
-      if ( !(csc_xa = intMalloc(n+1)) ) ABORT("Malloc fails for xa[].");
+      csc_a = new double[nnz];
+      csc_asub = new int[nnz];
+      csc_xa = new int[n+1];
+
+      // if ( !(csc_a = doubleMalloc(nnz)) ) ABORT("Malloc fails for a[].");
+      // if ( !(csc_asub = intMalloc(nnz)) ) ABORT("Malloc fails for asub[].");
+      // if ( !(csc_xa = intMalloc(n+1)) ) ABORT("Malloc fails for xa[].");
 
       csc_a[0] = a_unique[0];
       csc_asub[0] = irn_unique[0];
@@ -397,109 +382,91 @@ namespace Ipopt
       }
       csc_xa[asub_index] = nnz;
 
-      //调用superlu求解器开始        
+      //调用superlu求解器开始     
 
-      int *perm_c, *etree;
+      // int *perm_c, *etree;
+      // perm_c = new int[n];
+      // etree = new int[n];
 
-      if ( !(perm_c = intMalloc(n)) ) ABORT("Malloc fails for perm_c[].");
-      if ( !(etree = intMalloc(n)) ) ABORT("Malloc fails for etree[].");
+      // if ( !(perm_c = intMalloc(n)) ) ABORT("Malloc fails for perm_c[].");
+      // if ( !(etree = intMalloc(n)) ) ABORT("Malloc fails for etree[].");
 
-      // int etree[n];
-
-      // double   *aa, *rhs;
-      // double   s, u, p, e, r, l;
-      // int      *asub, *xa;
-      // int      *perm_r; /* row permutations from partial pivoting */
-      // int      *perm_c; /* column permutation vector */
-      // int      info, i, permc_spec;
-      // superlu_options_t options;
-      // SuperLUStat_t stat;
-  
-      // /* Initialize matrix A. */
-      // m = n = 5;
-      // nnz = 12;
-      // if ( !(aa = doubleMalloc(nnz)) ) ABORT("Malloc fails for a[].");
-      // if ( !(asub = intMalloc(nnz)) ) ABORT("Malloc fails for asub[].");
-      // if ( !(xa = intMalloc(n+1)) ) ABORT("Malloc fails for xa[].");
-      // s = 19.0; u = 21.0; p = 16.0; e = 5.0; r = 18.0; l = 12.0;
-      // aa[0] = s; aa[1] = l; aa[2] = l; aa[3] = u; aa[4] = l; aa[5] = l;
-      // aa[6] = u; aa[7] = p; aa[8] = u; aa[9] = e; aa[10]= u; aa[11]= r;
-      // asub[0] = 0; asub[1] = 1; asub[2] = 4; asub[3] = 1;
-      // asub[4] = 2; asub[5] = 4; asub[6] = 0; asub[7] = 2;
-      // asub[8] = 0; asub[9] = 3; asub[10]= 3; asub[11]= 4;
-      // xa[0] = 0; xa[1] = 3; xa[2] = 6; xa[3] = 8; xa[4] = 10; xa[5] = 12;
-      
-      // if ( !(rhs = doubleMalloc(m)) ) ABORT("Malloc fails for rhs[].");
-      // for (i = 0; i < m; ++i) rhs[i] = 1.0;
-        
-      // if ( !(perm_r = intMalloc(m)) ) ABORT("Malloc fails for perm_r[].");
-      
-      // cout << "三元组元素：" << endl;
-      // for (int i = 0; i < nnz; i++)
+      // if (pivtol_changed_)
       // {
-      //   // cout << irn_unique[i] << " " << jcn_unique[i] << " " << a_unique[i] << endl;
-      //   cout << csc_asub[i] << " " << csc_xa[i] << " " << csc_a[i] << endl;
+      //   cout << "pivtol_changed_" << endl;
+      //   cout << pivtol_changed_ << endl;
+      //   DBG_PRINT((1, "Pivot tolerance has changed.\n"));
+      //   pivtol_changed_ = false;
+      //   // If the pivot tolerance has been changed but the matrix is not
+      //   // new, we have to request the values for the matrix again to do
+      //   // the factorization again.
+      //   if (!new_matrix)
+      //   {
+      //     cout << "!new_matrix" << endl;
+      //     cout << !new_matrix << endl;
+      //     DBG_PRINT((1, "Ask caller to call again.\n"));
+      //     refactorize_ = true;
+      //     return SYMSOLVER_CALL_AGAIN;
+      //   }
       // }
-      
-      // double *result = Solve2(m, n, nnz, aa, asub, xa, rhs, perm_c, etree);
 
-      //   return retval;
+      // // check if a factorization has to be done
+      // DBG_PRINT((1, "new_matrix = %d\n", new_matrix));
+      // if (new_matrix || refactorize_)
+      // {
+      //   cout << "!new_matrix" << endl;
+      //   cout << !new_matrix << endl;
+      //   ESymSolverStatus retval;
+      //   // Do the symbolic facotrization if it hasn't been done yet
+      //   if (!have_symbolic_factorization_)
+      //   {
+      //     retval = SymbolicFactorization();
+      //     if (retval != SYMSOLVER_SUCCESS)
+      //     {
+      //       return retval;
+      //     }
+      //     have_symbolic_factorization_ = true;
+      //   }
+      //   // perform the factorization
+      //   retval = Factorization(check_NegEVals, numberOfNegEVals);
+      //   if (retval != SYMSOLVER_SUCCESS)
+      //   {
+      //     DBG_PRINT((1, "FACTORIZATION FAILED!\n"));
+      //     return retval; // Matrix singular or error occurred
+      //   }
+      //   refactorize_ = false;
+      // }
 
-      //   printf("%d %d", mumps_->n, mumps_->nz);
+      ESymSolverStatus retval = SYMSOLVER_SUCCESS;
 
-
-      if (pivtol_changed_)
+      if (call_counter == 0)
       {
-        DBG_PRINT((1, "Pivot tolerance has changed.\n"));
-        pivtol_changed_ = false;
-        // If the pivot tolerance has been changed but the matrix is not
-        // new, we have to request the values for the matrix again to do
-        // the factorization again.
-        if (!new_matrix)
-        {
-          DBG_PRINT((1, "Ask caller to call again.\n"));
-          refactorize_ = true;
-          return SYMSOLVER_CALL_AGAIN;
-        }
+        perm_c = new int[n];
+        etree = new int[n];
+        Solve2(m, n, nnz, csc_a, csc_asub, csc_xa, rhs_vals, perm_c, etree);
+        call_counter++;
+        return retval;
       }
 
-      // check if a factorization has to be done
-      DBG_PRINT((1, "new_matrix = %d\n", new_matrix));
-      if (new_matrix || refactorize_)
+      //do the solve
+      //这里调用superlu的求解器，会改变rhs_vals指向的变量的值，从而获得X向量，存放在rhs_vals指针中
+
+      if (new_matrix)
       {
-        ESymSolverStatus retval;
-        // Do the symbolic facotrization if it hasn't been done yet
-        if (!have_symbolic_factorization_)
-        {
-          retval = SymbolicFactorization();
-          if (retval != SYMSOLVER_SUCCESS)
-          {
-            return retval;
-          }
-          have_symbolic_factorization_ = true;
-        }
-        // perform the factorization
-        retval = Factorization(check_NegEVals, numberOfNegEVals);
-        if (retval != SYMSOLVER_SUCCESS)
-        {
-          DBG_PRINT((1, "FACTORIZATION FAILED!\n"));
-          return retval; // Matrix singular or error occurred
-        }
-        refactorize_ = false;
+        delete[] perm_c;
+        delete[] etree;
+        perm_c = new int[n];
+        etree = new int[n];
+        Solve2(m, n, nnz, csc_a, csc_asub, csc_xa, rhs_vals, perm_c, etree);
       }
-      // do the solve
+      else
+      {
+        Solve3(m, n, nnz, csc_a, csc_asub, csc_xa, rhs_vals, perm_c, etree);
+      }
 
-      // ESymSolverStatus retval = SYMSOLVER_SUCCESS;
-      // double *result = Solve2(m, n, nnz, csc_a, csc_asub, csc_xa, rhs_vals, perm_c, etree);
-
-      // cout << "%%%%%%%%%%%%%%%%" << endl;
-      // for (int i = 0; i < m; i++)
-      // {
-      //   cout << result[i] << endl;
-      // }
-      // cout << "&&&&&&&&&&&&&&&&" << endl;
-
-      return Solve(nrhs, rhs_vals, m, n, nnz, csc_a, csc_asub, csc_xa, perm_c, etree);
+      // return Solve(nrhs, rhs_vals, m, n, nnz, csc_a, csc_asub, csc_xa, perm_c, etree);
+      call_counter++;
+      return retval;
   }
 
   void CustomSolverInterface::Qsort(int *sort_array, int *position, double *a, int low, int high)
@@ -554,8 +521,7 @@ namespace Ipopt
   void dump_matrix(DMUMPS_STRUC_C* mumps_data)
   {
 #ifdef write_matrices
-    // Dump the matrix
-    
+    // Dump the matrix    
     for (int i=0; i<40; i++) {
       printf("%d\n", mumps_data->icntl[i]);
     }
@@ -575,7 +541,6 @@ namespace Ipopt
     }
     printf("    :RHS\n");
 #endif
-
   }
 
   /* Initialize the local copy of the positions of the nonzero
@@ -760,24 +725,14 @@ namespace Ipopt
     return SYMSOLVER_SUCCESS;
   }
 
-  ESymSolverStatus CustomSolverInterface::Solve(Index nrhs,
-                                                double *rhs_vals,
-                                                int m,
-                                                int n,
-                                                int nnz,
-                                                double *csc_a,
-                                                int *csc_asub,
-                                                int *csc_xa,
-                                                int *perm_c, 
-                                                int *etree)
+  ESymSolverStatus CustomSolverInterface::Solve(Index nrhs, double *rhs_vals)
   {
     DBG_START_METH("CustomSolverInterface::Solve", dbg_verbosity);
     DMUMPS_STRUC_C* mumps_data = (DMUMPS_STRUC_C*)mumps_ptr_;
     ESymSolverStatus retval = SYMSOLVER_SUCCESS;
     if (HaveIpData()) {
       IpData().TimingStats().LinearSystemBackSolve().Start();
-    }
-    
+    }    
     for (Index i = 0; i < nrhs; i++)
     {
       Index offset = i * mumps_data->n;
@@ -785,9 +740,7 @@ namespace Ipopt
       mumps_data->job = 3; //solve
       Jnlst().Printf(J_MOREDETAILED, J_LINEAR_ALGEBRA,
                      "Calling MUMPS-3 for solve at cpu time %10.3f (wall %10.3f).\n", CpuTime(), WallclockTime());
-
-      rhs_vals = Solve2(m, n, nnz, csc_a, csc_asub, csc_xa, rhs_vals, perm_c, etree);      
-      // dmumps_c(mumps_data);
+      dmumps_c(mumps_data);
       Jnlst().Printf(J_MOREDETAILED, J_LINEAR_ALGEBRA,
                      "Done with MUMPS-3 for solve at cpu time %10.3f (wall %10.3f).\n", CpuTime(), WallclockTime());
       int error = mumps_data->info[0];
@@ -799,7 +752,6 @@ namespace Ipopt
         retval = SYMSOLVER_FATAL_ERROR;
       }
     }
-    // rhs_vals = Solve2(m, n, nnz, csc_a, csc_asub, csc_xa, rhs_vals, perm_c, etree);
     if (HaveIpData()) {
       IpData().TimingStats().LinearSystemBackSolve().End();
     }
@@ -839,270 +791,267 @@ namespace Ipopt
     return retval;
   }
 
-  double* CustomSolverInterface::Solve2(int m,
-                                        int n,
-                                        int nnz,
-                                        double *a,
-                                        int *asub,
-                                        int *xa,
-                                        double *b,
-                                        int *perm_c,
-                                        int *etree)
+  void CustomSolverInterface::Solve2(int m,
+                                     int n,
+                                     int nnz,
+                                     double *a,
+                                     int *asub,
+                                     int *xa,
+                                     double *b,
+                                     int *perm_c,
+                                     int *etree)
   {
-      char equed[1];
-      yes_no_t equil;
-      trans_t trans;
-      SuperMatrix A, L, U;
-      SuperMatrix B, X;
-      GlobalLU_t Glu; /* facilitate multiple factorizations with
+    char equed[1];
+    yes_no_t equil;
+    trans_t trans;
+    SuperMatrix A, L, U;
+    SuperMatrix B, X;
+    GlobalLU_t Glu; /* facilitate multiple factorizations with
                                        SamePattern_SameRowPerm            */
-      int *perm_r;    /* row permutations from partial pivoting */
-      void *work;
-      int info, lwork, nrhs;
-      int i;
-      double *rhsb, *rhsx, *sol;
-      double *R, *C;
-      double *ferr, *berr;
-      double u, rpg, rcond;
+    int *perm_r;    /* row permutations from partial pivoting */
+    void *work;
+    int info, lwork, nrhs;
+    int i;
+    double *rhsb, *rhsx;
+    double *R, *C;
+    double *ferr, *berr;
+    double u, rpg, rcond;
 
-      mem_usage_t mem_usage;
-      superlu_options_t options;
-      SuperLUStat_t stat;
-      
-      // Defaults
-      lwork = 0;
-      nrhs = 1;
-      equil = YES;
-      u = 1.0;
-      trans = NOTRANS;
-      set_default_options(&options);
+    mem_usage_t mem_usage;
+    superlu_options_t options;
+    SuperLUStat_t stat;
 
-      options.Equil = equil;
-      options.DiagPivotThresh = u;
-      options.Trans = trans;
+    // Defaults
+    lwork = 0;
+    nrhs = 1;
+    equil = YES;
+    u = 1.0;
+    trans = NOTRANS;
+    set_default_options(&options);
 
-      /* Add more functionalities that the defaults. */
-      options.PivotGrowth = YES;       /* Compute reciprocal pivot growth */
-      options.ConditionNumber = YES;   /* Compute reciprocal condition number */
-      options.IterRefine = SLU_DOUBLE; /* Perform double-precision refinement */
+    options.Equil = equil;
+    options.DiagPivotThresh = u;
+    options.Trans = trans;
 
-      if (lwork > 0)
+    /* Add more functionalities that the defaults. */
+    options.PivotGrowth = YES;       /* Compute reciprocal pivot growth */
+    options.ConditionNumber = YES;   /* Compute reciprocal condition number */
+    options.IterRefine = SLU_DOUBLE; /* Perform double-precision refinement */
+
+    if (lwork > 0)
+    {
+      work = SUPERLU_MALLOC(lwork);
+      if (!work)
       {
-          work = SUPERLU_MALLOC(lwork);
-          if (!work)
-          {
-              ABORT("DLINSOLX: cannot allocate work[]");
-          }
+        ABORT("DLINSOLX: cannot allocate work[]");
       }
+    }
 
-      /* Initialize matrix A. */
-      dCreate_CompCol_Matrix(&A, m, n, nnz, a, asub, xa, SLU_NC, SLU_D, SLU_GE);
-      
+    /* Initialize matrix A. */
+    dCreate_CompCol_Matrix(&A, m, n, nnz, a, asub, xa, SLU_NC, SLU_D, SLU_GE);
 
-      /* Create right-hand side matrix B and X. */
-      if (!(rhsb = doubleMalloc(m * nrhs)))
-          ABORT("Malloc fails for rhsb[].");
-      if (!(rhsx = doubleMalloc(m * nrhs)))
-          ABORT("Malloc fails for rhsx[].");
-      if (!(sol = doubleMalloc(m * nrhs)))
-          ABORT("Malloc fails for sol[].");
+    /* Create right-hand side matrix B and X. */
+    if (!(rhsb = doubleMalloc(m * nrhs)))
+      ABORT("Malloc fails for rhsb[].");
+    if (!(rhsx = doubleMalloc(m * nrhs)))
+      ABORT("Malloc fails for rhsx[].");
+    // if (!(sol = doubleMalloc(m * nrhs)))
+    //   ABORT("Malloc fails for sol[].");
 
-      for (i = 0; i < m; ++i)
-      {
-          rhsb[i] = b[i];
-          rhsx[i] = b[i];
-      }
-      dCreate_Dense_Matrix(&B, m, nrhs, rhsb, m, SLU_DN, SLU_D, SLU_GE);
-      dCreate_Dense_Matrix(&X, m, nrhs, rhsx, m, SLU_DN, SLU_D, SLU_GE);
+    for (i = 0; i < m; ++i)
+    {
+      rhsb[i] = b[i];
+      rhsx[i] = b[i];
+    }
+    dCreate_Dense_Matrix(&B, m, nrhs, rhsb, m, SLU_DN, SLU_D, SLU_GE);
+    dCreate_Dense_Matrix(&X, m, nrhs, rhsx, m, SLU_DN, SLU_D, SLU_GE);
 
-      if (!(perm_r = intMalloc(m)))
-          ABORT("Malloc fails for perm_r[].");
-      if (!(R = (double *)SUPERLU_MALLOC(A.nrow * sizeof(double))))
-          ABORT("SUPERLU_MALLOC fails for R[].");
-      if (!(C = (double *)SUPERLU_MALLOC(A.ncol * sizeof(double))))
-          ABORT("SUPERLU_MALLOC fails for C[].");
-      if (!(ferr = (double *)SUPERLU_MALLOC(nrhs * sizeof(double))))
-          ABORT("SUPERLU_MALLOC fails for ferr[].");
-      if (!(berr = (double *)SUPERLU_MALLOC(nrhs * sizeof(double))))
-          ABORT("SUPERLU_MALLOC fails for berr[].");
+    if (!(perm_r = intMalloc(m)))
+      ABORT("Malloc fails for perm_r[].");
+    if (!(R = (double *)SUPERLU_MALLOC(A.nrow * sizeof(double))))
+      ABORT("SUPERLU_MALLOC fails for R[].");
+    if (!(C = (double *)SUPERLU_MALLOC(A.ncol * sizeof(double))))
+      ABORT("SUPERLU_MALLOC fails for C[].");
+    if (!(ferr = (double *)SUPERLU_MALLOC(nrhs * sizeof(double))))
+      ABORT("SUPERLU_MALLOC fails for ferr[].");
+    if (!(berr = (double *)SUPERLU_MALLOC(nrhs * sizeof(double))))
+      ABORT("SUPERLU_MALLOC fails for berr[].");
 
-      /* Initialize the statistics variables. */
-      StatInit(&stat);
+    /* Initialize the statistics variables. */
+    StatInit(&stat);
 
-      /* ------------------------------------------------------------
+    /* ------------------------------------------------------------
            WE SOLVE THE LINEAR SYSTEM FOR THE FIRST TIME: AX = B
            ------------------------------------------------------------*/
-      dgssvx(&options, &A, perm_c, perm_r, etree, equed, R, C,
-             &L, &U, work, lwork, &B, &X, &rpg, &rcond, ferr, berr,
-             &Glu, &mem_usage, &stat, &info);
+    dgssvx(&options, &A, perm_c, perm_r, etree, equed, R, C,
+           &L, &U, work, lwork, &B, &X, &rpg, &rcond, ferr, berr,
+           &Glu, &mem_usage, &stat, &info);
 
-      if (info == 0 || info == n + 1)
-      {
-          for (int i = 0; i < n; i++)
-              sol[i] = ((double *)((DNformat *)X.Store)->nzval)[i];
-      }
-      else if (info > 0 && lwork == -1)
-      {
-          printf("** Estimated memory: %d bytes\n", info - n);
-      }
+    if (info == 0 || info == n + 1)
+    {
+      for (int i = 0; i < n; i++)
+        b[i] = ((double *)((DNformat *)X.Store)->nzval)[i];
+    }
+    else if (info > 0 && lwork == -1)
+    {
+      printf("** Estimated memory: %d bytes\n", info - n);
+    }
 
-      //if ( options.PrintStat )
-      //	StatPrint(&stat);
-      StatFree(&stat);
+    //if ( options.PrintStat )
+    //	StatPrint(&stat);
+    StatFree(&stat);
 
-      SUPERLU_FREE(rhsb);
-      SUPERLU_FREE(rhsx);
-      SUPERLU_FREE(perm_r);
-      SUPERLU_FREE(R);
-      SUPERLU_FREE(C);
-      SUPERLU_FREE(ferr);
-      SUPERLU_FREE(berr);
-      Destroy_CompCol_Matrix(&A);
-      Destroy_SuperMatrix_Store(&B);
-      Destroy_SuperMatrix_Store(&X);
-      if (lwork == 0)
-      {
-          Destroy_SuperNode_Matrix(&L);
-          Destroy_CompCol_Matrix(&U);
-      }
-      else if (lwork > 0)
-      {
-          SUPERLU_FREE(work);
-      }
-      return sol;
+    SUPERLU_FREE(rhsb);
+    SUPERLU_FREE(rhsx);
+    SUPERLU_FREE(perm_r);
+    SUPERLU_FREE(R);
+    SUPERLU_FREE(C);
+    SUPERLU_FREE(ferr);
+    SUPERLU_FREE(berr);
+    Destroy_CompCol_Matrix(&A);
+    Destroy_SuperMatrix_Store(&B);
+    Destroy_SuperMatrix_Store(&X);
+    if (lwork == 0)
+    {
+      Destroy_SuperNode_Matrix(&L);
+      Destroy_CompCol_Matrix(&U);
+    }
+    else if (lwork > 0)
+    {
+      SUPERLU_FREE(work);
+    }
   }
 
-  double *CustomSolverInterface::Solve3(int m,
-                                        int n,
-                                        int nnz,
-                                        double *a,
-                                        int *asub,
-                                        int *xa,
-                                        double *b,
-                                        int *perm_c,
-                                        int *etree)
+  void CustomSolverInterface::Solve3(int m,
+                                     int n,
+                                     int nnz,
+                                     double *a,
+                                     int *asub,
+                                     int *xa,
+                                     double *b,
+                                     int *perm_c,
+                                     int *etree)
   {
-      char equed[1];
-      yes_no_t equil;
-      trans_t trans;
-      SuperMatrix A1, L, U;
-      SuperMatrix B, X;
-      GlobalLU_t Glu; /* facilitate multiple factorizations with
+    char equed[1];
+    yes_no_t equil;
+    trans_t trans;
+    SuperMatrix A1, L, U;
+    SuperMatrix B, X;
+    GlobalLU_t Glu; /* facilitate multiple factorizations with
                                        SamePattern_SameRowPerm            */
-      int *perm_r;    /* row permutations from partial pivoting */
-      void *work;
-      int info, lwork, nrhs;
-      int i;
-      double *rhsb, *rhsx, *sol;
-      double *R, *C;
-      double *ferr, *berr;
-      double u, rpg, rcond;
+    int *perm_r;    /* row permutations from partial pivoting */
+    void *work;
+    int info, lwork, nrhs;
+    int i;
+    double *rhsb, *rhsx, *sol;
+    double *R, *C;
+    double *ferr, *berr;
+    double u, rpg, rcond;
 
-      mem_usage_t mem_usage;
-      superlu_options_t options;
-      SuperLUStat_t stat;
+    mem_usage_t mem_usage;
+    superlu_options_t options;
+    SuperLUStat_t stat;
 
-      // Defaults
-      lwork = 0;
-      nrhs = 1;
-      equil = YES;
-      u = 1.0;
-      trans = NOTRANS;
-      set_default_options(&options);
+    // Defaults
+    lwork = 0;
+    nrhs = 1;
+    equil = YES;
+    u = 1.0;
+    trans = NOTRANS;
+    set_default_options(&options);
 
-      options.Equil = equil;
-      options.DiagPivotThresh = u;
-      options.Trans = trans;
+    options.Equil = equil;
+    options.DiagPivotThresh = u;
+    options.Trans = trans;
 
-      /* Add more functionalities that the defaults. */
-      options.PivotGrowth = YES;       /* Compute reciprocal pivot growth */
-      options.ConditionNumber = YES;   /* Compute reciprocal condition number */
-      options.IterRefine = SLU_DOUBLE; /* Perform double-precision refinement */
+    /* Add more functionalities that the defaults. */
+    options.PivotGrowth = YES;       /* Compute reciprocal pivot growth */
+    options.ConditionNumber = YES;   /* Compute reciprocal condition number */
+    options.IterRefine = SLU_DOUBLE; /* Perform double-precision refinement */
 
-      if (lwork > 0)
+    if (lwork > 0)
+    {
+      work = SUPERLU_MALLOC(lwork);
+      if (!work)
       {
-          work = SUPERLU_MALLOC(lwork);
-          if (!work)
-          {
-              ABORT("DLINSOLX: cannot allocate work[]");
-          }
+        ABORT("DLINSOLX: cannot allocate work[]");
       }
+    }
 
-      /* Initialize matrix A1. */
-      dCreate_CompCol_Matrix(&A1, m, n, nnz, a, asub, xa, SLU_NC, SLU_D, SLU_GE);
+    /* Initialize matrix A1. */
+    dCreate_CompCol_Matrix(&A1, m, n, nnz, a, asub, xa, SLU_NC, SLU_D, SLU_GE);
 
-      /* Create right-hand side matrix B and X. */
-      if (!(rhsb = doubleMalloc(m * nrhs)))
-          ABORT("Malloc fails for rhsb[].");
-      if (!(rhsx = doubleMalloc(m * nrhs)))
-          ABORT("Malloc fails for rhsx[].");
-      if (!(sol = doubleMalloc(n * nrhs)))
-          ABORT("Malloc fails for rhsx[].");
+    /* Create right-hand side matrix B and X. */
+    if (!(rhsb = doubleMalloc(m * nrhs)))
+      ABORT("Malloc fails for rhsb[].");
+    if (!(rhsx = doubleMalloc(m * nrhs)))
+      ABORT("Malloc fails for rhsx[].");
+    if (!(sol = doubleMalloc(n * nrhs)))
+      ABORT("Malloc fails for rhsx[].");
 
-      for (i = 0; i < m; ++i)
-      {
-          rhsb[i] = b[i];
-          rhsx[i] = b[i];
-      }
-      dCreate_Dense_Matrix(&B, m, nrhs, rhsb, m, SLU_DN, SLU_D, SLU_GE);
-      dCreate_Dense_Matrix(&X, m, nrhs, rhsx, m, SLU_DN, SLU_D, SLU_GE);
+    for (i = 0; i < m; ++i)
+    {
+      rhsb[i] = b[i];
+      rhsx[i] = b[i];
+    }
+    dCreate_Dense_Matrix(&B, m, nrhs, rhsb, m, SLU_DN, SLU_D, SLU_GE);
+    dCreate_Dense_Matrix(&X, m, nrhs, rhsx, m, SLU_DN, SLU_D, SLU_GE);
 
-      if (!(perm_r = intMalloc(m)))
-          ABORT("Malloc fails for perm_r[].");
-      if (!(R = (double *)SUPERLU_MALLOC(A1.nrow * sizeof(double))))
-          ABORT("SUPERLU_MALLOC fails for R[].");
-      if (!(C = (double *)SUPERLU_MALLOC(A1.ncol * sizeof(double))))
-          ABORT("SUPERLU_MALLOC fails for C[].");
-      if (!(ferr = (double *)SUPERLU_MALLOC(nrhs * sizeof(double))))
-          ABORT("SUPERLU_MALLOC fails for ferr[].");
-      if (!(berr = (double *)SUPERLU_MALLOC(nrhs * sizeof(double))))
-          ABORT("SUPERLU_MALLOC fails for berr[].");
+    if (!(perm_r = intMalloc(m)))
+      ABORT("Malloc fails for perm_r[].");
+    if (!(R = (double *)SUPERLU_MALLOC(A1.nrow * sizeof(double))))
+      ABORT("SUPERLU_MALLOC fails for R[].");
+    if (!(C = (double *)SUPERLU_MALLOC(A1.ncol * sizeof(double))))
+      ABORT("SUPERLU_MALLOC fails for C[].");
+    if (!(ferr = (double *)SUPERLU_MALLOC(nrhs * sizeof(double))))
+      ABORT("SUPERLU_MALLOC fails for ferr[].");
+    if (!(berr = (double *)SUPERLU_MALLOC(nrhs * sizeof(double))))
+      ABORT("SUPERLU_MALLOC fails for berr[].");
 
-      options.Fact = SamePattern; //稀疏结构相同，复用perm_c
+    options.Fact = SamePattern; //稀疏结构相同，复用perm_c
 
-      /* Initialize the statistics variables. */
-      StatInit(&stat);
+    /* Initialize the statistics variables. */
+    StatInit(&stat);
 
-      /* ------------------------------------------------------------
+    /* ------------------------------------------------------------
            WE SOLVE THE LINEAR SYSTEM FOR THE FIRST TIME: A1X = B
            ------------------------------------------------------------*/
-      dgssvx(&options, &A1, perm_c, perm_r, etree, equed, R, C,
-             &L, &U, work, lwork, &B, &X, &rpg, &rcond, ferr, berr,
-             &Glu, &mem_usage, &stat, &info);
-      if (info == 0 || info == n + 1)
-      {
-          for (int i = 0; i < n; i++)
-              sol[i] = ((double *)((DNformat *)X.Store)->nzval)[i];
-      }
-      else if (info > 0 && lwork == -1)
-      {
-          printf("** Estimated memory: %d bytes\n", info - n);
-      }
+    dgssvx(&options, &A1, perm_c, perm_r, etree, equed, R, C,
+           &L, &U, work, lwork, &B, &X, &rpg, &rcond, ferr, berr,
+           &Glu, &mem_usage, &stat, &info);
+    if (info == 0 || info == n + 1)
+    {
+      for (int i = 0; i < n; i++)
+        b[i] = ((double *)((DNformat *)X.Store)->nzval)[i];
+    }
+    else if (info > 0 && lwork == -1)
+    {
+      printf("** Estimated memory: %d bytes\n", info - n);
+    }
 
-      //if ( options.PrintStat )
-      //	StatPrint(&stat);
-      StatFree(&stat);
+    //if ( options.PrintStat )
+    //	StatPrint(&stat);
+    StatFree(&stat);
 
-      SUPERLU_FREE(rhsb);
-      SUPERLU_FREE(rhsx);
-      SUPERLU_FREE(perm_r);
-      SUPERLU_FREE(R);
-      SUPERLU_FREE(C);
-      SUPERLU_FREE(ferr);
-      SUPERLU_FREE(berr);
-      Destroy_CompCol_Matrix(&A1);
-      Destroy_SuperMatrix_Store(&B);
-      Destroy_SuperMatrix_Store(&X);
-      if (lwork == 0)
-      {
-          Destroy_SuperNode_Matrix(&L);
-          Destroy_CompCol_Matrix(&U);
-      }
-      else if (lwork > 0)
-      {
-          SUPERLU_FREE(work);
-      }
-      return sol;
+    SUPERLU_FREE(rhsb);
+    SUPERLU_FREE(rhsx);
+    SUPERLU_FREE(perm_r);
+    SUPERLU_FREE(R);
+    SUPERLU_FREE(C);
+    SUPERLU_FREE(ferr);
+    SUPERLU_FREE(berr);
+    Destroy_CompCol_Matrix(&A1);
+    Destroy_SuperMatrix_Store(&B);
+    Destroy_SuperMatrix_Store(&X);
+    if (lwork == 0)
+    {
+      Destroy_SuperNode_Matrix(&L);
+      Destroy_CompCol_Matrix(&U);
+    }
+    else if (lwork > 0)
+    {
+      SUPERLU_FREE(work);
+    }
   }
 
   Index CustomSolverInterface::NumberOfNegEVals() const

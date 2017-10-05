@@ -189,6 +189,12 @@ namespace Ipopt
      *  dependent */
     Number mumps_dep_tol_;
 
+    /** 存放superlu矩阵的分解信息供下一次调用 */
+    int *perm_c, *etree;
+
+    /** 判断是第几次调用 */
+    int call_counter;
+
     /** Flag indicating whether the TNLP with identical structure has
      *  already been solved before. */
     bool warm_start_same_structure_;
@@ -214,25 +220,16 @@ namespace Ipopt
 
     /** Call MUMPS (job=3) to do the solve.
      */
-    ESymSolverStatus Solve(Index nrhs,
-                           double *rhs_vals,
-                           int m,
-                           int n,
-                           int nnz,
-                           double *csc_a,
-                           int *csc_asub,
-                           int *csc_xa,
-                           int *perm_c,
-                           int *etree);
+    ESymSolverStatus Solve(Index nrhs, double *rhs_vals);
     //@}
 
-    double *Solve2(int m, int n, int nnz, double *a, int *asub, int *xa, double *b, int *perm_c, int *etree);
+    void Solve2(int m, int n, int nnz, double *a, int *asub, int *xa, double *b, int *perm_c, int *etree);
 
-    double *Solve3(int m, int n, int nnz, double *a, int *asub, int *xa, double *b, int *perm_c, int *etree);
+    void Solve3(int m, int n, int nnz, double *a, int *asub, int *xa, double *b, int *perm_c, int *etree);
 
     void Qsort(int *sort_array, int *position, double *a, int low, int high);
 
-    // int count_test=0;
+    // int count_test = 0;
   };
 
 } // namespace Ipopt
