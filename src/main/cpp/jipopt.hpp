@@ -18,6 +18,7 @@
 #include "IpAlgBuilder.hpp"
 #include "IpInexactAlgBuilder.hpp"
 #include "IpTNLPAdapter.hpp"
+#include "IpCudaSolverInterface.hpp"
 
 
 using namespace std;

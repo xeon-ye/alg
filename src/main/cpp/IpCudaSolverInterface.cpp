@@ -22,8 +22,9 @@
 #include "mpi.h"
 #endif
 
-#include "IpCustomSolverInterface.hpp"
+#include "IpCudaSolverInterface.hpp"
 #include "jpscpu_LinearSolver.h"
+#include "LinearSolver.h"
 
 #include "slu_ddefs.h"
 #include "sstream"
@@ -54,10 +55,18 @@
 //#  error "don't have header file for stdlib"
 //# endif
 //#endif
+#include <cstring>
+
+#include "Matrix.h"
+#include <cuda_runtime.h>
+#include <cusparse.h>
+#include <cublas_v2.h>
+
 #include <fstream>  
 #include <sstream>  
 
 using namespace std; 
+using namespace volcano;
 
 namespace Ipopt
 {
@@ -67,15 +76,15 @@ namespace Ipopt
 
 #define USE_COMM_WORLD -987654
 
-  int CustomSolverInterface::instancecount_mpi = 0;
+  int CudaSolverInterface::instancecount_mpi = 0;
 
-  CustomSolverInterface::CustomSolverInterface()
+  CudaSolverInterface::CudaSolverInterface()
   {
-    DBG_START_METH("CustomSolverInterface::CustomSolverInterface()",
+    DBG_START_METH("CudaSolverInterface::CudaSolverInterface()",
                    dbg_verbosity);
     //initialize mumps
     call_counter = 0;
-    DMUMPS_STRUC_C *mumps_ =     new DMUMPS_STRUC_C;
+    DMUMPS_STRUC_C *mumps_ = new DMUMPS_STRUC_C;
 #ifndef MUMPS_MPI_H
 #if defined(HAVE_MPI_INITIALIZED)
     int mpi_initialized;
@@ -111,9 +120,9 @@ namespace Ipopt
     // call_counter = 0；
   }
 
-  CustomSolverInterface::~CustomSolverInterface()
+  CudaSolverInterface::~CudaSolverInterface()
   {
-    DBG_START_METH("CustomSolverInterface::~CustomSolverInterface()",
+    DBG_START_METH("CudaSolverInterface::~CudaSolverInterface()",
                    dbg_verbosity);
 
     DMUMPS_STRUC_C* mumps_ = (DMUMPS_STRUC_C*)mumps_ptr_;
@@ -135,7 +144,7 @@ namespace Ipopt
     delete mumps_;
   }
 
-  void CustomSolverInterface::RegisterOptions(SmartPtr<RegisteredOptions> roptions)
+  void CudaSolverInterface::RegisterOptions(SmartPtr<RegisteredOptions> roptions)
   {
     roptions->AddBoundedNumberOption(
       "mumps_pivtol",
@@ -185,7 +194,7 @@ namespace Ipopt
       "is CNTL(3) in MUMPS.");
   }
 
-  bool CustomSolverInterface::InitializeImpl(const OptionsList& options,
+  bool CudaSolverInterface::InitializeImpl(const OptionsList& options,
       const std::string& prefix)
   {
     options.GetNumericValue("mumps_pivtol", pivtol_, prefix);
@@ -224,13 +233,13 @@ namespace Ipopt
     }
     else {
       ASSERT_EXCEPTION(mumps_->n>0 && mumps_->nz>0, INVALID_WARMSTART,
-                       "CustomSolverInterface called with warm_start_same_structure, but the problem is solved for the first time.");
+                       "CudaSolverInterface called with warm_start_same_structure, but the problem is solved for the first time.");
     }
 
     return true;
   }
 
-  ESymSolverStatus CustomSolverInterface::MultiSolve(bool new_matrix,
+  ESymSolverStatus CudaSolverInterface::MultiSolve(bool new_matrix,
                                                      const Index *ia,
                                                      const Index *ja,
                                                      Index nrhs,
@@ -239,7 +248,9 @@ namespace Ipopt
                                                      Index numberOfNegEVals)
   {
       DBG_START_METH("MumpsSolverInterface::MultiSolve", dbg_verbosity);
-      DBG_ASSERT(!check_NegEVals || ProvidesInertia());
+      DBG_ASSERT(!check_NegEValsif (call_counter == 0){
+        exit(1);
+      } || ProvidesInertia());
       DBG_ASSERT(initialized_);
       DBG_ASSERT(((DMUMPS_STRUC_C *)mumps_ptr_)->irn == ia);
       DBG_ASSERT(((DMUMPS_STRUC_C *)mumps_ptr_)->jcn == ja);
@@ -333,141 +344,7 @@ namespace Ipopt
         iter_a_i++;
       }
 
-      //先按列进行排序
-      Qsort(jcn_unique, irn_unique, a_unique, 0, sizeof(jcn_unique) / sizeof(int) - 1);
-      
-      //再按行进行排序
-      int last_column = 0;
-      for (int this_column = 1; this_column < nnz; this_column++)
-      {
-        if (jcn_unique[this_column] != jcn_unique[last_column])
-        {
-          Qsort(irn_unique, jcn_unique, a_unique, last_column, this_column - 1);
-          last_column = this_column;
-        }
-      }
 
-      //现在三元组已经按列从小到大进行排列，相同列的元素其行也按从小到大排列。下面进行CSC格式转换。
-      //asub代表该元素所处的行坐标，xa代表该元素在csc_a数组中所处的位置。
-
-      // cout << m << " " << n << " " << nnz << endl;
-
-      //这里在申请内存空间的时候不用自己释放，superlu会destroy。
-      double *csc_a;
-      int *csc_asub, *csc_xa;
-      int asub_index = 0;
-    
-      // double csc_a[nnz];
-      // int csc_asub[nnz], csc_xa[n+1];
-
-      csc_a = new double[nnz];
-      csc_asub = new int[nnz];
-      csc_xa = new int[n+1];
-
-      // if ( !(csc_a = doubleMalloc(nnz)) ) ABORT("Malloc fails for a[].");
-      // if ( !(csc_asub = intMalloc(nnz)) ) ABORT("Malloc fails for asub[].");
-      // if ( !(csc_xa = intMalloc(n+1)) ) ABORT("Malloc fails for xa[].");
-
-      csc_a[0] = a_unique[0];
-      csc_asub[0] = irn_unique[0];
-      csc_xa[0] = asub_index;
-      asub_index++;
-      for (int i = 1; i < nnz; i++)
-      {
-        csc_a[i] = a_unique[i];
-        csc_asub[i] = irn_unique[i];
-        if (jcn_unique[i] > jcn_unique[i - 1])
-        {
-          csc_xa[asub_index] = i;
-          asub_index++;
-        }
-      }
-      csc_xa[asub_index] = nnz;
-
-      //调用superlu求解器开始     
-
-      // int *perm_c, *etree;
-      // perm_c = new int[n];
-      // etree = new int[n];
-
-      // if ( !(perm_c = intMalloc(n)) ) ABORT("Malloc fails for perm_c[].");
-      // if ( !(etree = intMalloc(n)) ) ABORT("Malloc fails for etree[].");
-
-      if (pivtol_changed_)
-      {
-        //cout << "pivtol_changed_" << endl;
-        //cout << pivtol_changed_ << endl;
-        DBG_PRINT((1, "Pivot tolerance has changed.\n"));
-        pivtol_changed_ = false;
-        // If the pivot tolerance has been changed but the matrix is not
-        // new, we have to request the values for the matrix again to do
-        // the factorization again.
-        if (!new_matrix)
-        {
-          //cout << "!new_matrix" << endl;
-          //cout << !new_matrix << endl;
-          DBG_PRINT((1, "Ask caller to call again.\n"));
-          refactorize_ = true;
-          return SYMSOLVER_CALL_AGAIN;
-        }
-      }
-
-      // check if a factorization has to be done
-      DBG_PRINT((1, "new_matrix = %d\n", new_matrix));
-      if (new_matrix || refactorize_)
-      {
-        //cout << "!new_matrix" << endl;
-       // cout << !new_matrix << endl;
-        ESymSolverStatus retval;
-        // Do the symbolic facotrization if it hasn't been done yet
-        if (!have_symbolic_factorization_)
-        {
-          retval = SymbolicFactorization();
-          if (retval != SYMSOLVER_SUCCESS)
-          {
-            return retval;
-          }
-          have_symbolic_factorization_ = true;
-        }
-        // perform the factorization
-        retval = Factorization(check_NegEVals, numberOfNegEVals);
-        if (retval != SYMSOLVER_SUCCESS)
-        {
-          DBG_PRINT((1, "FACTORIZATION FAILED!\n"));
-          return retval; // Matrix singular or error occurred
-        }
-        refactorize_ = false;
-      }
-
-      //ESymSolverStatus retval = SYMSOLVER_SUCCESS;
-
-      /*
-      if (call_counter == 0)
-      {
-        perm_c = new int[n];
-        etree = new int[n];
-        Solve2(m, n, nnz, csc_a, csc_asub, csc_xa, rhs_vals, perm_c, etree);
-        call_counter++;
-        return retval;
-      }
-
-      //do the solve
-      //这里调用superlu的求解器，会改变rhs_vals指向的变量的值，从而获得X向量，存放在rhs_vals指针中
-
-      if (new_matrix)
-      {
-        delete[] perm_c;
-        delete[] etree;
-        perm_c = new int[n];
-        etree = new int[n];
-        Solve2(m, n, nnz, csc_a, csc_asub, csc_xa, rhs_vals, perm_c, etree);
-      }
-      else
-      {
-        Solve3(m, n, nnz, csc_a, csc_asub, csc_xa, rhs_vals, perm_c, etree);
-      }*/
-
-      double** w;
       w = (double **)malloc(n*sizeof(double *));  
       for(int i=0;i<n;i++)  
           w[i] = (double *)malloc(n*sizeof(double));
@@ -477,18 +354,23 @@ namespace Ipopt
             w[i][j] = 0.0;
           }
       }
-  
+
       for (int i = 0; i < sizeof(jcn_unique) / sizeof(int); i++){
-        w[irn_unique[i]][jcn_unique[i]] = a_unique[i];
+          w[irn_unique[i]][jcn_unique[i]] = a_unique[i];
       }
-  
+
+
+
+      cout << "test" << endl;
+      cout << call_counter << endl;
+
       ofstream outFile;  
       outFile.open("dataB.csv", ios::out); // 打开模式可省略  
       for (int i = 0; i<n; i++){
         outFile << rhs_vals[i] << endl;
       }
       outFile.close();
-  
+
       outFile.open("dataA.csv", ios::out);
       
       for (int i = 0; i<n; i++){
@@ -499,19 +381,347 @@ namespace Ipopt
       }
       outFile.close();
 
-      // if (call_counter == 2){
-      //   exit(1);
+   
+
+
+
+      lx = (double *)malloc(n*sizeof(double));
+      ly = (double *)malloc(n*sizeof(double));
+      linky = (int *)malloc(n*sizeof(int));
+      visx = (int *)malloc(n*sizeof(int));
+      visy = (int *)malloc(n*sizeof(int));
+      slack = (double *)malloc(n*sizeof(double));
+      nx = n; ny = n;
+
+
+      
+      // KM();
+
+      // double* rhs_valst;
+      // rhs_valst = (double*)malloc(n*sizeof(double));
+      // for (int i = 0; i < n; i++){
+      //   rhs_valst[i] = rhs_vals[i];
+      // }
+ 
+      // for (int i = 0; i < sizeof(jcn_unique) / sizeof(int); i++){
+      //   irn_unique[i] = linky[irn_unique[i]];
+      // }
+      // for (int i = 0; i < n; i++){
+      //   rhs_valst[i] = rhs_vals[linky[i]];
+      // }
+      // for (int i = 0; i < n; i++){
+      //   rhs_vals[i] = rhs_valst[i];
+      // }
+  
+
+
+      free(lx); free(ly); free(visx); free(visy); free(slack); free(w);
+
+      //exit(1);
+
+      //排序:第一关键字为行，第二关键字为列
+      Qsort2(irn_unique, jcn_unique, a_unique, 0, sizeof(jcn_unique) / sizeof(int) - 1);
+
+      /*
+      for (int i = 0; i < sizeof(jcn_unique) / sizeof(int); i++){
+        cout << irn_unique[i] << " " << jcn_unique[i] << " " << a_unique[i] << endl;
+      }*/
+
+      /*
+      if (call_counter == 0){
+        
+                ofstream outFile;  
+                outFile.open("dataB.csv", ios::out); // 打开模式可省略  
+                for (int i = 0; i<n; i++){
+                  outFile << rhs_vals[i] << endl;
+                }
+                outFile.close();
+        
+                outFile.open("dataA.csv", ios::out);
+                
+                for (int i = 0; i<n; i++){
+                  for (int j =0; j<n-1; j++){
+                    outFile << w[i][j] << ',';
+                  }
+                  outFile << w[i][n-1] << endl; 
+                }
+                outFile.close();
+      }*/
+
+
+      /*
+      for (int i=0; i<sizeof(jcn_unique) / sizeof(int); i++){
+          cout << irn_unique[i] << " " << jcn_unique[i] << endl;
+      }*/
+
+
+      //现在三元组已经按行从小到大进行排列，相同行的元素其列也按从小到大排列。下面进行CSR格式转换。
+      //asub代表该元素所处的列坐标，xa代表该元素在csr_a数组中所处的位置。
+
+      // cout << m << " " << n << " " << nnz << endl;
+
+      double *csr_a;
+      int *csr_asub, *csr_xa;
+      int asub_index = 0;
+
+      csr_a = new double[nnz];
+      csr_asub = new int[nnz];
+      csr_xa = new int[n+1];
+
+      // if ( !(csc_a = doubleMalloc(nnz)) ) ABORT("Malloc fails for a[].");
+      // if ( !(csc_asub = intMalloc(nnz)) ) ABORT("Malloc fails for asub[].");
+      // if ( !(csc_xa = intMalloc(n+1)) ) ABORT("Malloc fails for xa[].");
+
+      csr_a[0] = a_unique[0];
+      csr_asub[0] = jcn_unique[0];
+      csr_xa[0] = asub_index;
+      asub_index++;
+      for (int i = 1; i < nnz; i++)
+      {
+        csr_a[i] = a_unique[i];
+        csr_asub[i] = jcn_unique[i];
+        if (irn_unique[i] > irn_unique[i - 1])
+        {
+          csr_xa[asub_index] = i;
+          asub_index++;
+        }
+      }
+      csr_xa[asub_index] = nnz;
+
+      //调用superlu求解器开始     
+
+      // int *perm_c, *etree;
+      // perm_c = new int[n];
+      // etree = new int[n];
+
+      // if ( !(perm_c = intMalloc(n)) ) ABORT("Malloc fails for perm_c[].");
+      // if ( !(etree = intMalloc(n)) ) ABORT("Malloc fails for etree[].");
+
+      // if (pivtol_changed_)
+      // {
+      //   cout << "pivtol_changed_" << endl;
+      //   cout << pivtol_changed_ << endl;
+      //   DBG_PRINT((1, "Pivot tolerance has changed.\n"));
+      //   pivtol_changed_ = false;
+      //   // If the pivot tolerance has been changed but the matrix is not
+      //   // new, we have to request the values for the matrix again to do
+      //   // the factorization again.
+      //   if (!new_matrix)
+      //   {
+      //     cout << "!new_matrix" << endl;
+      //     cout << !new_matrix << endl;
+      //     DBG_PRINT((1, "Ask caller to call again.\n"));
+      //     refactorize_ = true;
+      //     return SYMSOLVER_CALL_AGAIN;
+      //   }
       // }
 
-      cout << call_counter << " ";
+      // // check if a factorization has to be done
+      // DBG_PRINT((1, "new_matrix = %d\n", new_matrix));
+      // if (new_matrix || refactorize_)
+      // {
+      //   cout << "!new_matrix" << endl;
+      //   cout << !new_matrix << endl;
+      //   ESymSolverStatus retval;
+      //   // Do the symbolic facotrization if it hasn't been done yet
+      //   if (!have_symbolic_factorization_)
+      //   {
+      //     retval = SymbolicFactorization();
+      //     if (retval != SYMSOLVER_SUCCESS)
+      //     {
+      //       return retval;
+      //     }
+      //     have_symbolic_factorization_ = true;
+      //   }
+      //   // perform the factorization
+      //   retval = Factorization(check_NegEVals, numberOfNegEVals);
+      //   if (retval != SYMSOLVER_SUCCESS)
+      //   {
+      //     DBG_PRINT((1, "FACTORIZATION FAILED!\n"));
+      //     return retval; // Matrix singular or error occurred
+      //   }  
+      //   refactorize_ = false;
+      // }
 
+      ESymSolverStatus retval = SYMSOLVER_SUCCESS;
+      
+      double *B;
+      double *rhs_valsx; 
+      B = (double*)malloc(sizeof(double)*n);
+      for (int i=0; i<n; i++){
+          B[i] = rhs_vals[i];
+      }
+      rhs_valsx = (double*)malloc(sizeof(double)*n);
+      for (int i=0; i<n; i++){
+        rhs_valsx[i] = rhs_vals[i];
+      }
+
+      /*
+      CSRMatrix *A = new CSRMatrix(m,n,nnz);
+      A->m = m;
+      A->n = n;
+      A->nnz = nnz;
+      for (int i=0; i<=n; i++){
+        A->rowptr[i] = csr_xa[i];
+      }
+      for (int i=0; i<nnz; i++){
+        A->val[i] = csr_a[i];
+        A->colind[i] = csr_asub[i];
+      }
+
+      SparseSolverSelector *solverSelector = new SparseSolverSelector();
+      solverSelector->setPlatform(CUDASOLVER);
+      solverSelector->solver->preconditioning();
+      
+      solverSelector->solver->setData(A, B, rhs_vals);
+      solverSelector->solver->execute();
+      */
+  
+      
+      // for (int i=0; i<n; i++){
+      //    cout << csr_xa[i] << "  ";
+      // }
+      // cout << csr_xa[n] << endl;
+      // for (int i=0; i<nnz-1; i++){
+      //     cout << csr_asub[i] << "  ";
+      // }
+      // cout << csr_asub[nnz-1] << endl;
+      // for (int i=0; i<nnz-1; i++){
+      //     cout << csr_a[i] << "  ";
+      // }
+      // cout << csr_a[nnz-1] << endl;
+      // for (int i=0; i<n-1; i++){
+      //   cout << B[i] << "  ";
+      // }
+      // cout << B[n-1] << endl;
+
+      Solve2(m, n, nnz, csr_a, csr_asub, csr_xa, B, rhs_valsx);
+      for (int i=0; i<n; i++){
+        rhs_vals[i] = rhs_valsx[i];
+      }
+      
+      for (int i=0; i<n; i++){
+        printf("%25.15e", rhs_vals[i]);
+      }
+      cout << endl;   
+      
+
+      if (call_counter == 5){
+        // for (int i = 0; i<n; i++){
+        //   cout << linky[i] << " ";
+        // }
+        // cout << endl;
+        exit(1);
+      }
+      
+
+      delete[] csr_a; 
+      delete[] csr_asub;
+      delete[] csr_xa;
+
+      // return Solve(nrhs, rhs_vals, m, n, nnz, csc_a, csc_asub, csc_xa, perm_c, etree);
       call_counter++;
-      return Solve(nrhs, rhs_vals);
-    
-      //return retval;
+      return retval;
   }
 
-  void CustomSolverInterface::Qsort(int *sort_array, int *position, double *a, int low, int high)
+  int CudaSolverInterface::find(int x)
+  {
+    double t;
+    visx[x] = 1;
+    for (int y = 0; y < ny; y++)
+    {
+      if (visy[y]==1)
+        continue;
+      t = lx[x] + ly[y] - w[x][y];
+      if (abs(t)<=1e-10)
+      {
+        visy[y] = 1;
+        if (linky[y] == -1 || find(linky[y]) == 1)
+        {
+          linky[y] = x;
+          return 1;
+        }
+      }
+      else if ((slack[y]-t)>1e-10)
+        slack[y] = t; 
+    }
+    return 0;
+  }
+
+  void CudaSolverInterface::KM()
+  {
+      int i, j;
+      double d;
+
+      for (i = 0; i < nx; i++) {
+        for (j = 0; j < ny; j++){
+          if (abs(w[i][j])>1e-10) w[i][j] = log10(abs(w[i][j])); else w[i][j] = -INF;
+        }
+      }
+    
+
+      for (i = 0; i < nx; i++) {
+        linky[i] = -1;
+        ly[i] = 0.0;
+        lx[i] = 0.0;
+      } 
+      
+      for (i = 0; i < nx; i++){
+        lx[i] = -INF; 
+        for (j = 0; j < ny; j++)
+              if ((w[i][j]-lx[i])>1e-10)
+                lx[i] = w[i][j];
+      }
+    
+      for (int x = 0; x < nx; x++)
+      {
+        for (i = 0; i < ny; i++)
+          slack[i] = INF;
+        while (true)
+        {
+          for (i = 0; i < nx; i++) {
+            visx[i] = 0;
+            visy[i] = 0;
+          }
+          if (find(x)==1){
+            break;
+          }
+            
+          d = INF;
+          for (i = 0; i < ny; i++)
+          {
+            if ((visy[i]==0) && ((d-slack[i])>1e-10))
+              d = slack[i];
+          }
+          for (i = 0; i < nx; i++)
+          {
+            if (visx[i]==1)
+              lx[i] = lx[i] - d;
+          }
+          for (i = 0; i < ny; i++)
+          {
+            if (visy[i]==1)
+              ly[i] = ly[i] + d;
+            else
+              slack[i] = slack[i] - d;
+          }
+
+        }
+
+      }
+      
+
+      /*
+      double result = 0;
+      for (i = 0; i<nx; i++){
+        result = result + abs(w[i][linky[i]]);
+      }*/
+
+
+      return;
+
+  }
+  void CudaSolverInterface::Qsort(int *sort_array, int *position, double *a, int low, int high)
   {
       if (low >= high)
       {
@@ -552,15 +762,53 @@ namespace Ipopt
       Qsort(sort_array, position, a, first + 1, high);
   }
 
-  double* CustomSolverInterface::GetValuesArrayPtr()
+  void CudaSolverInterface::Qsort2(int *sort_array1, int *sort_array2, double *a, int low, int high)
+  {
+      int first = low;
+      int last = high;
+      int key1 = sort_array1[(low+high)/2]; /*用字表的第一个记录作为枢轴*/
+      int key2 = sort_array2[(low+high)/2];
+      double key_a = a[(low+high)/2];
+      int tmp;
+      double tmpa;
+ 
+      while (first < last)
+      {
+          while ((sort_array1[last] > key1) || ((sort_array1[last] == key1) && (sort_array2[last] > key2)))
+          {
+              --last;
+          }
+
+          while ((sort_array1[first] < key1) || ((sort_array1[first] == key1) && (sort_array2[first] < key2)))
+          {
+              ++first;
+          }
+
+          if (first<=last){
+              tmp = sort_array1[first]; sort_array1[first] = sort_array1[last]; sort_array1[last] = tmp;
+              tmp = sort_array2[first]; sort_array2[first] = sort_array2[last]; sort_array2[last] = tmp;
+              tmpa = a[first]; a[first] = a[last]; a[last] = tmpa;
+              first++;
+              last--;
+          }
+          
+
+      }
+      
+      if (first<high) Qsort2(sort_array1, sort_array2, a, first, high);
+      if (last>low) Qsort2(sort_array1, sort_array2, a, low, last);
+  }
+
+  double* CudaSolverInterface::GetValuesArrayPtr()
   {
     DMUMPS_STRUC_C* mumps_ = (DMUMPS_STRUC_C*)mumps_ptr_;
-    DBG_START_METH("CustomSolverInterface::GetValuesArrayPtr",dbg_verbosity)
+    DBG_START_METH("CudaSolverInterface::GetValuesArrayPtr",dbg_verbosity)
     DBG_ASSERT(initialized_);
     return mumps_->a;
   }
 
-  void dump_matrix(DMUMPS_STRUC_C* mumps_data)
+  
+  void dump_matrix2(DMUMPS_STRUC_C* mumps_data)
   {
 #ifdef write_matrices
     // Dump the matrix    
@@ -587,13 +835,13 @@ namespace Ipopt
 
   /* Initialize the local copy of the positions of the nonzero
       elements */
-  ESymSolverStatus CustomSolverInterface::InitializeStructure(Index dim,
+  ESymSolverStatus CudaSolverInterface::InitializeStructure(Index dim,
       Index nonzeros,
       const Index* ia,
       const Index* ja)
   {
     DMUMPS_STRUC_C* mumps_ = (DMUMPS_STRUC_C*)mumps_ptr_;
-    DBG_START_METH("CustomSolverInterface::InitializeStructure", dbg_verbosity);
+    DBG_START_METH("CudaSolverInterface::InitializeStructure", dbg_verbosity);
 
     ESymSolverStatus retval = SYMSOLVER_SUCCESS;
     if (!warm_start_same_structure_) {
@@ -612,7 +860,7 @@ namespace Ipopt
     }
     else {
       ASSERT_EXCEPTION(mumps_->n==dim && mumps_->nz==nonzeros,
-                       INVALID_WARMSTART,"CustomSolverInterface called with warm_start_same_structure, but the problem size has changed.");
+                       INVALID_WARMSTART,"CudaSolverInterface called with warm_start_same_structure, but the problem size has changed.");
     }
 
     initialized_ = true;
@@ -620,9 +868,9 @@ namespace Ipopt
   }
 
 
-  ESymSolverStatus CustomSolverInterface::SymbolicFactorization()
+  ESymSolverStatus CudaSolverInterface::SymbolicFactorization()
   {
-    DBG_START_METH("CustomSolverInterface::SymbolicFactorization",
+    DBG_START_METH("CudaSolverInterface::SymbolicFactorization",
                    dbg_verbosity);
     DMUMPS_STRUC_C* mumps_data = (DMUMPS_STRUC_C*)mumps_ptr_;
 
@@ -646,7 +894,7 @@ namespace Ipopt
     mumps_data->icntl[13] = mem_percent_; //% memory to allocate over expected
     mumps_data->cntl[0] = pivtol_;  // Set pivot tolerance
 
-    dump_matrix(mumps_data);
+    dump_matrix2(mumps_data);
 
     Jnlst().Printf(J_MOREDETAILED, J_LINEAR_ALGEBRA,
                    "Calling MUMPS-1 for symbolic factorization at cpu time %10.3f (wall %10.3f).\n", CpuTime(), WallclockTime());
@@ -683,15 +931,15 @@ namespace Ipopt
     return SYMSOLVER_SUCCESS;
   }
 
-  ESymSolverStatus CustomSolverInterface::Factorization(
+  ESymSolverStatus CudaSolverInterface::Factorization(
     bool check_NegEVals, Index numberOfNegEVals)
   {
-    DBG_START_METH("CustomSolverInterface::Factorization", dbg_verbosity);
+    DBG_START_METH("CudaSolverInterface::Factorization", dbg_verbosity);
     DMUMPS_STRUC_C* mumps_data = (DMUMPS_STRUC_C*)mumps_ptr_;
 
     mumps_data->job = 2;//numerical factorization
 
-    dump_matrix(mumps_data);
+    dump_matrix2(mumps_data);
     Jnlst().Printf(J_MOREDETAILED, J_LINEAR_ALGEBRA,
                    "Calling MUMPS-2 for numerical factorization at cpu time %10.3f (wall %10.3f).\n", CpuTime(), WallclockTime());
     dmumps_c(mumps_data);
@@ -712,7 +960,7 @@ namespace Ipopt
         mumps_data->icntl[13] = (Index)(2.0 * mem_percent);
         Jnlst().Printf(J_WARNING, J_LINEAR_ALGEBRA, "%d.\n", mumps_data->icntl[13]);
 
-        dump_matrix(mumps_data);
+        dump_matrix2(mumps_data);
         Jnlst().Printf(J_MOREDETAILED, J_LINEAR_ALGEBRA,
                        "Calling MUMPS-2 (repeated) for numerical factorization at cpu time %10.3f (wall %10.3f).\n", CpuTime(), WallclockTime());
         dmumps_c(mumps_data);
@@ -759,7 +1007,7 @@ namespace Ipopt
 
     if (check_NegEVals && (numberOfNegEVals!=negevals_)) {
       Jnlst().Printf(J_DETAILED, J_LINEAR_ALGEBRA,
-                     "In CustomSolverInterface::Factorization: negevals_ = %d, but numberOfNegEVals = %d\n",
+                     "In CudaSolverInterface::Factorization: negevals_ = %d, but numberOfNegEVals = %d\n",
                      negevals_, numberOfNegEVals);
       return SYMSOLVER_WRONG_INERTIA;
     }
@@ -767,9 +1015,9 @@ namespace Ipopt
     return SYMSOLVER_SUCCESS;
   }
 
-  ESymSolverStatus CustomSolverInterface::Solve(Index nrhs, double *rhs_vals)
+  ESymSolverStatus CudaSolverInterface::Solve(Index nrhs, double *rhs_vals)
   {
-    DBG_START_METH("CustomSolverInterface::Solve", dbg_verbosity);
+    DBG_START_METH("CudaSolverInterface::Solve", dbg_verbosity);
     DMUMPS_STRUC_C* mumps_data = (DMUMPS_STRUC_C*)mumps_ptr_;
     ESymSolverStatus retval = SYMSOLVER_SUCCESS;
     if (HaveIpData()) {
@@ -806,7 +1054,7 @@ namespace Ipopt
     // for (int i=0; i<5; i++) {
     //   printf("%25.15e\n", mumps_data->cntl[i]);
     // }
-    // dump_matrix(mumps_data);
+    // dump_matrix2(mumps_data);
     // cout << "三元组元素：" << endl;
     // for (int i = 0; i < mumps_data->nz; i++)
     // {
@@ -822,13 +1070,10 @@ namespace Ipopt
     //   // cout << result[i] << endl;
     // }
     // cout << endl;
-    
-
-    for (int i = 0; i < mumps_data->n; i++)
-    {
-      cout << rhs_vals[i] << " ";
-    }
-    cout << endl;
+    // for (int i = 0; i < mumps_data->n; i++)
+    // {
+    //   cout << rhs_vals[i] << endl;
+    // }
     // // cout << "&&&&&&&&&&&&&&&&" << endl;
     
     // count_test++;
@@ -836,277 +1081,263 @@ namespace Ipopt
     return retval;
   }
 
-  void CustomSolverInterface::Solve2(int m,
-                                     int n,
+  void CudaSolverInterface::Solve2(int m,
+                                     int nn,
                                      int nnz,
-                                     double *a,
+                                     double *val,
                                      int *asub,
                                      int *xa,
-                                     double *b,
-                                     int *perm_c,
-                                     int *etree)
+                                     double *bb,
+                                     double *X)
   {
-    char equed[1];
-    yes_no_t equil;
-    trans_t trans;
-    SuperMatrix A, L, U;
-    SuperMatrix B, X;
-    GlobalLU_t Glu; /* facilitate multiple factorizations with
-                                       SamePattern_SameRowPerm            */
-    int *perm_r;    /* row permutations from partial pivoting */
-    void *work;
-    int info, lwork, nrhs;
-    int i;
-    double *rhsb, *rhsx;
-    double *R, *C;
-    double *ferr, *berr;
-    double u, rpg, rcond;
+    
+    cublasHandle_t cublasHandle;
+    cublasStatus_t cublasStatus;
+    cusparseHandle_t cusparseHandle;
+    cusparseStatus_t cusparseStatus;
+    cusparseMatDescr_t descrA;
+    cusparseMatDescr_t descrL;
+    cusparseMatDescr_t descrU;
 
-    mem_usage_t mem_usage;
-    superlu_options_t options;
-    SuperLUStat_t stat;
 
-    // Defaults
-    lwork = 0;
-    nrhs = 1;
-    equil = YES;
-    u = 1.0;
-    trans = NOTRANS;
-    set_default_options(&options);
+    cublasHandle = 0; 
+    cublasStatus = cublasCreate(&cublasHandle);
+    cusparseHandle = 0;
+    cusparseStatus = cusparseCreate(&cusparseHandle);
+    
+    descrA = 0;
+    descrL = 0;
+    descrU = 0;
+    cusparseStatus = cusparseCreateMatDescr(&descrA);
+    cusparseStatus = cusparseCreateMatDescr(&descrL);
+    cusparseStatus = cusparseCreateMatDescr(&descrU);
 
-    options.Equil = equil;
-    options.DiagPivotThresh = u;
-    options.Trans = trans;
 
-    /* Add more functionalities that the defaults. */
-    options.PivotGrowth = YES;       /* Compute reciprocal pivot growth */
-    options.ConditionNumber = YES;   /* Compute reciprocal condition number */
-    options.IterRefine = SLU_DOUBLE; /* Perform double-precision refinement */
+    cusparseSetMatType(descrA, CUSPARSE_MATRIX_TYPE_GENERAL);
+    cusparseSetMatIndexBase(descrA, CUSPARSE_INDEX_BASE_ZERO);
 
-    if (lwork > 0)
+    cusparseSetMatType(descrL, CUSPARSE_MATRIX_TYPE_GENERAL);
+    cusparseSetMatIndexBase(descrL, CUSPARSE_INDEX_BASE_ZERO);
+    cusparseSetMatFillMode(descrL, CUSPARSE_FILL_MODE_LOWER);
+    cusparseSetMatDiagType(descrL, CUSPARSE_DIAG_TYPE_UNIT);
+
+    cusparseSetMatType(descrU, CUSPARSE_MATRIX_TYPE_GENERAL);
+    cusparseSetMatIndexBase(descrU, CUSPARSE_INDEX_BASE_ZERO);
+    cusparseSetMatFillMode(descrU, CUSPARSE_FILL_MODE_UPPER);
+    cusparseSetMatDiagType(descrU, CUSPARSE_DIAG_TYPE_NON_UNIT);
+
+    const double one = 1.0;
+    const double zero = 0;
+    const double negativeone=-1.0;
+
+    CSRMatrix *A = new CSRMatrix(m,nn,nnz);
+    A->m = m;
+    A->n = nn;
+    A->nnz = nnz;
+
+    double *B;
+    B = (double*)malloc(sizeof(double)*m);
+    for (int i = 0; i < m; i++){
+        B[i] = bb[i];
+    }
+
+    for (int i = 0; i < A->m; i++)
     {
-      work = SUPERLU_MALLOC(lwork);
-      if (!work)
-      {
-        ABORT("DLINSOLX: cannot allocate work[]");
+        X[i] = 0;
+    }
+
+		double *d_val,  *d_x,*d_r,*d_f;
+		int *d_col, *d_row;
+		cudaMalloc((void **)&d_val, A->nnz*sizeof(double));
+		cudaMalloc((void **)&d_row, (A->m+1)*sizeof(int));
+		cudaMalloc((void **)&d_col, (A->nnz)*sizeof(int));
+		cudaMalloc((void **)&d_x, A->m*sizeof(double));
+		cudaMalloc((void **)&d_r, A->m*sizeof(double));
+		cudaMalloc((void **)&d_f, A->m*sizeof(double));
+
+
+		cudaMemcpy(d_col, A->colind, A->nnz*sizeof(int), cudaMemcpyHostToDevice);
+		cudaMemcpy(d_row, A->rowptr, (A->m + 1)*sizeof(int), cudaMemcpyHostToDevice);
+		cudaMemcpy(d_val, A->val, A->nnz*sizeof(double), cudaMemcpyHostToDevice);
+		cudaMemcpy(d_x, X, A->m*sizeof(double), cudaMemcpyHostToDevice);
+		cudaMemcpy(d_f,B, A->m*sizeof(double), cudaMemcpyHostToDevice);
+		int N = A->m;
+		int nz = A->nnz;
+		int nzILU0 = 2 * N - 1;
+		double *valsILU0 = (double *)malloc(nz*sizeof(double));
+		double *d_valsILU0;
+		double *d_zm1;
+		double *d_zm2;
+		double *d_rm2;
+		
+		//CUDADebug::printDeviceArray(d_f, A->m);
+		//CUDADebug::printHostArray(B, A->m);
+
+		cudaMalloc((void **)&d_valsILU0, nz*sizeof(double));
+		cudaMalloc((void **)&d_zm1, (N)*sizeof(double));
+		cudaMalloc((void **)&d_zm2, (N)*sizeof(double));
+		cudaMalloc((void **)&d_rm2, (N)*sizeof(double));
+
+
+		
+
+
+
+		cusparseSolveAnalysisInfo_t infoA = 0;
+		cusparseStatus = cusparseCreateSolveAnalysisInfo(&infoA);
+		
+
+		/* Perform the analysis for the Non-Transpose case */
+		cusparseStatus = cusparseDcsrsv_analysis(cusparseHandle, CUSPARSE_OPERATION_NON_TRANSPOSE,
+			N, nz, descrA, d_val, d_row, d_col, infoA);
+
+	
+
+		/* Copy A data to ILU0 vals as input*/
+		cudaMemcpy(d_valsILU0, d_val, nz*sizeof(double), cudaMemcpyDeviceToDevice);
+    cusparseStatus = cusparseDcsrilu0(cusparseHandle, CUSPARSE_OPERATION_NON_TRANSPOSE, N, descrA, d_valsILU0, d_row, d_col, infoA);
+
+		//checkCudaErrors(cusparseStatus);
+		//cusparseSolveAnalysisInfo_t info_u;
+		//cusparseCreateSolveAnalysisInfo(&info_u);
+
+		int n =N ;
+
+
+		cusparseSolveAnalysisInfo_t infoL,infoU;
+		cusparseCreateSolveAnalysisInfo(&infoL);
+		cusparseCreateSolveAnalysisInfo(&infoU);
+
+		cusparseStatus = cusparseDcsrsv_analysis(cusparseHandle, CUSPARSE_OPERATION_NON_TRANSPOSE, N, nz, descrU, d_val, d_row, d_col, infoU);
+    cusparseStatus = cusparseDcsrsv_analysis(cusparseHandle, CUSPARSE_OPERATION_NON_TRANSPOSE, N, nz, descrL, d_val, d_row, d_col, infoL);
+
+
+
+
+		double nrmr0,nrmr;
+
+
+		double *d_p,*d_q, *d_rw;
+		double *d_t,*d_s, *d_ph;
+		cudaMalloc((void **)&d_p, n*sizeof(double));
+		cudaMalloc((void **)&d_q, n*sizeof(double));
+		cudaMalloc((void **)&d_rw,n*sizeof(double));
+		cudaMalloc((void **)&d_t, n*sizeof(double));
+		cudaMalloc((void **)&d_s, n*sizeof(double));
+		cudaMalloc((void **)&d_ph, n*sizeof(double));
+		cudaMemcpy(d_q, X, A->m*sizeof(double), cudaMemcpyHostToDevice);
+		cudaMemcpy(d_t, X, A->m*sizeof(double), cudaMemcpyHostToDevice);
+		cudaMemcpy(d_s, X, A->m*sizeof(double), cudaMemcpyHostToDevice);
+		cudaMemcpy(d_ph, X, A->m*sizeof(double), cudaMemcpyHostToDevice);
+		cusparseDcsrmv(cusparseHandle, CUSPARSE_OPERATION_NON_TRANSPOSE, n, n, nz,&one,descrA,d_val, d_row, d_col, d_x,&zero, d_r);
+		cublasDscal(cublasHandle, n, &negativeone, d_r, 1);
+		cublasDaxpy(cublasHandle, n, &one, d_f, 1, d_r, 1);
+		cublasDcopy(cublasHandle, n, d_r, 1, d_p, 1);
+		cublasDcopy(cublasHandle, n, d_r, 1, d_rw, 1);
+		cublasDnrm2(cublasHandle, n, d_r, 1, &nrmr0);
+    int maxit = 1000;
+    double tol = 1e-15;
+		double alpha = 0, alpha_i = 0, beta = 0, omega = 1, omega_i;
+    double rho = 0, rhop=0;
+    int i = 0;
+		for (i = 0; i<maxit; i++)
+		{
+
+      cudaMemcpy(X, d_x, A->m*sizeof(double), cudaMemcpyDeviceToHost);
+      // cout << "ITER " << i << " ";
+      // for (int j=0; j<m; j++){
+      //   cout << X[j] << " ";
+      // }
+      // cout << endl;
+
+			rhop = rho;
+      cublasDdot(cublasHandle,n, d_rw, 1, d_r, 1, &rho);
+      // cout << "rho " << rho << endl;
+			if (i > 0)
+			{
+				beta = (rho / rhop)*(alpha / omega);
+				omega_i = 0 - omega;
+				cublasDaxpy(cublasHandle,n, &omega_i, d_q, 1, d_p, 1);
+				cublasDscal(cublasHandle,n, &beta, d_p, 1);
+				cublasDaxpy(cublasHandle,n, &one, d_r, 1, d_p, 1);
       }
-    }
+      //cublasDcopy(cublasHandle, n, d_p, 1, d_ph, 1);
+			cusparseDcsrsv_solve(cusparseHandle, CUSPARSE_OPERATION_NON_TRANSPOSE,n, &one, descrL, d_valsILU0, d_row, d_col,infoL, d_p, d_t);
+      cusparseDcsrsv_solve(cusparseHandle, CUSPARSE_OPERATION_NON_TRANSPOSE,n, &one, descrU, d_valsILU0, d_row, d_col,infoU, d_t,d_ph);
+      
+      double *ph = (double *)malloc(n*sizeof(double));
+      cudaMemcpy(ph, d_ph, n*sizeof(double), cudaMemcpyDeviceToHost);
+      for (int j=0; j<n; j++){
+        cout << ph[j] << " ";
+      }
+      cout << endl;
 
-    /* Initialize matrix A. */
-    dCreate_CompCol_Matrix(&A, m, n, nnz, a, asub, xa, SLU_NC, SLU_D, SLU_GE);
 
-    /* Create right-hand side matrix B and X. */
-    if (!(rhsb = doubleMalloc(m * nrhs)))
-      ABORT("Malloc fails for rhsb[].");
-    if (!(rhsx = doubleMalloc(m * nrhs)))
-      ABORT("Malloc fails for rhsx[].");
-    // if (!(sol = doubleMalloc(m * nrhs)))
-    //   ABORT("Malloc fails for sol[].");
+      /*
+      double *cval = (double *)malloc(nnz*sizeof(double));
+      cudaMemcpy(cval, d_val, nnz*sizeof(double), cudaMemcpyDeviceToHost);
+      for (int j=0; j<nnz; j++){
+        cout << cval[j] << " ";
+      }
+      cout << endl;*/
+      cusparseDcsrmv(cusparseHandle, CUSPARSE_OPERATION_NON_TRANSPOSE, n, n, nz,&one,descrA, d_val, d_row,d_col, d_ph, &zero, d_q);
 
-    for (i = 0; i < m; ++i)
-    {
-      rhsb[i] = b[i];
-      rhsx[i] = b[i];
-    }
-    dCreate_Dense_Matrix(&B, m, nrhs, rhsb, m, SLU_DN, SLU_D, SLU_GE);
-    dCreate_Dense_Matrix(&X, m, nrhs, rhsx, m, SLU_DN, SLU_D, SLU_GE);
 
-    if (!(perm_r = intMalloc(m)))
-      ABORT("Malloc fails for perm_r[].");
-    if (!(R = (double *)SUPERLU_MALLOC(A.nrow * sizeof(double))))
-      ABORT("SUPERLU_MALLOC fails for R[].");
-    if (!(C = (double *)SUPERLU_MALLOC(A.ncol * sizeof(double))))
-      ABORT("SUPERLU_MALLOC fails for C[].");
-    if (!(ferr = (double *)SUPERLU_MALLOC(nrhs * sizeof(double))))
-      ABORT("SUPERLU_MALLOC fails for ferr[].");
-    if (!(berr = (double *)SUPERLU_MALLOC(nrhs * sizeof(double))))
-      ABORT("SUPERLU_MALLOC fails for berr[].");
+      
+      // double *Q = (double *)malloc(n*sizeof(double));
+      // cudaMemcpy(Q, d_q, n*sizeof(double), cudaMemcpyDeviceToHost);
+      // for (int j=0; j<n; j++){
+      //   cout << Q[j] << " ";
+      // }
+      // cout << endl;
 
-    /* Initialize the statistics variables. */
-    StatInit(&stat);
+			__device__ double temp,temp2;
+      cublasDdot(cublasHandle,n, d_rw, 1, d_q, 1,&temp);
+      // cout << "temp " << temp << endl;
+      alpha = rho / temp;
+      // cout << "alpha " << alpha << endl;
+			alpha_i = 0 - alpha;
+			cublasDaxpy(cublasHandle, n, &alpha_i, d_q, 1, d_r, 1);
+			cublasDaxpy(cublasHandle, n, &alpha, d_ph, 1, d_x, 1);
+			cublasDnrm2(cublasHandle, n, d_r, 1,&nrmr);
+			if (nrmr / nrmr0 < tol)
+			{
+				break;
+      }
+      //cublasDcopy(cublasHandle, n, d_r, 1, d_s, 1);
+			cusparseDcsrsv_solve(cusparseHandle, CUSPARSE_OPERATION_NON_TRANSPOSE,n, &one, descrL, d_valsILU0, d_row, d_col,infoL, d_r, d_t);
+			cusparseDcsrsv_solve(cusparseHandle, CUSPARSE_OPERATION_NON_TRANSPOSE,n, &one, descrU, d_valsILU0, d_row, d_col,infoU, d_t, d_s);
+			cusparseDcsrmv(cusparseHandle, CUSPARSE_OPERATION_NON_TRANSPOSE, n, n,nz, &one,descrA, d_val, d_row, d_col, d_s, &zero, d_t);
+			cublasDdot(cublasHandle,n, d_t, 1, d_r, 1,&temp);
+			cublasDdot(cublasHandle, n, d_t, 1, d_t, 1,&temp2);
+			omega = temp / temp2;
+			cublasDaxpy(cublasHandle,n, &omega, d_s, 1, d_x, 1);
+			omega_i = 0 - omega;
+			cublasDaxpy(cublasHandle,n, &omega_i, d_t, 1, d_r, 1);  
+			cublasDnrm2(cublasHandle,n, d_r, 1,&nrmr);
+			if (nrmr / nrmr0 < tol)
+			{
+				break;
+			}
+		}
 
-    /* ------------------------------------------------------------
-           WE SOLVE THE LINEAR SYSTEM FOR THE FIRST TIME: AX = B
-           ------------------------------------------------------------*/
-    dgssvx(&options, &A, perm_c, perm_r, etree, equed, R, C,
-           &L, &U, work, lwork, &B, &X, &rpg, &rcond, ferr, berr,
-           &Glu, &mem_usage, &stat, &info);
+		cudaMemcpy(X, d_x, A->m*sizeof(double), cudaMemcpyDeviceToHost);
+		cusparseDestroySolveAnalysisInfo(infoA);
+		cusparseDestroySolveAnalysisInfo(infoL);
+		cusparseDestroySolveAnalysisInfo(infoU);
+		cudaFree(d_val); cudaFree(d_row); cudaFree(d_col); cudaFree(d_x); cudaFree(d_r); cudaFree(d_f);cudaFree(d_valsILU0);cudaFree(d_zm1);cudaFree(d_zm2);cudaFree(d_rm2);
+		cudaFree(d_p);cudaFree(d_q);cudaFree(d_rw);cudaFree(d_t);cudaFree(d_s);cudaFree(d_ph);
 
-    if (info == 0 || info == n + 1)
-    {
-      for (int i = 0; i < n; i++)
-        b[i] = ((double *)((DNformat *)X.Store)->nzval)[i];
-    }
-    else if (info > 0 && lwork == -1)
-    {
-      printf("** Estimated memory: %d bytes\n", info - n);
-    }
-
-    //if ( options.PrintStat )
-    //	StatPrint(&stat);
-    StatFree(&stat);
-
-    SUPERLU_FREE(rhsb);
-    SUPERLU_FREE(rhsx);
-    SUPERLU_FREE(perm_r);
-    SUPERLU_FREE(R);
-    SUPERLU_FREE(C);
-    SUPERLU_FREE(ferr);
-    SUPERLU_FREE(berr);
-    Destroy_CompCol_Matrix(&A);
-    Destroy_SuperMatrix_Store(&B);
-    Destroy_SuperMatrix_Store(&X);
-    if (lwork == 0)
-    {
-      Destroy_SuperNode_Matrix(&L);
-      Destroy_CompCol_Matrix(&U);
-    }
-    else if (lwork > 0)
-    {
-      SUPERLU_FREE(work);
-    }
   }
 
-  void CustomSolverInterface::Solve3(int m,
-                                     int n,
-                                     int nnz,
-                                     double *a,
-                                     int *asub,
-                                     int *xa,
-                                     double *b,
-                                     int *perm_c,
-                                     int *etree)
+  Index CudaSolverInterface::NumberOfNegEVals() const
   {
-    char equed[1];
-    yes_no_t equil;
-    trans_t trans;
-    SuperMatrix A1, L, U;
-    SuperMatrix B, X;
-    GlobalLU_t Glu; /* facilitate multiple factorizations with
-                                       SamePattern_SameRowPerm            */
-    int *perm_r;    /* row permutations from partial pivoting */
-    void *work;
-    int info, lwork, nrhs;
-    int i;
-    double *rhsb, *rhsx, *sol;
-    double *R, *C;
-    double *ferr, *berr;
-    double u, rpg, rcond;
-
-    mem_usage_t mem_usage;
-    superlu_options_t options;
-    SuperLUStat_t stat;
-
-    // Defaults
-    lwork = 0;
-    nrhs = 1;
-    equil = YES;
-    u = 1.0;
-    trans = NOTRANS;
-    set_default_options(&options);
-
-    options.Equil = equil;
-    options.DiagPivotThresh = u;
-    options.Trans = trans;
-
-    /* Add more functionalities that the defaults. */
-    options.PivotGrowth = YES;       /* Compute reciprocal pivot growth */
-    options.ConditionNumber = YES;   /* Compute reciprocal condition number */
-    options.IterRefine = SLU_DOUBLE; /* Perform double-precision refinement */
-
-    if (lwork > 0)
-    {
-      work = SUPERLU_MALLOC(lwork);
-      if (!work)
-      {
-        ABORT("DLINSOLX: cannot allocate work[]");
-      }
-    }
-
-    /* Initialize matrix A1. */
-    dCreate_CompCol_Matrix(&A1, m, n, nnz, a, asub, xa, SLU_NC, SLU_D, SLU_GE);
-
-    /* Create right-hand side matrix B and X. */
-    if (!(rhsb = doubleMalloc(m * nrhs)))
-      ABORT("Malloc fails for rhsb[].");
-    if (!(rhsx = doubleMalloc(m * nrhs)))
-      ABORT("Malloc fails for rhsx[].");
-    if (!(sol = doubleMalloc(n * nrhs)))
-      ABORT("Malloc fails for rhsx[].");
-
-    for (i = 0; i < m; ++i)
-    {
-      rhsb[i] = b[i];
-      rhsx[i] = b[i];
-    }
-    dCreate_Dense_Matrix(&B, m, nrhs, rhsb, m, SLU_DN, SLU_D, SLU_GE);
-    dCreate_Dense_Matrix(&X, m, nrhs, rhsx, m, SLU_DN, SLU_D, SLU_GE);
-
-    if (!(perm_r = intMalloc(m)))
-      ABORT("Malloc fails for perm_r[].");
-    if (!(R = (double *)SUPERLU_MALLOC(A1.nrow * sizeof(double))))
-      ABORT("SUPERLU_MALLOC fails for R[].");
-    if (!(C = (double *)SUPERLU_MALLOC(A1.ncol * sizeof(double))))
-      ABORT("SUPERLU_MALLOC fails for C[].");
-    if (!(ferr = (double *)SUPERLU_MALLOC(nrhs * sizeof(double))))
-      ABORT("SUPERLU_MALLOC fails for ferr[].");
-    if (!(berr = (double *)SUPERLU_MALLOC(nrhs * sizeof(double))))
-      ABORT("SUPERLU_MALLOC fails for berr[].");
-
-    options.Fact = SamePattern; //稀疏结构相同，复用perm_c
-
-    /* Initialize the statistics variables. */
-    StatInit(&stat);
-
-    /* ------------------------------------------------------------
-           WE SOLVE THE LINEAR SYSTEM FOR THE FIRST TIME: A1X = B
-           ------------------------------------------------------------*/
-    dgssvx(&options, &A1, perm_c, perm_r, etree, equed, R, C,
-           &L, &U, work, lwork, &B, &X, &rpg, &rcond, ferr, berr,
-           &Glu, &mem_usage, &stat, &info);
-    if (info == 0 || info == n + 1)
-    {
-      for (int i = 0; i < n; i++)
-        b[i] = ((double *)((DNformat *)X.Store)->nzval)[i];
-    }
-    else if (info > 0 && lwork == -1)
-    {
-      printf("** Estimated memory: %d bytes\n", info - n);
-    }
-
-    //if ( options.PrintStat )
-    //	StatPrint(&stat);
-    StatFree(&stat);
-
-    SUPERLU_FREE(rhsb);
-    SUPERLU_FREE(rhsx);
-    SUPERLU_FREE(perm_r);
-    SUPERLU_FREE(R);
-    SUPERLU_FREE(C);
-    SUPERLU_FREE(ferr);
-    SUPERLU_FREE(berr);
-    Destroy_CompCol_Matrix(&A1);
-    Destroy_SuperMatrix_Store(&B);
-    Destroy_SuperMatrix_Store(&X);
-    if (lwork == 0)
-    {
-      Destroy_SuperNode_Matrix(&L);
-      Destroy_CompCol_Matrix(&U);
-    }
-    else if (lwork > 0)
-    {
-      SUPERLU_FREE(work);
-    }
-  }
-
-  Index CustomSolverInterface::NumberOfNegEVals() const
-  {
-    DBG_START_METH("CustomSolverInterface::NumberOfNegEVals", dbg_verbosity);
+    DBG_START_METH("CudaSolverInterface::NumberOfNegEVals", dbg_verbosity);
     DBG_ASSERT(negevals_ >= 0);
     return negevals_;
   }
 
-  bool CustomSolverInterface::IncreaseQuality()
+  bool CudaSolverInterface::IncreaseQuality()
   {
     DBG_START_METH("MumpsTSolverInterface::IncreaseQuality",dbg_verbosity);
     if (pivtol_ == pivtolmax_) {
@@ -1127,16 +1358,16 @@ namespace Ipopt
     return true;
   }
 
-  bool CustomSolverInterface::ProvidesDegeneracyDetection() const
+  bool CudaSolverInterface::ProvidesDegeneracyDetection() const
   {
     return true;
   }
 
-  ESymSolverStatus CustomSolverInterface::
+  ESymSolverStatus CudaSolverInterface::
   DetermineDependentRows(const Index* ia, const Index* ja,
                          std::list<Index>& c_deps)
   {
-    DBG_START_METH("CustomSolverInterface::DetermineDependentRows",
+    DBG_START_METH("CudaSolverInterface::DetermineDependentRows",
                    dbg_verbosity);
     DMUMPS_STRUC_C* mumps_data = (DMUMPS_STRUC_C*)mumps_ptr_;
 
@@ -1164,7 +1395,7 @@ namespace Ipopt
     mumps_data->cntl[2] = mumps_dep_tol_;
     mumps_data->job = 2;//numerical factorization
 
-    dump_matrix(mumps_data);
+    dump_matrix2(mumps_data);
     dmumps_c(mumps_data);
     int error = mumps_data->info[0];
 
@@ -1181,7 +1412,7 @@ namespace Ipopt
         mumps_data->icntl[13] = (Index)(2.0 * mem_percent);
         Jnlst().Printf(J_WARNING, J_LINEAR_ALGEBRA, "%d.\n", mumps_data->icntl[13]);
 
-        dump_matrix(mumps_data);
+        dump_matrix2(mumps_data);
         dmumps_c(mumps_data);
         error = mumps_data->info[0];
         if (error != -8 && error != -9)

@@ -56,18 +56,18 @@
 ##==========================================================================  
   
 # The pre-processor and compiler options.  
-MY_CFLAGS = -I. -I./src/main/cpp -I${JAVA_HOME}/include -I${JAVA_HOME}/include/linux
+MY_CFLAGS = -I. -I./src/main/cpp -I${JAVA_HOME}/include -I${JAVA_HOME}/include/linux -I/home/bingte/lib/include/coin/ThirdParty
   
 # The linker options.  
 #MY_LIBS   =  -lipopt -lcoinmumps -lsuperlu_4.3 -lcoinlapack -lcoinblas -lieeeformat -lgfortran
 #MY_LIBS   =  -lbonmin -lOsiSym -lSym -lipopt -lOsiCbc -lCbcSolver -lCbc -lCgl -lOsiClp -lClp -lOsi -lCoinUtils -lpardiso500-GNU481-X86-64 -lsuperlu_4.3 -lopenblas -lgomp -lm -ldl
-MY_LIBS   =  -lbonmin -lipopt -lCbc -lSym -lCgl -lClp -lOsi -lCoinUtils -lcoinmumps -lcoinmetis -lsuperlu -lcoinlapack -lcoinblas -lgfortran
+MY_LIBS   =  -lbonmin -lipopt -lCbc -lSym -lCgl -lClp -lOsi -lCoinUtils -lcoinmumps -lcoinmetis -lsuperlu -lcoinlapack -lcoinblas -lgfortran -lcusolver -lcublas -lcusparse -lcudart -lculibos -lcudadevrt -lnvrtc
 
 # The pre-processor options used by the cpp (man cpp for more).  
 CPPFLAGS  = -Wall 
   
 # The options used in linking as well as in any direct use of ld.  所依赖库的路径
-LDFLAGS   = -L.
+LDFLAGS   = -L. -L/usr/local/cuda/lib64
    
 # The directories in which source files reside.  
 # If not specified, only the current directory will be serached.  

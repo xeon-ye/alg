@@ -409,13 +409,14 @@ jdoubleArray callback_hess) {
 	}
 
 	/* solve the problem */
-    SmartPtr<SparseSymLinearSolverInterface> SolverInterface = new CustomSolverInterface();
+    //SmartPtr<SparseSymLinearSolverInterface> SolverInterface = new CustomSolverInterface();
+    SmartPtr<SparseSymLinearSolverInterface> SolverInterface = new CudaSolverInterface();
     SmartPtr<TSymScalingMethod> ScalingMethod;
 //    SmartPtr<TSymScalingMethod> ScalingMethod = new SlackBasedTSymScalingMethod();
     SmartPtr<SymLinearSolver> ScaledSolver = new TSymLinearSolver(SolverInterface, ScalingMethod);
     SmartPtr<AugSystemSolver> AugSolver = new StdAugSystemSolver(*ScaledSolver);
     SmartPtr<AlgorithmBuilder> alg_builder = new AlgorithmBuilder(AugSolver);
-//    solver->application->Options()->SetStringValue("linear_solver","custom");
+    solver->application->Options()->SetStringValue("linear_solver","custom");
     SmartPtr<NLP> nlp_adapter = new TNLPAdapter(problem, NULL);
 	status = solver->application->OptimizeNLP(nlp_adapter, alg_builder);
 //	status = solver->application->OptimizeTNLP(problem);
