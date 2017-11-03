@@ -57,7 +57,7 @@ namespace volcano
 		double *X=0;
 		SolverType solver;
 		PreconditionerType preconditioner;
-		double tol = 0.000001;
+		double tol = 1e-10;
 		CSRMatrix *M1 = 0, *M2 = 0;
 		double *y = 0;
 	public:

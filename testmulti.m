@@ -1,6 +1,8 @@
 clc
 clear
 
+format long;
+
 global A n linky ly lx visx visy slack
 B = csvread('dataB.csv');
 A = csvread('dataA.csv');
@@ -62,7 +64,7 @@ end
 AA = zeros(n,n);
 BB = zeros(n,1);
 for i = 1 : n
-    AA(i,:) = pA(linky(i),:);
+    AA(linky(i),:) = pA(i,:);
     BB(i,:) = B(linky(i));
 end
 

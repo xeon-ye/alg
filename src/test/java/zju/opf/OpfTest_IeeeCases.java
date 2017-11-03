@@ -34,12 +34,12 @@ public class OpfTest_IeeeCases extends TestCase {
 
     public void testStandardCases() {
         IpoptOpf opf = new IpoptOpf();
-        doOpf(IcfDataUtil.ISLAND_14.clone(), opf);
+        //doOpf(IcfDataUtil.ISLAND_14.clone(), opf);
         //doOpf(IcfDataUtil.ISLAND_30.clone(), opf);
         //doOpf(IcfDataUtil.ISLAND_39.clone(), opf);
         //doOpf(IcfDataUtil.ISLAND_57.clone(), opf);
         //doOpf(IcfDataUtil.ISLAND_118.clone(), opf);
-        //doOpf(IcfDataUtil.ISLAND_300.clone(), opf);
+        doOpf(IcfDataUtil.ISLAND_300.clone(), opf);
     }
 
     public void doPf(IEEEDataIsland island, IpoptOpf opf) {

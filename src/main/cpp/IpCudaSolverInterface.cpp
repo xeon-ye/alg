@@ -395,23 +395,23 @@ namespace Ipopt
 
 
       
-      // KM();
+      KM();
 
-      // double* rhs_valst;
-      // rhs_valst = (double*)malloc(n*sizeof(double));
-      // for (int i = 0; i < n; i++){
-      //   rhs_valst[i] = rhs_vals[i];
-      // }
+      double* rhs_valst;
+      rhs_valst = (double*)malloc(n*sizeof(double));
+      for (int i = 0; i < n; i++){
+        rhs_valst[i] = rhs_vals[i];
+      }
  
-      // for (int i = 0; i < sizeof(jcn_unique) / sizeof(int); i++){
-      //   irn_unique[i] = linky[irn_unique[i]];
-      // }
-      // for (int i = 0; i < n; i++){
-      //   rhs_valst[i] = rhs_vals[linky[i]];
-      // }
-      // for (int i = 0; i < n; i++){
-      //   rhs_vals[i] = rhs_valst[i];
-      // }
+      for (int i = 0; i < sizeof(jcn_unique) / sizeof(int); i++){
+        irn_unique[i] = linky[irn_unique[i]];
+      }
+      for (int i = 0; i < n; i++){
+        rhs_valst[linky[i]] = rhs_vals[i];
+      }
+      for (int i = 0; i < n; i++){
+        rhs_vals[i] = rhs_valst[i];
+      }
   
 
 
@@ -551,12 +551,8 @@ namespace Ipopt
       for (int i=0; i<n; i++){
           B[i] = rhs_vals[i];
       }
-      rhs_valsx = (double*)malloc(sizeof(double)*n);
-      for (int i=0; i<n; i++){
-        rhs_valsx[i] = rhs_vals[i];
-      }
 
-      /*
+      
       CSRMatrix *A = new CSRMatrix(m,n,nnz);
       A->m = m;
       A->n = n;
@@ -575,44 +571,38 @@ namespace Ipopt
       
       solverSelector->solver->setData(A, B, rhs_vals);
       solverSelector->solver->execute();
-      */
+      
   
       
       // for (int i=0; i<n; i++){
-      //    cout << csr_xa[i] << "  ";
+      //    cout << A->rowptr[i] << "  ";
       // }
-      // cout << csr_xa[n] << endl;
+      // cout << A->rowptr[n] << endl;
       // for (int i=0; i<nnz-1; i++){
-      //     cout << csr_asub[i] << "  ";
+      //     cout << A->colind[i] << "  ";
       // }
-      // cout << csr_asub[nnz-1] << endl;
+      // cout << A->colind[nnz-1] << endl;
       // for (int i=0; i<nnz-1; i++){
-      //     cout << csr_a[i] << "  ";
+      //     cout << A->val[i] << "  ";
       // }
-      // cout << csr_a[nnz-1] << endl;
+      // cout << A->val[nnz-1] << endl;
       // for (int i=0; i<n-1; i++){
       //   cout << B[i] << "  ";
       // }
       // cout << B[n-1] << endl;
 
-      Solve2(m, n, nnz, csr_a, csr_asub, csr_xa, B, rhs_valsx);
-      for (int i=0; i<n; i++){
-        rhs_vals[i] = rhs_valsx[i];
-      }
       
-      for (int i=0; i<n; i++){
-        printf("%25.15e", rhs_vals[i]);
-      }
-      cout << endl;   
+      //Solve2(m, n, nnz, csr_a, csr_asub, csr_xa, B, rhs_vals);
+      
+      // for (int i=0; i<n; i++){
+      //   printf("%25.15e", rhs_vals[i]);
+      // }
+      // cout << endl;   
       
 
-      if (call_counter == 5){
-        // for (int i = 0; i<n; i++){
-        //   cout << linky[i] << " ";
-        // }
-        // cout << endl;
-        exit(1);
-      }
+      // if (call_counter == 5){
+      //   exit(1);
+      // }
       
 
       delete[] csr_a; 
@@ -1100,31 +1090,36 @@ namespace Ipopt
     cusparseMatDescr_t descrU;
 
 
-    cublasHandle = 0; 
-    cublasStatus = cublasCreate(&cublasHandle);
-    cusparseHandle = 0;
-    cusparseStatus = cusparseCreate(&cusparseHandle);
-    
-    descrA = 0;
-    descrL = 0;
-    descrU = 0;
-    cusparseStatus = cusparseCreateMatDescr(&descrA);
-    cusparseStatus = cusparseCreateMatDescr(&descrL);
-    cusparseStatus = cusparseCreateMatDescr(&descrU);
+    cublasHandle = 0;
+		cublasStatus = cublasCreate(&cublasHandle);
+		
+
+		cusparseHandle = 0;
+		cusparseStatus = cusparseCreate(&cusparseHandle);
+		
+		descrA = 0;
+		descrL = 0;
+		descrU = 0;
+		cusparseStatus = cusparseCreateMatDescr(&descrA);
+
+		cusparseStatus = cusparseCreateMatDescr(&descrL);
+		
+		cusparseStatus = cusparseCreateMatDescr(&descrU);
 
 
-    cusparseSetMatType(descrA, CUSPARSE_MATRIX_TYPE_GENERAL);
-    cusparseSetMatIndexBase(descrA, CUSPARSE_INDEX_BASE_ZERO);
+		cusparseSetMatType(descrA, CUSPARSE_MATRIX_TYPE_GENERAL);
+		cusparseSetMatIndexBase(descrA, CUSPARSE_INDEX_BASE_ZERO);
 
-    cusparseSetMatType(descrL, CUSPARSE_MATRIX_TYPE_GENERAL);
-    cusparseSetMatIndexBase(descrL, CUSPARSE_INDEX_BASE_ZERO);
-    cusparseSetMatFillMode(descrL, CUSPARSE_FILL_MODE_LOWER);
-    cusparseSetMatDiagType(descrL, CUSPARSE_DIAG_TYPE_UNIT);
 
-    cusparseSetMatType(descrU, CUSPARSE_MATRIX_TYPE_GENERAL);
-    cusparseSetMatIndexBase(descrU, CUSPARSE_INDEX_BASE_ZERO);
-    cusparseSetMatFillMode(descrU, CUSPARSE_FILL_MODE_UPPER);
-    cusparseSetMatDiagType(descrU, CUSPARSE_DIAG_TYPE_NON_UNIT);
+		cusparseSetMatType(descrL, CUSPARSE_MATRIX_TYPE_GENERAL);
+		cusparseSetMatIndexBase(descrL, CUSPARSE_INDEX_BASE_ZERO);
+		cusparseSetMatFillMode(descrL, CUSPARSE_FILL_MODE_LOWER);
+		cusparseSetMatDiagType(descrL, CUSPARSE_DIAG_TYPE_UNIT);
+
+		cusparseSetMatType(descrU, CUSPARSE_MATRIX_TYPE_GENERAL);
+		cusparseSetMatIndexBase(descrU, CUSPARSE_INDEX_BASE_ZERO);
+		cusparseSetMatFillMode(descrU, CUSPARSE_FILL_MODE_UPPER);
+		cusparseSetMatDiagType(descrU, CUSPARSE_DIAG_TYPE_NON_UNIT);
 
     const double one = 1.0;
     const double zero = 0;
@@ -1180,9 +1175,6 @@ namespace Ipopt
 
 
 		
-
-
-
 		cusparseSolveAnalysisInfo_t infoA = 0;
 		cusparseStatus = cusparseCreateSolveAnalysisInfo(&infoA);
 		
@@ -1195,8 +1187,7 @@ namespace Ipopt
 
 		/* Copy A data to ILU0 vals as input*/
 		cudaMemcpy(d_valsILU0, d_val, nz*sizeof(double), cudaMemcpyDeviceToDevice);
-    cusparseStatus = cusparseDcsrilu0(cusparseHandle, CUSPARSE_OPERATION_NON_TRANSPOSE, N, descrA, d_valsILU0, d_row, d_col, infoA);
-
+		cusparseStatus = cusparseDcsrilu0(cusparseHandle, CUSPARSE_OPERATION_NON_TRANSPOSE, N, descrA, d_valsILU0, d_row, d_col, infoA);
 		//checkCudaErrors(cusparseStatus);
 		//cusparseSolveAnalysisInfo_t info_u;
 		//cusparseCreateSolveAnalysisInfo(&info_u);
@@ -1209,7 +1200,7 @@ namespace Ipopt
 		cusparseCreateSolveAnalysisInfo(&infoU);
 
 		cusparseStatus = cusparseDcsrsv_analysis(cusparseHandle, CUSPARSE_OPERATION_NON_TRANSPOSE, N, nz, descrU, d_val, d_row, d_col, infoU);
-    cusparseStatus = cusparseDcsrsv_analysis(cusparseHandle, CUSPARSE_OPERATION_NON_TRANSPOSE, N, nz, descrL, d_val, d_row, d_col, infoL);
+		cusparseStatus = cusparseDcsrsv_analysis(cusparseHandle, CUSPARSE_OPERATION_NON_TRANSPOSE, N, nz, descrL, d_val, d_row, d_col, infoL);
 
 
 
@@ -1236,23 +1227,13 @@ namespace Ipopt
 		cublasDcopy(cublasHandle, n, d_r, 1, d_rw, 1);
 		cublasDnrm2(cublasHandle, n, d_r, 1, &nrmr0);
     int maxit = 1000;
-    double tol = 1e-15;
+    double tol = 1e-10;
 		double alpha = 0, alpha_i = 0, beta = 0, omega = 1, omega_i;
-    double rho = 0, rhop=0;
-    int i = 0;
-		for (i = 0; i<maxit; i++)
+		double rho = 0, rhop=0;
+		for (int i = 0; i<maxit; i++)
 		{
-
-      cudaMemcpy(X, d_x, A->m*sizeof(double), cudaMemcpyDeviceToHost);
-      // cout << "ITER " << i << " ";
-      // for (int j=0; j<m; j++){
-      //   cout << X[j] << " ";
-      // }
-      // cout << endl;
-
 			rhop = rho;
-      cublasDdot(cublasHandle,n, d_rw, 1, d_r, 1, &rho);
-      // cout << "rho " << rho << endl;
+			cublasDdot(cublasHandle,n, d_rw, 1, d_r, 1, &rho);
 			if (i > 0)
 			{
 				beta = (rho / rhop)*(alpha / omega);
@@ -1260,42 +1241,14 @@ namespace Ipopt
 				cublasDaxpy(cublasHandle,n, &omega_i, d_q, 1, d_p, 1);
 				cublasDscal(cublasHandle,n, &beta, d_p, 1);
 				cublasDaxpy(cublasHandle,n, &one, d_r, 1, d_p, 1);
-      }
-      //cublasDcopy(cublasHandle, n, d_p, 1, d_ph, 1);
+			}
 			cusparseDcsrsv_solve(cusparseHandle, CUSPARSE_OPERATION_NON_TRANSPOSE,n, &one, descrL, d_valsILU0, d_row, d_col,infoL, d_p, d_t);
-      cusparseDcsrsv_solve(cusparseHandle, CUSPARSE_OPERATION_NON_TRANSPOSE,n, &one, descrU, d_valsILU0, d_row, d_col,infoU, d_t,d_ph);
-      
-      double *ph = (double *)malloc(n*sizeof(double));
-      cudaMemcpy(ph, d_ph, n*sizeof(double), cudaMemcpyDeviceToHost);
-      for (int j=0; j<n; j++){
-        cout << ph[j] << " ";
-      }
-      cout << endl;
+			cusparseDcsrsv_solve(cusparseHandle, CUSPARSE_OPERATION_NON_TRANSPOSE,n, &one, descrU, d_valsILU0, d_row, d_col,infoU, d_t,d_ph);
 
-
-      /*
-      double *cval = (double *)malloc(nnz*sizeof(double));
-      cudaMemcpy(cval, d_val, nnz*sizeof(double), cudaMemcpyDeviceToHost);
-      for (int j=0; j<nnz; j++){
-        cout << cval[j] << " ";
-      }
-      cout << endl;*/
-      cusparseDcsrmv(cusparseHandle, CUSPARSE_OPERATION_NON_TRANSPOSE, n, n, nz,&one,descrA, d_val, d_row,d_col, d_ph, &zero, d_q);
-
-
-      
-      // double *Q = (double *)malloc(n*sizeof(double));
-      // cudaMemcpy(Q, d_q, n*sizeof(double), cudaMemcpyDeviceToHost);
-      // for (int j=0; j<n; j++){
-      //   cout << Q[j] << " ";
-      // }
-      // cout << endl;
-
+			cusparseDcsrmv(cusparseHandle, CUSPARSE_OPERATION_NON_TRANSPOSE, n, n, nz,&one,descrA, d_val, d_row,d_col, d_ph, &zero, d_q);
 			__device__ double temp,temp2;
-      cublasDdot(cublasHandle,n, d_rw, 1, d_q, 1,&temp);
-      // cout << "temp " << temp << endl;
-      alpha = rho / temp;
-      // cout << "alpha " << alpha << endl;
+			 cublasDdot(cublasHandle,n, d_rw, 1, d_q, 1,&temp);
+			alpha = rho / temp;
 			alpha_i = 0 - alpha;
 			cublasDaxpy(cublasHandle, n, &alpha_i, d_q, 1, d_r, 1);
 			cublasDaxpy(cublasHandle, n, &alpha, d_ph, 1, d_x, 1);
@@ -1303,8 +1256,7 @@ namespace Ipopt
 			if (nrmr / nrmr0 < tol)
 			{
 				break;
-      }
-      //cublasDcopy(cublasHandle, n, d_r, 1, d_s, 1);
+			}
 			cusparseDcsrsv_solve(cusparseHandle, CUSPARSE_OPERATION_NON_TRANSPOSE,n, &one, descrL, d_valsILU0, d_row, d_col,infoL, d_r, d_t);
 			cusparseDcsrsv_solve(cusparseHandle, CUSPARSE_OPERATION_NON_TRANSPOSE,n, &one, descrU, d_valsILU0, d_row, d_col,infoU, d_t, d_s);
 			cusparseDcsrmv(cusparseHandle, CUSPARSE_OPERATION_NON_TRANSPOSE, n, n,nz, &one,descrA, d_val, d_row, d_col, d_s, &zero, d_t);
