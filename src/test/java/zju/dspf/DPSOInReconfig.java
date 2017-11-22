@@ -2,6 +2,8 @@ package zju.dspf;
 
 import zju.dsmodel.DsTopoIsland;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,7 +16,10 @@ class DPSOInReconfig {
     ParticleInReconfig[] particles;//粒子群，一个Particle的对象
     double globalBestFitness;//全局最优解
     static double[] globalBestPosition;//所有粒子找到的最好位置
+    //全局最优解历史
     static List<double[]> globalBestPositionList;
+    //全局最优解对应配网拓扑历史
+//    static List<DsTopoIsland> globalBestDsTopoIslandList;
 
     int particlesAmount;//粒子的数量
 
@@ -46,6 +51,7 @@ class DPSOInReconfig {
         globalBestFitness = 1e6;//全局最优适应值
         globalBestPosition = new double[ParticleInReconfig.getDimension()];//开辟内存，全局最优位置，存储全局最优位置的数组长度应等于粒子的维数.
         globalBestPositionList = new ArrayList<>();
+//        globalBestDsTopoIslandList = new ArrayList<>();
 
         int index = -1;//记录最优位置
         for (int i = 0; i < particlesAmount; ++i) {
@@ -67,7 +73,7 @@ class DPSOInReconfig {
     /**
      * 粒子群的运行
      */
-    public void run() {
+    public void run() throws IOException {
         int runTimes = 1;//运行次数是1
         int index;//index
         //todo:最大迭代次数
@@ -89,7 +95,11 @@ class DPSOInReconfig {
                     globalBestPosition[i] = particles[index].getPosition()[i];//若index不是-1，则记录位置
                     position[i] = particles[index].getPosition()[i];
                 }
+                //保存最优解历史，始终放在第一位
                 globalBestPositionList.add(0,position);
+//                //保存最优解对应配网拓扑，始终放在第一位
+//                globalBestDsTopoIslandList.add(0,particles[index].getCalIsland().clone());
+
                 //打印结果
                 System.out.println("第" + runTimes + "次迭代发现更好解：");
                 System.out.println("globalBestFitness:" + globalBestFitness);
@@ -99,6 +109,11 @@ class DPSOInReconfig {
                         System.out.println("改变线路" + originIsland.getIdToBranch().get(i + 1).getName() + "状态");
                     }
                 }
+                //插入次数
+                FileWriter fileWriter = new FileWriter("D:\\result\\reconfiguration\\voltage.csv",true);
+                fileWriter.write("第"+runTimes+"次迭代发现更好解\n");
+                fileWriter.close();
+                DsPowerflowTest.printBusV(particles[index].getCalIsland(), true, false);
             }
             runTimes++;
         }
@@ -123,6 +138,7 @@ class DPSOInReconfig {
             System.out.println("第"+i+"优解：");
             for(int j =0;j<globalBestPositionList.get(i).length;j++){
                 if(globalBestPositionList.get(i)[j]==1){
+                    System.out.println(j);
                     System.out.println("改变线路"+originIsland.getIdToBranch().get(j+1).getName()+"状态");
                 }
             }

@@ -6,6 +6,7 @@ import zju.devmodel.MapObject;
 import zju.dsmodel.*;
 import zju.dsntp.DsPowerflow;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +19,7 @@ import java.util.Map;
  */
 public class MeshedDsPfTest extends TestCase implements DsModelCons {
 
-    public void testNotConverged_case33() {
+    public void testNotConverged_case33() throws IOException {
 
         DsTopoIsland island1 = DsCase33.createOpenLoopCase33();
         for (GeneralBranch b : island1.getBranches().values()) {
@@ -47,26 +48,50 @@ public class MeshedDsPfTest extends TestCase implements DsModelCons {
         DsPowerflowTest.printBusV(island1, true, true);
     }
 
-    //initialIsland中注释；潮流计算中注释
-    public void testCase33ReconfigByDPSO() {
+    public void testRadicalCase33() throws IOException {
         DsTopoIsland island = DsCase33.createRadicalCase33();
-        //tns键值为tn中的cn的id值，cn的id为原始编号
-        Map<String, DsTopoNode> tns = DsCase33.createTnMap(island);
-
-        DsCase33.addFeeder(island, tns, "33 8 21 2.0 2.0 2.0 2.0 2.0 2.0 0. 0. 0. 0. 0. 0.");
-        DsCase33.addFeeder(island, tns, "34 9 15 2.0 2.0 2.0 2.0 2.0 2.0 0. 0. 0. 0. 0. 0.");
-        DsCase33.addFeeder(island, tns, "35 12 22 2.0 2.0 2.0 2.0 2.0 2.0 0. 0. 0. 0. 0. 0.");
-        DsCase33.addFeeder(island, tns, "36 18 33 0.5 0.5 0.5 0.5 0.5 0.5 0. 0. 0. 0. 0. 0.");
-        DsCase33.addFeeder(island, tns, "37 25 29 0.5 0.5 0.5 0.5 0.5 0.5 0. 0. 0. 0. 0. 0.");
         island.initialIsland();
+        DsPowerflow pf = new DsPowerflow();
+        pf.setTolerance(1e-1);
+        pf.doLcbPf(island);
 
-        DPSOInReconfig dpsoInReconfig = new DPSOInReconfig(island);
+        DsPowerflowTest.printBusV(island, true, false);
+
+        double fitness = 0;
+        for (MapObject i : island.getBranches().keySet()) {
+            Feeder feeder = (Feeder) island.getBranches().get(i);
+            double[][] Z_real = feeder.getZ_real();
+
+            double[][] branchHeadI = island.getBranchHeadI().get(i);
+            double loss = 0;
+            for (int j = 0; j < 3; j++) {
+                loss += (branchHeadI[j][0] * branchHeadI[j][0] + branchHeadI[j][1] * branchHeadI[j][1]) * Z_real[j][j];
+            }
+            fitness += loss;
+        }
+        System.out.println("fitness:"+fitness);
+    }
+    //initialIsland中注释；潮流计算中注释
+    public void testCase33ReconfigByDPSO() throws IOException {
+        //获取完整配网拓扑
+        DsTopoIsland completeIsland = DsCase33.createRadicalCase33();
+        //tns键值为tn中的cn的id值，cn的id为原始编号
+        Map<String, DsTopoNode> tns = DsCase33.createTnMap(completeIsland);
+        DsCase33.addFeeder(completeIsland, tns, "33 8 21 2.0 2.0 2.0 2.0 2.0 2.0 0. 0. 0. 0. 0. 0.");
+        DsCase33.addFeeder(completeIsland, tns, "34 9 15 2.0 2.0 2.0 2.0 2.0 2.0 0. 0. 0. 0. 0. 0.");
+        DsCase33.addFeeder(completeIsland, tns, "35 12 22 2.0 2.0 2.0 2.0 2.0 2.0 0. 0. 0. 0. 0. 0.");
+        DsCase33.addFeeder(completeIsland, tns, "36 18 33 0.5 0.5 0.5 0.5 0.5 0.5 0. 0. 0. 0. 0. 0.");
+        DsCase33.addFeeder(completeIsland, tns, "37 25 29 0.5 0.5 0.5 0.5 0.5 0.5 0. 0. 0. 0. 0. 0.");
+        completeIsland.initialIsland();
+
+        //粒子群寻优
+        DPSOInReconfig dpsoInReconfig = new DPSOInReconfig(completeIsland);
         dpsoInReconfig.initial();
         dpsoInReconfig.run();
         dpsoInReconfig.showResult();
     }
 
-    public void testCase33ReconfigStrategy() {
+    public void testCase33ReconfigStrategy() throws IOException {
         //获取完整配网拓扑
         DsTopoIsland completeIsland = DsCase33.createRadicalCase33();
         //tns键值为tn中的cn的id值，cn的id为原始编号
@@ -155,6 +180,51 @@ public class MeshedDsPfTest extends TestCase implements DsModelCons {
         }
     }
 
+    public void testCase33ReconfigStrategy1() throws IOException {
+        //获取完整配网拓扑
+        DsTopoIsland completeIsland = DsCase33.createRadicalCase33();
+        //tns键值为tn中的cn的id值，cn的id为原始编号
+        Map<String, DsTopoNode> tns = DsCase33.createTnMap(completeIsland);
+        DsCase33.addFeeder(completeIsland, tns, "33 8 21 2.0 2.0 2.0 2.0 2.0 2.0 0. 0. 0. 0. 0. 0.");
+        DsCase33.addFeeder(completeIsland, tns, "34 9 15 2.0 2.0 2.0 2.0 2.0 2.0 0. 0. 0. 0. 0. 0.");
+        DsCase33.addFeeder(completeIsland, tns, "35 12 22 2.0 2.0 2.0 2.0 2.0 2.0 0. 0. 0. 0. 0. 0.");
+        DsCase33.addFeeder(completeIsland, tns, "36 18 33 0.5 0.5 0.5 0.5 0.5 0.5 0. 0. 0. 0. 0. 0.");
+        DsCase33.addFeeder(completeIsland, tns, "37 25 29 0.5 0.5 0.5 0.5 0.5 0.5 0. 0. 0. 0. 0. 0.");
+        completeIsland.initialIsland();
+
+        //获取初始配网拓扑
+        DsTopoIsland originIsland = DsCase33.createRadicalCase33();
+        originIsland.initialIsland();
+
+        List<String> toOpenBranches = new ArrayList<>();
+        List<String> toCloseBranches = new ArrayList<>();
+
+        //经检验，第一步必须断开“10-11”
+        toOpenBranches.add("10-11");
+        //经检验，第二步只能断开“14-15”或者“7-8”
+        toOpenBranches.add("14-15");
+
+        toOpenBranches.add("7-8");
+        toOpenBranches.add("32-33");
+
+
+        //经检验，第一步必须闭合“9-15”
+        toCloseBranches.add("9-15");
+        //经检验，第二步必须闭合“12-22”
+        toCloseBranches.add("12-22");
+
+        toCloseBranches.add("18-33");
+        toCloseBranches.add("8-21");
+
+        String result;
+        result = ReconfigStrategy.getReconfigStrategy(originIsland, toOpenBranches, toCloseBranches);
+        if(result != null){
+            System.out.println("实施策略："+result);
+        }else{
+            System.out.println("==============第二层优化失败==============");
+        }
+    }
+
     public void testCalZMatrix() {
         Matrix[] matrices = new Matrix[3];
         double[][] ele = {{1, 0, 2, -1, 1, 1}, {0, 1, 1, 1, 1, 2}, {-1, 1, 1, 0, 1, 0}};
@@ -171,8 +241,7 @@ public class MeshedDsPfTest extends TestCase implements DsModelCons {
 
     }
 
-
-    public void testLoopedPf_case33() {
+    public void testLoopedPf_case33() throws IOException {
         DsTopoIsland island1 = DsCase33.createRadicalCase33();
         DsTopoIsland island2 = DsCase33.createRadicalCase33();
         testConverged(island1, false);

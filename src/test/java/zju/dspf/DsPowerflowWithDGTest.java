@@ -4,6 +4,7 @@ import junit.framework.TestCase;
 import zju.devmodel.MapObject;
 import zju.dsmodel.*;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -24,7 +25,7 @@ public class DsPowerflowWithDGTest extends TestCase implements DsModelCons {
         cmBuilder = new CalModelBuilder();
     }
 
-    public void testPf_withDg_case4() {
+    public void testPf_withDg_case4() throws IOException {
         DistriSys ds = IeeeDsInHand.FEEDER4_DGrY_B.clone();
 
         MapObject g1 = parser.parseDg("4\tPV\tY\t300\t300\t300\t2.1\t2.1\t2.1");
@@ -153,7 +154,7 @@ public class DsPowerflowWithDGTest extends TestCase implements DsModelCons {
 //        DsPowerflowTest.testConverged(ds1, false);
     }
 
-    public void testPf_withDg_case4_unbalanced() {
+    public void testPf_withDg_case4_unbalanced() throws IOException {
         // 以下代码基本复制自testPf_withDg_case4方法，仅修改了调用的测试系统
         System.out.println("\nIEEE4节点系统（变压器GrY-GrY，三相负荷不平衡）测试：");
         // 1 DG类型为PQ节点
@@ -481,7 +482,7 @@ public class DsPowerflowWithDGTest extends TestCase implements DsModelCons {
         //DsPowerflowTest.assertStateEquals(island1, island2);
     }
 
-    public void testPf_withIM_case4() {
+    public void testPf_withIM_case4() throws IOException {
         DistriSys ds = IeeeDsInHand.FEEDER4_GrYGrY_B.clone();
         DsDeviceParser parser = new DsDeviceParser();
 
@@ -560,7 +561,7 @@ public class DsPowerflowWithDGTest extends TestCase implements DsModelCons {
         DsPowerflowTest.assertStateEquals(island1, island2);
     }
 
-    public void testPf_withDg_case34() {
+    public void testPf_withDg_case34() throws IOException {
         DistriSys ds = IeeeDsInHand.FEEDER34.clone();
 
         MapObject t1 = parser.parseBranch("848\t891\t0\tT1", null);
@@ -614,7 +615,7 @@ public class DsPowerflowWithDGTest extends TestCase implements DsModelCons {
         DsPowerflowTest.printBusV(ds4.getActiveIslands()[0], false, false);
     }
 
-    public void testPf_withDg_case34_more() {
+    public void testPf_withDg_case34_more() throws IOException {
         System.out.println("含分布式电源的IEEE34节点系统测试（辐射型配电网）");
         System.out.println("\n案例1：846节点接入PQ型DG，Y接法，每相P=30kW，Q=20kVar");
         DistriSys node34c1 = IeeeDsInHand.FEEDER34.clone();

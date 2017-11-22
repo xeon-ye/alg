@@ -8,6 +8,8 @@ import zju.dsntp.LcbPfModel;
 import zju.matrix.AVector;
 import zju.util.DoubleMatrixToolkit;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.InputStream;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -35,7 +37,7 @@ public class DsPowerflowTest extends TestCase implements DsModelCons {
         super.tearDown();
     }
 
-    public void testCase4() {
+    public void testCase4() throws IOException {
         DistriSys ds = IeeeDsInHand.FEEDER4_GrYGrY_B.clone();
         testConverged(ds, false);
         testKCL(ds);
@@ -43,6 +45,14 @@ public class DsPowerflowTest extends TestCase implements DsModelCons {
         ds = IeeeDsInHand.FEEDER4_GrYGrY_B.clone();
         testConverged(ds, true);
         assert_GrYGrY_B(ds);
+
+        System.out.println("开始打印");
+        DsTopoIsland[] islands = ds.getActiveIslands();
+        for(DsTopoIsland i : islands){
+            printBusV(i,i.isPerUnitSys(),false);
+        }
+
+
 
         ds = IeeeDsInHand.FEEDER4_GrYGrY_UNB.clone();
         testConverged(ds, false);
@@ -299,7 +309,7 @@ public class DsPowerflowTest extends TestCase implements DsModelCons {
         assertStateEquals(island1, island2);
     }
 
-    public void testStandardCases() {
+    public void testStandardCases() throws IOException {
         DistriSys ds1 = IeeeDsInHand.FEEDER13.clone();
         DistriSys ds2 = IeeeDsInHand.FEEDER13.clone();
         testConverged(ds1, false);
@@ -308,6 +318,13 @@ public class DsPowerflowTest extends TestCase implements DsModelCons {
         DsTopoIsland island1 = ds1.getActiveIslands()[0];
         DsTopoIsland island2 = ds2.getActiveIslands()[0];
         assertStateEquals(island1, island2);
+
+        System.out.println("开始打印");
+        DsTopoIsland[] islands = ds1.getActiveIslands();
+        for(DsTopoIsland i : islands){
+            printBusV(i,i.isPerUnitSys(),false);
+        }
+
 
         ds1 = IeeeDsInHand.FEEDER34.clone();
         ds2 = IeeeDsInHand.FEEDER34.clone();
@@ -335,6 +352,17 @@ public class DsPowerflowTest extends TestCase implements DsModelCons {
         island1 = ds1.getActiveIslands()[0];
         island2 = ds2.getActiveIslands()[0];
         assertStateEquals(island1, island2);
+
+        System.out.println("打印结果");
+        for(DsTopoNode i : island1.getBusV().keySet()){
+            System.out.print(i.getType()+" ");
+            for (double[] j : island1.getBusV().get(i)){
+                for(double k : j){
+                    System.out.print(k+" ");
+                }
+            }
+            System.out.println();
+        }
     }
 
     public static void assertStateEquals(DsTopoIsland island1, DsTopoIsland island2) {
@@ -369,6 +397,8 @@ public class DsPowerflowTest extends TestCase implements DsModelCons {
 
     public static void testConverged(DistriSys ds, boolean isBcfMethod) {
         ds.buildDynamicTopo();
+        System.out.println("网络数量："+ds.getActiveIslands().length);
+
         ds.createCalDevModel();
 
         DsPowerflow pf = new DsPowerflow(ds);
@@ -438,7 +468,7 @@ public class DsPowerflowTest extends TestCase implements DsModelCons {
         return lineToLineV;
     }
 
-    public static void printBusV(DsTopoIsland island, boolean isPerUnit, boolean isCartesian) {
+    public static void printBusV(DsTopoIsland island, boolean isPerUnit, boolean isCartesian) throws IOException {
         List<DsTopoNode> tns = new ArrayList<DsTopoNode>(island.getBusV().keySet());
         Collections.sort(tns, new Comparator<Object>() {
             @Override
@@ -475,7 +505,10 @@ public class DsPowerflowTest extends TestCase implements DsModelCons {
             }
             String id = tn.getConnectivityNodes().get(0).getId();
             StringBuilder sb = new StringBuilder();
+            //插入文件
+            StringBuilder stringBuilder = new StringBuilder();
             sb.append(id).append("\t");
+            stringBuilder.append(id).append(",");
             for (int i = 0; i < v.length; i++) {
                 if (!tn.containsPhase(i)) {
                     sb.append("-\t-\t");
@@ -483,8 +516,15 @@ public class DsPowerflowTest extends TestCase implements DsModelCons {
                 }
                 sb.append(df1.format(v[i][0])).append("\t");
                 sb.append(df2.format(v[i][1])).append("\t");
+                stringBuilder.append(df1.format(v[i][0])).append(",");
+                stringBuilder.append(df1.format(v[i][1])).append(",");
             }
             System.out.println(sb);
+            //插入文件
+            FileWriter fileWriter = new FileWriter("D:\\result\\reconfiguration\\voltage.csv",true);
+            stringBuilder.append("\n");
+            fileWriter.write(stringBuilder.toString());
+            fileWriter.close();
         }
     }
 }

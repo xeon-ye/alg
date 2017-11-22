@@ -106,6 +106,7 @@ public class ReconfigStrategy {
             System.out.println("A相冲击电流幅值："+surgeCurrentAmp[0]);
             System.out.println("B相冲击电流幅值："+surgeCurrentAmp[1]);
             System.out.println("C相冲击电流幅值："+surgeCurrentAmp[2]);
+            System.out.println("平均冲击电流幅值："+(surgeCurrentAmp[0]+surgeCurrentAmp[2]+surgeCurrentAmp[2])/3);
 //            //计算三相电压差
 //            double[][] nodeV1 = null;
 //            double[][] nodeV2 = null;
@@ -156,42 +157,44 @@ public class ReconfigStrategy {
 
             if (surgeCurrentAmp[0] < maxCurrent && surgeCurrentAmp[1] < maxCurrent && surgeCurrentAmp[2] < maxCurrent) {
                 System.out.println(toCloseBranch+"合环校验通过");
-                //默认肯定可以找到对应的断开开关
+                //默认肯定可以找到对应的断开开关,且有多种断开的可能方式
                 for (int j = 0; j < toOpenBranches.size(); j++) {
                     toOpenBranch = toOpenBranches.get(j);
                     DsCase33.deleteFeeder(calIsland, tns, toOpenBranch);
+                    //检查线路辐射状
                     ConnectivityInspector inspector = new ConnectivityInspector<>(calIsland.getGraph());
                     List<Set<DsConnectNode>> subGraphs = inspector.connectedSets();
                     if (subGraphs.size() == 1) {
                         //跳出找断开开关
-                        break;
+                        //break;
+                        System.out.println("尝试断开：" + toOpenBranch+"\n");
+                        //去除列表中的内容
+                        toCloseBranches.remove(toCloseBranch);
+                        toOpenBranches.remove(toOpenBranch);
+
+                        //判断是否为递归结束情况
+                        if (toCloseBranches.size() == 0 && toOpenBranches.size() == 0) {
+                            return "闭合" + toCloseBranch + "断开" + toOpenBranch;
+                        } else {
+                            strategy = getReconfigStrategy(calIsland.clone(), toOpenBranches, toCloseBranches);
+                        }
+
+                        //判断子递归是否有解
+                        if (strategy != null) {
+                            return "闭合" + toCloseBranch + "断开" + toOpenBranch + strategy;
+                        }else {
+                            //还原
+                            System.out.println("尝试失败!\n");
+                            toCloseBranches.add(i, toCloseBranch);
+                            toOpenBranches.add(j, toOpenBranch);
+                            DsCase33.addFeeder(calIsland, tns, branchesInfo.get(toOpenBranch));
+                        }
+
                     } else {
                         DsCase33.addFeeder(calIsland, tns, branchesInfo.get(toOpenBranch));
                     }
                 }
-                System.out.println("尝试断开：" + toOpenBranch+"\n");
-                //去除列表中的内容
-                toCloseBranches.remove(toCloseBranch);
-                toOpenBranches.remove(toOpenBranch);
-
-                //判断是否完成
-                if (toCloseBranches.size() == 0 && toOpenBranches.size() == 0) {
-                    return "闭合" + toCloseBranch + "断开" + toCloseBranch;
-                } else {
-                    strategy = getReconfigStrategy(calIsland.clone(), toOpenBranches, toCloseBranches);
-                }
-
-                if (strategy != null) {
-                    return "闭合" + toCloseBranch + "断开" + toOpenBranch + strategy;
-                } else {
-                    //还原
-                    System.out.println("尝试失败!\n");
-                    toCloseBranches.add(toCloseBranch);
-                    toOpenBranches.add(toOpenBranch);
-
-                    DsCase33.deleteFeeder(calIsland, tns, toCloseBranch);
-                    DsCase33.addFeeder(calIsland, tns, branchesInfo.get(toOpenBranch));
-                }
+                DsCase33.deleteFeeder(calIsland, tns, toCloseBranch);
             } else {
                 System.out.println(toCloseBranch+"冲击电流幅值过大，合环校验不通过！\n");
                 DsCase33.deleteFeeder(calIsland, tns, toCloseBranch);

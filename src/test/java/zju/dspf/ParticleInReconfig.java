@@ -153,25 +153,21 @@ class ParticleInReconfig {
             fitness = 1e6;
         }else{
             calIsland.initialIsland();
-            //System.out.println("开始计算");
             DsPowerflow pf = new DsPowerflow();
-            //long start = System.currentTimeMillis();
             pf.setTolerance(1e-1);
             pf.doLcbPf(calIsland);
-            //System.out.println("计算潮流用时：" + (System.currentTimeMillis() - start) + "ms.");
             if(pf.isConverged() == true){
-                //DsPowerflowTest.printBusV(calIsland, true, false);
                 for (MapObject i : calIsland.getBranches().keySet()) {
-                    Feeder feeder = (Feeder) calIsland.getBranches().get(i);
-                    double[][] Z_real = feeder.getZ_real();
+                Feeder feeder = (Feeder) calIsland.getBranches().get(i);
+                double[][] Z_real = feeder.getZ_real();
 
-                    double[][] branchHeadI = calIsland.getBranchHeadI().get(i);
-                    double loss = 0;
-                    for (int j = 0; j < 3; j++) {
-                        loss += (branchHeadI[j][0] * branchHeadI[j][0] + branchHeadI[j][1] * branchHeadI[j][1]) * Z_real[j][j];
-                    }
-                    fitness += loss;
+                double[][] branchHeadI = calIsland.getBranchHeadI().get(i);
+                double loss = 0;
+                for (int j = 0; j < 3; j++) {
+                    loss += (branchHeadI[j][0] * branchHeadI[j][0] + branchHeadI[j][1] * branchHeadI[j][1]) * Z_real[j][j];
                 }
+                fitness += loss;
+            }
             }else{
                 fitness = 1e6;
             }
