@@ -375,6 +375,7 @@ jdoubleArray callback_grad_f,
 jdoubleArray callback_jac_g,
 jdoubleArray callback_hess) {
 	// cast back our class
+
 	JIpoptSolver *solver = (JIpoptSolver *)pipopt;
 	Jipopt * problem = solver->problem;
 	problem->env = env;
@@ -390,28 +391,37 @@ jdoubleArray callback_hess) {
 	problem->grad_fj = callback_grad_f;
 	problem->jac_gj = callback_jac_g;
 	problem->hessj = callback_hess;
-	
-	 //  (use a SmartPtr, not raw)	
+
+	 //  (use a SmartPtr, not raw)
 	ApplicationReturnStatus status;
-	
+
 	if(outfilename){
 		const char *pparameterName = env->GetStringUTFChars(outfilename, 0);
 		string outfile=pparameterName;
-		status = solver->application->Initialize(outfile);	
+		status = solver->application->Initialize(outfile);
 		env->ReleaseStringUTFChars(outfilename, pparameterName);
 	} else
-		status = solver->application->Initialize();	
-	
+		status = solver->application->Initialize();
+
 	if (status != Solve_Succeeded) {
 		printf("\n\n*** Error during initialization!\n");
 		return (int) status;
 	}
-	
 
 	/* solve the problem */
-	status = solver->application->OptimizeTNLP(problem);
+    //SmartPtr<SparseSymLinearSolverInterface> SolverInterface = new CustomSolverInterface();
+    SmartPtr<SparseSymLinearSolverInterface> SolverInterface = new CudaSolverInterface();
+    SmartPtr<TSymScalingMethod> ScalingMethod;
+//    SmartPtr<TSymScalingMethod> ScalingMethod = new SlackBasedTSymScalingMethod();
+    SmartPtr<SymLinearSolver> ScaledSolver = new TSymLinearSolver(SolverInterface, ScalingMethod);
+    SmartPtr<AugSystemSolver> AugSolver = new StdAugSystemSolver(*ScaledSolver);
+    SmartPtr<AlgorithmBuilder> alg_builder = new AlgorithmBuilder(AugSolver);
+    solver->application->Options()->SetStringValue("linear_solver","custom");
+    SmartPtr<NLP> nlp_adapter = new TNLPAdapter(problem, NULL);
+	status = solver->application->OptimizeNLP(nlp_adapter, alg_builder);
+//	status = solver->application->OptimizeTNLP(problem);
 
-	return (jint) status;  
+	return (jint) status;
 }
 
 JNIEXPORT void JNICALL Java_org_coinor_Ipopt_FreeIpoptProblem
