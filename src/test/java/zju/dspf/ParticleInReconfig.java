@@ -48,15 +48,6 @@ class ParticleInReconfig {
      * @param dimension 表示粒子的维数,即可安装量测的位置
      */
     public void initial(int dimension) {
-        //
-        //tns = DsCase33.createTnMap(originIsland);
-
-//        for(MapObject i : originIsland.getGraph().edgeSet()){
-//            System.out.println(originIsland.getGraph().getEdgeSource(i).getConnectivityNodes().get(0).getId()+ " "+
-//                    originIsland.getGraph().getEdgeTarget(i).getConnectivityNodes().get(0).getId());
-//
-//        }
-
         position = new double[dimension];//开辟存储位置的数组的内存
         velocity = new double[dimension];//开辟存储位置的数组的内存
         fitness = 1e6;//初始粒子适应值是一个1*10的6次方，赋值的过程
@@ -101,27 +92,31 @@ class ParticleInReconfig {
             for (Object i : toSetZero) {
                 position[(int) i] = 0;
             }
-        }else if(sum < this.oneNumber ){
+        } else if (sum < this.oneNumber) {
             //补1操作
             int[] zeroSetPlace = new int[this.dimension - sum];
             int index = 0;
-            for(int i = 0 ; i < ParticleInReconfig.dimension ; i ++){
-                if(position[i] == 0){
+            for (int i = 0; i < ParticleInReconfig.dimension; i++) {
+                if (position[i] == 0) {
                     zeroSetPlace[index] = i;
                     index++;
                 }
             }
             Set toSetOne = new HashSet();
-            for(int i = 0 ; i < (oneNumber - sum) ; i++){
+            for (int i = 0; i < (oneNumber - sum); i++) {
                 int rdNumber;
-                do{
+                do {
                     rdNumber = zeroSetPlace[rd.nextInt(this.dimension - sum)];
-                }while(toSetOne.contains(rdNumber));
+                } while (toSetOne.contains(rdNumber));
                 toSetOne.add(rdNumber);
             }
-            for(Object i : toSetOne){
+            for (Object i : toSetOne) {
                 position[(int) i] = 1;
             }
+        }
+        //将初始化后的位置赋值给“粒子的历史最好位置”
+        for (int i = 0; i < dimension; ++i) {
+            pBestPositon[i] = position[i];
         }
     }
 
@@ -136,39 +131,40 @@ class ParticleInReconfig {
         tns = DsCase33.createTnMap(calIsland);
         String[] toOpenBranch = new String[5];
         int index = 0;
-        for(int i = 0; i < this.dimension ; i++){
-            if(position[i] == 1){
+        for (int i = 0; i < this.dimension; i++) {
+            if (position[i] == 1) {
                 //idToBranch从1开始
-                toOpenBranch[index] = calIsland.getIdToBranch().get(i+1).getName();
+                //System.out.println(index+" "+i+" "+calIsland.getIdToBranch().size());
+                toOpenBranch[index] = calIsland.getIdToBranch().get(i + 1).getName();
                 index++;
             }
         }
-        for(int i = 0; i < 5 ; i++){
-            DsCase33.deleteFeeder(calIsland,tns,toOpenBranch[i]);
+        for (int i = 0; i < 5; i++) {
+            DsCase33.deleteFeeder(calIsland, tns, toOpenBranch[i]);
         }
 
         ConnectivityInspector inspector = new ConnectivityInspector<>(calIsland.getGraph());
         List<Set<DsConnectNode>> subGraphs = inspector.connectedSets();
-        if(subGraphs.size() > 1){
+        if (subGraphs.size() > 1) {
             fitness = 1e6;
-        }else{
+        } else {
             calIsland.initialIsland();
             DsPowerflow pf = new DsPowerflow();
             pf.setTolerance(1e-1);
             pf.doLcbPf(calIsland);
-            if(pf.isConverged() == true){
+            if (pf.isConverged() == true) {
                 for (MapObject i : calIsland.getBranches().keySet()) {
-                Feeder feeder = (Feeder) calIsland.getBranches().get(i);
-                double[][] Z_real = feeder.getZ_real();
+                    Feeder feeder = (Feeder) calIsland.getBranches().get(i);
+                    double[][] Z_real = feeder.getZ_real();
 
-                double[][] branchHeadI = calIsland.getBranchHeadI().get(i);
-                double loss = 0;
-                for (int j = 0; j < 3; j++) {
-                    loss += (branchHeadI[j][0] * branchHeadI[j][0] + branchHeadI[j][1] * branchHeadI[j][1]) * Z_real[j][j];
+                    double[][] branchHeadI = calIsland.getBranchHeadI().get(i);
+                    double loss = 0;
+                    for (int j = 0; j < 3; j++) {
+                        loss += (branchHeadI[j][0] * branchHeadI[j][0] + branchHeadI[j][1] * branchHeadI[j][1]) * Z_real[j][j];
+                    }
+                    fitness += loss;
                 }
-                fitness += loss;
-            }
-            }else{
+            } else {
                 fitness = 1e6;
             }
         }
@@ -223,28 +219,30 @@ class ParticleInReconfig {
             for (Object i : toSetZero) {
                 position[(int) i] = 0;
             }
-        }else if(sum < this.oneNumber ){
+        } else if (sum < this.oneNumber) {
             //补1操作
             int[] zeroSetPlace = new int[this.dimension - sum];
             int index = 0;
-            for(int i = 0 ; i < ParticleInReconfig.dimension ; i ++){
-                if(position[i] == 0){
+            for (int i = 0; i < ParticleInReconfig.dimension; i++) {
+                if (position[i] == 0) {
                     zeroSetPlace[index] = i;
                     index++;
                 }
             }
             Set toSetOne = new HashSet();
-            for(int i = 0 ; i < (oneNumber - sum) ; i++){
+            for (int i = 0; i < (oneNumber - sum); i++) {
                 int rdNumber;
-                do{
+                do {
                     rdNumber = zeroSetPlace[rd.nextInt(this.dimension - sum)];
-                }while(toSetOne.contains(rdNumber));
+                } while (toSetOne.contains(rdNumber));
                 toSetOne.add(rdNumber);
             }
-            for(Object i : toSetOne){
+            for (Object i : toSetOne) {
                 position[(int) i] = 1;
             }
         }
+
+
     }
 
     /**
@@ -368,11 +366,11 @@ class ParticleInReconfig {
         ParticleInReconfig.originIsland = originIsland;
     }
 
-    public  DsTopoIsland getCalIsland() {
+    public DsTopoIsland getCalIsland() {
         return calIsland;
     }
 
-    public  Map<String, DsTopoNode> getTns() {
+    public Map<String, DsTopoNode> getTns() {
         return tns;
     }
 

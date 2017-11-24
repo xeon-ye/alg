@@ -39,13 +39,13 @@ class DPSOInReconfig {
         ParticleInReconfig.setC2(2);
         ParticleInReconfig.setW(0.8);
         //todo:维度
-        ParticleInReconfig.setDimension(37);
+        ParticleInReconfig.setDimension(73);
         //todo:最大为1的个数
         ParticleInReconfig.setOneNumber(5);
         //todo:传递网络
         ParticleInReconfig.setOriginIsland(originIsland);
         //todo:粒子个数
-        this.particlesAmount = 20;
+        this.particlesAmount = 50;
 
         particles = new ParticleInReconfig[this.particlesAmount];//开辟内存，确定该数组对象的大小
         globalBestFitness = 1e6;//全局最优适应值
@@ -59,14 +59,23 @@ class DPSOInReconfig {
             particles[i].initial(ParticleInReconfig.getDimension());//调用Particle中的方法，对每个粒子进行维度的初始化
 
             particles[i].evaluateFitness();//调用评估适应值的方法
-            if (globalBestFitness - particles[i].getFitness()>1e-6) {//将求得的每个粒子更新的适应值比原来的全局变量大
+            if (globalBestFitness - particles[i].getFitness() > 1e-6) {//将求得的每个粒子更新的适应值比原来的全局变量大
                 globalBestFitness = particles[i].getFitness();//则更新全局变量
                 index = i;//记录全局最优是哪个粒子
             }
         }
-
-        for (int i = 0; i < ParticleInReconfig.getDimension(); ++i) {
-            globalBestPosition[i] = particles[index].getPosition()[i];//更新全局最优位置，根据index
+        //无全局最优位置时index=-1
+        if (index != -1) {
+            for (int i = 0; i < ParticleInReconfig.getDimension(); ++i) {
+                globalBestPosition[i] = particles[index].getPosition()[i];//更新全局最优位置，根据index
+            }
+        } else {
+            System.out.println();
+            globalBestPosition[1] = 1;
+            globalBestPosition[2] = 1;
+            globalBestPosition[3] = 1;
+            globalBestPosition[4] = 1;
+            globalBestPosition[5] = 1;
         }
     }
 
@@ -77,26 +86,30 @@ class DPSOInReconfig {
         int runTimes = 1;//运行次数是1
         int index;//index
         //todo:最大迭代次数
-        while (runTimes <= 700) {//确定迭代次数
+        while (runTimes <= 800) {//确定迭代次数
             index = -1;
             //每个粒子更新位置和适应值
             for (int i = 0; i < particlesAmount; ++i) {
                 particles[i].updatePosAndVel();//更新每个粒子的位置和速度
                 particles[i].evaluateFitness();//更新每个粒子的适应值
-                if (globalBestFitness - particles[i].getFitness()>1e-6) {
+                if (globalBestFitness - particles[i].getFitness() > 1e-6) {
                     globalBestFitness = particles[i].getFitness();
                     index = i;//更新全局最优适应值，并记录最优的粒子
                 }
             }
             //发现更好的解
             if (index != -1) {
+//                System.out.println("打印对照表");
+//                for(Integer i : originIsland.getIdToBranch().keySet()) {
+//                    System.out.println(i+" "+originIsland.getIdToBranch().get(i));
+//                }
                 double[] position = new double[ParticleInReconfig.getDimension()];
                 for (int i = 0; i < ParticleInReconfig.getDimension(); ++i) {
                     globalBestPosition[i] = particles[index].getPosition()[i];//若index不是-1，则记录位置
                     position[i] = particles[index].getPosition()[i];
                 }
                 //保存最优解历史，始终放在第一位
-                globalBestPositionList.add(0,position);
+                globalBestPositionList.add(0, position);
 //                //保存最优解对应配网拓扑，始终放在第一位
 //                globalBestDsTopoIslandList.add(0,particles[index].getCalIsland().clone());
 
@@ -106,12 +119,13 @@ class DPSOInReconfig {
                 for (int i = 0; i < ParticleInReconfig.getDimension(); i++) {
                     //System.out.println("position[" + i + "]:" +particles[index].getPosition()[i]);//输出最优的粒子的位置
                     if (particles[index].getPosition()[i] == 1) {
+                        System.out.println(i);
                         System.out.println("改变线路" + originIsland.getIdToBranch().get(i + 1).getName() + "状态");
                     }
                 }
                 //插入次数
-                FileWriter fileWriter = new FileWriter("D:\\result\\reconfiguration\\voltage.csv",true);
-                fileWriter.write("第"+runTimes+"次迭代发现更好解\n");
+                FileWriter fileWriter = new FileWriter("G:\\voltage.csv", true);
+                fileWriter.write("第" + runTimes + "次迭代发现更好解\n");
                 fileWriter.close();
                 DsPowerflowTest.printBusV(particles[index].getCalIsland(), true, false);
             }
@@ -134,12 +148,12 @@ class DPSOInReconfig {
         }
         //打印最优解list
         System.out.println("最优解List：");
-        for(int i = 0; i < globalBestPositionList.size();i++){
-            System.out.println("第"+i+"优解：");
-            for(int j =0;j<globalBestPositionList.get(i).length;j++){
-                if(globalBestPositionList.get(i)[j]==1){
-                    System.out.println(j);
-                    System.out.println("改变线路"+originIsland.getIdToBranch().get(j+1).getName()+"状态");
+        for (int i = 0; i < globalBestPositionList.size(); i++) {
+            System.out.println("第" + i + "优解：");
+            for (int j = 0; j < globalBestPositionList.get(i).length; j++) {
+                if (globalBestPositionList.get(i)[j] == 1) {
+                    //System.out.println(j);
+                    System.out.println("改变线路" + originIsland.getIdToBranch().get(j + 1).getName() + "状态");
                 }
             }
         }

@@ -81,6 +81,10 @@ public class DsCase33 implements DsModelCons {
         return readRadicalIsland(DsCase33.class.getResourceAsStream("/other/case33.txt"), 1);
     }
 
+    public static DsTopoIsland createRadicalCase69(){
+        return readRadicalIsland(DsCase33.class.getResourceAsStream("/other/case69.txt"),1);
+    }
+
     public static Map<String, DsTopoNode> createTnMap(DsTopoIsland island) {
         Map<String, DsTopoNode> tns = new HashMap<String, DsTopoNode>(island.getGraph().vertexSet().size());
         for (DsTopoNode tn : island.getGraph().vertexSet())

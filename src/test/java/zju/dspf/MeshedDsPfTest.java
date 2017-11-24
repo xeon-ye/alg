@@ -71,7 +71,120 @@ public class MeshedDsPfTest extends TestCase implements DsModelCons {
         }
         System.out.println("fitness:"+fitness);
     }
-    //initialIsland中注释；潮流计算中注释
+
+    public void testCase69ReconfigByDPSO() throws IOException {
+        //获取完整配网拓扑
+        DsTopoIsland completeIsland = DsCase33.createRadicalCase69();
+        //tns键值为tn中的cn的id值，cn的id为原始编号
+        Map<String, DsTopoNode> tns = DsCase33.createTnMap(completeIsland);
+        DsCase33.addFeeder(completeIsland, tns, "69 13 20 0.5000 0.5000 0.5000 0.5000 0.5000 0.5000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000");
+        DsCase33.addFeeder(completeIsland, tns, "70 15 69 1.0000 1.0000 1.0000 1.0000 1.0000 1.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000");
+        DsCase33.addFeeder(completeIsland, tns, "71 39 48 2.0000 2.0000 2.0000 2.0000 2.0000 2.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000");
+        DsCase33.addFeeder(completeIsland, tns, "72 11 66 0.5000 0.5000 0.5000 0.5000 0.5000 0.5000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000");
+        DsCase33.addFeeder(completeIsland, tns, "73 27 54 1.0000 1.0000 1.0000 1.0000 1.0000 1.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000");
+        completeIsland.initialIsland();
+
+        //粒子群寻优
+        DPSOInReconfig dpsoInReconfig = new DPSOInReconfig(completeIsland);
+        dpsoInReconfig.initial();
+        dpsoInReconfig.run();
+        dpsoInReconfig.showResult();
+    }
+
+    public void testCase69ReconfigStrategy() throws IOException {
+        //获取完整配网拓扑
+        DsTopoIsland completeIsland = DsCase33.createRadicalCase69();
+        //tns键值为tn中的cn的id值，cn的id为原始编号
+        Map<String, DsTopoNode> tns = DsCase33.createTnMap(completeIsland);
+        DsCase33.addFeeder(completeIsland, tns, "69 13 20 0.5000 0.5000 0.5000 0.5000 0.5000 0.5000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000");
+        DsCase33.addFeeder(completeIsland, tns, "70 15 69 1.0000 1.0000 1.0000 1.0000 1.0000 1.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000");
+        DsCase33.addFeeder(completeIsland, tns, "71 39 48 2.0000 2.0000 2.0000 2.0000 2.0000 2.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000");
+        DsCase33.addFeeder(completeIsland, tns, "72 11 66 0.5000 0.5000 0.5000 0.5000 0.5000 0.5000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000");
+        DsCase33.addFeeder(completeIsland, tns, "73 27 54 1.0000 1.0000 1.0000 1.0000 1.0000 1.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000");
+        completeIsland.initialIsland();
+
+        //粒子群寻优
+        DPSOInReconfig dpsoInReconfig = new DPSOInReconfig(completeIsland);
+        dpsoInReconfig.initial();
+        dpsoInReconfig.run();
+        dpsoInReconfig.showResult();
+
+        //获取初始配网拓扑
+        DsTopoIsland originIsland = DsCase33.createRadicalCase69();
+        originIsland.initialIsland();
+
+        ReconfigStrategy reconfigStrategy = new ReconfigStrategy();
+        int count = 0;
+        for (double[] bestPosition : DPSOInReconfig.getGlobalBestPositionList()) {
+            count++;
+            System.out.println("==============第"+count+"次第二层优化==============");
+            //更新标号（必要操作，影响断开、闭合线路的提取。ReconfigStrategy在加入一条branch后，会进行一次更新）
+            originIsland.initialIsland();
+
+            //获取优解对应的配网拓扑
+            DsTopoIsland finalIsland = completeIsland.clone();
+            tns = DsCase33.createTnMap(finalIsland);
+            for (int i = 0; i < bestPosition.length; i++) {
+                if (bestPosition[i] == 1) {
+                    String toOpenBranch = finalIsland.getIdToBranch().get(i + 1).getName();
+                    DsCase33.deleteFeeder(finalIsland, tns, toOpenBranch);
+                }
+            }
+            finalIsland.initialIsland();
+
+            //获取切断线路
+            List<String> toOpenBranches = new ArrayList<>();
+            for (MapObject branch1 : originIsland.getIdToBranch().values()) {
+                boolean flag = false;
+                for (MapObject branch2 : finalIsland.getIdToBranch().values()) {
+                    if (branch1.getName().equals(branch2.getName())) {
+                        flag = true;
+                        break;
+                    }
+                }
+                if (!flag) {
+                    toOpenBranches.add(branch1.getName());
+                }
+            }
+
+            //获取闭合线路
+            List<String> toCloseBranches = new ArrayList<>();
+            for (MapObject branch1 : finalIsland.getIdToBranch().values()) {
+                boolean flag = false;
+                for (MapObject branch2 : originIsland.getIdToBranch().values()) {
+                    if (branch1.getName().equals(branch2.getName())) {
+                        flag = true;
+                        break;
+                    }
+                }
+                if (!flag) {
+                    toCloseBranches.add(branch1.getName());
+                }
+            }
+
+            System.out.println("断开线路");
+            for (String i : toOpenBranches) {
+                System.out.println(i);
+            }
+            System.out.println("闭合线路");
+            for (String i : toCloseBranches) {
+                System.out.println(i);
+            }
+            //求解重构实施策略
+            String result;
+            result = reconfigStrategy.getReconfigStrategy(originIsland, toOpenBranches, toCloseBranches);
+            if(result != null){
+                System.out.println("实施策略："+result);
+                break;
+            }else{
+                System.out.println("==============第"+count+"次第二层优化失败==============");
+            }
+        }
+    }
+
+
+
+    //initialIsland中注释；潮流计算中注释 DsTopoIsland、NewtonSolver、DsPowerflow
     public void testCase33ReconfigByDPSO() throws IOException {
         //获取完整配网拓扑
         DsTopoIsland completeIsland = DsCase33.createRadicalCase33();
@@ -90,6 +203,8 @@ public class MeshedDsPfTest extends TestCase implements DsModelCons {
         dpsoInReconfig.run();
         dpsoInReconfig.showResult();
     }
+
+
 
     public void testCase33ReconfigStrategy() throws IOException {
         //获取完整配网拓扑
@@ -113,6 +228,7 @@ public class MeshedDsPfTest extends TestCase implements DsModelCons {
         DsTopoIsland originIsland = DsCase33.createRadicalCase33();
         originIsland.initialIsland();
 
+        ReconfigStrategy reconfigStrategy = new ReconfigStrategy();
         int count = 0;
         for (double[] bestPosition : DPSOInReconfig.getGlobalBestPositionList()) {
             count++;
@@ -170,7 +286,7 @@ public class MeshedDsPfTest extends TestCase implements DsModelCons {
                 System.out.println(i);
             }
             String result;
-            result = ReconfigStrategy.getReconfigStrategy(originIsland, toOpenBranches, toCloseBranches);
+            result = reconfigStrategy.getReconfigStrategy(originIsland, toOpenBranches, toCloseBranches);
             if(result != null){
                 System.out.println("实施策略："+result);
                 break;
@@ -217,7 +333,8 @@ public class MeshedDsPfTest extends TestCase implements DsModelCons {
         toCloseBranches.add("8-21");
 
         String result;
-        result = ReconfigStrategy.getReconfigStrategy(originIsland, toOpenBranches, toCloseBranches);
+        ReconfigStrategy reconfigStrategy = new ReconfigStrategy();
+        result = reconfigStrategy.getReconfigStrategy(originIsland, toOpenBranches, toCloseBranches);
         if(result != null){
             System.out.println("实施策略："+result);
         }else{
