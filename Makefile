@@ -56,7 +56,7 @@
 ##==========================================================================  
   
 # The pre-processor and compiler options.  
-MY_CFLAGS = -I. -I./src/main/cpp -I${JAVA_HOME}/include -I${JAVA_HOME}/include/linux -I/home/bingte/lib/include/coin/ThirdParty
+MY_CFLAGS = -I. -I./src/main/cpp -I${JAVA_HOME}/include -I${JAVA_HOME}/include/linux -I${HOME}/lib/include/coin/ThirdParty
   
 # The linker options.  
 #MY_LIBS   =  -lipopt -lcoinmumps -lsuperlu_4.3 -lcoinlapack -lcoinblas -lieeeformat -lgfortran
