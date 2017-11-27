@@ -149,4 +149,16 @@ public class FeederConfMgr implements Serializable, DsModelCons {
             log.warn(e);
         }
     }
+
+    public Map<String, double[][]> getzRealPerLen() {
+        return zRealPerLen;
+    }
+
+    public Map<String, double[][]> getzImagPerLen() {
+        return zImagPerLen;
+    }
+
+    public Map<String, double[][]> getbPerLen() {
+        return bPerLen;
+    }
 }
