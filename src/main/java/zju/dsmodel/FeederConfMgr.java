@@ -15,9 +15,9 @@ import java.util.Map;
 public class FeederConfMgr implements Serializable, DsModelCons {
     private transient static Logger log = Logger.getLogger(FeederConfMgr.class);
     private String lengthUnit;
-    private Map<String, double[][]> zRealPerLen = new HashMap<>();
-    private Map<String, double[][]> zImagPerLen = new HashMap<>();
-    private Map<String, double[][]> bPerLen = new HashMap<>();
+    public Map<String, double[][]> zRealPerLen = new HashMap<>();
+    public Map<String, double[][]> zImagPerLen = new HashMap<>();
+    public Map<String, double[][]> bPerLen = new HashMap<>();
 
     public void calPara(String id, String length, String unit, double baseKva, double baseKv, Feeder feeder) {
         double[][] zReal = zRealPerLen.get(id);
@@ -148,17 +148,5 @@ public class FeederConfMgr implements Serializable, DsModelCons {
             e.printStackTrace();
             log.warn(e);
         }
-    }
-
-    public Map<String, double[][]> getzRealPerLen() {
-        return zRealPerLen;
-    }
-
-    public Map<String, double[][]> getzImagPerLen() {
-        return zImagPerLen;
-    }
-
-    public Map<String, double[][]> getbPerLen() {
-        return bPerLen;
     }
 }
