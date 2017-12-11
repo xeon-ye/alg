@@ -45,6 +45,7 @@ public class PathBasedModel {
         this.sys = sys;
     }
 
+    //重复搜索太多次，待优化
     public void buildPathes() {
         String[] supplies = sys.getSupplyCns();
         UndirectedGraph<DsConnectNode, MapObject> g = sys.getOrigGraph();
@@ -55,33 +56,45 @@ public class PathBasedModel {
         MapObject[] p;
         int i, count = 0;
         boolean flag1, flag2;
+        //路径按照电源顺序存储。快速检索各电源对应路径起始位置。
         supplyStart = new int[supplies.length];
         supplyCnNum = 0;
+        //遍历所有的电源
         for (String supply : supplies) {
             supplyStart[count++] = pathes.size();
+            //
             DsConnectNode supplyCn = sys.getCns().get(supply);
-            stack.push(supplyCn);//先将电源节点压入栈内
+            //先将电源节点压入栈内
+            stack.push(supplyCn);
+
             while (!stack.isEmpty()) {
-                DsConnectNode cn = (DsConnectNode) stack.peek();    //对栈顶元素深度搜索路径
+                //对栈顶元素深度搜索路径
+                DsConnectNode cn = (DsConnectNode) stack.peek();
+                //初始化flag1，flag1表示是否存入新路径
                 flag1 = true;
+                //遍历该栈顶点连接的边 另一点1.栈中不包含；2.不是电源点 新路径1.不重复
                 for (MapObject e : g.edgesOf(cn)) {
                     DsConnectNode cn1 = g.getEdgeSource(e);
                     DsConnectNode cn2 = g.getEdgeTarget(e);
+                    //cn1为起始点
                     if (cn1.equals(cn)) {
+                        //初始化flag2，flag2表示是否找到新路径
                         flag2 = true;
+                        //栈中已有该点，处理下一条边
                         if (stack.contains(cn2))
                             continue;
+                        //该点是否为电源点
                         for (String scn : supplies)
                             if (scn.equals(cn2.getId())) {
                                 flag2 = false;
                                 break;
                             }
-                        //将栈中的结点生成新的路径
-                        i = stack.size() - 2;
+                        //将栈中的节点生成新的路径
                         Iterator<Object> Iter = stack.iterator();
                         p = new MapObject[stack.size()];
                         p[p.length - 1] = g.getEdge(cn1, cn2);
                         DsConnectNode temp1 = (DsConnectNode) Iter.next();
+                        i = stack.size() - 2;
                         while (Iter.hasNext()) {
                             DsConnectNode temp2 = (DsConnectNode) Iter.next();
                             p[i] = g.getEdge(temp2, temp1);
@@ -94,14 +107,16 @@ public class PathBasedModel {
                                 flag2 = false;
                                 break;
                             }
-                        //cn2不在栈中，cn2不能是电源,且已有路径中没有生成的新路径为开头的
+                        //cn2不在栈中，cn2不能是电源,没有重复路径
                         if (flag2) {
                             stack.push(cn2);    //结点入栈
                             flag1 = false;
                             //将路径加入pathes
-                            pathes.add(p);  //增加一条路径
+                            pathes.add(p);
+                            //路径只有一条边
                             if(p.length == 1)
                                 supplyCnNum++;
+                            //跳出边的遍历
                             break;
                         }
                     } else {
@@ -143,6 +158,8 @@ public class PathBasedModel {
                     stack.pop();
             }
         }
+
+
         if(isDebug) {
             System.out.printf("\nAll the pathes started from a specific supply\n");
             printPathes(pathes);
@@ -156,6 +173,7 @@ public class PathBasedModel {
     }
 
     //以某个结点为终点的所有路径
+    //path按照cn顺序存入，cn为nodes中的顺序
     public void buildCnsPathes() {
         String[] supplies = sys.getSupplyCns();
         UndirectedGraph<DsConnectNode, MapObject> g = sys.getOrigGraph();
@@ -167,15 +185,19 @@ public class PathBasedModel {
         for (k = 0; k <= nodes.size() - 1; k++) {
             cnStart[k] = cnpathes.size();
             cn = nodes.get(k).getId();
+            //遍历所有路径
             for (i = 0; i <= pathes.size() - 1; i++) {
+                //末端点的一种情况
                 lastID = g.getEdgeTarget(pathes.get(i)[pathes.get(i).length - 1]).getId();
                 if (pathes.get(i).length == 1) {
                     for (String scn : supplies) {
                         if (scn.equals(lastID)) {
+                            //末端点的另一种情况
                             lastID = g.getEdgeSource(pathes.get(i)[pathes.get(i).length - 1]).getId();
                             break;
                         }
                     }
+                    //必要条件
                     if (cn.equals(lastID)) {
                         cnpathes.add(pathes.get(i));
                         cnpathesIndex.add(i);
@@ -185,6 +207,7 @@ public class PathBasedModel {
                     //如果路径上倒数第二条边有节点与lastID相同，则lastID应取最后一条边的另一个端点才是路径上的最后一个点
                     if (lastID.equals(g.getEdgeSource(pathes.get(i)[pathes.get(i).length - 2]).getId()) || lastID.equals(g.getEdgeTarget(pathes.get(i)[pathes.get(i).length - 2]).getId()))
                         lastID = g.getEdgeSource(pathes.get(i)[pathes.get(i).length - 1]).getId();
+                    //必要条件
                     if (cn.equals(lastID)) {
                         cnpathes.add(pathes.get(i));
                         cnpathesIndex.add(i);
@@ -194,16 +217,21 @@ public class PathBasedModel {
         }
     }
 
+
+
     //通过某条边的所有路径
     public void buildedgePathes() {
         UndirectedGraph<DsConnectNode, MapObject> g = sys.getOrigGraph();
         edgepathes = new ArrayList<>();//todo: not efficient
         edgepathesIndex = new ArrayList<>();//todo: not efficient
+
         int i, j, k;
         edgeStart = new int[edges.size()];
         for (k = 0; k <= edges.size() - 1; k++) {
             edgeStart[k] = edgepathes.size();
+            //遍历所有路径
             for (i = 0; i <= pathes.size() - 1; i++) {
+                //遍历路径中的所有边
                 for (j = 0; j <= pathes.get(i).length - 1; j++)
                     if (edges.get(k) == pathes.get(i)[j]) {
                         edgepathes.add(pathes.get(i));
@@ -250,7 +278,8 @@ public class PathBasedModel {
         UndirectedGraph<DsConnectNode, MapObject> g = sys.getOrigGraph();
         edges = new ArrayList<>();//todo: not efficient
         nodes = new ArrayList<>();//todo: not efficient
-        DsConnectNode supply0 = sys.getCns().get(supplies[0]);  // 从某一个电源开始深度优先搜索
+        // 从某一个电源开始深度优先搜索
+        DsConnectNode supply0 = sys.getCns().get(supplies[0]);
         DsConnectNode cn1, cn2, cn;
         Deque<Object> stack = new ArrayDeque<>();
         stack.push(supply0);
@@ -258,8 +287,10 @@ public class PathBasedModel {
         while (!stack.isEmpty()) {
             flag = true;
             cn = (DsConnectNode) stack.peek();
+            //遍历点的所有边
             for (MapObject edge : g.edgesOf(cn)) {
                 if (!edges.contains(edge))
+                    //添加边
                     edges.add(edge);
                 cn1 = g.getEdgeSource(edge);
                 cn2 = g.getEdgeTarget(edge);
@@ -278,6 +309,7 @@ public class PathBasedModel {
             if (flag) {
                 //节点出栈时判断是否存储：还未存储过，则存入nodes中
                 if (!nodes.contains(stack.peek()))
+                    //添加点
                     nodes.add((DsConnectNode) stack.peek());
                 stack.pop();
             }
@@ -306,6 +338,7 @@ public class PathBasedModel {
         String temp;
         System.out.println("Number of pathes is " + pathes.size());
         for (i = 0; i <= pathes.size() - 1; i++) {
+            //找路径电源点
             isSupply = false;
 //            System.out.println("Length of " + i + "th path is " + pathes.get(i).length + ":");
             for (String scn : supplies) {
@@ -339,4 +372,11 @@ public class PathBasedModel {
         return supplyCnNum;
     }
 
+    public List<DsConnectNode> getNodes() {
+        return nodes;
+    }
+
+    public List<MapObject> getEdges() {
+        return edges;
+    }
 }
