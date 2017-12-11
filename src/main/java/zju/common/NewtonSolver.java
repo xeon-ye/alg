@@ -5,6 +5,7 @@ import cern.colt.matrix.DoubleMatrix2D;
 import cern.colt.matrix.impl.DenseDoubleMatrix1D;
 import cern.colt.matrix.linalg.LUDecompositionQuick;
 import jpscpu.LinearSolver;
+import jpscpu.LinearSolverMT;
 import org.apache.log4j.Logger;
 import zju.matrix.ASparseMatrixLink2D;
 import zju.matrix.AVector;
@@ -24,6 +25,8 @@ public class NewtonSolver {
     public static final int LINEAR_SOLVER_COLT = 1;
     //SuperLU求解器
     public static final int LINEAR_SOLVER_SUPERLU = 2;
+    //SuperLU_MT求解器
+    public static final int LINEAR_SOLVER_SUPERLU_MT = 3;
     //默认为SuperLU求解器
     private int linearSolver = LINEAR_SOLVER_SUPERLU;
     //具体问题的模型
@@ -34,6 +37,8 @@ public class NewtonSolver {
     private ASparseMatrixLink2D jacStruc;
     //JNI封装的SuperLU线性求解器
     private LinearSolver sluSolver = new LinearSolver();
+    //JNI封装的SuperLU_MT线性求解器
+    private LinearSolverMT sluMTSolver = new LinearSolverMT(4);
     //jacobian矩阵的结构是否可以重用
     private boolean isJacStrucReuse = false;
     //迭代次数
@@ -97,6 +102,9 @@ public class NewtonSolver {
                     jacStruc = model.getJacobianStruc();
                     sluSolver.solve(jacStruc, left, result);
                 }
+            } else if (linearSolver == LINEAR_SOLVER_SUPERLU_MT) {
+                jacStruc = model.getJacobianStruc();
+                sluMTSolver.solve(jacStruc, left, result);
             }
             log.debug("计算Jx=b用时: " + (System.nanoTime() - start) / 1000 + " us");
             //check for convergence
@@ -157,7 +165,7 @@ public class NewtonSolver {
                     delta.setQuick(i, z.getValue(i) - z_est.getValue(i));
             }
             //-----  evaluate jacobian  -----
-            if(!((NewtonWlsModel)model).isJacLinear() || iterNum == 1) {
+            if (!((NewtonWlsModel) model).isJacLinear() || iterNum == 1) {
                 H = model.getJocobian(state);
                 //记录开始时间
                 start = System.currentTimeMillis();

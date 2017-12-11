@@ -56,22 +56,23 @@
 ##==========================================================================  
   
 # The pre-processor and compiler options.  
-MY_CFLAGS = -I. -I./src/main/cpp -I${JAVA_HOME}/include -I${JAVA_HOME}/include/linux -I/home/bingte/lib/include/coin/ThirdParty
+MY_CFLAGS = -I. -I./src/main/cpp/include -I./src/main/cpp -I${JAVA_HOME}/include -I${JAVA_HOME}/include/linux -I$CPLUS_INCLUDE_PATH
   
 # The linker options.  
 #MY_LIBS   =  -lipopt -lcoinmumps -lsuperlu_4.3 -lcoinlapack -lcoinblas -lieeeformat -lgfortran
 #MY_LIBS   =  -lbonmin -lOsiSym -lSym -lipopt -lOsiCbc -lCbcSolver -lCbc -lCgl -lOsiClp -lClp -lOsi -lCoinUtils -lpardiso500-GNU481-X86-64 -lsuperlu_4.3 -lopenblas -lgomp -lm -ldl
-MY_LIBS   =  -lbonmin -lipopt -lCbc -lSym -lCgl -lClp -lOsi -lCoinUtils -lcoinmumps -lcoinmetis -lsuperlu -lcoinlapack -lcoinblas -lgfortran -lcusolver -lcublas -lcusparse -lcudart -lculibos -lcudadevrt -lnvrtc
+#MY_LIBS   =  -lbonmin -lipopt -lCbc -lSym -lCgl -lClp -lOsi -lCoinUtils -lcoinmumps -lcoinmetis -lsuperlu -lcoinlapack -lcoinblas -lgfortran -lcusolver -lcublas -lcusparse -lcudart -lculibos -lcudadevrt -lnvrtc
+MY_LIBS   =  -lbonmin -lipopt -lCbc -lSym -lCgl -lClp -lOsi -lCoinUtils -lcoinmumps -lcoinmetis -lsuperlu_mt_PTHREAD -lcoinlapack -lcoinblas -lgfortran -lcusolver -lcublas -lcusparse -lcudart -lculibos -lcudadevrt -lnvrtc
 
 # The pre-processor options used by the cpp (man cpp for more).  
-CPPFLAGS  = -Wall 
+CPPFLAGS  = -Wall
   
 # The options used in linking as well as in any direct use of ld.  所依赖库的路径
-LDFLAGS   = -L. -L/usr/local/cuda/lib64
+LDFLAGS   = -L. -L$LIBRARY_PATH
    
 # The directories in which source files reside.  
 # If not specified, only the current directory will be serached.  
-SRCDIRS   =  ./src/main/cpp
+SRCDIRS   =  ./src/main/cpp ./src/main/cpp/Cuda ./src/main/cpp/Ipopt ./src/main/cpp/SuperLU
   
 # The executable file name.  
 # If not specified, current directory name or `a.out' will be used.  
@@ -95,8 +96,8 @@ HDREXTS = .h .H .hh .hpp .HPP .h++ .hxx .hp
   
 # The pre-processor and compiler options.  
 # Users can override those variables from the command line.  
-CFLAGS  = -g -O2  
-CXXFLAGS= -g -O2  
+CFLAGS  = -g -O2
+CXXFLAGS= -g -O2
   
 # The C program compiler.  
 CC     = gcc  
