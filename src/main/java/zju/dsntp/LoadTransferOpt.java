@@ -723,7 +723,8 @@ public class LoadTransferOpt extends PathBasedModel {
     }
 
     /**
-     * 求配网最大可装容量
+     * 求配网最大可装容量（待修改）
+     * 所有负荷均为变量
      *
      * @param
      */
@@ -767,7 +768,7 @@ public class LoadTransferOpt extends PathBasedModel {
                 supplyCapacity[i] = this.supplyCap.get(supplies[i]);
             }
             //电源故障等效于容量置0
-            log.info("故障电源为："+supplies[count]);
+            log.info("故障电源为：" + supplies[count]);
             supplyCapacity[count] = 0;
 
             //求节点可带的最大负荷
@@ -992,19 +993,245 @@ public class LoadTransferOpt extends PathBasedModel {
                 for (i = 0; i < nodes.size(); i++) {
                     System.out.println("节点：" + nodes.get(i).getId() + " " + "负荷：" + result[pathes.size() + cnpathes.size() + i]);
                 }
-                for(i=0;i<pathes.size();i++){
+                for (i = 0; i < pathes.size(); i++) {
                     System.out.print("线路：");
-                    for(j=0;j<pathes.get(i).length;j++) {
-                        System.out.print(pathes.get(i)[j].getProperty("ConnectedNode").replace(";","-")+" ");
+                    for (j = 0; j < pathes.get(i).length; j++) {
+                        System.out.print(pathes.get(i)[j].getProperty("ConnectedNode").replace(";", "-") + " ");
                     }
-                    if(result[i]==1) {
+                    if (result[i] == 1) {
                         System.out.print("状态：闭合\n");
-                    }else{
+                    } else {
                         System.out.print("状态：断开\n");
                     }
                 }
             }
         }
+    }
+
+    /**
+     * N-1校验，遍历所有电源损坏情况
+     * @return isPass
+     */
+    public boolean checkN1() {
+        //是否通过N-1校验
+        boolean isPass = true;
+
+        //生成路径
+        long time = System.currentTimeMillis();
+        //buildPathes();
+        //System.out.println("搜索耗时："+(System.currentTimeMillis()-time));
+
+        int endIndex;
+        int i, j, k, l;
+
+        //开始构造线性规划模型
+        //状态变量是所有路径的通断状态，加上将LW替换为Z后增加的变量，加上一个节点的负荷
+        //objValue 是优化问题中的变量的系数,　如min Cx 中 C矩阵里的系数。
+        double objValue[] = new double[pathes.size()];
+        //状态变量下限, column里元素的个数等于矩阵C里系数的个数
+        double columnLower[] = new double[objValue.length];
+        //状态变量上限
+        double columnUpper[] = new double[objValue.length];
+        //指明哪些是整数
+        int whichInt[] = new int[pathes.size()];
+
+        //约束下限
+        double rowLower[] = new double[nodes.size() + (pathes.size() - supplyCnNum) + supplyStart.length + edges.size()];
+        //约束上限
+        double rowUpper[] = new double[rowLower.length];
+        //约束中非零元系数
+        double element[] = new double[cnpathes.size() + (pathes.size() - supplyCnNum) * 2 + pathes.size() + edgepathes.size()];
+        //上面系数对应的列
+        int column[] = new int[element.length];
+        //每一行起始位置
+        int starts[] = new int[rowLower.length + 1];
+
+        UndirectedGraph<DsConnectNode, MapObject> g = sys.getOrigGraph();
+        //电源容量
+        String[] supplies = sys.getSupplyCns();
+        double[] supplyCapacity = new double[supplyStart.length];
+        maxLoad = Double.MAX_VALUE;
+        //各种N-1情况遍历
+        for (int count = 0; count < supplyCapacity.length; count++) {
+            for (i = 0; i < supplyCapacity.length; i++) {
+                supplyCapacity[i] = this.supplyCap.get(supplies[i]);
+            }
+            //电源故障等效于容量置0
+            log.info("故障电源为：" + supplies[count]);
+            supplyCapacity[count] = 0;
+
+            //求节点可带的最大负荷
+            //数组游标
+            int rowLowerLen = 0, rowUpperLen = 0, elementLen = 0, columnLen = 0, startsLen = 0;
+
+            //负荷的功率，按nodes中的顺序排列
+            double[] loadArray = new double[nodes.size()];
+            for (i = 0; i < nodes.size(); i++) {
+                loadArray[i] = this.load.get(nodes.get(i).getId());
+            }
+
+            //所有电源容量之和
+            double LMax = 0;
+            for (i = 0; i < supplyCapacity.length; i++)
+                LMax += supplyCapacity[i];
+
+            //所有路径通断状态变量上限为1，下限为0，都是整数
+            for (i = 0; i < pathes.size(); i++) {
+                columnLower[i] = 0;
+                columnUpper[i] = 1;
+                whichInt[i] = i;
+            }
+
+            //设置变量的系数值,均为0
+            for (i = 0; i < pathes.size(); i++)
+                objValue[i] = 0;
+
+            //约束条件：对每个负荷节点，有且只有一条路径供电
+            for (i = 0; i < nodes.size(); i++) {
+                starts[startsLen++] = elementLen;
+                //等式约束，将上下限设成相同
+                rowLower[rowLowerLen++] = 1;
+                rowUpper[rowUpperLen++] = 1;
+                if (i == nodes.size() - 1) {
+                    for (j = cnStart[i]; j < cnpathes.size(); j++) {
+                        element[elementLen++] = 1;
+                        column[columnLen++] = cnpathesIndex.get(j);
+                    }
+                } else {
+                    for (j = cnStart[i]; j < cnStart[i + 1]; j++) {
+                        element[elementLen++] = 1;
+                        column[columnLen++] = cnpathesIndex.get(j);
+                    }
+                }
+            }
+            //约束条件：若某路径为通路，那么包括在该路径内的任意路径也是通路
+            //对pathes进行类似深度搜索的方式实现
+            boolean lenEqualOne;
+            for (k = 0; k < supplyStart.length; k++) {
+                if (k == supplyStart.length - 1)
+                    endIndex = pathes.size();
+                else
+                    endIndex = supplyStart[k + 1];
+                for (i = supplyStart[k] + 1; i < endIndex; i++) {
+                    lenEqualOne = false;
+                    starts[startsLen++] = elementLen;
+                    j = i - 1;
+                    rowLower[rowLowerLen++] = 0;
+                    rowUpper[rowUpperLen++] = 1;  //状态变量只取0和1，可令约束上限为1
+                    element[elementLen++] = 1;
+                    element[elementLen++] = -1;
+                    if (pathes.get(i).length > pathes.get(j).length) {
+                        column[columnLen++] = j;
+                        column[columnLen++] = i;
+                    } else {
+                        while (pathes.get(i).length <= pathes.get(j).length) {
+                            j--;
+                            if (j < 0) {
+                                //i、j路径长度均为1
+                                lenEqualOne = true;
+                                break;
+                            }
+                        }
+                        if (lenEqualOne) {
+                            startsLen--;
+                            rowLowerLen--;
+                            rowUpperLen--;
+                            elementLen -= 2;
+                            continue;
+                        }
+                        column[columnLen++] = j;
+                        column[columnLen++] = i;
+                    }
+                }
+            }
+            //约束条件：由某一电源供电的所有负荷功率之和应小于电源容量
+            int p;
+            for (i = 0; i < supplyStart.length; i++) {
+                starts[startsLen++] = elementLen;
+                rowUpper[rowUpperLen++] = supplyCapacity[i];
+                rowLower[rowLowerLen++] = 0;
+                if (i == supplyStart.length - 1)
+                    endIndex = pathes.size();
+                else
+                    endIndex = supplyStart[i + 1];
+                for (j = supplyStart[i]; j < endIndex; j++) {
+                    //找出路径在cnpathes中对应的序号
+                    for (k = 0; k < cnpathesIndex.size(); k++) {
+                        if (cnpathesIndex.get(k) == j)
+                            break;
+                    }
+                    //找出路径cnpathes[k]的末尾节点
+                    for (l = 1; l < cnStart.length; l++) {
+                        if (cnStart[l] > k)
+                            break;
+                    }
+                    element[elementLen++] = loadArray[l - 1];
+                    column[columnLen++] = j;
+                }
+            }
+            //约束条件：每一条供电线路不能过载
+            //线容量
+            String lastID;
+            double[] feederCapacity = new double[edges.size()];
+            for (i = 0; i < feederCapacity.length; i++) {
+                feederCapacity[i] = feederCapacityConst;
+            }
+            for (i = 0; i < edges.size(); i++) {
+                starts[startsLen++] = elementLen;
+                rowUpper[rowUpperLen++] = feederCapacity[i];
+                rowLower[rowLowerLen++] = 0;
+                if (i == edgeStart.length - 1)
+                    endIndex = edgepathes.size();
+                else
+                    endIndex = edgeStart[i + 1];
+                for (j = edgeStart[i]; j < endIndex; j++) {
+                    //找出路径edgepathes[j]的末尾节点
+                    lastID = g.getEdgeTarget(edgepathes.get(j)[edgepathes.get(j).length - 1]).getId();
+                    //路径只有一条边
+                    if (edgepathes.get(j).length == 1) {
+                        for (String scn : supplies) {
+                            if (scn.equals(lastID)) {
+                                lastID = g.getEdgeSource(edgepathes.get(j)[edgepathes.get(j).length - 1]).getId();
+                                break;
+                            }
+                        }
+                    } else {
+                        //如果路径上倒数第二条边有节点与lastID相同，则lastID应取最后一条边的另一个端点才是路径上的最后一个点
+                        if (lastID.equals(g.getEdgeSource(edgepathes.get(j)[edgepathes.get(j).length - 2]).getId()) || lastID.equals(g.getEdgeTarget(edgepathes.get(j)[edgepathes.get(j).length - 2]).getId()))
+                            lastID = g.getEdgeSource(edgepathes.get(j)[edgepathes.get(j).length - 1]).getId();
+                    }
+
+                    for (k = 0; k < nodes.size(); k++)
+                        if (nodes.get(k).getId().equals(lastID))
+                            break;
+                    element[elementLen++] = loadArray[k];
+                    column[columnLen++] = edgepathesIndex.get(j);
+                }
+            }
+
+            starts[startsLen++] = elementLen;
+
+            int numberRows = rowLower.length;
+            int numberColumns = columnLower.length;
+            double result[] = new double[numberColumns];
+            //求解
+            LinearSolver solver = new LinearSolver();
+            solver.setDrive(LinearSolver.MLP_DRIVE_CBC);
+
+            time = System.currentTimeMillis();
+            int status = solver.solveMlp(numberColumns, numberRows, objValue,
+                    columnLower, columnUpper, rowLower, rowUpper, element, column, starts, whichInt, result);
+            System.out.println("求解耗时："+(System.currentTimeMillis()-time));
+
+            if (status < 0) {
+                log.warn("计算不收敛.");
+                isPass = false;
+                break;
+            } else { //状态位显示计算收敛
+                log.info("计算收敛");
+            }
+        }
+        return isPass;
     }
 
     public void allMinSwitch() {
