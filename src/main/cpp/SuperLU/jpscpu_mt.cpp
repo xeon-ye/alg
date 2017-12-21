@@ -16,11 +16,11 @@
 
 using namespace std;
 
-template<class T>
-int length(T& data)
+template <class T>
+int length(T &data)
 {
-    return sizeof(data)/sizeof(data[0]);
-} 
+    return sizeof(data) / sizeof(data[0]);
+}
 
 // use simple driver PDGSSV to solve a linear system one time.
 double *solve0_mt(int m, int n, int nnz, double *a, int *asub, int *xa, double *b, int nprocs)
@@ -82,7 +82,6 @@ double *solve0_mt(int m, int n, int nnz, double *a, int *asub, int *xa, double *
     Destroy_SuperMatrix_Store(&B);
     Destroy_SuperNode_SCP(&L);
     Destroy_CompCol_NCP(&U);
-
 
     return result;
 }
@@ -241,7 +240,7 @@ double *solve1_mt(int m, int n, int nnz, double *a, int *asub, int *xa, double *
  * perm_c, etree, colcnt_h, part_super_h
  * with the same sparsity pattern of matrix A.
  */
-double *solve2_mt(int m, int n, int nnz, double *a, int *asub, int *xa, double *b, int nprocs, int* perm_c, int* etree, int* colcnt_h, int* part_super_h, SuperMatrix *L, SuperMatrix *U)
+double *solve2_mt(int m, int n, int nnz, double *a, int *asub, int *xa, double *b, int nprocs, int *perm_c, int *etree, int *colcnt_h, int *part_super_h, SuperMatrix *L, SuperMatrix *U)
 {
     SuperMatrix A;
     SuperMatrix B, X;
@@ -259,7 +258,7 @@ double *solve2_mt(int m, int n, int nnz, double *a, int *asub, int *xa, double *
     double *ferr, *berr;
     double u, drop_tol, rpg, rcond;
     superlu_memusage_t superlu_memusage;
-    
+
     /* Default parameters to control factorization. */
     fact = EQUILIBRATE;
     trans = NOTRANS;
@@ -337,49 +336,15 @@ double *solve2_mt(int m, int n, int nnz, double *a, int *asub, int *xa, double *
     superlumt_options.etree = etree;
     superlumt_options.colcnt_h = colcnt_h;
     superlumt_options.part_super_h = part_super_h;
-    // if (!(superlumt_options.etree = intMalloc(n)))
-    //     SUPERLU_ABORT("Malloc fails for etree[].");
-    // if (!(superlumt_options.colcnt_h = intMalloc(n)))
-    //     SUPERLU_ABORT("Malloc fails for colcnt_h[].");
-    // if (!(superlumt_options.part_super_h = intMalloc(n)))
-    //     SUPERLU_ABORT("Malloc fails for part_super_h[].");
-// printf("perm_c[5] %d etree[5] %d colcnt_h[5] %d part_super_h[5] %d \n", superlumt_options.perm_c[5], superlumt_options.etree[5], superlumt_options.colcnt_h[5], superlumt_options.part_super_h[5]);
-// printf("$$perm_c[5] %d etree[5] %d colcnt_h[5] %d part_super_h[5] %d \n", perm_c[5], etree[5], colcnt_h[5], part_super_h[5]);
-    // printf("perm_c ");
-    // for (int i = 0; i < n; i++)
-    //     printf("%d ", superlumt_options.perm_c[i]);
-    // printf("\netree ");
-    // for (int i = 0; i < n; i++)
-    //     printf("%d ", superlumt_options.etree[i]);
-    // printf("\ncolcnt_h ");
-    // for (int i = 0; i < n; i++)
-    //     printf("%d ", superlumt_options.colcnt_h[i]);
-    // printf("\npart_super_h ");
-    // for (int i = 0; i < n; i++)
-    //     printf("%d ", superlumt_options.part_super_h[i]);
-    // printf("\n");
+
     /* ------------------------------------------------------------
        WE SOLVE THE LINEAR SYSTEM FOR THE FIRST TIME: AX = B
        ------------------------------------------------------------*/
-    printf("第一次求解开始\n");
+
     pdgssvx(nprocs, &superlumt_options, &A, perm_c, perm_r,
             &equed, R, C, L, U, &B, &X, &rpg, &rcond,
             ferr, berr, &superlu_memusage, &info);
-// printf("perm_c[5] %d etree[5] %d colcnt_h[5] %d part_super_h[5] %d \n", superlumt_options.perm_c[5], superlumt_options.etree[5], superlumt_options.colcnt_h[5], superlumt_options.part_super_h[5]);
-// printf("$$perm_c[5] %d etree[5] %d colcnt_h[5] %d part_super_h[5] %d \n", perm_c[5], etree[5], colcnt_h[5], part_super_h[5]);
-    // printf("perm_c ");
-    // for (int i = 0; i < n; i++)
-    //     printf("%d ", superlumt_options.perm_c[i]);
-    // printf("\netree ");
-    // for (int i = 0; i < n; i++)
-    //     printf("%d ", superlumt_options.etree[i]);
-    // printf("\ncolcnt_h ");
-    // for (int i = 0; i < n; i++)
-    //     printf("%d ", superlumt_options.colcnt_h[i]);
-    // printf("\npart_super_h ");
-    // for (int i = 0; i < n; i++)
-    //     printf("%d ", superlumt_options.part_super_h[i]);
-    // printf("\n");
+
     if (info == 0 || info == n + 1)
     {
         for (int i = 0; i < n; i++)
@@ -414,7 +379,7 @@ double *solve2_mt(int m, int n, int nnz, double *a, int *asub, int *xa, double *
  * perm_c, etree, colcnt_h, part_super_h
  * with the same sparsity pattern of matrix A.
  */
-double *solve3_mt(int m, int n, int nnz, double *a, int *asub, int *xa, double *b, int nprocs, int* perm_c, int* etree, int* colcnt_h, int* part_super_h, SuperMatrix *L, SuperMatrix *U)
+double *solve3_mt(int m, int n, int nnz, double *a, int *asub, int *xa, double *b, int nprocs, int *perm_c, int *etree, int *colcnt_h, int *part_super_h, SuperMatrix *L, SuperMatrix *U)
 {
     SuperMatrix A;
     SuperMatrix B, X;
@@ -432,7 +397,7 @@ double *solve3_mt(int m, int n, int nnz, double *a, int *asub, int *xa, double *
     double *ferr, *berr;
     double u, drop_tol, rpg, rcond;
     superlu_memusage_t superlu_memusage;
-    
+
     /* Default parameters to control factorization. */
     fact = EQUILIBRATE;
     trans = NOTRANS;
@@ -492,40 +457,6 @@ double *solve3_mt(int m, int n, int nnz, double *a, int *asub, int *xa, double *
     //    permc_spec = 1;
     //    get_perm_c(permc_spec, &A, perm_c);
 
-    // double *ferr1, *berr1;
-    // if (!(ferr1 = (double *)SUPERLU_MALLOC(nrhs * sizeof(double))))
-    //     SUPERLU_ABORT("SUPERLU_MALLOC fails for ferr[].");
-    // if (!(berr1 = (double *)SUPERLU_MALLOC(nrhs * sizeof(double))))
-    //     SUPERLU_ABORT("SUPERLU_MALLOC fails for berr[].");
-
-    // if (!(R1 = (double *)SUPERLU_MALLOC(A.nrow * sizeof(double))))
-    //     SUPERLU_ABORT("SUPERLU_MALLOC fails for R[].");
-    // if (!(C1 = (double *)SUPERLU_MALLOC(A.ncol * sizeof(double))))
-    //     SUPERLU_ABORT("SUPERLU_MALLOC fails for C[].");
-
-    // superlumt_options_t superlumt_options1;
-    // superlumt_options1.nprocs = nprocs;
-    // superlumt_options1.fact = fact;
-    // superlumt_options1.trans = trans;
-    // superlumt_options1.refact = refact;
-    // superlumt_options1.panel_size = panel_size;
-    // superlumt_options1.relax = relax;
-    // superlumt_options1.usepr = usepr;
-    // superlumt_options1.drop_tol = drop_tol;
-    // superlumt_options1.diag_pivot_thresh = u;
-    // superlumt_options1.SymmetricMode = NO;
-    // superlumt_options1.PrintStat = YES;
-    // superlumt_options1.perm_c = perm_c;
-    // superlumt_options1.perm_r = perm_r;
-    // superlumt_options1.work = work;
-    // superlumt_options1.lwork = lwork;
-    // superlumt_options1.etree = etree;
-    // superlumt_options1.colcnt_h = colcnt_h;
-    // superlumt_options1.part_super_h = part_super_h;
-
-
-
-
     superlumt_options.nprocs = nprocs;
     superlumt_options.fact = fact;
     superlumt_options.trans = trans;
@@ -544,101 +475,17 @@ double *solve3_mt(int m, int n, int nnz, double *a, int *asub, int *xa, double *
     superlumt_options.etree = etree;
     superlumt_options.colcnt_h = colcnt_h;
     superlumt_options.part_super_h = part_super_h;
-//    if (!(superlumt_options.etree = intMalloc(n)))
-//        SUPERLU_ABORT("Malloc fails for etree[].");
-//    if (!(superlumt_options.colcnt_h = intMalloc(n)))
-//        SUPERLU_ABORT("Malloc fails for colcnt_h[].");
-//    if (!(superlumt_options.part_super_h = intMalloc(n)))
-//        SUPERLU_ABORT("Malloc fails for part_super_h[].");
-    // pdgssvx(nprocs, &superlumt_options, &A, perm_c, perm_r,
-	//     &equed, R, C, &L, &U, &B, &X, &rpg, &rcond,
-	//     ferr, berr, &superlu_memusage, &info);
-    //    for (int i = 0; i < n; i++)
-    //    {
-    //        superlumt_options.etree[i] = etree[i];
-    //        superlumt_options.colcnt_h[i] = colcnt_h[i];
-    //        superlumt_options.part_super_h[i] = part_super_h[i];
-    //    }
-
-    //    printf("perm_c ");
-    //    for (int i = 0; i < n; i++)
-    //        printf("%d ", superlumt_options.perm_c[i]);
-    //    printf("\netree ");
-    //    for (int i = 0; i < n; i++)
-    //        printf("%d ", superlumt_options.etree[i]);
-    //    printf("\ncolcnt_h ");
-    //    for (int i = 0; i < n; i++)
-    //        printf("%d ", superlumt_options.colcnt_h[i]);
-    //    printf("\npart_super_h ");
-    //    for (int i = 0; i < n; i++)
-    //        printf("%d ", superlumt_options.part_super_h[i]);
-    //    printf("\n");
-    
-    // SuperMatrix A1, B1, X1;
-    // SuperMatrix L1,U1;
-    // dCreate_Dense_Matrix(&X1, m, nrhs, rhsx, m, SLU_DN, SLU_D, SLU_GE);
-    // double *a1;
-    // int_t *asub1, *xa1;
-    // int_t info1;
-    // if (!(a1 = doubleMalloc(nnz)))
-    //     SUPERLU_ABORT("Malloc fails for a1[].");
-    // if (!(asub1 = intMalloc(nnz)))
-    //     SUPERLU_ABORT("Malloc fails for asub1[].");
-    // if (!(xa1 = intMalloc(n + 1)))
-    //     SUPERLU_ABORT("Malloc fails for xa1[].");
-    // for (i = 0; i < nnz; ++i)
-    // {
-    //     a1[i] = a[i];
-    //     asub1[i] = asub[i];
-    // }
-    // for (i = 0; i < n + 1; ++i)
-    //     xa1[i] = xa[i];
-
-    
 
     /* ------------------------------------------------------------
        NOW WE SOLVE ANOTHER LINEAR SYSTEM: A*X = B
        ONLY THE SPARSITY PATTERN OF A IS THE SAME AS THAT OF THE FIRST TIME.
        ------------------------------------------------------------*/
-    printf("后续求解开始\n");
-    // superlumt_options.refact = YES;
-    // dCreate_CompCol_Matrix(&A, m, n, nnz, a, asub, xa, SLU_NC, SLU_D, SLU_GE);
-    // dCreate_Dense_Matrix(&B, m, nrhs, rhsb, m, SLU_DN, SLU_D, SLU_GE);
-    
-    // dCreate_CompCol_Matrix(&A, m, n, nnz, a, asub, xa, SLU_NC, SLU_D, SLU_GE);
-    // dCreate_Dense_Matrix(&B, m, nrhs, rhsb, m, SLU_DN, SLU_D, SLU_GE);
-    // printf("perm_c[5] %d etree[5] %d colcnt_h[5] %d part_super_h[5] %d \n", superlumt_options.perm_c[5], superlumt_options.etree[5], superlumt_options.colcnt_h[5], superlumt_options.part_super_h[5]);
-    // printf("$$perm_c[5] %d etree[5] %d colcnt_h[5] %d part_super_h[5] %d \n", perm_c[5], etree[5], colcnt_h[5], part_super_h[5]);
-
-    // double rpg1,rcond1;
-    // while(1);
-    pdgssvx(nprocs, &superlumt_options, &A, perm_c, perm_r,
-            &equed, R, C, L, U, &B, &X, &rpg, &rcond,
-            ferr, berr, &superlu_memusage, &info);
 
     superlumt_options.refact = YES;
     pdgssvx(nprocs, &superlumt_options, &A, perm_c, perm_r,
             &equed, R, C, L, U, &B, &X, &rpg, &rcond,
             ferr, berr, &superlu_memusage, &info);
 
-    // pdgssvx(nprocs, &superlumt_options, &A, perm_c, perm_r,
-    //         &equed, R, C, &L, &U, &B, &X, &rpg, &rcond,
-    //         ferr, berr, &superlu_memusage, &info);
-    // printf("perm_c[5] %d etree[5] %d colcnt_h[5] %d part_super_h[5] %d \n", superlumt_options.perm_c[5], superlumt_options.etree[5], superlumt_options.colcnt_h[5], superlumt_options.part_super_h[5]);
-    // printf("$$perm_c[5] %d etree[5] %d colcnt_h[5] %d part_super_h[5] %d \n", perm_c[5], etree[5], colcnt_h[5], part_super_h[5]);
-    // printf("perm_c ");
-    // for (int i = 0; i < n; i++)
-    //     printf("%d ", superlumt_options.perm_c[i]);
-    // printf("\netree ");
-    // for (int i = 0; i < n; i++)
-    //     printf("%d ", superlumt_options.etree[i]);
-    // printf("\ncolcnt_h ");
-    // for (int i = 0; i < n; i++)
-    //     printf("%d ", superlumt_options.colcnt_h[i]);
-    // printf("\npart_super_h ");
-    // for (int i = 0; i < n; i++)
-    //     printf("%d ", superlumt_options.part_super_h[i]);
-    // printf("\n");
     if (info == 0 || info == n + 1)
     {
         for (int i = 0; i < n; i++)
@@ -648,7 +495,6 @@ double *solve3_mt(int m, int n, int nnz, double *a, int *asub, int *xa, double *
     {
         printf("** Estimated memory: " IFMT " bytes\n", info - n);
     }
-    printf("结束\n");
     SUPERLU_FREE(rhsb);
     SUPERLU_FREE(rhsx);
     SUPERLU_FREE(perm_r);
@@ -819,22 +665,6 @@ JNIEXPORT jdoubleArray JNICALL Java_jpscpu_LinearSolverMT_solve2_1mt(JNIEnv *env
     SCPformat *Lstore = (SCPformat *)sL.Store;
     NCPformat *Ustore = (NCPformat *)sU.Store;
 
-    // printf("$$$%%%%\n");
-    // cout<< Lstore->nzval_colend[n-1] << endl;
-    // for (int k = 0; k < n+2; k++)
-    // {
-    //     // cout<< *(double *)(Lstore->nzval+k)<< endl;
-    //     cout<< Lstore->nzval_colbeg[k] << endl;
-    //     cout<< Lstore->nzval_colend[k] << endl;
-    //     // cout<< Lstore->rowind[k] << endl;         
-    // }
-    // cout<< Lstore->nzval_colbeg<< endl; 
-    // cout<< Lstore->nnz << endl;
-    // cout<< Lstore->nzval_colend[n-1] << endl;
-    // cout<< Lstore->nsuper << endl;
-    // cout<< Lstore->nzval_colbeg[n-1] << endl; 
-    // cout<< Lstore->nzval_colend[n-1] << endl;
-
     jclass clazz = env->FindClass("jpscpu/SCPformat");
     jmethodID methodId = env->GetMethodID(clazz, "setNnz", "(I)V");
     env->CallVoidMethod(L, methodId, Lstore->nnz);
@@ -842,14 +672,15 @@ JNIEXPORT jdoubleArray JNICALL Java_jpscpu_LinearSolverMT_solve2_1mt(JNIEnv *env
     methodId = env->GetMethodID(clazz, "setNsuper", "(I)V");
     env->CallVoidMethod(L, methodId, Lstore->nsuper);
 
-    jdoubleArray nzval = env->NewDoubleArray(Lstore->nzval_colend[n-1]);
-    env->SetDoubleArrayRegion(nzval, 0, Lstore->nzval_colend[n-1], (const jdouble *)Lstore->nzval);
+    jdoubleArray nzval = env->NewDoubleArray(2 * Lstore->nnz);
+    env->SetDoubleArrayRegion(nzval, 0, 2 * Lstore->nnz, (const jdouble *)Lstore->nzval);
     methodId = env->GetMethodID(clazz, "setNzval", "([D)V");
     env->CallVoidMethod(L, methodId, nzval);
     env->DeleteLocalRef(nzval);
+    // printf("%d",(int)(2 * nnz));
 
-    jintArray nzval_colbeg = env->NewIntArray(n);
-    env->SetIntArrayRegion(nzval_colbeg, 0, n, (const jint *)Lstore->nzval_colbeg);
+    jintArray nzval_colbeg = env->NewIntArray(n + 1);
+    env->SetIntArrayRegion(nzval_colbeg, 0, n + 1, (const jint *)Lstore->nzval_colbeg);
     methodId = env->GetMethodID(clazz, "setNzval_colbeg", "([I)V");
     env->CallVoidMethod(L, methodId, nzval_colbeg);
     env->DeleteLocalRef(nzval_colbeg);
@@ -860,14 +691,14 @@ JNIEXPORT jdoubleArray JNICALL Java_jpscpu_LinearSolverMT_solve2_1mt(JNIEnv *env
     env->CallVoidMethod(L, methodId, nzval_colend);
     env->DeleteLocalRef(nzval_colend);
 
-    jintArray rowind = env->NewIntArray(Lstore->rowind_colend[n-1]);
-    env->SetIntArrayRegion(rowind, 0, Lstore->rowind_colend[n-1], (const jint *)Lstore->rowind);
+    jintArray rowind = env->NewIntArray(2 * Lstore->nnz);
+    env->SetIntArrayRegion(rowind, 0, 2 * Lstore->nnz, (const jint *)Lstore->rowind);
     methodId = env->GetMethodID(clazz, "setRowind", "([I)V");
     env->CallVoidMethod(L, methodId, rowind);
     env->DeleteLocalRef(rowind);
 
-    jintArray rowind_colbeg = env->NewIntArray(n);
-    env->SetIntArrayRegion(rowind_colbeg, 0, n, (const jint *)Lstore->rowind_colbeg);
+    jintArray rowind_colbeg = env->NewIntArray(n + 1);
+    env->SetIntArrayRegion(rowind_colbeg, 0, n + 1, (const jint *)Lstore->rowind_colbeg);
     methodId = env->GetMethodID(clazz, "setRowind_colbeg", "([I)V");
     env->CallVoidMethod(L, methodId, rowind_colbeg);
     env->DeleteLocalRef(rowind_colbeg);
@@ -884,14 +715,14 @@ JNIEXPORT jdoubleArray JNICALL Java_jpscpu_LinearSolverMT_solve2_1mt(JNIEnv *env
     env->CallVoidMethod(L, methodId, col_to_sup);
     env->DeleteLocalRef(col_to_sup);
 
-    jintArray sup_to_colbeg = env->NewIntArray(Lstore->nsuper + 1);
-    env->SetIntArrayRegion(sup_to_colbeg, 0, Lstore->nsuper + 1, (const jint *)Lstore->sup_to_colbeg);
+    jintArray sup_to_colbeg = env->NewIntArray(n + 1);
+    env->SetIntArrayRegion(sup_to_colbeg, 0, n + 1, (const jint *)Lstore->sup_to_colbeg);
     methodId = env->GetMethodID(clazz, "setSup_to_colbeg", "([I)V");
     env->CallVoidMethod(L, methodId, sup_to_colbeg);
     env->DeleteLocalRef(sup_to_colbeg);
 
-    jintArray sup_to_colend = env->NewIntArray(Lstore->nsuper + 1);
-    env->SetIntArrayRegion(sup_to_colend, 0, Lstore->nsuper + 1, (const jint *)Lstore->sup_to_colend);
+    jintArray sup_to_colend = env->NewIntArray(n);
+    env->SetIntArrayRegion(sup_to_colend, 0, n, (const jint *)Lstore->sup_to_colend);
     methodId = env->GetMethodID(clazz, "setSup_to_colend", "([I)V");
     env->CallVoidMethod(L, methodId, sup_to_colend);
     env->DeleteLocalRef(sup_to_colend);
@@ -900,20 +731,20 @@ JNIEXPORT jdoubleArray JNICALL Java_jpscpu_LinearSolverMT_solve2_1mt(JNIEnv *env
     methodId = env->GetMethodID(clazz, "setNnz", "(I)V");
     env->CallVoidMethod(U, methodId, Ustore->nnz);
 
-    jdoubleArray nzval_U = env->NewDoubleArray(Ustore->colend[n-1]);
-    env->SetDoubleArrayRegion(nzval_U, 0, Ustore->colend[n-1], (const jdouble *)Ustore->nzval);
+    jdoubleArray nzval_U = env->NewDoubleArray(2 * Ustore->nnz);
+    env->SetDoubleArrayRegion(nzval_U, 0, 2 * Ustore->nnz, (const jdouble *)Ustore->nzval);
     methodId = env->GetMethodID(clazz, "setNzval", "([D)V");
     env->CallVoidMethod(U, methodId, nzval_U);
     env->DeleteLocalRef(nzval_U);
 
-    jintArray rowind_U = env->NewIntArray(Ustore->colend[n-1]);
-    env->SetIntArrayRegion(rowind_U, 0, Ustore->colend[n-1], (const jint *)Ustore->rowind);
+    jintArray rowind_U = env->NewIntArray(2 * Ustore->nnz);
+    env->SetIntArrayRegion(rowind_U, 0, 2 * Ustore->nnz, (const jint *)Ustore->rowind);
     methodId = env->GetMethodID(clazz, "setRowind", "([I)V");
     env->CallVoidMethod(U, methodId, rowind_U);
     env->DeleteLocalRef(rowind_U);
 
-    jintArray colbeg = env->NewIntArray(n);
-    env->SetIntArrayRegion(colbeg, 0, n, (const jint *)Ustore->colbeg);
+    jintArray colbeg = env->NewIntArray(n + 1);
+    env->SetIntArrayRegion(colbeg, 0, n + 1, (const jint *)Ustore->colbeg);
     methodId = env->GetMethodID(clazz, "setColbeg", "([I)V");
     env->CallVoidMethod(U, methodId, colbeg);
     env->DeleteLocalRef(colbeg);
@@ -944,7 +775,6 @@ JNIEXPORT jdoubleArray JNICALL Java_jpscpu_LinearSolverMT_solve3_1mt(
         jint *jnzval_colbeg_L, *jnzval_colend_L, *jrowind_L, *jrowind_colbeg_L, *jrowind_colend_L, *jcol_to_sup_L, *jsup_to_colbeg_L, *jsup_to_colend_L;
         jint *jrowind_U, *jcolbeg_U, *jcolend_U;
         jdouble *ja, *jb, *jnzval_L, *jnzval_U;
-        printf("nsuper:%d \n",nsuper_L);
         double sb[n];
         int sperm_c[n], setree[n], scolcnt_h[n], spart_super_h[n];
         int *snzval_colbeg_L, *snzval_colend_L, *srowind_L, *srowind_colbeg_L, *srowind_colend_L, *scol_to_sup_L, *ssup_to_colbeg_L, *ssup_to_colend_L, *srowind_U, *scolbeg_U, *scolend_U;
@@ -983,36 +813,35 @@ JNIEXPORT jdoubleArray JNICALL Java_jpscpu_LinearSolverMT_solve3_1mt(
         if (!(sxa = intMalloc(n + 1)))
             SUPERLU_ABORT("Malloc fails for xa[].");
 
-        if (!(snzval_L = doubleMalloc(jnzval_colend_L[n-1])))
+        if (!(snzval_L = doubleMalloc(2 * nnz_L)))
             SUPERLU_ABORT("Malloc fails for nzval_L[].");
-        if (!(snzval_U = doubleMalloc(jcolend_U[n-1])))
+        if (!(snzval_U = doubleMalloc(2 * nnz_U)))
             SUPERLU_ABORT("Malloc fails for nzval_U[].");
 
-        if (!(snzval_colbeg_L = intMalloc(n)))
+        if (!(snzval_colbeg_L = intMalloc(n + 1)))
             SUPERLU_ABORT("Malloc fails for nzval_colbeg_L[].");
         if (!(snzval_colend_L = intMalloc(n)))
             SUPERLU_ABORT("Malloc fails for nzval_colend_L[].");
-        if (!(srowind_L = intMalloc(jrowind_colend_L[n - 1])))
+        if (!(srowind_L = intMalloc(2 * nnz_L)))
             SUPERLU_ABORT("Malloc fails for rowind_L[].");
-        if (!(srowind_colbeg_L = intMalloc(n)))
+        if (!(srowind_colbeg_L = intMalloc(n + 1)))
             SUPERLU_ABORT("Malloc fails for rowind_colbeg_L[].");
         if (!(srowind_colend_L = intMalloc(n)))
             SUPERLU_ABORT("Malloc fails for rowind_colend_L[].");
         if (!(scol_to_sup_L = intMalloc(n + 1)))
             SUPERLU_ABORT("Malloc fails for col_to_sup_L[].");
-        if (!(ssup_to_colbeg_L = intMalloc(nsuper_L + 1)))
+        if (!(ssup_to_colbeg_L = intMalloc(n + 1)))
             SUPERLU_ABORT("Malloc fails for sup_to_colbeg_L[].");
-        if (!(ssup_to_colend_L = intMalloc(nsuper_L + 1)))
+        if (!(ssup_to_colend_L = intMalloc(n)))
             SUPERLU_ABORT("Malloc fails for sup_to_colend_L[].");
 
-        if (!(srowind_U = intMalloc(jcolend_U[n - 1])))
+        if (!(srowind_U = intMalloc(2 * nnz_U)))
             SUPERLU_ABORT("Malloc fails for rowind_U[].");
-        if (!(scolbeg_U = intMalloc(n)))
+        if (!(scolbeg_U = intMalloc(n + 1)))
             SUPERLU_ABORT("Malloc fails for colbeg_U[].");
         if (!(scolend_U = intMalloc(n)))
             SUPERLU_ABORT("Malloc fails for colend_U[].");
 
-        
         for (int i = 0; i < nnz; i++)
         {
             sa[i] = (double)ja[i];
@@ -1025,34 +854,31 @@ JNIEXPORT jdoubleArray JNICALL Java_jpscpu_LinearSolverMT_solve3_1mt(
             setree[i] = (int)jetree[i];
             scolcnt_h[i] = (int)jcolcnt_h[i];
             spart_super_h[i] = (int)jpart_super_h[i];
-            snzval_colbeg_L[i] = (int)jnzval_colbeg_L[i];
             snzval_colend_L[i] = (int)jnzval_colend_L[i];
-            srowind_colbeg_L[i] = (int)jrowind_colbeg_L[i];
             srowind_colend_L[i] = (int)jrowind_colend_L[i];
-            scolbeg_U[i] = (int)jcolbeg_U[i];
+            ssup_to_colend_L[i] = (int)jsup_to_colend_L[i];
             scolend_U[i] = (int)jcolend_U[i];
         }
         for (int i = 0; i < n + 1; i++)
         {
             sxa[i] = (int)jxa[i];
+            snzval_colbeg_L[i] = (int)jnzval_colbeg_L[i];
+            srowind_colbeg_L[i] = (int)jrowind_colbeg_L[i];
             scol_to_sup_L[i] = (int)jcol_to_sup_L[i];
-        }
-        for (int i = 0; i < nsuper_L + 1; i++)
-        {
             ssup_to_colbeg_L[i] = (int)jsup_to_colbeg_L[i];
-            ssup_to_colend_L[i] = (int)jsup_to_colend_L[i];
+            scolbeg_U[i] = (int)jcolbeg_U[i];
         }
-
-        for (int i = 0; i < snzval_colend_L[n - 1]; i++)
+        for (int i = 0; i < 2 * nnz_L; i++)
+        {
             snzval_L[i] = (double)jnzval_L[i];
-        for (int i = 0; i < srowind_colend_L[n - 1]; i++)
             srowind_L[i] = (int)jrowind_L[i];
-        for (int i = 0; i < scolend_U[n - 1]; i++)
+        }
+        for (int i = 0; i < 2 * nnz_U; i++)
         {
             snzval_U[i] = (double)jnzval_U[i];
             srowind_U[i] = (int)jrowind_U[i];
-        }            
-        
+        }
+
         SuperMatrix sL, sU;
         SCPformat Lstore;
         NCPformat Ustore;
@@ -1085,16 +911,9 @@ JNIEXPORT jdoubleArray JNICALL Java_jpscpu_LinearSolverMT_solve3_1mt(
         sU.nrow = m;
         sU.ncol = n;
         sU.Store = &Ustore;
-        
-        // for (int i = 0; i < snzval_colend_L[n - 1]; i++)
-        //     printf("%f ",snzval_L[i]);
 
-        // for (int i = 0; i < nsuper_L + 1; i++)
-        // {
-        //     printf("")
-        // }
         double *res = solve3_mt(m, n, nnz, sa, sasub, sxa, sb, nprocs, sperm_c, setree, scolcnt_h, spart_super_h, &sL, &sU);
-        
+
         env->ReleaseDoubleArrayElements(a, ja, JNI_ABORT);
         env->ReleaseDoubleArrayElements(b, jb, JNI_ABORT);
         env->ReleaseDoubleArrayElements(nzval_L, jnzval_L, JNI_ABORT);
@@ -1123,7 +942,6 @@ JNIEXPORT jdoubleArray JNICALL Java_jpscpu_LinearSolverMT_solve3_1mt(
         env->SetDoubleArrayRegion(b, 0, n, (const jdouble *)res);
 
         SUPERLU_FREE(res);
-        //Destroy_SuperNode_Matrix(&sL);
         SUPERLU_FREE(Lstore.rowind);
         SUPERLU_FREE(Lstore.rowind_colbeg);
         SUPERLU_FREE(Lstore.rowind_colend);
@@ -1133,8 +951,6 @@ JNIEXPORT jdoubleArray JNICALL Java_jpscpu_LinearSolverMT_solve3_1mt(
         SUPERLU_FREE(Lstore.col_to_sup);
         SUPERLU_FREE(Lstore.sup_to_colbeg);
         SUPERLU_FREE(Lstore.sup_to_colend);
-        //SUPERLU_FREE ( Lstore );
-        //Destroy_CompCol_Matrix(&sU);
         SUPERLU_FREE(Ustore.rowind);
         SUPERLU_FREE(Ustore.colbeg);
         SUPERLU_FREE(Ustore.colend);

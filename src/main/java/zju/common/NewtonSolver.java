@@ -16,7 +16,7 @@ import zju.util.ColtMatrixUtil;
  * Created by IntelliJ IDEA.
  *
  * @author Dong Shufeng
- *         Date: 2008-8-9
+ * Date: 2008-8-9
  */
 public class NewtonSolver {
 
@@ -28,7 +28,7 @@ public class NewtonSolver {
     //SuperLU_MT求解器
     public static final int LINEAR_SOLVER_SUPERLU_MT = 3;
     //默认为SuperLU求解器
-    private int linearSolver = LINEAR_SOLVER_SUPERLU_MT;
+    private int linearSolver = LINEAR_SOLVER_SUPERLU;
     //具体问题的模型
     private NewtonModel model;
     //状态变量，有具体问题模型提供
@@ -115,11 +115,7 @@ public class NewtonSolver {
                     sluMTSolver.solve(jacStruc, left, result);
                 }
             }
-//            else if (linearSolver == LINEAR_SOLVER_SUPERLU_MT) {
-//                jacStruc = model.getJacobianStruc();
-//                sluMTSolver.solve(jacStruc, left, result);
-//            }
-                log.debug("计算Jx=b用时: " + (System.nanoTime() - start) / 1000 + " us");
+            log.debug("计算Jx=b用时: " + (System.nanoTime() - start) / 1000 + " us");
             //check for convergence
             double max = 0;
             int columns = left.columns();
@@ -215,7 +211,7 @@ public class NewtonSolver {
                             if (k1 == -1 || k2 == -1)
                                 break;
                         }
-                        if(!isExist)
+                        if (!isExist)
                             continue;
                         left.setQuick(row, col, s);
                         left.setQuick(col, row, s);
