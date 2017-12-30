@@ -672,12 +672,12 @@ JNIEXPORT jdoubleArray JNICALL Java_jpscpu_LinearSolverMT_solve2_1mt(JNIEnv *env
     methodId = env->GetMethodID(clazz, "setNsuper", "(I)V");
     env->CallVoidMethod(L, methodId, Lstore->nsuper);
 
-    jdoubleArray nzval = env->NewDoubleArray(2 * Lstore->nnz);
-    env->SetDoubleArrayRegion(nzval, 0, 2 * Lstore->nnz, (const jdouble *)Lstore->nzval);
+    jdoubleArray nzval = env->NewDoubleArray((int)(1.5 * Lstore->nnz));
+    env->SetDoubleArrayRegion(nzval, 0, (int)(1.5 * Lstore->nnz), (const jdouble *)Lstore->nzval);
     methodId = env->GetMethodID(clazz, "setNzval", "([D)V");
     env->CallVoidMethod(L, methodId, nzval);
     env->DeleteLocalRef(nzval);
-    // printf("%d",(int)(2 * nnz));
+    // printf("%d",(int)((int)(1.5 * nnz)));
 
     jintArray nzval_colbeg = env->NewIntArray(n + 1);
     env->SetIntArrayRegion(nzval_colbeg, 0, n + 1, (const jint *)Lstore->nzval_colbeg);
@@ -691,8 +691,8 @@ JNIEXPORT jdoubleArray JNICALL Java_jpscpu_LinearSolverMT_solve2_1mt(JNIEnv *env
     env->CallVoidMethod(L, methodId, nzval_colend);
     env->DeleteLocalRef(nzval_colend);
 
-    jintArray rowind = env->NewIntArray(2 * Lstore->nnz);
-    env->SetIntArrayRegion(rowind, 0, 2 * Lstore->nnz, (const jint *)Lstore->rowind);
+    jintArray rowind = env->NewIntArray((int)(1.5 * Lstore->nnz));
+    env->SetIntArrayRegion(rowind, 0, (int)(1.5 * Lstore->nnz), (const jint *)Lstore->rowind);
     methodId = env->GetMethodID(clazz, "setRowind", "([I)V");
     env->CallVoidMethod(L, methodId, rowind);
     env->DeleteLocalRef(rowind);
@@ -731,14 +731,14 @@ JNIEXPORT jdoubleArray JNICALL Java_jpscpu_LinearSolverMT_solve2_1mt(JNIEnv *env
     methodId = env->GetMethodID(clazz, "setNnz", "(I)V");
     env->CallVoidMethod(U, methodId, Ustore->nnz);
 
-    jdoubleArray nzval_U = env->NewDoubleArray(2 * Ustore->nnz);
-    env->SetDoubleArrayRegion(nzval_U, 0, 2 * Ustore->nnz, (const jdouble *)Ustore->nzval);
+    jdoubleArray nzval_U = env->NewDoubleArray((int)(1.5 * Ustore->nnz));
+    env->SetDoubleArrayRegion(nzval_U, 0, (int)(1.5 * Ustore->nnz), (const jdouble *)Ustore->nzval);
     methodId = env->GetMethodID(clazz, "setNzval", "([D)V");
     env->CallVoidMethod(U, methodId, nzval_U);
     env->DeleteLocalRef(nzval_U);
 
-    jintArray rowind_U = env->NewIntArray(2 * Ustore->nnz);
-    env->SetIntArrayRegion(rowind_U, 0, 2 * Ustore->nnz, (const jint *)Ustore->rowind);
+    jintArray rowind_U = env->NewIntArray((int)(1.5 * Ustore->nnz));
+    env->SetIntArrayRegion(rowind_U, 0, (int)(1.5 * Ustore->nnz), (const jint *)Ustore->rowind);
     methodId = env->GetMethodID(clazz, "setRowind", "([I)V");
     env->CallVoidMethod(U, methodId, rowind_U);
     env->DeleteLocalRef(rowind_U);
@@ -813,16 +813,16 @@ JNIEXPORT jdoubleArray JNICALL Java_jpscpu_LinearSolverMT_solve3_1mt(
         if (!(sxa = intMalloc(n + 1)))
             SUPERLU_ABORT("Malloc fails for xa[].");
 
-        if (!(snzval_L = doubleMalloc(2 * nnz_L)))
+        if (!(snzval_L = doubleMalloc((int)(1.5 * nnz_L))))
             SUPERLU_ABORT("Malloc fails for nzval_L[].");
-        if (!(snzval_U = doubleMalloc(2 * nnz_U)))
+        if (!(snzval_U = doubleMalloc((int)(1.5 * nnz_U))))
             SUPERLU_ABORT("Malloc fails for nzval_U[].");
 
         if (!(snzval_colbeg_L = intMalloc(n + 1)))
             SUPERLU_ABORT("Malloc fails for nzval_colbeg_L[].");
         if (!(snzval_colend_L = intMalloc(n)))
             SUPERLU_ABORT("Malloc fails for nzval_colend_L[].");
-        if (!(srowind_L = intMalloc(2 * nnz_L)))
+        if (!(srowind_L = intMalloc((int)(1.5 * nnz_L))))
             SUPERLU_ABORT("Malloc fails for rowind_L[].");
         if (!(srowind_colbeg_L = intMalloc(n + 1)))
             SUPERLU_ABORT("Malloc fails for rowind_colbeg_L[].");
@@ -835,7 +835,7 @@ JNIEXPORT jdoubleArray JNICALL Java_jpscpu_LinearSolverMT_solve3_1mt(
         if (!(ssup_to_colend_L = intMalloc(n)))
             SUPERLU_ABORT("Malloc fails for sup_to_colend_L[].");
 
-        if (!(srowind_U = intMalloc(2 * nnz_U)))
+        if (!(srowind_U = intMalloc((int)(1.5 * nnz_U))))
             SUPERLU_ABORT("Malloc fails for rowind_U[].");
         if (!(scolbeg_U = intMalloc(n + 1)))
             SUPERLU_ABORT("Malloc fails for colbeg_U[].");
@@ -868,12 +868,12 @@ JNIEXPORT jdoubleArray JNICALL Java_jpscpu_LinearSolverMT_solve3_1mt(
             ssup_to_colbeg_L[i] = (int)jsup_to_colbeg_L[i];
             scolbeg_U[i] = (int)jcolbeg_U[i];
         }
-        for (int i = 0; i < 2 * nnz_L; i++)
+        for (int i = 0; i < (int)(1.5 * nnz_L); i++)
         {
             snzval_L[i] = (double)jnzval_L[i];
             srowind_L[i] = (int)jrowind_L[i];
         }
-        for (int i = 0; i < 2 * nnz_U; i++)
+        for (int i = 0; i < (int)(1.5 * nnz_U); i++)
         {
             snzval_U[i] = (double)jnzval_U[i];
             srowind_U[i] = (int)jrowind_U[i];
