@@ -11,10 +11,6 @@ extern "C" {
 #define jpscpu_LinearSolverMT_SUPERLU_DRIVE_0 0L
 #undef jpscpu_LinearSolverMT_SUPERLU_DRIVE_1
 #define jpscpu_LinearSolverMT_SUPERLU_DRIVE_1 1L
-#undef jpscpu_LinearSolverMT_MLP_DRIVE_CBC
-#define jpscpu_LinearSolverMT_MLP_DRIVE_CBC 2L
-#undef jpscpu_LinearSolverMT_MLP_DRIVE_SYM
-#define jpscpu_LinearSolverMT_MLP_DRIVE_SYM 3L
 /*
  * Class:     jpscpu_LinearSolverMT
  * Method:    solve0_mt
@@ -30,6 +26,22 @@ JNIEXPORT jdoubleArray JNICALL Java_jpscpu_LinearSolverMT_solve0_1mt
  */
 JNIEXPORT jdoubleArray JNICALL Java_jpscpu_LinearSolverMT_solve1_1mt
   (JNIEnv *, jobject, jint, jint, jint, jdoubleArray, jintArray, jintArray, jdoubleArray, jint);
+
+/*
+ * Class:     jpscpu_LinearSolverMT
+ * Method:    solve2_mt
+ * Signature: (III[D[I[I[DI[I[I[I[ILjpscpu/SCPformat;Ljpscpu/NCPformat;)[D
+ */
+JNIEXPORT jdoubleArray JNICALL Java_jpscpu_LinearSolverMT_solve2_1mt
+  (JNIEnv *, jobject, jint, jint, jint, jdoubleArray, jintArray, jintArray, jdoubleArray, jint, jintArray, jintArray, jintArray, jintArray, jobject, jobject);
+
+/*
+ * Class:     jpscpu_LinearSolverMT
+ * Method:    solve3_mt
+ * Signature: (III[D[I[I[DI[I[I[I[III[D[I[I[I[I[I[I[I[II[D[I[I[I)[D
+ */
+JNIEXPORT jdoubleArray JNICALL Java_jpscpu_LinearSolverMT_solve3_1mt
+  (JNIEnv *, jobject, jint, jint, jint, jdoubleArray, jintArray, jintArray, jdoubleArray, jint, jintArray, jintArray, jintArray, jintArray, jint, jint, jdoubleArray, jintArray, jintArray, jintArray, jintArray, jintArray, jintArray, jintArray, jintArray, jint, jdoubleArray, jintArray, jintArray, jintArray);
 
 #ifdef __cplusplus
 }
