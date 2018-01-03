@@ -43,6 +43,18 @@ class ParticleInTSC {
     //负荷名
     LinkedList<String> loadName;
 
+//    //是否完成N-1校验
+//    boolean isFinish = false;
+//    //是否通过N-1校验
+//    boolean isPass = false;
+//    //是否计算超时
+//    boolean isTooLong = false;
+//
+//    //计时器
+//    TimekeeperThread timekeeperThread;
+//
+//    CheckN1Task checkN1Task;
+
     /**
      * 初始化粒子
      *
@@ -72,18 +84,18 @@ class ParticleInTSC {
         //生成系统
         //todo:
         InputStream ieeeFile = this.getClass().getResourceAsStream("/loadtransferfiles/testcase17/graphtest.txt");
+
         DistriSys distriSys = createDs(ieeeFile, "S1", 100);
         //设置电源节点，电源名
         //todo:
-        String[] supplyID = new String[]{"S1", "S2", "S3","S4","S5","S6"};
+        String[] supplyID = new String[]{"S1", "S2", "S3", "S4", "S5", "S6"};
         distriSys.setSupplyCns(supplyID);
         //设置电源基准电压
-        Double[] supplyBaseKv = new Double[]{100., 100., 100.,100., 100.,100.,};
+        Double[] supplyBaseKv = new Double[]{100., 100., 100., 100., 100., 100.,};
         distriSys.setSupplyCnBaseKv(supplyBaseKv);
 
         //新建计算模型
         loadTransferOpt = new LoadTransferOpt(distriSys);
-
 
 
         //设置电源容量
@@ -128,6 +140,60 @@ class ParticleInTSC {
             fitness = 0;
         }
 
+        //正常运行状态控制
+        //todo:
+        boolean isTooBig;
+        isTooBig = position[0]+position[6]+position[7]>40;
+        if (isTooBig){
+            fitness= 0;
+        }
+        isTooBig = position[1]+position[8]+position[9]+position[20]+position[21]+position[32]+position[33]>40;
+        if(isTooBig){
+            fitness=0;
+        }
+        isTooBig=position[2]+position[10]+position[11]+position[12]+position[22]+position[23]+position[24]+position[34]+position[35]+position[36]>40;
+        if (isTooBig){
+            fitness=0;
+        }
+        isTooBig=position[3]+position[13]+position[14]+position[25]+position[26]+position[37]+position[38]>40;
+        if (isTooBig){
+            fitness=0;
+        }
+        isTooBig=position[4]+position[15]+position[16]+position[17]+position[27]+position[28]+position[29]+position[39]+position[40]+position[41]>63;
+        if (isTooBig){
+            fitness=0;
+        }
+        isTooBig=position[5]+position[18]+position[19]+position[30]+position[31]+position[42]+position[43]>63;
+        if (isTooBig){
+            fitness=0;
+        }
+//        checkN1Task = new CheckN1Task(loadTransferOpt,this);
+//        checkN1Task.start();
+//
+//        timekeeperThread = new TimekeeperThread(200000, new TimeoutException("超时"),this);
+//        timekeeperThread.start();
+//        //初始设置未结束
+//        timekeeperThread.updateTime();
+//        isFinish = false;
+//        while (!isFinish && !isTooLong) {
+//            //System.out.println(".");
+//        }
+//        //checkN1Task.interrupt();
+//        //timekeeperThread.interrupt();
+//        //System.out.println("关闭成功");
+//
+//        //未通过N-1校验
+//        if (!isPass) {
+//            fitness = 0;
+//        }
+//        isPass = false;
+//
+//        //超时
+//        if(!isTooLong){
+//            fitness = 0;
+//        }
+//        isTooLong = false;
+
         if (fitness - pBestFitness > 1e-2) {
             //假如计算出的适应值比历史最优适应值好，则用新计算出的适应值函数替代历史最优适应值
             pBestFitness = fitness;
@@ -144,10 +210,10 @@ class ParticleInTSC {
         for (int j = 0; j < dimension; j++) {
             velocity[j] = w * velocity[j] + c1 * rnd.nextDouble() * (pBestPositon[j] - position[j])
                     + c2 * rnd.nextDouble() * (PSOInTSC.globalBestPosition[j] - position[j]);//速度更新
-            position[j] = position[j]+velocity[j];
+            position[j] = position[j] + velocity[j] + rnd.nextDouble()*0.5;
             //坐标默认大于等于0
-            if(position[j]<0){
-                position[j]=0;
+            if (position[j] < 0) {
+                position[j] = 0;
             }
         }
     }
@@ -169,7 +235,7 @@ class ParticleInTSC {
      */
     double getRandomPostion() {
         //todo:
-        return rnd.nextDouble() * 1;
+        return rnd.nextDouble() * 6;
     }
 
     /**
@@ -240,8 +306,6 @@ class ParticleInTSC {
         }
         return supplyCap;
     }
-
-
 
     public double[] getPosition() {
         return position;
@@ -315,3 +379,27 @@ class ParticleInTSC {
         ParticleInTSC.c2 = c2;
     }
 }
+
+//class CheckN1Task extends Thread {
+//
+//    private LoadTransferOpt loadTransferOpt;
+//    private ParticleInTSC particleInTSC;
+//
+//    CheckN1Task(LoadTransferOpt model,ParticleInTSC particle) {
+//        super();
+//        loadTransferOpt = model;
+//        particleInTSC = particle;
+//    }
+//
+//    @Override
+//    public void run() {
+//        if (loadTransferOpt.checkN1()) {
+//            particleInTSC.isPass = true;
+//        } else {
+//            particleInTSC.isPass = false;
+//        }
+//        particleInTSC.isFinish = true;
+//    }
+//}
+
+
