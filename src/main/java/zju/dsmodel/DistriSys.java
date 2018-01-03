@@ -308,7 +308,7 @@ public class DistriSys implements DsModelCons, Serializable {
      *
      * @param topoNode a logical topoNode
      * @param node     connectivity node in cim
-     * @param g        topological graph
+     * @param g        topological graph.txt
      */
     private void createTopologicalNode(DsTopoNode topoNode, DsConnectNode node, UndirectedGraph<DsTopoNode, MapObject> g) {
         if (topoNode == null) {
