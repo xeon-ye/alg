@@ -4,47 +4,47 @@
 
 [Linecode]
 name=3PH-Connector 
-nphases=3 
+nphases=3
+units=km
 r1=1  
 r0=1 
 x1=1      
 x0=1      
 c1=0     
-c0=0   
-units=km    
+c0=0
 
 [Linecode]
 name=1PH-Connector 
 nphases=1 
-r1=1  
+units=km
+r1=1
 r0=1 
 x1=1      
 x0=1      
 c1=0     
 c0=0   
-units=km    
 
 [Linecode]
 name=3P_1/0_AXNJ_DB         
 nphases=3 
-r1=0.551156 
+units=km
+r1=0.551156
 x1=0.200765 
 r0=1.350357 
 x0=0.426882  
 c1=48.6655390619471  
 c0=48.6655390619471  
-units=km  
 
-[Linecode
+[Linecode]
 name=1P_1/0_AXNJ_DB         
 nphases=1 
-r1=0.958962 
+units=km
+r1=0.958962
 x1=0.541276 
 r0=0.958962 
 x0=0.541276  
 c1=25.9234833984413  
 c0=25.9234833984413  
-units=km 
 
 [Linecode]
 name=1ph-x4_acsrx4_acsr 

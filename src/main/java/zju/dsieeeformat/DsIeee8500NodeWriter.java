@@ -45,6 +45,24 @@ public class DsIeee8500NodeWriter implements DsModelCons {
     public DsIeee8500NodeWriter() {
     }
 
+    public void createFile() {
+        String fullPath = path + fileName + ".txt";//文件路径+名称+文件类型
+        outputFile = new File(fullPath);
+        try {
+            //如果文件不存在，则创建新的文件
+            if (!outputFile.exists()) {
+                outputFile.createNewFile();
+                System.out.println("创建文件成功，路径名为" + fullPath);
+            }
+            FileWriter fileWriter = new FileWriter(outputFile);
+            fileWriter.write("");
+            fileWriter.flush();
+            fileWriter.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     //获取原始数据
     public void readRawData(InputStream linesResource, InputStream capacitorsResource, InputStream transformersResource, InputStream loadXfmrsResource) {
         System.out.println("########################### 读取原始数据开始 ###########################");
@@ -111,25 +129,6 @@ public class DsIeee8500NodeWriter implements DsModelCons {
         }
     }
 
-
-    public void createFile() {
-        String fullPath = path + fileName + ".txt";//文件路径+名称+文件类型
-        outputFile = new File(fullPath);
-        try {
-            //如果文件不存在，则创建新的文件
-            if (!outputFile.exists()) {
-                outputFile.createNewFile();
-                System.out.println("创建文件成功，路径名为" + fullPath);
-            }
-            FileWriter fileWriter = new FileWriter(outputFile);
-            fileWriter.write("");
-            fileWriter.flush();
-            fileWriter.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
     public void writeLineSegmentData() {
         int lineSegmentDataLength = linesList.size();
         int transformerDataLength = transformersList.size();
@@ -144,7 +143,12 @@ public class DsIeee8500NodeWriter implements DsModelCons {
             }
             lineSegmentDataLength += transformerDataLength;
 
+            // 追加一个电源节点
+            lineSegmentDataLength += 1;
+
             fileWriter.write("Line Segment Data\t" + lineSegmentDataLength + " items\t" + LEN_UNIT_KILOMETER + "\n");
+            fileWriter.write("Source\tHVMV_Sub_HSB\t1\tX_Source\n");
+
             for (String[] strings : transformersList) {
                 // 去除regxfmr的前缀，这是因为忽略了调压器，将两个节点收缩为一个节点
                 if (strings[3].startsWith("regxfmr")) {
@@ -162,10 +166,10 @@ public class DsIeee8500NodeWriter implements DsModelCons {
 
                 if (strings[7].contains("Connector")) {
                     // 对开关进行特殊处理，增加一个虚拟节点，将阻抗和纯开关分开
-                    fileWriter.write(strings[1] + "\t" + strings[1] + "--" + strings[3] + "\t" + strings[5] + "\t" + strings[7] + "-" + strings[2] + "\n");
+                    fileWriter.write(strings[1] + "\t" + strings[1] + "--" + strings[3] + "\t" + strings[5] + "\t" + strings[7].toUpperCase() + "-" + strings[2] + "\n");
                     fileWriter.write(strings[1] + "--" + strings[3] + "\t" + strings[3] + "\t" + "0" + "\t" + "Switch" + "\n");
                 } else {
-                    fileWriter.write(strings[1] + "\t" + strings[3] + "\t" + strings[5] + "\t" + strings[7] + "-" + strings[2] + "\n");
+                    fileWriter.write(strings[1] + "\t" + strings[3] + "\t" + strings[5] + "\t" + strings[7].toUpperCase() + "-" + strings[2] + "\n");
                 }
             }
             fileWriter.write("-999\n");
@@ -221,8 +225,7 @@ public class DsIeee8500NodeWriter implements DsModelCons {
     public void writeCapacitorData() {
         try {
             FileWriter fileWriter = new FileWriter(outputFile, true);
-            int capacitorDataLength = capacitorsList.size();
-            fileWriter.write("Shunt Capacitors\t" + capacitorDataLength + " items\n");
+            fileWriter.write("Shunt Capacitors\t" + 4 + " items\n");
             for (String[] strings : capacitorsList) {
                 if (strings[2].equals("A") || strings[2].equals("ABC")) {
                     fileWriter.write(strings[1] + "\t" + strings[4] + "\t" + strings[4] + "\t" + strings[4] + "\n");

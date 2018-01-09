@@ -8,11 +8,12 @@ import java.io.InputStream;
  * Created by IntelliJ IDEA.
  *
  * @author Dong Shufeng
- *         Date: 2011-4-21
+ * Date: 2011-4-21
  */
 
 public class IeeeDsInHand implements DsModelCons {
     private static final FeederConfMgr FEEDER_CONF = new FeederConfMgr();
+    private static final FeederConfMgr FEEDER_CONF_CASE8500 = new FeederConfMgr();
 
     public final static DistriSys FEEDER4_DD_B;
     public final static DistriSys FEEDER4_DD_UNB;
@@ -29,9 +30,11 @@ public class IeeeDsInHand implements DsModelCons {
     public final static DistriSys FEEDER34;
     public final static DistriSys FEEDER37;
     public final static DistriSys FEEDER123;
+    public final static DistriSys FEEDER8500;
 
     static {
         FEEDER_CONF.readImpedanceConf(IeeeDsInHand.class.getResourceAsStream("/dsieee/common/feederconfig.txt"));
+        FEEDER_CONF_CASE8500.readImpedanceConf(IeeeDsInHand.class.getResourceAsStream("/dsieee/common/feederconfig8500.txt"));
 
         InputStream ieeeFile = IeeeDsInHand.class.getResourceAsStream("/dsieee/case4/case4_D-D_Bload.txt");
         FEEDER4_DD_B = createDs(ieeeFile, "1", 12.47 / sqrt3);
@@ -80,6 +83,21 @@ public class IeeeDsInHand implements DsModelCons {
             else if (obj.getProperty(KEY_CONNECTED_NODE).equals("300;350"))
                 obj.setProperty(KEY_SWITCH_STATUS, SWITCH_OFF);
         }
+
+        ieeeFile = IeeeDsInHand.class.getResourceAsStream("/dsieee/8500node/case8500.txt");
+        FEEDER8500 = createDs8500(ieeeFile, "Source", 115 / sqrt3);
+        for (MapObject obj : FEEDER8500.getDevices().getSwitches()) {
+            if (obj.getProperty(KEY_CONNECTED_NODE).equals("228-979371-2_INT--193-48013;193-48013"))
+                obj.setProperty(KEY_SWITCH_STATUS, SWITCH_OFF);
+            else if (obj.getProperty(KEY_CONNECTED_NODE).equals("228-961799-3_INT--193-46661;193-46661"))
+                obj.setProperty(KEY_SWITCH_STATUS, SWITCH_OFF);
+            else if (obj.getProperty(KEY_CONNECTED_NODE).equals("228-1353934-4_INT--193-103041;193-103041"))
+                obj.setProperty(KEY_SWITCH_STATUS, SWITCH_OFF);
+            else if (obj.getProperty(KEY_CONNECTED_NODE).equals("D5837361-8_INT--E182745;E182745"))
+                obj.setProperty(KEY_SWITCH_STATUS, SWITCH_OFF);
+            else if (obj.getProperty(KEY_CONNECTED_NODE).equals("228-1048090-1_INT--193-51796;193-51796"))
+                obj.setProperty(KEY_SWITCH_STATUS, SWITCH_OFF);
+        }
     }
 
     public static DistriSys createDs(InputStream ieeeFile, String slackCnId, double baseKv) {
@@ -90,6 +108,21 @@ public class IeeeDsInHand implements DsModelCons {
         dsTopo.setSupplyCns(new String[]{slackCnId});
         dsTopo.setSupplyCnBaseKv(new Double[]{baseKv});
         dsTopo.setFeederConf(FEEDER_CONF);
+        dsTopo.fillCnBaseKv();
+
+        for (MapObject obj : devices.getSwitches())
+            obj.setProperty(KEY_SWITCH_STATUS, SWITCH_ON);
+        return dsTopo;
+    }
+
+    public static DistriSys createDs8500(InputStream ieeeFile, String slackCnId, double baseKv) {
+        DsDevices devices = new DsDeviceParser().parse(ieeeFile);
+        DistriSys dsTopo = new DistriSys();
+        dsTopo.buildOrigTopo(devices);
+
+        dsTopo.setSupplyCns(new String[]{slackCnId});
+        dsTopo.setSupplyCnBaseKv(new Double[]{baseKv});
+        dsTopo.setFeederConf(FEEDER_CONF_CASE8500);
         dsTopo.fillCnBaseKv();
 
         for (MapObject obj : devices.getSwitches())
