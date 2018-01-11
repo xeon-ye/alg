@@ -29,7 +29,6 @@ public class IeeeDsInHand implements DsModelCons {
     public final static DistriSys FEEDER34;
     public final static DistriSys FEEDER37;
     public final static DistriSys FEEDER123;
-    public final static DistriSys FEEDER123x50;
 
     static {
         FEEDER_CONF.readImpedanceConf(IeeeDsInHand.class.getResourceAsStream("/dsieee/common/feederconfig.txt"));
@@ -69,9 +68,6 @@ public class IeeeDsInHand implements DsModelCons {
 
         ieeeFile = IeeeDsInHand.class.getResourceAsStream("/dsieee/case123/case123.txt");
         FEEDER123 = createDs(ieeeFile, "150", 4.16 / sqrt3);
-
-        ieeeFile = IeeeDsInHand.class.getResourceAsStream("/dsieee/case_connection/case123x50.txt");
-        FEEDER123x50 = createDs(ieeeFile, "150", 4.16 / sqrt3);
         for (MapObject obj : FEEDER123.getDevices().getSwitches()) {
             if (obj.getProperty(KEY_CONNECTED_NODE).equals("250;251"))
                 obj.setProperty(KEY_SWITCH_STATUS, SWITCH_OFF);

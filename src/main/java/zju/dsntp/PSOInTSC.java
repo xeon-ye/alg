@@ -79,7 +79,7 @@ class PSOInTSC {
         int runTimes = 1;
         int index;
         //设置最大迭代次数
-        while (runTimes <= 100) {
+        while (runTimes <= 50) {
             index = -1;
             //每个粒子更新位置和适应值
             for (int i = 0; i < particlesAmount; ++i) {
@@ -139,5 +139,4 @@ class PSOInTSC {
     public static double[] getGlobalBestPosition() {
         return globalBestPosition;
     }
-
 }

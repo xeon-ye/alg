@@ -152,7 +152,7 @@ public class IcfTopoUtil {
      * @param baseV 需要分析的电压等级
      */
     public void doEquivalentLoad(double baseV) {
-        //if (graph == null)
+        //if (graph.txt == null)
         //    createGraph();
         //List<Set<BusData>> subgraphes;
         //Set<BusData> equivalentLoad = null;
@@ -164,8 +164,8 @@ public class IcfTopoUtil {
         //for (BranchData b : island.getBranches()) {
         //    if (b.getType() == BranchData.BRANCH_TYPE_TF_FIXED_TAP) {
         //        e = getBranchToEdge().get(b);
-        //        b1 = graph.getEdgeSource(e);
-        //        b2 = graph.getEdgeTarget(e);
+        //        b1 = graph.txt.getEdgeSource(e);
+        //        b2 = graph.txt.getEdgeTarget(e);
         //        if (b1.getBaseVoltage() < b2.getBaseVoltage()) {
         //            tmpBus = b1;
         //            b1 = b2;
@@ -180,8 +180,8 @@ public class IcfTopoUtil {
         //            for (DefaultEdge edge : getGraph().edgesOf(b2)) {
         //                if (edge == e)
         //                    continue;
-        //                bus1 = graph.getEdgeSource(edge);
-        //                bus2 = graph.getEdgeTarget(edge);
+        //                bus1 = graph.txt.getEdgeSource(edge);
+        //                bus2 = graph.txt.getEdgeTarget(edge);
         //                if (bus1 == b2 && bus2.getBaseVoltage() < b1.getBaseVoltage())
         //                    isUpper220 = true;
         //                if (bus2 == b2 && bus1.getBaseVoltage() < b1.getBaseVoltage())
@@ -215,13 +215,13 @@ public class IcfTopoUtil {
         //            q += bus.getLoadMVAR();
         //            p -= bus.getGenerationMW();
         //            q -= bus.getGenerationMVAR();
-        //            for (DefaultEdge edge : graph.edgesOf(bus))
+        //            for (DefaultEdge edge : graph.txt.edgesOf(bus))
         //                edges.add(edge);
         //        }
         //        for (DefaultEdge edge : edges)
-        //            graph.removeEdge(edge);
+        //            graph.txt.removeEdge(edge);
         //        for (BusData bus : equivalentLoad)
-        //            graph.removeVertex(bus);
+        //            graph.txt.removeVertex(bus);
         //        b1.setLoadMW(b1.getLoadMW() + p);
         //        b1.setLoadMVAR(b1.getLoadMVAR() + q);
         //        count++;
@@ -229,13 +229,13 @@ public class IcfTopoUtil {
         //}
         //log.info("共" + count + "条变压器支路可以等效成负荷.");
         //count = 0;
-        //for (DefaultEdge edge : graph.edgeSet())
-        //    count += graph.getEdgeWeight(edge);
+        //for (DefaultEdge edge : graph.txt.edgeSet())
+        //    count += graph.txt.getEdgeWeight(edge);
         //List<BranchData> branches = new ArrayList<BranchData>(count);
         //for (BranchData b : island.getBranches())
-        //    if (graph.containsEdge(branchToEdge.get(b)))
+        //    if (graph.txt.containsEdge(branchToEdge.get(b)))
         //        branches.add(b);
-        //island.setBuses(new ArrayList<BusData>(graph.vertexSet()));
+        //island.setBuses(new ArrayList<BusData>(graph.txt.vertexSet()));
         //island.setBranches(branches);
         //createGraph();
     }

@@ -248,30 +248,6 @@ public class PathBasedModel {
         }
     }
 
-    public List<MapObject[]> getPathes() {
-        return pathes;
-    }
-
-    public int[] getSupplyStart() {
-        return supplyStart;
-    }
-
-    public List<MapObject[]> getCnPathes() {
-        return cnpathes;
-    }
-
-    public int[] getCnStart() {
-        return cnStart;
-    }
-
-    public List<MapObject[]> getEdgePathes() {
-        return edgepathes;
-    }
-
-    public int[] getEdgeStart() {
-        return edgeStart;
-    }
-
     //将图中除电源以外的节点和所有的边分别存入数组中
     public void buildEdgesAndNodes() {
         String[] supplies = sys.getSupplyCns();
@@ -367,6 +343,30 @@ public class PathBasedModel {
         System.out.println("-----END-----");
     }
 
+    public List<MapObject[]> getPathes() {
+        return pathes;
+    }
+
+    public int[] getSupplyStart() {
+        return supplyStart;
+    }
+
+    public List<MapObject[]> getCnPathes() {
+        return cnpathes;
+    }
+
+    public int[] getCnStart() {
+        return cnStart;
+    }
+
+    public List<MapObject[]> getEdgePathes() {
+        return edgepathes;
+    }
+
+    public int[] getEdgeStart() {
+        return edgeStart;
+    }
+
     //返回与电源直接相连的节点数
     public int getSupplyCnNum() {
         return supplyCnNum;
@@ -378,5 +378,13 @@ public class PathBasedModel {
 
     public List<MapObject> getEdges() {
         return edges;
+    }
+
+    public List<Integer> getCnpathesIndex() {
+        return cnpathesIndex;
+    }
+
+    public List<Integer> getEdgepathesIndex() {
+        return edgepathesIndex;
     }
 }

@@ -12,6 +12,7 @@ import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static zju.dsmodel.DsModelCons.KEY_SWITCH_STATUS;
@@ -1173,9 +1174,46 @@ public class LoadTransferOpt extends PathBasedModel {
             //线容量
             String lastID;
             double[] feederCapacity = new double[edges.size()];
+            //设置线路容量
             for (i = 0; i < feederCapacity.length; i++) {
+                //对应线路
+//                MapObject feeder = edges.get(i);
+//                String feederName = feeder.getProperty("ConnectedNode");
+//                String[] nodeNames = feederName.split(";");
+//                //L21-L23 6.35MVA
+//                boolean isThis = (nodeNames[0].equals("L21") && nodeNames[1].equals("L23")) || (nodeNames[0].equals("L23") && nodeNames[1].equals("L21"));
+//                if(isThis){
+//                    feederCapacity[i] = 6.35;
+//                }
+//                //L22-L30 11.3
+//                isThis = (nodeNames[0].equals("L22") && nodeNames[1].equals("L30")) || (nodeNames[0].equals("L30") && nodeNames[1].equals("L22"));
+//                if(isThis){
+//                    feederCapacity[i]=11.3;
+//                }
+//                //L24-L32 4.43
+//                isThis = (nodeNames[0].equals("L24") && nodeNames[1].equals("L32")) || (nodeNames[0].equals("L32") && nodeNames[1].equals("L24"));
+//                if(isThis){
+//                    feederCapacity[i]=4.43;
+//                }
+//                //L25-L29 7.64
+//                isThis = (nodeNames[0].equals("L25") && nodeNames[1].equals("L29")) || (nodeNames[0].equals("L29") && nodeNames[1].equals("L25"));
+//                if(isThis){
+//                    feederCapacity[i]=7.64;
+//                }
+//                //L26-L31 6.02
+//                isThis = (nodeNames[0].equals("L26") && nodeNames[1].equals("L31")) || (nodeNames[0].equals("L31") && nodeNames[1].equals("L26"));
+//                if(isThis){
+//                    feederCapacity[i]=6.02;
+//                }
+//                //L27-L28 8.83
+//                isThis = (nodeNames[0].equals("L27") && nodeNames[1].equals("L28")) || (nodeNames[0].equals("L28") && nodeNames[1].equals("L27"));
+//                if(isThis){
+//                    feederCapacity[i]=8.83;
+//                }
+
                 feederCapacity[i] = feederCapacityConst;
             }
+
             for (i = 0; i < edges.size(); i++) {
                 starts[startsLen++] = elementLen;
                 rowUpper[rowUpperLen++] = feederCapacity[i];
@@ -1221,6 +1259,10 @@ public class LoadTransferOpt extends PathBasedModel {
             time = System.currentTimeMillis();
             int status = solver.solveMlp(numberColumns, numberRows, objValue,
                     columnLower, columnUpper, rowLower, rowUpper, element, column, starts, whichInt, result);
+
+            //打印时间
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            System.out.println(dateFormat.format(new Date()));
             System.out.println("求解耗时："+(System.currentTimeMillis()-time));
 
             if (status < 0) {
@@ -1229,6 +1271,10 @@ public class LoadTransferOpt extends PathBasedModel {
                 break;
             } else { //状态位显示计算收敛
                 log.info("计算收敛");
+
+//                for(i = 0;i<result.length;i++){
+//                    System.out.println("路径"+i+"状态"+result[i]);
+//                }
             }
         }
         return isPass;
@@ -1641,4 +1687,6 @@ public class LoadTransferOpt extends PathBasedModel {
     public Map<String, Double> getMaxCircuitLoad() {
         return maxCircuitLoad;
     }
+
+
 }
