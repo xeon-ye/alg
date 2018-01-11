@@ -108,7 +108,7 @@ public class DsPowerflow implements DsModelCons {
                         v0[i][0] -= sonV[i][0];
                         v0[i][1] -= sonV[i][1];
                         double delta = Math.sqrt(v0[i][0] * v0[i][0] + v0[i][1] * v0[i][1]);
-                        //log.debug("Now voltage delta" + " " + i + " " + delta);
+                        log.debug("Now voltage delta" + " " + i + " " + delta);
                         if (delta > maxDelta)
                             maxDelta = delta;
                     }
