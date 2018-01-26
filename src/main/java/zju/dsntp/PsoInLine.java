@@ -1,6 +1,7 @@
 package zju.dsntp;
 
 import zju.devmodel.MapObject;
+import zju.dsmodel.DistriSys;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -9,32 +10,34 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * 粒子群类
- *
- * @author
+ * Created by meditation on 2018/1/25.
  */
-class PsoInRoad {
+
+class PsoInLine {
     //粒子群
-    private ParticleInRoad[] particles;
+    private ParticleInLine[] particles;
     //全局最优解
     private double globalBestFitness;
     //全局最优解对应位置
     private static double[] globalBestPosition;
-    //全局最优解对应的下层路径状态
-    private static double[] globalBestBelowPositon;
     //全局最优解历史
     private List<double[]> globalBestPositionList;
     private List<Double> globalBestPositionFitnessList;
     private List<Integer> iterationCountList;
-    private List<double[]> globalBestBelowPositionList;
-    private List<List<MapObject[]>> pathesList;
-
     //粒子的数量
     private int particlesAmount;
     //粒子维度
     private int dimension;
 
-    public void initial(int amount, int dimen) {
+    //路径
+    private List<MapObject[]> pathes;
+
+    //
+    DistriSys distriSys;
+    //
+    LoadTransferOpt loadTransferOpt;
+
+    public void initial(int amount, DistriSys dis) {
         //修改参数
         //类的静态成员的初始化
         ParticleInTSC.setC1(2);
@@ -43,9 +46,17 @@ class PsoInRoad {
 
         //粒子个数
         particlesAmount = amount;
-        particles = new ParticleInRoad[particlesAmount];
-        //粒子维度
-        dimension = dimen;
+        particles = new ParticleInLine[particlesAmount];
+
+        distriSys = dis.clone();
+        //搜索路径
+        loadTransferOpt = new LoadTransferOpt(distriSys);
+        loadTransferOpt.buildPathes();
+        //粒子维数
+        dimension = loadTransferOpt.getPathes().size();
+        //路径
+        pathes = loadTransferOpt.getPathes();
+
         //全局最优适应值
         globalBestFitness = 1e10;
         //全局最优位置
@@ -53,17 +64,20 @@ class PsoInRoad {
         globalBestPositionList = new ArrayList<>();
         globalBestPositionFitnessList = new ArrayList<>();
         iterationCountList = new ArrayList<>();
-        globalBestBelowPositionList = new ArrayList<>();
-        pathesList = new ArrayList<>();
 
         //最优位置索引
         int index = -1;
         for (int i = 0; i < particlesAmount; ++i) {
-            System.out.println("新建廊道粒子" + i);
-            particles[i] = new ParticleInRoad();
-            //初始化
-            particles[i].initial(dimension);
-            particles[i].readRoadPrice(this.getClass().getResource("/roadplanning/roadmessage.txt").getPath());
+            //System.out.println("新建线路粒子" + i);
+            particles[i] = new ParticleInLine();
+            //todo:实际负荷数量
+            particles[i].initial(dis, 3);
+
+            //文件路径
+            particles[i].readRoadLength(this.getClass().getResource("/roadplanning/roadmessage.txt").getPath());
+            particles[i].readSupplyCap(this.getClass().getResource("/roadplanning/supplycapacity.txt").getPath());
+            particles[i].readLoads(this.getClass().getResource("/roadplanning/load.txt").getPath());
+
             particles[i].evaluateFitness();
             if (globalBestFitness > particles[i].getFitness()) {
                 globalBestFitness = particles[i].getFitness();
@@ -86,7 +100,7 @@ class PsoInRoad {
     /**
      * 粒子群的运行
      */
-    public void run() throws IOException {
+    public void run() {
         int runTimes = 1;
         int index;
         //设置最大迭代次数
@@ -108,33 +122,23 @@ class PsoInRoad {
                     globalBestPosition[i] = particles[index].getPosition()[i];
                     position[i] = particles[index].getPosition()[i];
                 }
-
-                //每次都新建，添加至list
-                globalBestBelowPositon = new double[particles[index].getpBelowBestPosition().length];
-                for (int i = 0; i < particles[index].getpBelowBestPosition().length; i++) {
-                    globalBestBelowPositon[i] = particles[index].getpBelowBestPosition()[i];
-                }
-
                 //保存最优解历史，始终放在第一位
                 globalBestPositionList.add(0, position);
                 globalBestPositionFitnessList.add(0, globalBestFitness);
                 iterationCountList.add(0, runTimes);
 
-                globalBestBelowPositionList.add(0, globalBestBelowPositon);
-                pathesList.add(0,particles[index].getPathes());
-
                 //打印结果
-                System.out.println("第" + runTimes + "次迭代发现更好解：");
-                System.out.println("globalBestFitness:" + globalBestFitness);
-                for (int i = 0; i < dimension; i++) {
-                    System.out.println("ROAD" + (i + 1) + " = " + getGlobalBestPosition()[i]);
-                }
+//                System.out.println("第" + runTimes + "次迭代发现更好解：");
+//                System.out.println("globalBestFitness:" + globalBestFitness);
+//                for (int i = 0; i < dimension; i++) {
+//                    System.out.println("ROAD" + (i + 1) + " = " + getGlobalBestPosition()[i]);
+//                }
             }
             runTimes++;
         }
 
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        System.out.println("运行结束 " + dateFormat.format(new Date()));
+//        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//        System.out.println(dateFormat.format(new Date()));
     }
 
     /**
@@ -154,21 +158,18 @@ class PsoInRoad {
             for (int j = 0; j < dimension; j++) {
                 System.out.println("ROAD" + (j + 1) + " = " + globalBestPositionList.get(i)[j]);
             }
-            for (int j = 0; j < globalBestBelowPositionList.get(i).length; j++) {
-                System.out.println("ROUTE" + (j + 1) + " = " + globalBestBelowPositionList.get(i)[j]);
-            }
-            for (MapObject[] j : pathesList.get(i)) {
-                System.out.print("路径：");
-                for (MapObject k : j) {
-                    System.out.print(k.getProperty("ConnectedNode") + "-");
-                }
-                System.out.println();
-            }
-
         }
     }
 
     public static double[] getGlobalBestPosition() {
         return globalBestPosition;
+    }
+
+    public double getGlobalBestFitness() {
+        return globalBestFitness;
+    }
+
+    public List<MapObject[]> getPathes() {
+        return pathes;
     }
 }

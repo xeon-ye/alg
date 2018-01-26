@@ -5,20 +5,24 @@ import org.jgrapht.alg.ConnectivityInspector;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.SimpleGraph;
 import zju.devmodel.MapObject;
+import zju.dsmodel.DistriSys;
+import zju.dsmodel.DsDevices;
 import zju.dsmodel.DsTopoNode;
 
 import java.io.*;
 import java.util.*;
 
+import static zju.dsmodel.IeeeDsInHand.createDs;
+
 /**
  * 粒子类
  * 求解函数
  *
- * @author
+ * @author meditation
  */
 class ParticleInRoad {
     //粒子属性值
-    //粒子的位置
+    //粒子的位置，对应于graph文件中至上而下的各条廊道
     private double[] position;
     //粒子的速度，维数同位置
     private double[] velocity;
@@ -26,6 +30,12 @@ class ParticleInRoad {
     private double fitness;
     //粒子的历史最好位置
     private double[] pBestPosition;
+
+    //下层粒子的最好位置
+    private double[] pBelowBestPosition;
+    //下层路径
+    private List<MapObject[]> pathes;
+
     //历史最优适应值
     private double pBestFitness;
 
@@ -34,7 +44,7 @@ class ParticleInRoad {
 
     //公式参数设置
     //产生随机变量
-    private static Random rnd;
+    private Random rnd;
     //声明权重
     private static double w;
     //声明学习系数
@@ -43,6 +53,8 @@ class ParticleInRoad {
 
     //廊道成本
     private Map<String, Double> roadPriceMap;
+    //折旧率
+    private static final double Depreciation_Rate = 0.03;
 
     /**
      * 初始化粒子
@@ -60,8 +72,8 @@ class ParticleInRoad {
 
         rnd = new Random();
 
+        //位置初始化
         for (int i = 0; i < dimension; ++i) {
-            //位置初始化
             position[i] = getRandomPostion();
             //将初始化后的位置赋值给“粒子的历史最好位置”
             pBestPosition[i] = position[i];
@@ -104,7 +116,7 @@ class ParticleInRoad {
     public void evaluateFitness() {
         //适应度的计算公式
         fitness = 0;
-
+        //廊道费用
         Iterator iterator = roadPriceMap.keySet().iterator();
         String roadName;
         for (int i = 0; i < dimension; i++) {
@@ -113,27 +125,44 @@ class ParticleInRoad {
                 fitness += roadPriceMap.get(roadName);
             }
         }
+        //加入折旧率
+        fitness += fitness * Depreciation_Rate;
 
-        //利用拓扑文件判断图的连通性
-        boolean isConnected = judgeConnection(this.getClass().getResource("/roadplanning/graph.txt").getPath());
+        //利用拓扑文件判断图的连通性并判断是否包含必要点
+        //todo:设置必须包含的点
+        String[] necessaryNodesArray = {"S1", "L1", "L2", "L3"};
+        boolean isConnected = judgeConnection(this.getClass().getResource("/roadplanning/graph.txt").getPath(), necessaryNodesArray);
         //若连通
-        if(isConnected){
-        //todo:
+        PsoInLine psoInLine = null;
+        if (isConnected) {
+            //建立路径搜索程序所需的DistriSys对象
+            InputStream file = this.getClass().getResourceAsStream("/roadplanning/graph.txt");
+            //传入文件输入流，根据position读取支路信息
+            DsDevices devices = parse(file);
+            DistriSys distriSys = createDs(devices, "S1", 100);
 
-
-
-
-        }else {
+            psoInLine = new PsoInLine();
+            //源graph文件默认所有的边均为switch
+            psoInLine.initial(20, distriSys);
+            psoInLine.run();
+            //上层适应度值加下层适应度值
+            fitness += psoInLine.getGlobalBestFitness();
+        } else {
             fitness = 1e10;
         }
 
-
+        //假如计算出的适应值比历史最优适应值好，则用新计算出的适应值函数替代历史最优适应值，同时更新最优位置和对应的下层位置
         if (pBestFitness - fitness > 1e-2) {
-            //假如计算出的适应值比历史最优适应值好，则用新计算出的适应值函数替代历史最优适应值
             pBestFitness = fitness;
             for (int i = 0; i < dimension; ++i) {
                 pBestPosition[i] = position[i];
             }
+
+            pBelowBestPosition = new double[PsoInLine.getGlobalBestPosition().length];
+            for(int i =0; i<pBelowBestPosition.length;i++){
+                pBelowBestPosition[i]=PsoInLine.getGlobalBestPosition()[i];
+            }
+            pathes = psoInLine.getPathes();
         }
     }
 
@@ -143,7 +172,7 @@ class ParticleInRoad {
     public void updatePosAndVel() {
         for (int j = 0; j < dimension; j++) {
             velocity[j] = w * velocity[j] + c1 * rnd.nextDouble() * (pBestPosition[j] - position[j])
-                    + c2 * rnd.nextDouble() * (PSOInTSC.globalBestPosition[j] - position[j]);//速度更新
+                    + c2 * rnd.nextDouble() * (PsoInRoad.getGlobalBestPosition()[j] - position[j]);//速度更新
             double threshold = 1 / (1 + Math.exp(-velocity[j]));
             if (rnd.nextDouble() < threshold) {//若随机数小于速度的sig函数值
                 position[j] = 1;//位置等于1
@@ -247,12 +276,13 @@ class ParticleInRoad {
     }
 
     /**
-     * 连通性检测
-     * @param filePath
+     * 连通性检测，并判断是否包含必要点。必要点包括电源点、真负荷点。
+     *
+     * @param filePath  文件路径
+     * @param neceNodes 必须包含的点
      * @return isConnected
      */
-    private boolean judgeConnection(String filePath) {
-        boolean result = false;
+    private boolean judgeConnection(String filePath, String[] neceNodes) {
         BufferedReader bufferedReader = null;
         try {
             bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(filePath)));
@@ -264,51 +294,206 @@ class ParticleInRoad {
         UndirectedGraph<Node, DefaultEdge> undirectedGraph = new SimpleGraph<>(DefaultEdge.class);
 
         String data;
+        //维数游标
+        int count = 0;
         try {
             //读起始行
             while (!(data = bufferedReader.readLine()).startsWith("Line Segment Data")) {
             }
             //读至“-999”
             while (!(data = bufferedReader.readLine()).equals("-999")) {
-                String[] dataArray = data.split("\t");
-                boolean isExist1 = false;
-                boolean isExist2 = false;
-                Node node1 = null;
-                Node node2 = null;
-                //判断点是否已经存在
-                for (Node i : undirectedGraph.vertexSet()) {
-                    if (i.getId().equals(dataArray[1])) {
-                        isExist1 = true;
-                        //存在直接赋值
-                        node1 = i;
-                    } else if (i.getId().equals(dataArray[2])) {
-                        isExist2 = true;
-                        //存在直接赋值
-                        node2 = i;
+                //建造廊道
+                if (position[count] == 1) {
+                    count++;
+                    String[] dataArray = data.split("\t");
+                    boolean isExist1 = false;
+                    boolean isExist2 = false;
+                    Node node1 = null;
+                    Node node2 = null;
+                    //判断点是否已经存在
+                    for (Node i : undirectedGraph.vertexSet()) {
+                        if (i.getId().equals(dataArray[0])) {
+                            isExist1 = true;
+                            //存在直接赋值
+                            node1 = i;
+                        } else if (i.getId().equals(dataArray[1])) {
+                            isExist2 = true;
+                            //存在直接赋值
+                            node2 = i;
+                        }
                     }
+                    //不存在则新建并添加
+                    if (!isExist1) {
+                        node1 = new Node(dataArray[0]);
+                        undirectedGraph.addVertex(node1);
+                    }
+                    //不存在则新建并添加
+                    if (!isExist2) {
+                        node2 = new Node(dataArray[1]);
+                        undirectedGraph.addVertex(node2);
+                    }
+                    //添加边
+                    undirectedGraph.addEdge(node1, node2);
+                    //不建造廊道
+                } else {
+                    count++;
+                    continue;
                 }
-                //不存在则新建并添加
-                if (!isExist1) {
-                    node1 = new Node(dataArray[1]);
-                    undirectedGraph.addVertex(node1);
-                }
-                //不存在则新建并添加
-                if (!isExist2) {
-                    node2 = new Node(dataArray[2]);
-                    undirectedGraph.addVertex(node2);
-                }
-                //添加边
-                undirectedGraph.addEdge(node1,node2);
             }
         } catch (IOException e) {
             e.printStackTrace();
             System.out.println("Can not read the File!");
         }
-        //连通性检测
+
+        //调用库方法，对undirectedGraph进行连通性检测
         ConnectivityInspector inspector = new ConnectivityInspector(undirectedGraph);
-        result = inspector.isGraphConnected();
-        return result;
+        //如果不连通返回false
+        if (!inspector.isGraphConnected()) {
+            return false;
+        }
+
+        for (String j : neceNodes) {
+            boolean isExist = false;
+            for (Node i : undirectedGraph.vertexSet()) {
+                if (i.getId().equals(j)) {
+                    isExist = true;
+                    break;
+                }
+            }
+            //任意一个必要点不被包含，则返回false
+            if (!isExist) {
+                return false;
+            }
+        }
+        return true;
     }
+
+    /**
+     * 传入文件输入流，根据position读取支路信息。
+     *
+     * @param stream graph文件输入流
+     * @return dsDevices 返回筛选后的设备信息
+     */
+    public DsDevices parse(InputStream stream) {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+        String strLine;
+        try {
+            //起始行
+            strLine = reader.readLine();
+            while (!strLine.startsWith("Line Segment Data")) {
+                strLine = reader.readLine();
+            }
+            String[] strings = strLine.split("\t");
+            String s = strings[1];
+            //取出数值，数值即为拓扑支路数量
+            ArrayList<MapObject> branches = new ArrayList<MapObject>(Integer.parseInt(s.substring(0, s.indexOf(" "))));
+            //支路游标
+            int count = 0;
+            //设置支路属性，添加支路
+            while (true) {
+                strLine = reader.readLine();
+                if (strLine.trim().equalsIgnoreCase("-999"))
+                    break;
+                //空行跳过。#开头行为注释行。
+                if (strLine.trim().equals("") || strLine.startsWith("#")) //Debug Mode,you can disable elements with"//"
+                    continue;
+                //建设廊道
+                if (position[count] == 1) {
+                    count++;
+                    String content[] = strLine.split("\t");
+                    //存储边属性
+                    MapObject obj = new MapObject();
+                    obj.setProperty("ConnectedNode", content[0] + ";" + content[1]);
+                    obj.setProperty("LineLength", content[2]);
+                    obj.setProperty("LineConfigure", content[3]);
+                    obj.setProperty("ResourceType", "Feeder");
+                    obj.setProperty("LengthUnit", strings[2]);
+                    branches.add(obj);
+                    //不建设廊道
+                } else {
+                    count++;
+                    continue;
+                }
+            }
+
+            //Spot Loads
+            while (!strLine.startsWith("Spot Loads"))
+                strLine = reader.readLine();
+            ArrayList<MapObject> spotLoads = new ArrayList<MapObject>(0);
+
+            //Distributed Loads
+            while (!strLine.startsWith("Distributed Loads"))
+                strLine = reader.readLine();
+            ArrayList<MapObject> distributedLoads = new ArrayList<MapObject>(0);
+
+            //Shunt Capacitors
+            while (!strLine.startsWith("Shunt Capacitors"))
+                strLine = reader.readLine();
+            ArrayList<MapObject> shuntCapacitors = new ArrayList<MapObject>(0);
+
+            int tfCount = 0;
+            int switchCount = 0;
+            //配置为Switch的branch为开关；否则，长度为0的边为变压器。
+            for (MapObject obj : branches) {
+                String length = obj.getProperty("LineLength");
+                if (obj.getProperty("LineConfigure").trim().equalsIgnoreCase("Switch")) {
+                    switchCount++;
+                } else if (Double.parseDouble(length) < 1e-5) {
+                    tfCount++;
+                }
+            }
+            List<MapObject> transformers = new ArrayList<MapObject>(tfCount);
+            List<MapObject> switches = new ArrayList<MapObject>(switchCount);
+            for (MapObject obj : branches) {
+                String length = obj.getProperty("LineLength");
+                if (obj.getProperty("LineConfigure").trim().equalsIgnoreCase("Switch")) {
+                    //将类型Feeder改为类型Switch
+                    obj.setProperty("ResourceType", "Switch");
+                    switches.add(obj);
+                } else if (Double.parseDouble(length) < 1e-5) {
+                    //将类型Feeder改为类型Transformer
+                    obj.setProperty("ResourceType", "Transformer");
+                    transformers.add(obj);
+                }
+            }
+
+            //Transformer
+            while (!strLine.startsWith("Transformer"))
+                strLine = reader.readLine();
+
+            //Regulator
+            while (!strLine.startsWith("Regulator"))
+                strLine = reader.readLine();
+            ArrayList<MapObject> regulators = new ArrayList<MapObject>(0);
+
+            //Distributed Generation
+            while (strLine != null && !strLine.startsWith("Distributed Generation"))
+                strLine = reader.readLine();
+            ArrayList<MapObject> dgs = new ArrayList<MapObject>(0);
+
+            //-999
+            while (strLine != null && !strLine.startsWith("-999"))
+                strLine = reader.readLine();
+
+            branches.removeAll(transformers);
+            branches.removeAll(switches);
+            DsDevices dsDevices = new DsDevices();
+            dsDevices.setSpotLoads(spotLoads);
+            dsDevices.setDistributedLoads(distributedLoads);
+            dsDevices.setShuntCapacitors(shuntCapacitors);
+            dsDevices.setFeeders(branches);
+            dsDevices.setTransformers(transformers);
+            dsDevices.setSwitches(switches);
+            dsDevices.setRegulators(regulators);
+            dsDevices.setDispersedGens(dgs);
+
+            return dsDevices;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
 
     public double[] getPosition() {
         return position;
@@ -350,14 +535,6 @@ class ParticleInRoad {
         this.pBestFitness = pBestFitness;
     }
 
-    public static Random getRnd() {
-        return rnd;
-    }
-
-    public static void setRnd(Random rnd) {
-        ParticleInRoad.rnd = rnd;
-    }
-
     public static double getW() {
         return w;
     }
@@ -381,9 +558,17 @@ class ParticleInRoad {
     public static void setC2(double c2) {
         ParticleInRoad.c2 = c2;
     }
+
+    public double[] getpBelowBestPosition() {
+        return pBelowBestPosition;
+    }
+
+    public List<MapObject[]> getPathes() {
+        return pathes;
+    }
 }
 
-//fixme:临时解决方法
+//todo:当前为临时解决方法
 class Node {
     String Id;
 

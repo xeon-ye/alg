@@ -12,7 +12,7 @@ import java.util.*;
  * 粒子类
  * 求解函数
  *
- * @author
+ * @author meditation
  */
 class ParticleInLine {
     //粒子属性值
@@ -32,7 +32,7 @@ class ParticleInLine {
 
     //公式参数设置
     //产生随机变量
-    private static Random rnd;
+    private Random rnd;
     //声明权重
     private static double w;
     //声明学习系数
@@ -43,28 +43,42 @@ class ParticleInLine {
     private DistriSys distriSys;
     private LoadTransferOpt loadTransferOpt;
     //虚拟负荷点数
-    private int virtualLoadsNumber;
+    private int realLoadsNumber;
 
     //廊道长度
     private Map<String, Double> roadLengthMap;
 
     //电源容量
     private Map<String, Double> supplyCapMap;
-    //负荷功率
-    private Map<String, Double> loadsMap;
+    //负荷有功功率
+    private Map<String, Double> loadsActiveMap;
+    //负荷无功功率
+    private Map<String, Double> loadsReactiveMap;
 
     //线路容量常值
     private static final double FEEDER_CAPACITY_CONST = 100000;
+    //最大负荷小时数
+    private static final double MAX_LOAD_HOURS = 1000;
+    //单位电价（单位：兆瓦）
+    private static final double ELECTRICITY_PRICE = 0.04;
+    //线路铺设单位成本
+    private static final double LINE_UNIT_PRICE = 0.51;
+    //线路单位电阻
+    private static final double LINE_UNIT_RESISTANCE = 0.223;
+    //线路单位电抗
+    private static final double LINE_UNIT_REACTANCE = 0.348;
+    //折旧率
+    private static final double Depreciation_Rate = 0.03;
 
     /**
      * 初始化粒子
      *
-     * @param dis 表示粒子的维数,即可安装量测的位置
+     * @param dis    表示粒子的维数,即可安装量测的位置
      * @param number 表示虚拟负荷点的数目
      */
-    public void initial(DistriSys dis,int number) {
+    public void initial(DistriSys dis, int number) {
         distriSys = dis.clone();
-        virtualLoadsNumber = number;
+        realLoadsNumber = number;
         //搜索路径
         loadTransferOpt = new LoadTransferOpt(distriSys);
         loadTransferOpt.buildPathes();
@@ -92,6 +106,7 @@ class ParticleInLine {
 
     /**
      * 读取廊道长度
+     * 文件格式--节点1;节点2 长度 价格
      *
      * @param filePath 廊道价格文件路径
      */
@@ -117,7 +132,6 @@ class ParticleInLine {
             System.out.println("Error occurred in reading!");
         }
     }
-
 
     /**
      * 读取电源容量
@@ -148,7 +162,9 @@ class ParticleInLine {
     }
 
     /**
-     * 读取负荷
+     * 读取负荷有功无功
+     * 文件格式——负荷点 有功功率 无功功率
+     *
      * @param filePath 负荷文件路径
      */
     public void readLoads(String filePath) {
@@ -160,13 +176,15 @@ class ParticleInLine {
             System.out.println("File not found!");
         }
 
-        loadsMap = new LinkedHashMap<>();
+        loadsActiveMap = new LinkedHashMap<>();
+        loadsReactiveMap = new LinkedHashMap<>();
         String data;
         String[] dataArray;
         try {
             while ((data = bufferedReader.readLine()) != null) {
                 dataArray = data.split(" ");
-                loadsMap.put(dataArray[0], Double.parseDouble(dataArray[1]));
+                loadsActiveMap.put(dataArray[0], Double.parseDouble(dataArray[1]));
+                loadsReactiveMap.put(dataArray[0], Double.parseDouble(dataArray[2]));
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -182,24 +200,24 @@ class ParticleInLine {
         //适应度的计算公式
         fitness = 0;
 
-        Iterator iterator = roadLengthMap.keySet().iterator();
-        String roadName;
-        for (int i = 0; i < dimension; i++) {
-            roadName = (String) iterator.next();
-            if (position[i] == 1) {
-                fitness += roadLengthMap.get(roadName);
-            }
-        }
-
-        //todo:
-
-
-
-        //传入路径状态信息，判断该路径状态是否满足
-        boolean isPassed = judgeFeasibility(position);
-        if(!isPassed){
+        //传入路径状态信息，判断该路径状态是否满足，不满足直接返回
+        //todo：修改必要节点
+        String[] necessaryLoads = {"L1","L2","L3"};
+        boolean isPassed = judgeFeasibility(position,necessaryLoads);
+        if (!isPassed) {
             fitness = 1e10;
+            return;
         }
+
+        //线路铺设成本
+        fitness += calculateLineCost(position);
+
+        //考虑设备折旧
+        fitness += fitness * Depreciation_Rate;
+
+        //网络损耗费用
+        double netLoss = calculateLoss(position);
+        fitness += netLoss * MAX_LOAD_HOURS * ELECTRICITY_PRICE;
 
         if (pBestFitness - fitness > 1e-2) {
             //假如计算出的适应值比历史最优适应值好，则用新计算出的适应值函数替代历史最优适应值
@@ -216,7 +234,7 @@ class ParticleInLine {
     public void updatePosAndVel() {
         for (int j = 0; j < dimension; j++) {
             velocity[j] = w * velocity[j] + c1 * rnd.nextDouble() * (pBestPosition[j] - position[j])
-                    + c2 * rnd.nextDouble() * (PSOInTSC.globalBestPosition[j] - position[j]);//速度更新
+                    + c2 * rnd.nextDouble() * (PsoInLine.getGlobalBestPosition()[j] - position[j]);//速度更新
             double threshold = 1 / (1 + Math.exp(-velocity[j]));
             if (rnd.nextDouble() < threshold) {//若随机数小于速度的sig函数值
                 position[j] = 1;//位置等于1
@@ -252,29 +270,30 @@ class ParticleInLine {
 
     /**
      * 根据传入的路径状态信息，判断该种路径通断状态是否具备可行性
+     *
      * @param routeState
      * @return 可行性校验结果
      */
-    private boolean judgeFeasibility(double[] routeState) {
+    private boolean judgeFeasibility(double[] routeState,String[] necessaryLoads) {
         //电源顺序按照supplyCns中的存放顺序
         String[] suppliesArray = distriSys.getSupplyCns();
-        //电源容量
-        double[] supplyCapacityArray = new double[supplyCapMap.size()];
-        for (int i = 0; i < supplyCapacityArray.length; i++) {
-            supplyCapacityArray[i] = supplyCapMap.get(suppliesArray[i]);
+        //电源有功容量
+        double[] supplyCapacityActiveArray = new double[supplyCapMap.size()];
+        for (int i = 0; i < supplyCapacityActiveArray.length; i++) {
+            supplyCapacityActiveArray[i] = supplyCapMap.get(suppliesArray[i]);
         }
 
-        //负荷的功率，按nodes中的顺序排列
-        double[] loadsArray = new double[loadTransferOpt.getNodes().size()];
+        //负荷的有功功率，按nodes中的顺序排列
+        double[] loadsActiveArray = new double[loadTransferOpt.getNodes().size()];
         for (int i = 0; i < loadTransferOpt.getNodes().size(); i++) {
-            loadsArray[i] = loadsMap.get(loadTransferOpt.getNodes().get(i).getId());
+            loadsActiveArray[i] = loadsActiveMap.get(loadTransferOpt.getNodes().get(i).getId());
         }
 
         UndirectedGraph<DsConnectNode, MapObject> g = distriSys.getOrigGraph();
 
-        //约束条件：对每个实际负荷节点，有且只有一条路径供电
+        //约束条件：对每个实际负荷节点，有且只有一条路径供电；对每个虚拟负荷节点，无任何路径供电
         double sum;
-        for (int i = 0; i < (loadTransferOpt.getNodes().size()-virtualLoadsNumber); i++) {
+        for (int i = 0; i < loadTransferOpt.getNodes().size(); i++) {
             //路径状态的累加和
             sum = 0;
             if (i == loadTransferOpt.getNodes().size() - 1) {
@@ -286,29 +305,19 @@ class ParticleInLine {
                     sum += routeState[loadTransferOpt.getCnpathesIndex().get(j)];
                 }
             }
-            if (sum != 1) {
+
+            boolean isNecesssry = false;
+            for(String j : necessaryLoads){
+                if(j.equals(loadTransferOpt.getNodes().get(i).getId())){
+                    isNecesssry = true;
+                }
+            }
+            if (isNecesssry && sum != 1) {
+                return false;
+            }else if(!isNecesssry && sum!=0){
                 return false;
             }
         }
-
-        //约束条件：对每个虚拟负荷节点，无任何路径供电
-        for (int i = (loadTransferOpt.getNodes().size()-virtualLoadsNumber); i < loadTransferOpt.getNodes().size(); i++) {
-            //路径状态的累加和
-            sum = 0;
-            if (i == loadTransferOpt.getNodes().size() - 1) {
-                for (int j = loadTransferOpt.getCnStart()[i]; j < loadTransferOpt.getCnPathes().size(); j++) {
-                    sum += routeState[loadTransferOpt.getCnpathesIndex().get(j)];
-                }
-            } else {
-                for (int j = loadTransferOpt.getCnStart()[i]; j < loadTransferOpt.getCnStart()[i + 1]; j++) {
-                    sum += routeState[loadTransferOpt.getCnpathesIndex().get(j)];
-                }
-            }
-            if (sum != 0) {
-                return false;
-            }
-        }
-
 
         //约束条件：若某路径为通路，那么包括在该路径内的任意路径也是通路
         //对pathes进行类似深度搜索的方式实现
@@ -370,10 +379,10 @@ class ParticleInLine {
                         if (loadTransferOpt.getCnStart()[l] > k)
                             break;
                     }
-                    loadSum += loadsArray[l - 1];
+                    loadSum += loadsActiveArray[l - 1];
                 }
             }
-            if (loadSum > supplyCapacityArray[i]) {
+            if (loadSum > supplyCapacityActiveArray[i]) {
                 return false;
             }
         }
@@ -419,7 +428,7 @@ class ParticleInLine {
                             break;
                     }
 
-                    loadSum += loadsArray[k];
+                    loadSum += loadsActiveArray[k];
                 }
             }
             if (loadSum > feederCapacityArray[i]) {
@@ -429,6 +438,137 @@ class ParticleInLine {
 
         //通过所有的校验
         return true;
+    }
+
+    /**
+     * 传入路径状态，返回电力线路的建造成本
+     * @param routeState 路径状态
+     * @return cost 电力线路的建造成本
+     */
+    public double calculateLineCost(double[] routeState) {
+        double cost = 0;
+        UndirectedGraph<DsConnectNode, MapObject> g = distriSys.getOrigGraph();
+        int endIndex;
+
+        for (int i = 0; i < loadTransferOpt.getEdges().size(); i++) {
+            boolean isBuilt = false;
+
+            if (i == loadTransferOpt.getEdgeStart().length - 1)
+                endIndex = loadTransferOpt.getEdgePathes().size();
+            else
+                endIndex = loadTransferOpt.getEdgeStart()[i + 1];
+
+            for (int j = loadTransferOpt.getEdgeStart()[i]; j < endIndex; j++) {
+                if (routeState[loadTransferOpt.getEdgepathesIndex().get(j)] == 1) {
+                    isBuilt = true;
+                    break;
+                }
+            }
+            //如果建造线路
+            if(isBuilt) {
+                String nodeName1 = g.getEdgeSource(loadTransferOpt.getEdges().get(i)).getId();
+                String nodeName2 = g.getEdgeTarget(loadTransferOpt.getEdges().get(i)).getId();
+                String lineName1 = nodeName1 + ";" + nodeName2;
+                String lineName2 = nodeName2 + ";" + nodeName1;
+
+                for (String j : roadLengthMap.keySet()) {
+                    if (j.equals(lineName1) || j.equals(lineName2)) {
+                        cost += roadLengthMap.get(j) * LINE_UNIT_PRICE;
+                    }
+                }
+            }
+        }
+        return cost;
+    }
+
+
+    /**
+     * 输入路径通断状态，返回系统网损
+     *
+     * @param routeState 路径通断状态
+     * @return loss 系统网损
+     */
+    public double calculateLoss(double[] routeState) {
+        //网损初始化
+        double loss = 0;
+        UndirectedGraph<DsConnectNode, MapObject> g = distriSys.getOrigGraph();
+        //负荷的有功、无功功率，按nodes中的顺序排列
+        double[] loadsActiveArray = new double[loadTransferOpt.getNodes().size()];
+        double[] loadsReactiveArray = new double[loadTransferOpt.getNodes().size()];
+        for (int i = 0; i < loadTransferOpt.getNodes().size(); i++) {
+            loadsActiveArray[i] = loadsActiveMap.get(loadTransferOpt.getNodes().get(i).getId());
+            loadsReactiveArray[i] = loadsReactiveMap.get(loadTransferOpt.getNodes().get(i).getId());
+        }
+
+        String lastID;
+        int endIndex;
+        for (int i = 0; i < loadTransferOpt.getEdges().size(); i++) {
+            if (i == loadTransferOpt.getEdgeStart().length - 1)
+                endIndex = loadTransferOpt.getEdgePathes().size();
+            else
+                endIndex = loadTransferOpt.getEdgeStart()[i + 1];
+            double loadActiveSum = 0;
+            double loadReactiveSum = 0;
+            for (int j = loadTransferOpt.getEdgeStart()[i]; j < endIndex; j++) {
+                //若路径状态为通，负荷累加
+                if (routeState[loadTransferOpt.getEdgepathesIndex().get(j)] == 1) {
+                    //找出路径edgepathes[j]的末尾节点
+                    lastID = g.getEdgeTarget(loadTransferOpt.getEdgePathes().get(j)[loadTransferOpt.getEdgePathes().get(j).length - 1]).getId();
+                    //路径只有一条边
+                    if (loadTransferOpt.getEdgePathes().get(j).length == 1) {
+                        for (String scn : distriSys.getSupplyCns()) {
+                            if (scn.equals(lastID)) {
+                                lastID = g.getEdgeSource(loadTransferOpt.getEdgePathes().get(j)[loadTransferOpt.getEdgePathes().get(j).length - 1]).getId();
+                                break;
+                            }
+                        }
+                    } else {
+                        //如果路径上倒数第二条边有节点与lastID相同，则lastID应取最后一条边的另一个端点才是路径上的最后一个点
+                        if (lastID.equals(g.getEdgeSource(loadTransferOpt.getEdgePathes().get(j)[loadTransferOpt.getEdgePathes().get(j).length - 2]).getId())
+                                || lastID.equals(g.getEdgeTarget(loadTransferOpt.getEdgePathes().get(j)[loadTransferOpt.getEdgePathes().get(j).length - 2]).getId()))
+                            lastID = g.getEdgeSource(loadTransferOpt.getEdgePathes().get(j)[loadTransferOpt.getEdgePathes().get(j).length - 1]).getId();
+                    }
+
+                    int k;
+                    for (k = 0; k < loadTransferOpt.getNodes().size(); k++) {
+                        if (loadTransferOpt.getNodes().get(k).getId().equals(lastID))
+                            break;
+                    }
+                    loadActiveSum += loadsActiveArray[k];
+                    loadReactiveSum += loadsReactiveArray[k];
+                }
+            }
+
+            //找边的名称
+            String nodeSource = g.getEdgeSource(loadTransferOpt.getEdges().get(i)).getId();
+            String nodeTarget = g.getEdgeTarget(loadTransferOpt.getEdges().get(i)).getId();
+            String roadName1 = nodeSource + ";" + nodeTarget;
+            String roadName2 = nodeTarget + ";" + nodeSource;
+            String roadName = null;
+            boolean isFound = false;
+            Iterator iterator = roadLengthMap.keySet().iterator();
+            for (int j = 0; j < roadLengthMap.keySet().size(); j++) {
+                roadName = (String) iterator.next();
+                //找到对应的廊道
+                if (roadName.equals(roadName1) || roadName.equals(roadName2)) {
+                    isFound = true;
+                    break;
+                }
+            }
+            //
+            if (isFound) {
+                double length = roadLengthMap.get(roadName);
+                double resistance = length * LINE_UNIT_RESISTANCE;
+                double reactance = length * LINE_UNIT_REACTANCE;
+                //线路损耗
+                double lineLoss = (loadActiveSum * loadActiveSum + loadReactiveSum * loadReactiveSum) / (resistance * resistance + reactance * reactance) * resistance;
+                loss += lineLoss;
+            } else {
+                System.out.println("error: can't find the line！");
+                loss = 1e10;
+            }
+        }
+        return loss;
     }
 
 
@@ -470,14 +610,6 @@ class ParticleInLine {
 
     public void setpBestFitness(double pBestFitness) {
         this.pBestFitness = pBestFitness;
-    }
-
-    public static Random getRnd() {
-        return rnd;
-    }
-
-    public static void setRnd(Random rnd) {
-        ParticleInLine.rnd = rnd;
     }
 
     public static double getW() {
