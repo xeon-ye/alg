@@ -310,6 +310,7 @@ public class DsPowerflowTest extends TestCase implements DsModelCons {
     }
 
     public void testStandardCases() throws IOException {
+        System.out.println("13节点开始");
         DistriSys ds1 = IeeeDsInHand.FEEDER13.clone();
         DistriSys ds2 = IeeeDsInHand.FEEDER13.clone();
         testConverged(ds1, false);
@@ -319,11 +320,11 @@ public class DsPowerflowTest extends TestCase implements DsModelCons {
         DsTopoIsland island2 = ds2.getActiveIslands()[0];
         assertStateEquals(island1, island2);
 
-        System.out.println("开始打印");
-        DsTopoIsland[] islands = ds1.getActiveIslands();
-        for(DsTopoIsland i : islands){
-            printBusV(i,i.isPerUnitSys(),false);
-        }
+//        System.out.println("开始打印");
+//        DsTopoIsland[] islands = ds1.getActiveIslands();
+//        for(DsTopoIsland i : islands){
+//            printBusV(i,i.isPerUnitSys(),false);
+//        }
 
 
         ds1 = IeeeDsInHand.FEEDER34.clone();
@@ -353,16 +354,25 @@ public class DsPowerflowTest extends TestCase implements DsModelCons {
         island2 = ds2.getActiveIslands()[0];
         assertStateEquals(island1, island2);
 
-        System.out.println("打印结果");
-        for(DsTopoNode i : island1.getBusV().keySet()){
-            System.out.print(i.getType()+" ");
-            for (double[] j : island1.getBusV().get(i)){
-                for(double k : j){
-                    System.out.print(k+" ");
-                }
-            }
-            System.out.println();
-        }
+        ds1 = IeeeDsInHand.FEEDER123x50.clone();
+        ds2 = IeeeDsInHand.FEEDER123x50.clone();
+        testConverged(ds1, false);
+        testKCL(ds1);
+        testConverged(ds2, true);
+        island1 = ds1.getActiveIslands()[0];
+        island2 = ds2.getActiveIslands()[0];
+        assertStateEquals(island1, island2);
+
+//        System.out.println("打印结果");
+//        for(DsTopoNode i : island1.getBusV().keySet()){
+//            System.out.print(i.getType()+" ");
+//            for (double[] j : island1.getBusV().get(i)){
+//                for(double k : j){
+//                    System.out.print(k+" ");
+//                }
+//            }
+//            System.out.println();
+//        }
     }
 
     public static void assertStateEquals(DsTopoIsland island1, DsTopoIsland island2) {
@@ -397,7 +407,7 @@ public class DsPowerflowTest extends TestCase implements DsModelCons {
 
     public static void testConverged(DistriSys ds, boolean isBcfMethod) {
         ds.buildDynamicTopo();
-        System.out.println("网络数量："+ds.getActiveIslands().length);
+//        System.out.println("网络数量："+ds.getActiveIslands().length);
 
         ds.createCalDevModel();
 
