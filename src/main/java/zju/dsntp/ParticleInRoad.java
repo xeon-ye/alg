@@ -7,7 +7,6 @@ import org.jgrapht.graph.SimpleGraph;
 import zju.devmodel.MapObject;
 import zju.dsmodel.DistriSys;
 import zju.dsmodel.DsDevices;
-import zju.dsmodel.DsTopoNode;
 
 import java.io.*;
 import java.util.*;
@@ -28,6 +27,13 @@ class ParticleInRoad {
     private double[] velocity;
     //粒子的适应度
     private double fitness;
+    //廊道成本
+    private double roadCost;
+    //线路铺设成本
+    private double lineCost;
+    //网络损耗成本
+    private double lineLossCost;
+
     //粒子的历史最好位置
     private double[] pBestPosition;
 
@@ -125,28 +131,40 @@ class ParticleInRoad {
                 fitness += roadPriceMap.get(roadName);
             }
         }
-        //加入折旧率
-        fitness += fitness * Depreciation_Rate;
+        //廊道成本，考虑折旧率
+        roadCost = fitness*(1+Depreciation_Rate);
+        fitness = roadCost;
 
         //利用拓扑文件判断图的连通性并判断是否包含必要点
         //todo:设置必须包含的点
-        String[] necessaryNodesArray = {"S1", "L1", "L2", "L3"};
-        boolean isConnected = judgeConnection(this.getClass().getResource("/roadplanning/graph.txt").getPath(), necessaryNodesArray);
+//        String[] necessaryNodesArray = {"S1", "L1", "L2", "L3"};
+        String[] necessaryNodesArray = {"S650", "L645", "L632", "L646","L633","L684","L671","L652","L611","L680","L675"};
+        //fixme:改成配置文件的形式
+        boolean isConnected = judgeConnection(this.getClass().getResource("/roadplanning/11nodes/graph.txt").getPath(), necessaryNodesArray);
         //若连通
         PsoInLine psoInLine = null;
         if (isConnected) {
             //建立路径搜索程序所需的DistriSys对象
-            InputStream file = this.getClass().getResourceAsStream("/roadplanning/graph.txt");
+            // fixme:改成配置文件的形式
+            InputStream file = this.getClass().getResourceAsStream("/roadplanning/11nodes/graph.txt");
             //传入文件输入流，根据position读取支路信息
             DsDevices devices = parse(file);
-            DistriSys distriSys = createDs(devices, "S1", 100);
+            //todo:修改
+            DistriSys distriSys = createDs(devices, "S650", 4.16);
 
             psoInLine = new PsoInLine();
             //源graph文件默认所有的边均为switch
+            //todo:改下层粒子维数
             psoInLine.initial(20, distriSys);
             psoInLine.run();
             //上层适应度值加下层适应度值
             fitness += psoInLine.getGlobalBestFitness();
+            //更新线路成本
+            lineCost = psoInLine.getGlobalBestLineCost();
+            //更新网络损耗成本
+            lineLossCost = psoInLine.getGlobalBestLineLossCost();
+            //更新路径
+            pathes = psoInLine.getPathes();
         } else {
             fitness = 1e10;
         }
@@ -162,7 +180,6 @@ class ParticleInRoad {
             for(int i =0; i<pBelowBestPosition.length;i++){
                 pBelowBestPosition[i]=PsoInLine.getGlobalBestPosition()[i];
             }
-            pathes = psoInLine.getPathes();
         }
     }
 
@@ -565,6 +582,18 @@ class ParticleInRoad {
 
     public List<MapObject[]> getPathes() {
         return pathes;
+    }
+
+    public double getRoadCost() {
+        return roadCost;
+    }
+
+    public double getLineCost() {
+        return lineCost;
+    }
+
+    public double getLineLossCost() {
+        return lineLossCost;
     }
 }
 

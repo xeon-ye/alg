@@ -13,7 +13,7 @@ public class main {
 //        psoInTSC.showResult();
 
         PsoInRoad psoInRoad = new PsoInRoad();
-        psoInRoad.initial(20,8);
+        psoInRoad.initial(20,20);
         psoInRoad.run();
         psoInRoad.showResult();
 

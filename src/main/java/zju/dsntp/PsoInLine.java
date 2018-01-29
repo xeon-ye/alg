@@ -3,10 +3,7 @@ package zju.dsntp;
 import zju.devmodel.MapObject;
 import zju.dsmodel.DistriSys;
 
-import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -18,6 +15,11 @@ class PsoInLine {
     private ParticleInLine[] particles;
     //全局最优解
     private double globalBestFitness;
+    //全局最优解对应线路铺设费用
+    private double globalBestLineCost;
+    //全局最优解对应网络损耗费用
+    private double globalBestLineLossCost;
+
     //全局最优解对应位置
     private static double[] globalBestPosition;
     //全局最优解历史
@@ -32,17 +34,16 @@ class PsoInLine {
     //路径
     private List<MapObject[]> pathes;
 
-    //
+    //配网模型
     DistriSys distriSys;
-    //
     LoadTransferOpt loadTransferOpt;
 
     public void initial(int amount, DistriSys dis) {
         //修改参数
         //类的静态成员的初始化
-        ParticleInTSC.setC1(2);
-        ParticleInTSC.setC2(2);
-        ParticleInTSC.setW(0.8);
+        ParticleInLine.setC1(2);
+        ParticleInLine.setC2(2);
+        ParticleInLine.setW(0.8);
 
         //粒子个数
         particlesAmount = amount;
@@ -57,8 +58,11 @@ class PsoInLine {
         //路径
         pathes = loadTransferOpt.getPathes();
 
-        //全局最优适应值
+        //全局最优适应值及其相应值初始化
         globalBestFitness = 1e10;
+        globalBestLineCost = 1e10;
+        globalBestLineLossCost = 1e10;
+
         //全局最优位置
         globalBestPosition = new double[dimension];
         globalBestPositionList = new ArrayList<>();
@@ -70,13 +74,13 @@ class PsoInLine {
         for (int i = 0; i < particlesAmount; ++i) {
             //System.out.println("新建线路粒子" + i);
             particles[i] = new ParticleInLine();
-            //todo:实际负荷数量
-            particles[i].initial(dis, 3);
+            particles[i].initial(dis);
 
             //文件路径
-            particles[i].readRoadLength(this.getClass().getResource("/roadplanning/roadmessage.txt").getPath());
-            particles[i].readSupplyCap(this.getClass().getResource("/roadplanning/supplycapacity.txt").getPath());
-            particles[i].readLoads(this.getClass().getResource("/roadplanning/load.txt").getPath());
+            //fixme:改成配置文件的形式
+            particles[i].readRoadLength(this.getClass().getResource("/roadplanning/11nodes/roadmessage.txt").getPath());
+            particles[i].readSupplyCap(this.getClass().getResource("/roadplanning/11nodes/supplycapacity.txt").getPath());
+            particles[i].readLoads(this.getClass().getResource("/roadplanning/11nodes/load.txt").getPath());
 
             particles[i].evaluateFitness();
             if (globalBestFitness > particles[i].getFitness()) {
@@ -104,7 +108,7 @@ class PsoInLine {
         int runTimes = 1;
         int index;
         //设置最大迭代次数
-        while (runTimes <= 50) {
+        while (runTimes <= 100) {
             index = -1;
             //每个粒子更新位置和适应值
             for (int i = 0; i < particlesAmount; ++i) {
@@ -127,6 +131,8 @@ class PsoInLine {
                 globalBestPositionFitnessList.add(0, globalBestFitness);
                 iterationCountList.add(0, runTimes);
 
+                globalBestLineCost = particles[index].getLineCost();
+                globalBestLineLossCost = particles[index].getLineLossCost();
                 //打印结果
 //                System.out.println("第" + runTimes + "次迭代发现更好解：");
 //                System.out.println("globalBestFitness:" + globalBestFitness);
@@ -171,5 +177,13 @@ class PsoInLine {
 
     public List<MapObject[]> getPathes() {
         return pathes;
+    }
+
+    public double getGlobalBestLineCost() {
+        return globalBestLineCost;
+    }
+
+    public double getGlobalBestLineLossCost() {
+        return globalBestLineLossCost;
     }
 }

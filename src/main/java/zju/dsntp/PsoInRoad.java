@@ -25,6 +25,14 @@ class PsoInRoad {
     //全局最优解历史
     private List<double[]> globalBestPositionList;
     private List<Double> globalBestPositionFitnessList;
+    //全局最优解对应廊道成本历史
+    private List<Double> globalBestRoadCostList;
+    //全局最优解对应线路成本历史
+    private List<Double> globalBestLineCostList;
+    //全局最优解对应网络损耗成本历史
+    private List<Double> globalBestLineLossCostList;
+
+    //迭代次数
     private List<Integer> iterationCountList;
     private List<double[]> globalBestBelowPositionList;
     private List<List<MapObject[]>> pathesList;
@@ -37,9 +45,9 @@ class PsoInRoad {
     public void initial(int amount, int dimen) {
         //修改参数
         //类的静态成员的初始化
-        ParticleInTSC.setC1(2);
-        ParticleInTSC.setC2(2);
-        ParticleInTSC.setW(0.8);
+        ParticleInRoad.setC1(2);
+        ParticleInRoad.setC2(2);
+        ParticleInRoad.setW(0.8);
 
         //粒子个数
         particlesAmount = amount;
@@ -52,6 +60,9 @@ class PsoInRoad {
         globalBestPosition = new double[dimension];
         globalBestPositionList = new ArrayList<>();
         globalBestPositionFitnessList = new ArrayList<>();
+        globalBestRoadCostList = new ArrayList<>();
+        globalBestLineCostList = new ArrayList<>();
+        globalBestLineLossCostList = new ArrayList<>();
         iterationCountList = new ArrayList<>();
         globalBestBelowPositionList = new ArrayList<>();
         pathesList = new ArrayList<>();
@@ -63,7 +74,8 @@ class PsoInRoad {
             particles[i] = new ParticleInRoad();
             //初始化
             particles[i].initial(dimension);
-            particles[i].readRoadPrice(this.getClass().getResource("/roadplanning/roadmessage.txt").getPath());
+            //fixme:配置形式
+            particles[i].readRoadPrice(this.getClass().getResource("/roadplanning/11nodes/roadmessage.txt").getPath());
             particles[i].evaluateFitness();
             if (globalBestFitness > particles[i].getFitness()) {
                 globalBestFitness = particles[i].getFitness();
@@ -90,7 +102,8 @@ class PsoInRoad {
         int runTimes = 1;
         int index;
         //设置最大迭代次数
-        while (runTimes <= 50) {
+        while (runTimes <= 200) {
+            System.out.println("迭代次数："+runTimes);
             index = -1;
             //每个粒子更新位置和适应值
             for (int i = 0; i < particlesAmount; ++i) {
@@ -118,6 +131,9 @@ class PsoInRoad {
                 //保存最优解历史，始终放在第一位
                 globalBestPositionList.add(0, position);
                 globalBestPositionFitnessList.add(0, globalBestFitness);
+                globalBestRoadCostList.add(0,particles[index].getRoadCost());
+                globalBestLineCostList.add(0,particles[index].getLineCost());
+                globalBestLineLossCostList.add(0,particles[index].getLineLossCost());
                 iterationCountList.add(0, runTimes);
 
                 globalBestBelowPositionList.add(0, globalBestBelowPositon);
@@ -150,7 +166,8 @@ class PsoInRoad {
         //打印最优解list
         System.out.println("最优解List：");
         for (int i = 0; i < globalBestPositionList.size(); i++) {
-            System.out.println("在第" + iterationCountList.get(i) + "次迭代中发现第" + i + "优解：" + globalBestPositionFitnessList.get(i));
+            System.out.println("在第" + iterationCountList.get(i) + "次迭代中发现第" + i + "优解：" + globalBestPositionFitnessList.get(i)
+                    + " (Road: "+globalBestRoadCostList.get(i)+" Line: "+globalBestLineCostList.get(i)+" LineLoss: "+globalBestLineLossCostList.get(i)+")");
             for (int j = 0; j < dimension; j++) {
                 System.out.println("ROAD" + (j + 1) + " = " + globalBestPositionList.get(i)[j]);
             }

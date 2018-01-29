@@ -42,8 +42,6 @@ class ParticleInLine {
     //廊道系统
     private DistriSys distriSys;
     private LoadTransferOpt loadTransferOpt;
-    //虚拟负荷点数
-    private int realLoadsNumber;
 
     //廊道长度
     private Map<String, Double> roadLengthMap;
@@ -55,11 +53,16 @@ class ParticleInLine {
     //负荷无功功率
     private Map<String, Double> loadsReactiveMap;
 
+    //线路铺设成本，考虑折旧
+    private double lineCost;
+    //网损
+    private double lineLossCost;
+
     //线路容量常值
     private static final double FEEDER_CAPACITY_CONST = 100000;
     //最大负荷小时数
     private static final double MAX_LOAD_HOURS = 1000;
-    //单位电价（单位：兆瓦）
+    //单位电价（单位：万元/兆瓦时）
     private static final double ELECTRICITY_PRICE = 0.04;
     //线路铺设单位成本
     private static final double LINE_UNIT_PRICE = 0.51;
@@ -68,17 +71,18 @@ class ParticleInLine {
     //线路单位电抗
     private static final double LINE_UNIT_REACTANCE = 0.348;
     //折旧率
-    private static final double Depreciation_Rate = 0.03;
+    private static final double DEPRECIATION_RATE = 0.03;
+    //额定电压（单位：kV）
+    private static final double RATED_VOLTAGE = 4.16;
+
 
     /**
      * 初始化粒子
      *
-     * @param dis    表示粒子的维数,即可安装量测的位置
-     * @param number 表示虚拟负荷点的数目
+     * @param dis 表示粒子的维数,即可安装量测的位置
      */
-    public void initial(DistriSys dis, int number) {
+    public void initial(DistriSys dis) {
         distriSys = dis.clone();
-        realLoadsNumber = number;
         //搜索路径
         loadTransferOpt = new LoadTransferOpt(distriSys);
         loadTransferOpt.buildPathes();
@@ -197,27 +201,29 @@ class ParticleInLine {
      * 评估函数值,同时记录历史最优位置
      */
     public void evaluateFitness() {
-        //适应度的计算公式
+        //适应度置零
         fitness = 0;
 
         //传入路径状态信息，判断该路径状态是否满足，不满足直接返回
         //todo：修改必要节点
-        String[] necessaryLoads = {"L1","L2","L3"};
-        boolean isPassed = judgeFeasibility(position,necessaryLoads);
+        //String[] necessaryLoads = {"L1","L2","L3"};
+        String[] necessaryLoads = {"L645", "L632", "L646", "L633", "L684", "L671", "L652", "L611", "L680", "L675"};
+        boolean isPassed = judgeFeasibility(position, necessaryLoads);
         if (!isPassed) {
             fitness = 1e10;
             return;
         }
 
-        //线路铺设成本
-        fitness += calculateLineCost(position);
+        //更新线路铺设成本（考虑折旧）
+        lineCost = calculateLineCost(position) * (1 + DEPRECIATION_RATE);
 
-        //考虑设备折旧
-        fitness += fitness * Depreciation_Rate;
+        fitness += lineCost;
 
         //网络损耗费用
         double netLoss = calculateLoss(position);
-        fitness += netLoss * MAX_LOAD_HOURS * ELECTRICITY_PRICE;
+        //更新网络损耗费用
+        lineLossCost = netLoss * MAX_LOAD_HOURS * ELECTRICITY_PRICE;
+        fitness += lineLossCost;
 
         if (pBestFitness - fitness > 1e-2) {
             //假如计算出的适应值比历史最优适应值好，则用新计算出的适应值函数替代历史最优适应值
@@ -274,7 +280,7 @@ class ParticleInLine {
      * @param routeState
      * @return 可行性校验结果
      */
-    private boolean judgeFeasibility(double[] routeState,String[] necessaryLoads) {
+    private boolean judgeFeasibility(double[] routeState, String[] necessaryLoads) {
         //电源顺序按照supplyCns中的存放顺序
         String[] suppliesArray = distriSys.getSupplyCns();
         //电源有功容量
@@ -307,14 +313,14 @@ class ParticleInLine {
             }
 
             boolean isNecesssry = false;
-            for(String j : necessaryLoads){
-                if(j.equals(loadTransferOpt.getNodes().get(i).getId())){
+            for (String j : necessaryLoads) {
+                if (j.equals(loadTransferOpt.getNodes().get(i).getId())) {
                     isNecesssry = true;
                 }
             }
             if (isNecesssry && sum != 1) {
                 return false;
-            }else if(!isNecesssry && sum!=0){
+            } else if (!isNecesssry && sum != 0) {
                 return false;
             }
         }
@@ -442,6 +448,7 @@ class ParticleInLine {
 
     /**
      * 传入路径状态，返回电力线路的建造成本
+     *
      * @param routeState 路径状态
      * @return cost 电力线路的建造成本
      */
@@ -465,7 +472,7 @@ class ParticleInLine {
                 }
             }
             //如果建造线路
-            if(isBuilt) {
+            if (isBuilt) {
                 String nodeName1 = g.getEdgeSource(loadTransferOpt.getEdges().get(i)).getId();
                 String nodeName2 = g.getEdgeTarget(loadTransferOpt.getEdges().get(i)).getId();
                 String lineName1 = nodeName1 + ";" + nodeName2;
@@ -561,7 +568,7 @@ class ParticleInLine {
                 double resistance = length * LINE_UNIT_RESISTANCE;
                 double reactance = length * LINE_UNIT_REACTANCE;
                 //线路损耗
-                double lineLoss = (loadActiveSum * loadActiveSum + loadReactiveSum * loadReactiveSum) / (resistance * resistance + reactance * reactance) * resistance;
+                double lineLoss = (loadActiveSum * loadActiveSum + loadReactiveSum * loadReactiveSum) / (RATED_VOLTAGE * RATED_VOLTAGE) * resistance;
                 loss += lineLoss;
             } else {
                 System.out.println("error: can't find the line！");
@@ -634,6 +641,14 @@ class ParticleInLine {
 
     public static void setC2(double c2) {
         ParticleInLine.c2 = c2;
+    }
+
+    public double getLineCost() {
+        return lineCost;
+    }
+
+    public double getLineLossCost() {
+        return lineLossCost;
     }
 }
 
