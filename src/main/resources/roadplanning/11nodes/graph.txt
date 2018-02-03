@@ -1,0 +1,32 @@
+Line Segment Data	8 items	feet
+S650	L632	0	Switch
+L632	L645	0	Switch
+L632	L633	0	Switch
+L645	L646	0	Switch
+L645	L647	0	Switch
+L632	L648	0	Switch
+L646	L647	0	Switch
+L647	L648	0	Switch
+L648	L633	0	Switch
+L646	L684	0	Switch
+L648	L671	0	Switch
+L633	L671	0	Switch
+L684	L671	0	Switch
+L684	L652	0	Switch
+L684	L611	0	Switch
+L671	L680	0	Switch
+L671	L675	0	Switch
+L652	L611	0	Switch
+L611	L680	0	Switch
+L680	L675	0	Switch
+-999
+Spot Loads	0 items
+-999
+Distributed Loads	0 items
+-999
+Shunt Capacitors	0 items
+-999
+Transformer	0 item
+-999
+Regulator	0 item
+-999

@@ -7,9 +7,15 @@ import java.io.IOException;
  */
 public class main {
     public static void main(String[] args) throws IOException {
-        PSOInTSC psoInTSC = new PSOInTSC();
-        psoInTSC.initial();
-        psoInTSC.run();
-        psoInTSC.showResult();
+//        PSOInTSC psoInTSC = new PSOInTSC();
+//        psoInTSC.initial();
+//        psoInTSC.run();
+//        psoInTSC.showResult();
+
+        PsoInRoad psoInRoad = new PsoInRoad();
+        psoInRoad.initial(20,20);
+        psoInRoad.run();
+        psoInRoad.showResult();
+
     }
 }
