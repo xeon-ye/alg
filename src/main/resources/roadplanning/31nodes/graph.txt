@@ -1,0 +1,63 @@
+Line Segment Data	8 items	feet
+S	L801	0	Switch
+S	L802	0	Switch
+L801	L804	0	Switch
+L802	L832	0	Switch
+L802	L803	0	Switch
+L832	L803	0	Switch
+L832	L805	0	Switch
+L803	L805	0	Switch
+L803	L806	0	Switch
+L804	L807	0	Switch
+L804	L808	0	Switch
+L804	L816	0	Switch
+L805	L814	0	Switch
+L806	L810	0	Switch
+L806	L811	0	Switch
+L806	L817	0	Switch
+L807	L809	0	Switch
+L807	L808	0	Switch
+L808	L813	0	Switch
+L809	L812	0	Switch
+L812	L813	0	Switch
+L813	L815	0	Switch
+L810	L814	0	Switch
+L810	L811	0	Switch
+L811	L833	0	Switch
+L814	L833	0	Switch
+L817	L833	0	Switch
+L815	L818	0	Switch
+L816	L834	0	Switch
+L819	L833	0	Switch
+L817	L820	0	Switch
+L818	L822	0	Switch
+L818	L821	0	Switch
+L821	L834	0	Switch
+L823	L834	0	Switch
+L819	L824	0	Switch
+L822	L825	0	Switch
+L821	L825	0	Switch
+L821	L835	0	Switch
+L823	L827	0	Switch
+L824	L828	0	Switch
+L824	L829	0	Switch
+L825	L826	0	Switch
+L826	L835	0	Switch
+L827	L835	0	Switch
+L828	L829	0	Switch
+L825	L830	0	Switch
+L826	L830	0	Switch
+L831	L835	0	Switch
+L801	L802	0	Switch
+L804	L805	0	Switch
+-999
+Spot Loads	0 items
+-999
+Distributed Loads	0 items
+-999
+Shunt Capacitors	0 items
+-999
+Transformer	0 item
+-999
+Regulator	0 item
+-999

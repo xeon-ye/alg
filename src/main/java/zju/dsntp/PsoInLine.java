@@ -78,9 +78,9 @@ class PsoInLine {
 
             //文件路径
             //fixme:改成配置文件的形式
-            particles[i].readRoadLength(this.getClass().getResource("/roadplanning/11nodes/roadmessage.txt").getPath());
-            particles[i].readSupplyCap(this.getClass().getResource("/roadplanning/11nodes/supplycapacity.txt").getPath());
-            particles[i].readLoads(this.getClass().getResource("/roadplanning/11nodes/load.txt").getPath());
+            particles[i].readRoadLength(this.getClass().getResource("/roadplanning/21nodes/roadmessage.txt").getPath());
+            particles[i].readSupplyCap(this.getClass().getResource("/roadplanning/21nodes/supplycapacity.txt").getPath());
+            particles[i].readLoads(this.getClass().getResource("/roadplanning/21nodes/load.txt").getPath());
 
             particles[i].evaluateFitness();
             if (globalBestFitness > particles[i].getFitness()) {
@@ -108,7 +108,7 @@ class PsoInLine {
         int runTimes = 1;
         int index;
         //设置最大迭代次数
-        while (runTimes <= 100) {
+        while (runTimes <= 1000) {
             index = -1;
             //每个粒子更新位置和适应值
             for (int i = 0; i < particlesAmount; ++i) {

@@ -1018,7 +1018,7 @@ public class LoadTransferOpt extends PathBasedModel {
         boolean isPass = true;
 
         //生成路径
-        long time = System.currentTimeMillis();
+        long time ;
         //buildPathes();
         //System.out.println("搜索耗时："+(System.currentTimeMillis()-time));
 

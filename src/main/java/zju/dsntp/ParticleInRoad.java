@@ -137,25 +137,31 @@ class ParticleInRoad {
 
         //利用拓扑文件判断图的连通性并判断是否包含必要点
         //todo:设置必须包含的点
-//        String[] necessaryNodesArray = {"S1", "L1", "L2", "L3"};
-        String[] necessaryNodesArray = {"S650", "L645", "L632", "L646","L633","L684","L671","L652","L611","L680","L675"};
+//       String[] necessaryNodesArray = {"S1", "L1", "L2", "L3"};
+//       String[] necessaryNodesArray = {"S650", "L645", "L632", "L646","L633","L684","L671","L652","L611","L680","L675"};
+//        String[] necessaryNodesArray = {"S", "L801", "L802", "L803","L804","L805","L806","L807","L808","L809","L810",
+//                                        "L811", "L812", "L813","L814","L815","L816","L817","L818","L819","L820",
+//                                        "L821", "L822", "L823","L824","L825","L826","L827","L828","L829","L830","L831"};
+        String[] necessaryNodesArray = {"S", "L801", "L802", "L803","L804","L805","L806","L807","L808","L809","L810",
+                "L811", "L812", "L813","L814","L815","L816","L817","L818","L819","L820", "L821"};
+
         //fixme:改成配置文件的形式
-        boolean isConnected = judgeConnection(this.getClass().getResource("/roadplanning/11nodes/graph.txt").getPath(), necessaryNodesArray);
+        boolean isConnected = judgeConnection(this.getClass().getResource("/roadplanning/21nodes/graph.txt").getPath(), necessaryNodesArray);
         //若连通
         PsoInLine psoInLine = null;
         if (isConnected) {
             //建立路径搜索程序所需的DistriSys对象
             // fixme:改成配置文件的形式
-            InputStream file = this.getClass().getResourceAsStream("/roadplanning/11nodes/graph.txt");
+            InputStream file = this.getClass().getResourceAsStream("/roadplanning/21nodes/graph.txt");
             //传入文件输入流，根据position读取支路信息
             DsDevices devices = parse(file);
             //todo:修改
-            DistriSys distriSys = createDs(devices, "S650", 4.16);
+            DistriSys distriSys = createDs(devices, "S", 4.16);
 
             psoInLine = new PsoInLine();
             //源graph文件默认所有的边均为switch
             //todo:改下层粒子维数
-            psoInLine.initial(20, distriSys);
+            psoInLine.initial(500, distriSys);
             psoInLine.run();
             //上层适应度值加下层适应度值
             fitness += psoInLine.getGlobalBestFitness();

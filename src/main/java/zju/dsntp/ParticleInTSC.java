@@ -73,11 +73,8 @@ class ParticleInTSC {
         rnd = new Random();
 
         for (int i = 0; i < dimension; ++i) {
-            //位置初始化
             position[i] = getRandomPostion();
-            //将初始化后的位置赋值给“粒子的历史最好位置”
             pBestPositon[i] = position[i];
-            //速度的初始化0
             velocity[i] = 0;
         }
 

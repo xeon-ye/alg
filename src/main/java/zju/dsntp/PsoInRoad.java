@@ -75,7 +75,7 @@ class PsoInRoad {
             //初始化
             particles[i].initial(dimension);
             //fixme:配置形式
-            particles[i].readRoadPrice(this.getClass().getResource("/roadplanning/11nodes/roadmessage.txt").getPath());
+            particles[i].readRoadPrice(this.getClass().getResource("/roadplanning/21nodes/roadmessage.txt").getPath());
             particles[i].evaluateFitness();
             if (globalBestFitness > particles[i].getFitness()) {
                 globalBestFitness = particles[i].getFitness();

@@ -29,20 +29,29 @@ class PSOInTSC {
     int particlesAmount;
     //粒子维度
     int dimension;
+    //迭代次数
+    int iterationMaxTime;
 
-    public void initial() {
+    /**
+     * 粒子群初始化
+     * @param amount 粒子数量
+     * @param dimen 粒子维数
+     * @param maxTime 最大迭代次数
+     */
+    public void initial(int amount,int dimen, int maxTime) {
         //修改参数
         //类的静态成员的初始化
         ParticleInTSC.setC1(2);
         ParticleInTSC.setC2(2);
         ParticleInTSC.setW(0.8);
 
+        iterationMaxTime = maxTime;
+
         //粒子个数
-        particlesAmount = 20;
-        particles = new ParticleInTSC[this.particlesAmount];
+        particlesAmount = amount;
+        particles = new ParticleInTSC[particlesAmount];
         //粒子维度
-        //todo:
-        dimension = 44;
+        dimension = dimen;
         //全局最优适应值
         globalBestFitness = 0;
         //全局最优位置
@@ -53,7 +62,6 @@ class PSOInTSC {
 
         //最优位置索引
         int index = -1;
-//        while (index == -1) {
         for (int i = 0; i < particlesAmount; ++i) {
             System.out.println("新建粒子"+i);
             particles[i] = new ParticleInTSC();
@@ -65,7 +73,6 @@ class PSOInTSC {
                 index = i;
             }
         }
-//        }
 
         for (int i = 0; i < dimension; ++i) {
             globalBestPosition[i] = particles[index].getPosition()[i];
@@ -79,15 +86,15 @@ class PSOInTSC {
         int runTimes = 1;
         int index;
         //设置最大迭代次数
-        while (runTimes <= 50) {
+        while (runTimes <= iterationMaxTime) {
             index = -1;
             //每个粒子更新位置和适应值
             for (int i = 0; i < particlesAmount; ++i) {
-                particles[i].updatePosAndVel();//更新每个粒子的位置和速度
-                particles[i].evaluateFitness();//更新每个粒子的适应值
+                particles[i].updatePosAndVel();
+                particles[i].evaluateFitness();
                 if (particles[i].getFitness() - globalBestFitness > 1e-2) {
                     globalBestFitness = particles[i].getFitness();
-                    index = i;//更新全局最优适应值，并记录最优的粒子
+                    index = i;
                 }
             }
             //发现更好的解
@@ -106,7 +113,7 @@ class PSOInTSC {
                 System.out.println("第" + runTimes + "次迭代发现更好解：");
                 System.out.println("globalBestFitness:" + globalBestFitness);
                 for (int i = 0; i < dimension; i++) {
-                    System.out.println("负荷" + (i+1) + " = " + getGlobalBestPosition()[i]);
+                    System.out.println("负荷" + (i+1) + " = " + globalBestPosition[i]);
                 }
             }
             runTimes++;

@@ -207,7 +207,13 @@ class ParticleInLine {
         //传入路径状态信息，判断该路径状态是否满足，不满足直接返回
         //todo：修改必要节点
         //String[] necessaryLoads = {"L1","L2","L3"};
-        String[] necessaryLoads = {"L645", "L632", "L646", "L633", "L684", "L671", "L652", "L611", "L680", "L675"};
+//        String[] necessaryLoads = {"L645", "L632", "L646", "L633", "L684", "L671", "L652", "L611", "L680", "L675"};
+//        String[] necessaryLoads ={"L801", "L802", "L803","L804","L805","L806","L807","L808","L809","L810",
+//                                    "L811", "L812", "L813","L814","L815","L816","L817","L818","L819","L820",
+//                                    "L821", "L822", "L823","L824","L825","L826","L827","L828","L829","L830","L831"};
+        String[] necessaryLoads = { "L801", "L802", "L803","L804","L805","L806","L807","L808","L809","L810",
+                "L811", "L812", "L813","L814","L815","L816","L817","L818","L819","L820", "L821"};
+
         boolean isPassed = judgeFeasibility(position, necessaryLoads);
         if (!isPassed) {
             fitness = 1e10;
@@ -316,6 +322,7 @@ class ParticleInLine {
             for (String j : necessaryLoads) {
                 if (j.equals(loadTransferOpt.getNodes().get(i).getId())) {
                     isNecesssry = true;
+                    break;
                 }
             }
             if (isNecesssry && sum != 1) {
