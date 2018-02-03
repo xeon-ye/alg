@@ -105,7 +105,7 @@ public class IeeeDsInHand implements DsModelCons {
         }
 
         ieeeFile = IeeeDsInHand.class.getResourceAsStream("/dsieee/8500node/case8500.txt");
-        FEEDER8500 = createDs8500(ieeeFile, "Source", 115 / sqrt3);
+        FEEDER8500 = createDs8500(ieeeFile, "Source", 115 * 1.05 / sqrt3);
         for (MapObject obj : FEEDER8500.getDevices().getSwitches()) {
             if (obj.getProperty(KEY_CONNECTED_NODE).equals("228-979371-2_INT--193-48013;193-48013"))
                 obj.setProperty(KEY_SWITCH_STATUS, SWITCH_OFF);
@@ -116,6 +116,9 @@ public class IeeeDsInHand implements DsModelCons {
             else if (obj.getProperty(KEY_CONNECTED_NODE).equals("D5837361-8_INT--E182745;E182745"))
                 obj.setProperty(KEY_SWITCH_STATUS, SWITCH_OFF);
             else if (obj.getProperty(KEY_CONNECTED_NODE).equals("228-1048090-1_INT--193-51796;193-51796"))
+                obj.setProperty(KEY_SWITCH_STATUS, SWITCH_OFF);
+            // 8500节点算例中D5860423-3_INT节点与regxfmr_190-8593相连，该处有调压器，由于未处理调压器，计算配电网末端电压较低，因此断开
+            else if (obj.getProperty(KEY_CONNECTED_NODE).equals("D5587291-3_INT--Q14734;Q14734"))
                 obj.setProperty(KEY_SWITCH_STATUS, SWITCH_OFF);
         }
     }
