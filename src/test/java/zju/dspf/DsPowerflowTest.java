@@ -12,10 +12,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * DsPowerflow Tester.
@@ -48,10 +46,9 @@ public class DsPowerflowTest extends TestCase implements DsModelCons {
 
         System.out.println("开始打印");
         DsTopoIsland[] islands = ds.getActiveIslands();
-        for(DsTopoIsland i : islands){
-            printBusV(i,i.isPerUnitSys(),false);
+        for (DsTopoIsland i : islands) {
+            printBusV(i, i.isPerUnitSys(), false);
         }
-
 
 
         ds = IeeeDsInHand.FEEDER4_GrYGrY_UNB.clone();
@@ -320,13 +317,6 @@ public class DsPowerflowTest extends TestCase implements DsModelCons {
         DsTopoIsland island2 = ds2.getActiveIslands()[0];
         assertStateEquals(island1, island2);
 
-//        System.out.println("开始打印");
-//        DsTopoIsland[] islands = ds1.getActiveIslands();
-//        for(DsTopoIsland i : islands){
-//            printBusV(i,i.isPerUnitSys(),false);
-//        }
-
-
         ds1 = IeeeDsInHand.FEEDER34.clone();
         ds2 = IeeeDsInHand.FEEDER34.clone();
         testConverged(ds1, false);
@@ -363,16 +353,14 @@ public class DsPowerflowTest extends TestCase implements DsModelCons {
         island2 = ds2.getActiveIslands()[0];
         assertStateEquals(island1, island2);
 
-//        System.out.println("打印结果");
-//        for(DsTopoNode i : island1.getBusV().keySet()){
-//            System.out.print(i.getType()+" ");
-//            for (double[] j : island1.getBusV().get(i)){
-//                for(double k : j){
-//                    System.out.print(k+" ");
-//                }
-//            }
-//            System.out.println();
-//        }
+        ds1 = IeeeDsInHand.FEEDER8500.clone();
+        ds2 = IeeeDsInHand.FEEDER8500.clone();
+        testConverged(ds1, false);
+        testKCL(ds1);
+        testConverged(ds2, true);
+        island1 = ds1.getActiveIslands()[0];
+        island2 = ds2.getActiveIslands()[0];
+        assertStateEquals(island1, island2);
     }
 
     public static void assertStateEquals(DsTopoIsland island1, DsTopoIsland island2) {
@@ -407,7 +395,6 @@ public class DsPowerflowTest extends TestCase implements DsModelCons {
 
     public static void testConverged(DistriSys ds, boolean isBcfMethod) {
         ds.buildDynamicTopo();
-//        System.out.println("网络数量："+ds.getActiveIslands().length);
 
         ds.createCalDevModel();
 
@@ -480,22 +467,24 @@ public class DsPowerflowTest extends TestCase implements DsModelCons {
 
     public static void printBusV(DsTopoIsland island, boolean isPerUnit, boolean isCartesian) throws IOException {
         List<DsTopoNode> tns = new ArrayList<DsTopoNode>(island.getBusV().keySet());
-        Collections.sort(tns, new Comparator<Object>() {
-            @Override
-            public int compare(Object o1, Object o2) {
-                DsTopoNode tn1 = (DsTopoNode) o1;
-                DsTopoNode tn2 = (DsTopoNode) o2;
-                String id1 = tn1.getConnectivityNodes().get(0).getId();
-                String id2 = tn2.getConnectivityNodes().get(0).getId();
-                return new Integer(id1).compareTo(new Integer(id2));
-            }
-        });
+//        Collections.sort(tns, new Comparator<Object>() {
+//            @Override
+//            public int compare(Object o1, Object o2) {
+//                DsTopoNode tn1 = (DsTopoNode) o1;
+//                DsTopoNode tn2 = (DsTopoNode) o2;
+//                String id1 = tn1.getConnectivityNodes().get(0).getId();
+//                String id2 = tn2.getConnectivityNodes().get(0).getId();
+//                return new Integer(id1).compareTo(new Integer(id2));
+//            }
+//        });
         DecimalFormat df1 = new DecimalFormat("0.00000");
         DecimalFormat df2;
         if (isCartesian)
             df2 = new DecimalFormat("0.00000");
         else
             df2 = new DecimalFormat("#.#");
+        SimpleDateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
+        FileWriter fileWriter = new FileWriter("./src/test/resources/testfiles/voltage_" + df.format(new Date()) + ".csv", true);
         for (DsTopoNode tn : tns) {
             double[][] v = island.getBusV().get(tn);
             if (!isCartesian)
@@ -531,10 +520,10 @@ public class DsPowerflowTest extends TestCase implements DsModelCons {
             }
             System.out.println(sb);
             //插入文件
-            FileWriter fileWriter = new FileWriter("D:\\result\\reconfiguration\\voltage.csv",true);
             stringBuilder.append("\n");
             fileWriter.write(stringBuilder.toString());
-            fileWriter.close();
         }
+        fileWriter.flush();
+        fileWriter.close();
     }
 }
