@@ -307,7 +307,6 @@ public class DsPowerflowTest extends TestCase implements DsModelCons {
     }
 
     public void testStandardCases() throws IOException {
-        System.out.println("13节点开始");
         DistriSys ds1 = IeeeDsInHand.FEEDER13.clone();
         DistriSys ds2 = IeeeDsInHand.FEEDER13.clone();
         testConverged(ds1, false);
@@ -328,6 +327,15 @@ public class DsPowerflowTest extends TestCase implements DsModelCons {
 
         ds1 = IeeeDsInHand.FEEDER37.clone();
         ds2 = IeeeDsInHand.FEEDER37.clone();
+        testConverged(ds1, false);
+        testKCL(ds1);
+        testConverged(ds2, true);
+        island1 = ds1.getActiveIslands()[0];
+        island2 = ds2.getActiveIslands()[0];
+        assertStateEquals(island1, island2);
+
+        ds1 = IeeeDsInHand.FEEDER69.clone();
+        ds2 = IeeeDsInHand.FEEDER69.clone();
         testConverged(ds1, false);
         testKCL(ds1);
         testConverged(ds2, true);
@@ -467,16 +475,16 @@ public class DsPowerflowTest extends TestCase implements DsModelCons {
 
     public static void printBusV(DsTopoIsland island, boolean isPerUnit, boolean isCartesian) throws IOException {
         List<DsTopoNode> tns = new ArrayList<DsTopoNode>(island.getBusV().keySet());
-//        Collections.sort(tns, new Comparator<Object>() {
-//            @Override
-//            public int compare(Object o1, Object o2) {
-//                DsTopoNode tn1 = (DsTopoNode) o1;
-//                DsTopoNode tn2 = (DsTopoNode) o2;
-//                String id1 = tn1.getConnectivityNodes().get(0).getId();
-//                String id2 = tn2.getConnectivityNodes().get(0).getId();
-//                return new Integer(id1).compareTo(new Integer(id2));
-//            }
-//        });
+        Collections.sort(tns, new Comparator<Object>() {
+            @Override
+            public int compare(Object o1, Object o2) {
+                DsTopoNode tn1 = (DsTopoNode) o1;
+                DsTopoNode tn2 = (DsTopoNode) o2;
+                String id1 = tn1.getConnectivityNodes().get(0).getId();
+                String id2 = tn2.getConnectivityNodes().get(0).getId();
+                return new Integer(id1).compareTo(new Integer(id2));
+            }
+        });
         DecimalFormat df1 = new DecimalFormat("0.00000");
         DecimalFormat df2;
         if (isCartesian)

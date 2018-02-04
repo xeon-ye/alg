@@ -29,6 +29,7 @@ public class IeeeDsInHand implements DsModelCons {
     public final static DistriSys FEEDER13;
     public final static DistriSys FEEDER34;
     public final static DistriSys FEEDER37;
+    public final static DistriSys FEEDER69;
     public final static DistriSys FEEDER123;
     public final static DistriSys FEEDER123x50;
     public final static DistriSys FEEDER8500;
@@ -69,6 +70,9 @@ public class IeeeDsInHand implements DsModelCons {
 
         ieeeFile = IeeeDsInHand.class.getResourceAsStream("/dsieee/case37/case37.txt");
         FEEDER37 = createDs(ieeeFile, "799", 4.8 / sqrt3);
+
+        ieeeFile = IeeeDsInHand.class.getResourceAsStream("/dsieee/case69/case69.txt");
+        FEEDER69 = createDs(ieeeFile, "0", 12.66 / sqrt3);
 
         ieeeFile = IeeeDsInHand.class.getResourceAsStream("/dsieee/case123/case123.txt");
         FEEDER123 = createDs(ieeeFile, "150", 4.16 / sqrt3);
