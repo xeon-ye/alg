@@ -174,15 +174,15 @@ public class FeederConfMgr implements Serializable, DsModelCons {
         this.bPerLen = bPerLen;
     }
 
-    public void clearzRealPerLen(Map<String, double[][]> zRealPerLen) {
+    public void clearzRealPerLen() {
         this.zRealPerLen.clear();
     }
 
-    public void clearzImagPerLen(Map<String, double[][]> zImagPerLen) {
+    public void clearzImagPerLen() {
         this.zImagPerLen.clear();
     }
 
-    public void clearbPerLen(Map<String, double[][]> bPerLen) {
+    public void clearbPerLen() {
         this.bPerLen.clear();
     }
 
