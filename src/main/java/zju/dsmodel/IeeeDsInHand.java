@@ -142,6 +142,20 @@ public class IeeeDsInHand implements DsModelCons {
         return dsTopo;
     }
 
+    public static DistriSys createDs(DsDevices devices, String slackCnId, double baseKv) {
+        DistriSys dsTopo = new DistriSys();
+        dsTopo.buildOrigTopo(devices);
+
+        dsTopo.setSupplyCns(new String[]{slackCnId});
+        dsTopo.setSupplyCnBaseKv(new Double[]{baseKv});
+        dsTopo.setFeederConf(FEEDER_CONF);
+        dsTopo.fillCnBaseKv();
+
+        for (MapObject obj : devices.getSwitches())
+            obj.setProperty(KEY_SWITCH_STATUS, SWITCH_ON);
+        return dsTopo;
+    }
+
     public static DistriSys createDs8500(InputStream ieeeFile, String slackCnId, double baseKv) {
         DsDevices devices = new DsDeviceParser().parse(ieeeFile);
         DistriSys dsTopo = new DistriSys();
