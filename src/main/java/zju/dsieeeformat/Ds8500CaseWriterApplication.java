@@ -9,7 +9,7 @@ import java.io.InputStream;
  * @Date: 2018/1/6
  * @Time: 15:03
  */
-public class DsCaseWriterApplication {
+public class Ds8500CaseWriterApplication {
 
     public static void main(String[] args) {
 
