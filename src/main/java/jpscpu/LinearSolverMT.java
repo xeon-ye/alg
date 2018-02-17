@@ -2,8 +2,12 @@ package jpscpu;
 
 import cern.colt.matrix.DoubleMatrix1D;
 import cern.colt.matrix.DoubleMatrix2D;
+import com.csvreader.CsvWriter;
 import zju.matrix.ASparseMatrixLink2D;
 import zju.util.ColtMatrixUtil;
+
+import java.io.IOException;
+import java.nio.charset.Charset;
 
 /**
  * Created by IntelliJ IDEA.
@@ -31,6 +35,8 @@ public class LinearSolverMT {
     private NCPformat U;
 
     private int nprocs = 1;
+
+    private int calNum = 0;
 
     static {
         SoFileLoader.loadSoFiles();
@@ -254,4 +260,44 @@ public class LinearSolverMT {
     public void setDrive(int drive) {
         this.drive = drive;
     }
+
+    private void writeMatrixByNc(double[] b) {
+        double[][] originA = new double[m][n];
+        int row;
+        for (int i = 0; i < n; i++) {
+            for (int j = xa[i]; j < xa[i + 1]; j++) {
+                row = asub[j]; // asub代表的是行号
+                originA[row][i] = a[j];
+            }
+        }
+        try {
+            String csvFilePath = "~/cuda/matrix/matrixA_" + calNum + ".csv";
+            CsvWriter wr = new CsvWriter(csvFilePath, ',', Charset.forName("utf-8"));
+            String[] contents = new String[n];
+            for (int i = 0; i < m; i++) {
+                for (int j = 0; j < n; j++) {
+                    contents[j] = String.valueOf(originA[i][j]);
+                }
+                wr.writeRecord(contents);
+            }
+            wr.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        calNum++;
+        try {
+            String csvFilePath = "~/cuda/matrix/matrixB_" + calNum + ".csv";
+            CsvWriter wr = new CsvWriter(csvFilePath, ',', Charset.forName("utf-8"));
+            String[] contents = new String[n];
+            for (int i = 0; i < n; i++) {
+                contents[i] = String.valueOf(b[i]);
+            }
+            wr.writeRecord(contents);
+            wr.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
 }
