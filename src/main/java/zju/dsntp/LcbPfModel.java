@@ -20,7 +20,7 @@ import java.util.*;
  * Loop-Current-Based power flow model
  *
  * @author : Dong Shufeng
- *         Date: 14-1-16
+ * Date: 14-1-16
  */
 public class LcbPfModel implements NewtonModel, DsModelCons {
     private static Logger log = Logger.getLogger(LcbPfModel.class);
@@ -551,40 +551,180 @@ public class LcbPfModel implements NewtonModel, DsModelCons {
      * @param isUpdateDG 是否更新DG的状态
      */
     public void calLoopKVL(double[] result, int index, boolean isUpdateDG) {
-        int k, j;
-        double rValue, iValue, value;
-        double[] tempI = new double[2];
-        double[] vDrop = new double[2];
-        DetailedEdge edge;
         if (isUpdateDG)
             for (DispersedGen dg : island.getDispersedGens().values())
                 dg.updateState(this);
-        for (int i = 0; i < B.getM(); i++) {
-            k = B.getIA()[i];
-            rValue = 0.0;
-            iValue = 0.0;
-            while (k != -1) {
-                j = B.getJA().get(k);
-                value = B.getVA().get(k);
-                k = B.getLINK().get(k);
+        Thread t1 = new Thread(() -> {
+            for (int i = 0; i < B.getM() / 4; i++) {
+                int k, j;
+                double rValue, iValue, value;
+                double[] tempI = new double[2];
+                double[] vDrop = new double[2];
+                DetailedEdge edge;
 
-                edge = noToEdge.get(j);
-                calVoltDrop(edge, vDrop, tempI);
-                if (value < 0) {
-                    rValue += -vDrop[0];
-                    iValue += -vDrop[1];
-                } else {
-                    rValue += vDrop[0];
-                    iValue += vDrop[1];
+                k = B.getIA()[i];
+                rValue = 0.0;
+                iValue = 0.0;
+                while (k != -1) {
+                    j = B.getJA().get(k);
+                    value = B.getVA().get(k);
+                    k = B.getLINK().get(k);
+
+                    edge = noToEdge.get(j);
+                    calVoltDrop(edge, vDrop, tempI);
+                    if (value < 0) {
+                        rValue += -vDrop[0];
+                        iValue += -vDrop[1];
+                    } else {
+                        rValue += vDrop[0];
+                        iValue += vDrop[1];
+                    }
                 }
+                result[i + index] = rValue;
+                result[i + index + B.getM()] = iValue;
             }
-            result[i + index] = rValue;
-            result[i + index + B.getM()] = iValue;
+
+        });
+        Thread t2 = new Thread(() -> {
+            for (int i = B.getM() / 4; i < B.getM() / 2; i++) {
+                int k, j;
+                double rValue, iValue, value;
+                double[] tempI = new double[2];
+                double[] vDrop = new double[2];
+                DetailedEdge edge;
+
+                k = B.getIA()[i];
+                rValue = 0.0;
+                iValue = 0.0;
+                while (k != -1) {
+                    j = B.getJA().get(k);
+                    value = B.getVA().get(k);
+                    k = B.getLINK().get(k);
+
+                    edge = noToEdge.get(j);
+                    calVoltDrop(edge, vDrop, tempI);
+                    if (value < 0) {
+                        rValue += -vDrop[0];
+                        iValue += -vDrop[1];
+                    } else {
+                        rValue += vDrop[0];
+                        iValue += vDrop[1];
+                    }
+                }
+                result[i + index] = rValue;
+                result[i + index + B.getM()] = iValue;
+            }
+        });
+        Thread t3 = new Thread(() -> {
+            for (int i = B.getM() / 2; i < B.getM() / 4 * 3; i++) {
+                int k, j;
+                double rValue, iValue, value;
+                double[] tempI = new double[2];
+                double[] vDrop = new double[2];
+                DetailedEdge edge;
+
+                k = B.getIA()[i];
+                rValue = 0.0;
+                iValue = 0.0;
+                while (k != -1) {
+                    j = B.getJA().get(k);
+                    value = B.getVA().get(k);
+                    k = B.getLINK().get(k);
+
+                    edge = noToEdge.get(j);
+                    calVoltDrop(edge, vDrop, tempI);
+                    if (value < 0) {
+                        rValue += -vDrop[0];
+                        iValue += -vDrop[1];
+                    } else {
+                        rValue += vDrop[0];
+                        iValue += vDrop[1];
+                    }
+                }
+                result[i + index] = rValue;
+                result[i + index + B.getM()] = iValue;
+            }
+        });
+        Thread t4 = new Thread(() -> {
+            for (int i = B.getM() / 4 * 3; i < B.getM(); i++) {
+                int k, j;
+                double rValue, iValue, value;
+                double[] tempI = new double[2];
+                double[] vDrop = new double[2];
+                DetailedEdge edge;
+
+                k = B.getIA()[i];
+                rValue = 0.0;
+                iValue = 0.0;
+                while (k != -1) {
+                    j = B.getJA().get(k);
+                    value = B.getVA().get(k);
+                    k = B.getLINK().get(k);
+
+                    edge = noToEdge.get(j);
+                    calVoltDrop(edge, vDrop, tempI);
+                    if (value < 0) {
+                        rValue += -vDrop[0];
+                        iValue += -vDrop[1];
+                    } else {
+                        rValue += vDrop[0];
+                        iValue += vDrop[1];
+                    }
+                }
+                result[i + index] = rValue;
+                result[i + index + B.getM()] = iValue;
+            }
+        });
+        t1.start();
+        t2.start();
+        t3.start();
+        t4.start();
+
+        try {
+            t1.join();
+            t2.join();
+            t3.join();
+            t4.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
+
+//        int k, j;
+//        double rValue, iValue, value;
+//        double[] tempI = new double[2];
+//        double[] vDrop = new double[2];
+//        DetailedEdge edge;
+//
+//        for (int i = 0; i < B.getM() ; i++) {
+//
+//            k = B.getIA()[i];
+//            rValue = 0.0;
+//            iValue = 0.0;
+//            while (k != -1) {
+//                j = B.getJA().get(k);
+//                value = B.getVA().get(k);
+//                k = B.getLINK().get(k);
+//
+//                edge = noToEdge.get(j);
+//                calVoltDrop(edge, vDrop, tempI);
+//                if (value < 0) {
+//                    rValue += -vDrop[0];
+//                    iValue += -vDrop[1];
+//                } else {
+//                    rValue += vDrop[0];
+//                    iValue += vDrop[1];
+//                }
+//            }
+//            result[i + index] = rValue;
+//            result[i + index + B.getM()] = iValue;
+//        }
     }
 
     public AVector calZ(AVector state, boolean isUpdateDG) {
+        long start = System.nanoTime();
         calLoopKVL(z_est.getValues(), 0, isUpdateDG);
+        log.debug("Time used for calLoopKVL : " + (System.nanoTime() - start) / 1000 + "us");
+
         calTfCurrent(z_est.getValues(), 2 * getLoopSize());
         int index = 2 * (getLoopSize() + windingEdges.size()), pos;
         double[] tempI = new double[2];
@@ -693,9 +833,10 @@ public class LcbPfModel implements NewtonModel, DsModelCons {
 
     /**
      * 计算支路电流，电流正方向为小的节点号->大的节点号
+     *
      * @param branchNo 支路号
-     * @param state 状态变量
-     * @param c 计算结果
+     * @param state    状态变量
+     * @param c        计算结果
      */
     public void calCurrent(int branchNo, AVector state, double[] c) {
         int k = B.getJA2()[branchNo], i;
@@ -1057,10 +1198,9 @@ public class LcbPfModel implements NewtonModel, DsModelCons {
     }
 
     /**
-     *
-     * @param m 存储Jacobian矩阵
-     * @param e 支路
-     * @param row 当前的Jacobian矩阵中的行
+     * @param m     存储Jacobian矩阵
+     * @param e     支路
+     * @param row   当前的Jacobian矩阵中的行
      * @param value 回路矩阵中该支路所对应的值
      */
     public void fillVDropJac(ASparseMatrixLink2D m, DetailedEdge e, int row, double value, double a, double b) {
@@ -1078,7 +1218,7 @@ public class LcbPfModel implements NewtonModel, DsModelCons {
 
                 int pos = edgeToNo.get(e);
                 fillJacStruc(m, pos, row, a * value * feeder.getZ_real()[e.getPhase()][e.getPhase()], 0);
-                fillJacStruc(m, pos, row, - a * value * feeder.getZ_imag()[e.getPhase()][e.getPhase()], dimension);
+                fillJacStruc(m, pos, row, -a * value * feeder.getZ_imag()[e.getPhase()][e.getPhase()], dimension);
                 fillJacStruc(m, pos, row + B.getM(), b * value * feeder.getZ_imag()[e.getPhase()][e.getPhase()], 0);
                 fillJacStruc(m, pos, row + B.getM(), b * value * feeder.getZ_real()[e.getPhase()][e.getPhase()], dimension);
                 for (DetailedEdge otherE : e.getOtherEdgesOfSameFeeder()) {
@@ -1159,8 +1299,10 @@ public class LcbPfModel implements NewtonModel, DsModelCons {
             return;
         jacStruc = new ASparseMatrixLink2D(varSize, varSize);
         //回路KVL方程的Jacobian
+        long start = System.nanoTime();
         formJacStrucOfKVL(jacStruc, 0);
-
+        log.debug("Time used for formJacStrucOfKVL : " + (System.nanoTime() - start) / 1000 + "us");
+        start = System.nanoTime();
         Transformer tf;
         int index = 2 * B.getM(), j1, j2, pos;
         double r, x;
@@ -1238,6 +1380,7 @@ public class LcbPfModel implements NewtonModel, DsModelCons {
         //分布式电源
         for (DispersedGen dg : island.getDispersedGens().values())
             index += dg.fillJacStruc(this, index);
+        log.debug("Time used for 其他 : " + (System.nanoTime() - start) / 1000 + "us");
         jacobian = new MySparseDoubleMatrix2D(jacStruc.getM(), jacStruc.getN(), jacStruc.getVA().size(), 0.2, 0.9);
         jacStruc.toColteMatrix(jacobian);
     }
