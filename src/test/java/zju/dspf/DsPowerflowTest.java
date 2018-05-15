@@ -492,7 +492,6 @@ public class DsPowerflowTest extends TestCase implements DsModelCons {
         else
             df2 = new DecimalFormat("#.#");
         SimpleDateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
-        FileWriter fileWriter = new FileWriter("./src/test/resources/testfiles/voltage_" + df.format(new Date()) + ".csv", true);
         for (DsTopoNode tn : tns) {
             double[][] v = island.getBusV().get(tn);
             if (!isCartesian)
@@ -529,9 +528,6 @@ public class DsPowerflowTest extends TestCase implements DsModelCons {
             System.out.println(sb);
             //插入文件
             stringBuilder.append("\n");
-            fileWriter.write(stringBuilder.toString());
         }
-        fileWriter.flush();
-        fileWriter.close();
     }
 }
