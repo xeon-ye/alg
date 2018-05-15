@@ -11,7 +11,7 @@ import java.util.List;
  * Created by IntelliJ IDEA.
  *
  * @author Dong Shufeng
- *         Date: 2010-7-9
+ * Date: 2010-7-9
  */
 public class DsDeviceParser implements DsModelCons {
     private static Logger log = Logger.getLogger(DsDeviceParser.class);
@@ -313,6 +313,10 @@ public class DsDeviceParser implements DsModelCons {
         obj.setProperty(KEY_LINE_CONF, content[3]);
         obj.setProperty(KEY_RESOURCE_TYPE, RESOURCE_FEEDER);
         obj.setProperty(KEY_LENGTH_UNIT, lenthUnit);
+        if (content[3].trim().equalsIgnoreCase("Switch")) {
+            if (content.length == 5)
+                obj.setProperty(KEY_SWITCH_STATUS, content[4]);
+        }
         return obj;
     }
 }
