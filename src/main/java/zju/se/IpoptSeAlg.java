@@ -44,14 +44,14 @@ public class IpoptSeAlg extends AbstractSeAlg implements MeasTypeCons, IpoptMode
     public void initial() {
         iterNum = 0;
         if (getSlackBusNum() > 0)
-            slackBusCol = getSlackBusNum() - 1;
-        busNumber = Y.getAdmittance()[0].getM();
+            slackBusCol = getSlackBusNum() - 1; // 得到松弛节点的列号
+        busNumber = Y.getAdmittance()[0].getM(); // 节点数量
         //初始化约束个数和状态变量个数
         switch (variable_type) {
             case VARIABLE_VTHETA:
             case VARIABLE_U:
-                dimension = 2 * busNumber;
-                m = getMeas().getZ().getN() + zeroPBuses.length + zeroQBuses.length;
+                dimension = 2 * busNumber; // 状态变量个数
+                m = getMeas().getZ().getN() + zeroPBuses.length + zeroQBuses.length; // 量测个数加零注入个数
                 break;
             case VARIABLE_VTHETA_PQ:
                 dimension = 4 * busNumber;
@@ -70,7 +70,7 @@ public class IpoptSeAlg extends AbstractSeAlg implements MeasTypeCons, IpoptMode
             if (isSlackBusVoltageFixed())
                 m++;
         }
-        n = dimension + getMeas().getZ().getN();
+        n = dimension + getMeas().getZ().getN(); // 状态变量个数加量测个数
 
         //得到Jacobian矩阵的非零元个数
         if (variable_type == VARIABLE_UI || variable_type == VARIABLE_U) {
@@ -424,6 +424,7 @@ public class IpoptSeAlg extends AbstractSeAlg implements MeasTypeCons, IpoptMode
                 x_U[i + offset] = 2e15;
     }
 
+    // 开始状态估计计算
     public void doSeAnalyse() {
         long start = System.currentTimeMillis();
         initial();

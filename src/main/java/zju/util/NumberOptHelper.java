@@ -180,6 +180,7 @@ public class NumberOptHelper {
         Map<Integer, Integer> old2new = new HashMap<Integer, Integer>(island.getBuses().size());
         Map<Integer, Integer> new2old = new HashMap<Integer, Integer>(island.getBuses().size());
         int i = 1;
+        // 将节点按顺序编号
         for (BusData bus : island.getBuses()) {
             old2new.put(bus.getBusNumber(), i);
             new2old.put(i, bus.getBusNumber());
@@ -205,17 +206,17 @@ public class NumberOptHelper {
             int type = bus.getType();
             switch (type) {
                 case BusData.BUS_TYPE_LOAD_PQ://
-                case BusData.BUS_TYPE_GEN_PQ://
+                case BusData.BUS_TYPE_GEN_PQ:// 把PQ节点排在前面
                     old2new.put(bus.getBusNumber(), i);
                     new2old.put(i, bus.getBusNumber());
                     i++;
                     break;
-                case BusData.BUS_TYPE_GEN_PV://
+                case BusData.BUS_TYPE_GEN_PV:// 然后排PV节点
                     old2new.put(bus.getBusNumber(), j);
                     new2old.put(j, bus.getBusNumber());
                     j++;
                     break;
-                case BusData.BUS_TYPE_SLACK://
+                case BusData.BUS_TYPE_SLACK:// 最后排平衡节点
                     old2new.put(bus.getBusNumber(), island.getPqBusSize() + island.getPvBusSize() + 1);
                     new2old.put(island.getPqBusSize() + island.getPvBusSize() + 1, bus.getBusNumber());
                     break;

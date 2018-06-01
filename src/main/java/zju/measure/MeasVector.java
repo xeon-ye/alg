@@ -15,11 +15,11 @@ import java.util.Map;
  */
 public class MeasVector implements Serializable, MeasTypeCons {
 
-    public AVector z;
+    public AVector z; // 量测向量，可能是加了噪声后的值
 
-    public AVector z_estimate = new AVector(0);
+    public AVector z_estimate = new AVector(0); // 估计结果
 
-    public AVector z_true;
+    public AVector z_true; // 真值
 
     public AVector sigma;
 

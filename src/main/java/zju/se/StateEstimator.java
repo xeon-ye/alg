@@ -62,13 +62,14 @@ public class StateEstimator implements SeConstants, MeasTypeCons {
             return;
         }
         int n = clonedIsland.getBuses().size();
+        // 给状态变量赋初值
         if (alg instanceof IpoptSeAlg) {
             int variable_type = ((IpoptSeAlg) alg).getVariable_type();
             switch (variable_type) {
                 case IpoptSeAlg.VARIABLE_UI:
                 case IpoptSeAlg.VARIABLE_U:
                     double[] initialU;
-                    if (variable_type == IpoptSeAlg.VARIABLE_U)
+                    if (variable_type == IpoptSeAlg.VARIABLE_U) // 直角坐标的电压
                         initialU = new double[2 * n];
                     else
                         initialU = new double[4 * n];
@@ -92,7 +93,7 @@ public class StateEstimator implements SeConstants, MeasTypeCons {
                 case IpoptSeAlg.VARIABLE_VTHETA:
                 case IpoptSeAlg.VARIABLE_VTHETA_PQ:
                     double[] vTheta;
-                    if (variable_type == IpoptSeAlg.VARIABLE_VTHETA)
+                    if (variable_type == IpoptSeAlg.VARIABLE_VTHETA) // 极坐标的电压
                         vTheta = new double[n * 2];
                     else
                         vTheta = new double[n * 4];
@@ -118,12 +119,12 @@ public class StateEstimator implements SeConstants, MeasTypeCons {
     public void doSe() {
         startTime = System.currentTimeMillis();
 
-        MeasureUtil.trans(sm, numOpt.getOld2new());
+        MeasureUtil.trans(sm, numOpt.getOld2new()); // 把量测又重新编号为新的编号
         alg.setIsland(clonedIsland);
         alg.setY(Y);
-        alg.setSlackBusNum(clonedIsland.getSlackBusNum());
+        alg.setSlackBusNum(clonedIsland.getSlackBusNum()); // 已经重新编号过
 
-        setAlgInitial();
+        setAlgInitial(); // 给状态变量赋初值
         Map<String, MeasureInfo> origVMeas = sm.getContainer(TYPE_BUS_VOLOTAGE);
         Map<String, MeasureInfo> origPMeas = sm.getContainer(TYPE_BUS_ACTIVE_POWER);
         Map<String, MeasureInfo> origQMeas = sm.getContainer(TYPE_BUS_REACTIVE_POWER);
@@ -136,16 +137,17 @@ public class StateEstimator implements SeConstants, MeasTypeCons {
             objFunc.setPMeasPos(new int[0]);
             objFunc.setQMeas(new MeasureInfo[0]);
             objFunc.setQMeasPos(new int[0]);
+            // 采用VTHETA作为状态变量时，会把sm中对应的量测给抹去
             if (variable_type == IpoptSeAlg.VARIABLE_VTHETA
                     || variable_type == IpoptSeAlg.VARIABLE_VTHETA_PQ) {
                 if (objFunc.getObjType() == SeObjective.OBJ_TYPE_WLS) {
                     //todo; system measure is changed, must pay attention to it.
                     MeasureInfo[] vMeas = new MeasureInfo[origVMeas.size()];
-                    origVMeas.values().toArray(vMeas);
+                    origVMeas.values().toArray(vMeas); // 把origVMeas中的量测排成数组存入vMeas
                     int[] vMeasPos = new int[vMeas.length];
                     for (int i = 0; i < vMeasPos.length; i++)
-                        vMeasPos[i] = Integer.parseInt(vMeas[i].getPositionId()) - 1;
-                    sm.setBus_v(new HashMap<>(0));
+                        vMeasPos[i] = Integer.parseInt(vMeas[i].getPositionId()) - 1; // 在状态变量中的位置
+                    sm.setBus_v(new HashMap<>(0)); // 把节点电压量测抹除
                     objFunc.setVMeas(vMeas);
                     objFunc.setVMeasPos(vMeasPos);
 
@@ -171,17 +173,19 @@ public class StateEstimator implements SeConstants, MeasTypeCons {
                 }
             }
             if (variable_type == IpoptSeAlg.VARIABLE_U
-                    || variable_type == IpoptSeAlg.VARIABLE_UI) {
+                    || variable_type == IpoptSeAlg.VARIABLE_UI) { // 采用直角坐标
                 for (MeasureInfo info : origVMeas.values()) {
                     double v = info.getValue();
-                    info.setValue(v * v);
+                    info.setValue(v * v); // 对于PV节点不平衡量是v * v
                 }
             }
         }
+        // 通过sm获取量测向量
         MeasVector meas = new MeasVectorCreator().getMeasureVector(sm);
         alg.setMeas(meas);
 
         //alg.setPrintPath(false);//show computation details
+        // 初始化目标函数
         if (alg instanceof IpoptSeAlg)
             initialObjFunc(meas, ((IpoptSeAlg) alg).getObjFunc());
 
@@ -355,11 +359,11 @@ public class StateEstimator implements SeConstants, MeasTypeCons {
         clonedIsland = oriIsland.clone();
 
         numOpt.simple(clonedIsland);
-        numOpt.trans(clonedIsland);
+        numOpt.trans(clonedIsland); // 编号
 
         Y.setIsland(clonedIsland);
-        Y.formYMatrix();
-        Y.formConnectedBusCount();
+        Y.formYMatrix(); // 形成导纳矩阵
+        Y.formConnectedBusCount(); // 形成存储各节点所相连节点数量的数组
     }
 }
 

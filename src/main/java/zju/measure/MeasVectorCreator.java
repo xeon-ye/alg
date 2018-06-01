@@ -82,10 +82,10 @@ public class MeasVectorCreator implements MeasTypeCons {
                 switch (type) {
                     case TYPE_BUS_ANGLE:
                         field = "bus_a";
-                        meas.setBus_a_index(index);
+                        meas.setBus_a_index(index); // 先设置index
                         for(int i = index; i < sysMeas.bus_a.size() + index; i++)
                             measTypes[i] = TYPE_BUS_ANGLE;
-                        setMeasValue(field, sysMeas, meas, withPhase, index);
+                        setMeasValue(field, sysMeas, meas, withPhase, index); // 再设置position，以及该类成员变量
                         index += sysMeas.bus_a.size();
                         break;
                     case TYPE_BUS_VOLOTAGE:
@@ -236,9 +236,11 @@ public class MeasVectorCreator implements MeasTypeCons {
         return getMeasureVector(MeasureFileRw.parse(in));
     }
 
+    // 给量测向量赋值
     private void setMeasValue(String field, SystemMeasure sm, MeasVector meas, boolean withPhase, int index) throws IOException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
         Map<String, MeasureInfo> content = null;
         String getter = "get" + field;
+        // 先获取到sm中对应的container放入content
         Method[] methods = sm.getClass().getMethods();
         for (Method m : methods) {
             if (m.getName().equalsIgnoreCase(getter)) {
@@ -247,6 +249,7 @@ public class MeasVectorCreator implements MeasTypeCons {
             }
         }
         assert content != null;
+        // 使用meas中的set方法设置数组
         methods = meas.getClass().getMethods();
         String setter = "set" + field;
         AVector v1 = new AVector(content.size());
@@ -263,6 +266,7 @@ public class MeasVectorCreator implements MeasTypeCons {
                 m.invoke(meas, (Object) v3);
             }
         }
+        // 将content中的信息放入成员变量中
         int i = 0;
         for (MeasureInfo info : content.values()) {
             if (withPhase) {
