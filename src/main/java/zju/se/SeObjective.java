@@ -149,7 +149,7 @@ public class SeObjective {
                     double y1 = 1.0 / (1.0 + Math.exp(-b[i] * (v - a[i])));
                     double y2 = 1.0 / (1.0 + Math.exp(b[i] * (v + a[i])));
                     double y = shortenRate * b[i] * b[i] * (y1 * (1.0 - y1) * (1.0 - 2.0 * y1)
-                            + y2 * (1.0 - y2) * (1.0 - 2.0 * y2)); // 这个方程是对Sigmoid函数求二次偏导
+                            + y2 * (1.0 - y2) * (1.0 - 2.0 * y2));
                     //hessian.addQuick(i, i, obj_factor * y);
                     values[start++] = obj_factor * y;
                 }
