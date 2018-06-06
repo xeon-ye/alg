@@ -335,28 +335,28 @@ public class AvailableCapOptNewTest extends TestCase {
 ////            }
 //        }
 //        System.out.println(time / 5);
-//        model.allMinSwitch();
-//        this.minSwitchResult = model.getOptResult();
-//        for(int i = 0; i < minSwitchResult.getSupplyId().length; i++) {
-//            System.out.println(minSwitchResult.getSupplyId()[i]);
-//            System.out.println(minSwitchResult.getMinSwitch()[i]);
-//            // if(minSwitchResult.getSupplyId()[i] != null) {
-//            for (int j = 0; j < minSwitchResult.getMinSwitch()[i]; j++)
-//                System.out.println(minSwitchResult.getSwitchChanged().get(i)[j]);
-//            //   }
-//        }
+        model.allMinSwitch();
+        this.minSwitchResult = model.getOptResult();
+        for(int i = 0; i < minSwitchResult.getSupplyId().length; i++) {
+            System.out.println(minSwitchResult.getSupplyId()[i]);
+            System.out.println(minSwitchResult.getMinSwitch()[i]);
+            // if(minSwitchResult.getSupplyId()[i] != null) {
+            for (int j = 0; j < minSwitchResult.getMinSwitch()[i]; j++)
+                System.out.println(minSwitchResult.getSwitchChanged().get(i)[j]);
+            //   }
+        }
 
 //        long startT = System.currentTimeMillis();
 //        model.loadMax("5");
 //        System.out.println("Time:");
 //        System.out.println(System.currentTimeMillis() - startT);
 //        System.out.println(model.maxLoad);
-        model.allLoadMax();
-        this.maxLoadResult = model.maxLoadResult;
-        for(int i = 0; i < maxLoadResult.size(); i++) {
-            System.out.println(model.loadNodes.get(i).getId());
-            System.out.println(maxLoadResult.get(model.loadNodes.get(i).getId()));
-        }
+//        model.allLoadMax();
+//        this.maxLoadResult = model.maxLoadResult;
+//        for(int i = 0; i < maxLoadResult.size(); i++) {
+//            System.out.println(model.loadNodes.get(i).getId());
+//            System.out.println(maxLoadResult.get(model.loadNodes.get(i).getId()));
+//        }
     }
 
     //读取各节点带的负载

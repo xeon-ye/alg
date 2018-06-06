@@ -18,7 +18,8 @@ import static zju.dsmodel.IeeeDsInHand.createDs;
 public class LoadTransferOptTest extends TestCase implements DsModelCons {
 
     Map<String, Double> supplyCap = new HashMap<String, Double>();
-    Map<String, Double> load = new HashMap<String, Double>();
+    Map<String, Double> load = new HashMap<>();
+    Map<String, Double> feederCap = new HashMap<>();
     LoadTransferOptResult minSwitchResult;
     Map<String, Double> maxLoadResult;
     Map<String, Double> maxCircuitLoad;
@@ -302,7 +303,7 @@ public class LoadTransferOptTest extends TestCase implements DsModelCons {
         }
     }
 
-    public void testCase4All() throws IOException {
+    public void testCase4All() throws Exception {
         DistriSys testsys;
         String[] supplyID;
         InputStream ieeeFile = this.getClass().getResourceAsStream("/loadtransferfiles/testcase4/graphtestNew.txt");
@@ -324,14 +325,19 @@ public class LoadTransferOptTest extends TestCase implements DsModelCons {
         testsys.setSupplyCns(supplyID);
         testsys.setSupplyCnBaseKv(supplyBaseKv);
 
-        LoadTransferOpt model = new LoadTransferOpt(testsys);
+        LoadTransferOptNew model = new LoadTransferOptNew(testsys);
         String loadsPath = this.getClass().getResource("/loadtransferfiles/testcase4/loads.txt").getPath();
         String supplyCapacityPath = this.getClass().getResource("/loadtransferfiles/testcase4/supplyCapacity.txt").getPath();
+        String feederCapacityPath = this.getClass().getResource("/loadtransferfiles/testcase4/feederCapacity.txt").getPath();
         readSupplyCapacity(supplyCapacityPath);
         readLoads(loadsPath);
+        readFeederCapacity(feederCapacityPath);
         model.setFeederCapacityConst(20000);
         model.setLoad(load);
         model.setSupplyCap(supplyCap);
+        model.setFeederCap(feederCap);
+        model.buildPathes();
+        model.makeFeederCapArray();
         model.allMinSwitch();
         this.minSwitchResult = model.getOptResult();
         for (int i = 0; i < minSwitchResult.getSupplyId().length; i++) {
@@ -356,7 +362,7 @@ public class LoadTransferOptTest extends TestCase implements DsModelCons {
         }
     }
 
-    public void testCase5() {
+    public void testCase5() throws Exception {
         DistriSys testsys;
         String[] supplyID;
 //        for(int i = 1; i < 5; i++) {
@@ -622,19 +628,34 @@ public class LoadTransferOptTest extends TestCase implements DsModelCons {
         String data;
         String[] newdata;
         String supplyId;
-        Double supplyLoad;
+        double supplyLoad;
 
         while ((data = br.readLine()) != null) {
             newdata = data.split(" ", 2);
             supplyId = newdata[0];
-            supplyLoad = new Double(Double.parseDouble(newdata[1]));
+            supplyLoad = Double.parseDouble(newdata[1]);
             supplyCap.put(supplyId, supplyLoad);
+        }
+    }
+
+    //读取馈线容量
+    public void readFeederCapacity(String path) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(path)));
+        String data;
+        String[] newdata;
+        String feederId;
+        double feederCapacity;
+
+        while((data = br.readLine()) != null) {
+            newdata = data.split(" ", 3);
+            feederId = newdata[0] + ";" + newdata[1];
+            feederCapacity = Double.parseDouble(newdata[2]);
+            feederCap.put(feederId, feederCapacity);
         }
     }
 
     /**
      * 导出
-     *
      * @param file 文件(路径+文件名)，文件不存在会自动创建
      * @return
      */

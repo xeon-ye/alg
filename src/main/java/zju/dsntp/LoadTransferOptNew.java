@@ -11,10 +11,6 @@ import zju.devmodel.MapObject;
 import zju.dsmodel.DistriSys;
 import zju.dsmodel.DsConnectNode;
 
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -72,7 +68,7 @@ public class LoadTransferOptNew extends PathBasedModel {
     /**
      * 优化最小开关次数
      */
-    public void doOpt() {
+    public void doOpt() throws Exception {
         UndirectedGraph<DsConnectNode, MapObject> g = sys.getOrigGraph();
         int i, j, k, l;
         double[] feederCapacity = new double[edges.size()];
@@ -735,7 +731,7 @@ public class LoadTransferOptNew extends PathBasedModel {
      *
      * @param node
      */
-    public void loadMax(String node) {
+    public void loadMax(String node) throws Exception {
         int loadIndex;
         int i, j, k, l, endIndex;
         //找到负荷作为变量的节点
@@ -984,8 +980,6 @@ public class LoadTransferOptNew extends PathBasedModel {
      *
      */
     public void loadsMax() {
-        //生成路径
-        buildPathes();
         //负荷的功率，按nodes中的顺序排列
         double[] loadArray = new double[nodes.size()];
         for(int i = 0; i < nodes.size(); i++) {
@@ -1282,8 +1276,6 @@ public class LoadTransferOptNew extends PathBasedModel {
     }
 
     public void loadsMax1() {
-        //生成路径
-        buildPathes();
         //负荷的功率，按nodes中的顺序排列
         double[] loadArray = new double[nodes.size()];
         for(int i = 0; i < nodes.size(); i++) {
@@ -1576,8 +1568,7 @@ public class LoadTransferOptNew extends PathBasedModel {
         }
     }
 
-    public void allMinSwitch() {
-        buildPathes();
+    public void allMinSwitch() throws Exception {
         String[] supplyID = sys.getSupplyCns();
         int supplyNum = supplyStart.length;
         optResult = new LoadTransferOptResult(supplyStart.length, 0);
@@ -1600,8 +1591,7 @@ public class LoadTransferOptNew extends PathBasedModel {
     /**
      * 求所有节点的N-1可装容量
      */
-    public void allLoadMax() {
-        buildPathes();
+    public void allLoadMax() throws Exception {
         String[] supplies = sys.getSupplyCns();
         UndirectedGraph<DsConnectNode, MapObject> g = sys.getOrigGraph();
         maxLoadResult = new HashMap<String, Double>(nodes.size());
@@ -1693,7 +1683,7 @@ public class LoadTransferOptNew extends PathBasedModel {
     /**
      * 节点的非N-1可装容量
      */
-    public void loadMaxN(String node) {
+    public void loadMaxN(String node) throws Exception {
         int loadIndex,endIndex, i, j, k, l, pathOnIndex;
         //电源容量
         String[] supplies = sys.getSupplyCns();
@@ -1773,7 +1763,7 @@ public class LoadTransferOptNew extends PathBasedModel {
     /**
      * 求所有节点的非N-1可装容量
      */
-    public void allLoadMaxN() {
+    public void allLoadMaxN() throws Exception {
         buildPathes();
         String[] supplies = sys.getSupplyCns();
         UndirectedGraph<DsConnectNode, MapObject> g = sys.getOrigGraph();
@@ -1849,89 +1839,6 @@ public class LoadTransferOptNew extends PathBasedModel {
                 if (g.getEdgeSource(edges.get(i)).getId().equals(supplies[j]) || g.getEdgeTarget(edges.get(i)).getId().equals(supplies[j])) {
                     maxCircuitLoad.put(edges.get(i).getId(), minFeederLoadChanged[i]);
 //                        maxCircuitLoad.put(edges.get(i).getId(), feederLoad[i] + minFeederLoadChanged[i]);
-                    break;
-                }
-            }
-        }
-    }
-
-    /**
-     * 读取各节点带的负载
-     * @param loads
-     * @param path  文件路径
-     * @throws IOException
-     */
-    public void readLoads(double[] loads, String path) throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(path)));
-        String data;
-        String[] newdata;
-        String cnId;
-        double cnLoad;
-        int i,j;
-
-        for(i = 1; i <= nodes.size(); i++) {
-            data = br.readLine();
-            newdata = data.split(" ", 2);
-            cnId = newdata[0];
-            cnLoad = Double.parseDouble(newdata[1]);
-            for(j = 0; j < nodes.size(); j++) {
-                if(nodes.get(j).getId().equals(cnId)) {
-                    loads[j] = cnLoad;
-                    break;
-                }
-            }
-        }
-    }
-
-    //读取馈线容量
-    public void readFeederCapacity(double[] feederCapacity, String path) throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(path)));
-        String data;
-        String[] newdata;
-        String cnId1, cnId2;
-        double feederLoad;
-        MapObject edge;
-        DsConnectNode cn1, cn2;
-        UndirectedGraph<DsConnectNode, MapObject> g = sys.getOrigGraph();
-        int i;
-
-        while((data = br.readLine()) != null) {
-            newdata = data.split(" ", 3);
-            cnId1 = newdata[0];
-            cnId2 = newdata[1];
-            feederLoad = Double.parseDouble(newdata[2]);
-            cn1 = sys.getCns().get(cnId1);
-            cn2 = sys.getCns().get(cnId2);
-            if(cn1 == null || cn2 == null) {
-                System.out.println("Wrong!");
-                continue;
-            }
-            edge = g.getEdge(cn1, cn2);
-            for(i = 0; i < edges.size(); i++) {
-                if(edges.get(i).equals(edge)) {
-                    feederCapacity[i] = feederLoad;
-                    break;
-                }
-            }
-        }
-    }
-
-    //读取电源容量
-    public void readSupplyCapacity(double[] supplyCapacity, String path) throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(path)));
-        String data;
-        String[] newdata;
-        String supplyId;
-        double supplyLoad;
-        String[] supplies = sys.getSupplyCns();
-        int i;
-        while((data = br.readLine()) != null) {
-            newdata = data.split(" ", 2);
-            supplyId = newdata[0];
-            supplyLoad = Double.parseDouble(newdata[1]);
-            for(i = 0; i < supplies.length; i++) {
-                if(supplies[i].equals(supplyId)) {
-                    supplyCapacity[i] = supplyLoad;
                     break;
                 }
             }

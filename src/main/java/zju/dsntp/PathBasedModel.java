@@ -46,7 +46,7 @@ public class PathBasedModel {
     }
 
     //重复搜索太多次，待优化
-    public void buildPathes() {
+    public void buildPathes() throws Exception {
         String[] supplies = sys.getSupplyCns();
         UndirectedGraph<DsConnectNode, MapObject> g = sys.getOrigGraph();
         //用于深度优先搜索的栈
@@ -174,7 +174,7 @@ public class PathBasedModel {
 
     //以某个结点为终点的所有路径
     //path按照cn顺序存入，cn为nodes中的顺序
-    public void buildCnsPathes() {
+    public void buildCnsPathes() throws Exception {
         String[] supplies = sys.getSupplyCns();
         UndirectedGraph<DsConnectNode, MapObject> g = sys.getOrigGraph();
         cnpathes = new ArrayList<>(pathes.size());
@@ -220,7 +220,7 @@ public class PathBasedModel {
 
 
     //通过某条边的所有路径
-    public void buildedgePathes() {
+    public void buildedgePathes() throws Exception {
         UndirectedGraph<DsConnectNode, MapObject> g = sys.getOrigGraph();
         edgepathes = new ArrayList<>();//todo: not efficient
         edgepathesIndex = new ArrayList<>();//todo: not efficient
@@ -249,7 +249,7 @@ public class PathBasedModel {
     }
 
     //将图中除电源以外的节点和所有的边分别存入数组中
-    public void buildEdgesAndNodes() {
+    public void buildEdgesAndNodes() throws Exception {
         String[] supplies = sys.getSupplyCns();
         UndirectedGraph<DsConnectNode, MapObject> g = sys.getOrigGraph();
         edges = new ArrayList<>();//todo: not efficient
