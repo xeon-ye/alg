@@ -61,9 +61,6 @@ public class LoadTransferOpt extends PathBasedModel {
      * 优化最小开关次数
      */
     public void doOpt() {
-        //生成路径
-        buildPathes();
-
         UndirectedGraph<DsConnectNode, MapObject> g = sys.getOrigGraph();
 
         int i, j, k, l;
@@ -422,9 +419,6 @@ public class LoadTransferOpt extends PathBasedModel {
      * @param node
      */
     public void loadMax(String node) {
-        //生成路径
-        buildPathes();
-
         int loadIndex;
         int i, j, k, l, endIndex;
         //找到负荷作为变量的节点
@@ -725,8 +719,6 @@ public class LoadTransferOpt extends PathBasedModel {
      *
      */
     public void loadsMax() {
-        //生成路径
-        buildPathes();
         //负荷的功率，按nodes中的顺序排列
         double[] loadArray = new double[nodes.size()];
         for(int i = 0; i < nodes.size(); i++) {
@@ -1023,8 +1015,6 @@ public class LoadTransferOpt extends PathBasedModel {
     }
 
     public void loadsMax1() {
-        //生成路径
-        buildPathes();
         //负荷的功率，按nodes中的顺序排列
         double[] loadArray = new double[nodes.size()];
         for(int i = 0; i < nodes.size(); i++) {
@@ -1323,7 +1313,7 @@ public class LoadTransferOpt extends PathBasedModel {
      *
      * @param
      */
-    public void calcTSC() {
+    public void calcTSC() throws Exception {
         //生成路径
         buildPathes();
 
@@ -1875,7 +1865,6 @@ public class LoadTransferOpt extends PathBasedModel {
     }
 
     public void allMinSwitch() {
-        buildPathes();
         String[] supplyID = sys.getSupplyCns();
         int supplyNum = supplyStart.length;
         optResult = new LoadTransferOptResult(supplyStart.length, 0);
@@ -1899,7 +1888,6 @@ public class LoadTransferOpt extends PathBasedModel {
      * 求所有节点的N-1可装容量
      */
     public void allLoadMax() {
-        buildPathes();
         String[] supplies = sys.getSupplyCns();
         UndirectedGraph<DsConnectNode, MapObject> g = sys.getOrigGraph();
         maxLoadResult = new HashMap<String, Double>(nodes.size());
@@ -2073,7 +2061,6 @@ public class LoadTransferOpt extends PathBasedModel {
      * 求所有节点的非N-1可装容量
      */
     public void allLoadMaxN() {
-        buildPathes();
         String[] supplies = sys.getSupplyCns();
         UndirectedGraph<DsConnectNode, MapObject> g = sys.getOrigGraph();
         maxLoadResult = new HashMap<String, Double>(nodes.size());

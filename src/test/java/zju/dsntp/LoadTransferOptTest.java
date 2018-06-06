@@ -81,7 +81,7 @@ public class LoadTransferOptTest extends TestCase implements DsModelCons {
         model.loadMax("L1");
     }
 
-    public void testCase12() throws IOException {
+    public void testCase12() throws Exception {
         DistriSys testsys;
         String[] supplyID;
 
