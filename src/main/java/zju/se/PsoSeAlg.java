@@ -11,8 +11,6 @@ import zju.measure.MeasTypeCons;
  */
 public class PsoSeAlg extends AbstractSeAlg implements MeasTypeCons {
 
-    private double tol_p = 0.005, tol_q = 0.005;
-
     @Override
     public AVector getFinalVTheta() {
         return null;
@@ -21,21 +19,5 @@ public class PsoSeAlg extends AbstractSeAlg implements MeasTypeCons {
     @Override
     public void doSeAnalyse() {
 
-    }
-
-    public double getTol_p() {
-        return tol_p;
-    }
-
-    public void setTol_p(double tol_p) {
-        this.tol_p = tol_p;
-    }
-
-    public double getTol_q() {
-        return tol_q;
-    }
-
-    public void setTol_q(double tol_q) {
-        this.tol_q = tol_q;
     }
 }

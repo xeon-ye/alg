@@ -37,8 +37,6 @@ public class IpoptSeAlg extends AbstractSeAlg implements MeasTypeCons, IpoptMode
 
     protected double[] rcCurrent;
 
-    protected double tol_p = 0.005, tol_q = 0.005;
-
     protected SeObjective objFunc = new SeObjective();
 
     public void initial() {
@@ -565,22 +563,6 @@ public class IpoptSeAlg extends AbstractSeAlg implements MeasTypeCons, IpoptMode
 
     public int getNele_hess() {
         return nele_hess;
-    }
-
-    public double getTol_p() {
-        return tol_p;
-    }
-
-    public void setTol_p(double tol_p) {
-        this.tol_p = tol_p;
-    }
-
-    public double getTol_q() {
-        return tol_q;
-    }
-
-    public void setTol_q(double tol_q) {
-        this.tol_q = tol_q;
     }
 
     public int getVariable_type() {

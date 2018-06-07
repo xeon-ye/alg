@@ -22,7 +22,7 @@ import java.util.Map;
 public class SeTest_IeeeCase extends TestCase implements MeasTypeCons {
 
     StateEstimator se;
-    IpoptSeAlg alg;
+    AbstractSeAlg alg;
 
     public SeTest_IeeeCase(String name) {
         super(name);
@@ -172,7 +172,8 @@ public class SeTest_IeeeCase extends TestCase implements MeasTypeCons {
         se.setFlatStart(true); // 平启动
 
         long start = System.currentTimeMillis();
-        alg.getObjFunc().setObjType(SeObjective.OBJ_TYPE_WLS); // 设置目标函数
+        if (alg instanceof IpoptSeAlg)
+            ((IpoptSeAlg) alg).getObjFunc().setObjType(SeObjective.OBJ_TYPE_WLS); // 设置目标函数
         SeResultInfo r;
 
         //下面这一段测试传统最小二乘的效果
@@ -185,7 +186,7 @@ public class SeTest_IeeeCase extends TestCase implements MeasTypeCons {
         //printZeroInjectionDelta(ref, r);
 
         //下面这一段测试所有模型的最小二乘效果
-        if(ref != null) // ref是潮流计算的结果
+        if (ref != null) // ref是潮流计算的结果
             dealZeroInjection(sm, ref, isZeroInjection); // 将零注入功率节点的节点注入功率量测从sm中剔除
         for (int variable_type : variables_types) {
             alg.setVariable_type(variable_type);
@@ -331,7 +332,7 @@ public class SeTest_IeeeCase extends TestCase implements MeasTypeCons {
 
     public static void doSeStudy(IEEEDataIsland island, double tol_p, double tol_q) {
         SeTest_IeeeCase seTest = new SeTest_IeeeCase("do 20 time study.");
-        IpoptSeAlg alg = seTest.alg;
+        AbstractSeAlg alg = seTest.alg;
         alg.setTol_p(tol_p);
         alg.setTol_q(tol_q);
         alg.setPrintPath(false);
@@ -358,7 +359,7 @@ public class SeTest_IeeeCase extends TestCase implements MeasTypeCons {
         return se;
     }
 
-    public IpoptSeAlg getAlg() {
+    public AbstractSeAlg getAlg() {
         return alg;
     }
 }
