@@ -38,7 +38,7 @@ class PSOInTSC {
      * @param dimen 粒子维数
      * @param maxTime 最大迭代次数
      */
-    public void initial(int amount,int dimen, int maxTime) {
+    public void initial(int amount,int dimen, int maxTime) throws Exception {
         //修改参数
         //类的静态成员的初始化
         ParticleInTSC.setC1(2);

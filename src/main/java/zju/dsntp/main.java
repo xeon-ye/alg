@@ -6,7 +6,7 @@ import java.io.IOException;
  * Created by meditation on 2017/12/14.
  */
 public class main {
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws Exception {
         PSOInTSC psoInTSC = new PSOInTSC();
         psoInTSC.initial(20,44,50);
         psoInTSC.run();

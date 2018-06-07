@@ -119,7 +119,7 @@ class ParticleInRoad {
     /**
      * 评估函数值,同时记录历史最优位置
      */
-    public void evaluateFitness() {
+    public void evaluateFitness() throws Exception {
         //适应度的计算公式
         fitness = 0;
         //廊道费用

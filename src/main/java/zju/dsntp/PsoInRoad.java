@@ -42,7 +42,7 @@ class PsoInRoad {
     //粒子维度
     private int dimension;
 
-    public void initial(int amount, int dimen) {
+    public void initial(int amount, int dimen) throws Exception {
         //修改参数
         //类的静态成员的初始化
         ParticleInRoad.setC1(2);
@@ -98,7 +98,7 @@ class PsoInRoad {
     /**
      * 粒子群的运行
      */
-    public void run() throws IOException {
+    public void run() throws Exception {
         int runTimes = 1;
         int index;
         //设置最大迭代次数

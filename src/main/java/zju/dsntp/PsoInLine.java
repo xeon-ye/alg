@@ -38,7 +38,7 @@ class PsoInLine {
     DistriSys distriSys;
     LoadTransferOpt loadTransferOpt;
 
-    public void initial(int amount, DistriSys dis) {
+    public void initial(int amount, DistriSys dis) throws Exception {
         //修改参数
         //类的静态成员的初始化
         ParticleInLine.setC1(2);

@@ -61,7 +61,7 @@ class ParticleInTSC {
      * @param dimen 表示粒子的维数,即可安装量测的位置
      * @return
      */
-    public void initial(int dimen) {
+    public void initial(int dimen) throws Exception {
         dimension = dimen;
         position = new double[dimension];
         velocity = new double[dimension];

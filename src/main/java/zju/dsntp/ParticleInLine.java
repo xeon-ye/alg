@@ -81,7 +81,7 @@ class ParticleInLine {
      *
      * @param dis 表示粒子的维数,即可安装量测的位置
      */
-    public void initial(DistriSys dis) {
+    public void initial(DistriSys dis) throws Exception {
         distriSys = dis.clone();
         //搜索路径
         loadTransferOpt = new LoadTransferOpt(distriSys);
@@ -211,8 +211,8 @@ class ParticleInLine {
 //        String[] necessaryLoads ={"L801", "L802", "L803","L804","L805","L806","L807","L808","L809","L810",
 //                                    "L811", "L812", "L813","L814","L815","L816","L817","L818","L819","L820",
 //                                    "L821", "L822", "L823","L824","L825","L826","L827","L828","L829","L830","L831"};
-        String[] necessaryLoads = { "L801", "L802", "L803","L804","L805","L806","L807","L808","L809","L810",
-                "L811", "L812", "L813","L814","L815","L816","L817","L818","L819","L820", "L821"};
+        String[] necessaryLoads = {"L801", "L802", "L803", "L804", "L805", "L806", "L807", "L808", "L809", "L810",
+                "L811", "L812", "L813", "L814", "L815", "L816", "L817", "L818", "L819", "L820", "L821"};
 
         boolean isPassed = judgeFeasibility(position, necessaryLoads);
         if (!isPassed) {
