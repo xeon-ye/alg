@@ -1597,7 +1597,12 @@ public class LoadTransferOptNew extends PathBasedModel {
         maxLoadResult = new HashMap<String, Double>(nodes.size());
 //        boolean isConvergent = true;
         for(int i = 0; i < nodes.size(); i++) {
-            loadMax(nodes.get(i).getId());
+            try {
+                loadMax(nodes.get(i).getId());
+            } catch (Exception e) {
+                e.printStackTrace();
+                return;
+            }
 //            System.out.println(load.get(load.get(i).));
             System.out.printf("The max load in node %s is: %.2f\n", nodes.get(i).getId(), maxLoad);
             maxLoadResult.put(nodes.get(i).getId(), maxLoad);
