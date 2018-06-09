@@ -1,16 +1,18 @@
 package zju.pso;
 
-/* author: gandhi - gandhi.mtm [at] gmail [dot] com - Depok, Indonesia */
-
-// just a simple utility class to find a minimum position on a list
-
+/**
+ * @Description: 工具类
+ * @Author: Fang Rui
+ * @Date: 2018/6/7
+ * @Time: 17:43
+ */
 public class PsoUtil {
 
     /**
-     * 找到最优的粒子
+     * 找到数组中的最小元素
      *
-     * @param list 适应度值列表
-     * @return 适应度值最小元素的下表
+     * @param list 数组
+     * @return 下标
      */
     public static int getMinPos(double[] list) {
         int pos = 0;
@@ -19,6 +21,33 @@ public class PsoUtil {
             if (list[i] < minValue) {
                 pos = i;
                 minValue = list[i];
+            }
+        }
+        return pos;
+    }
+
+    /**
+     * 找到指定元素中的最小元素
+     * @param list 数组
+     * @param feasibleList 可行序列
+     * @param isFeasible 是否可行
+     * @return 下标
+     */
+    public static int getMinPos(double[] list, boolean[] feasibleList, boolean isFeasible) {
+        int pos = -1;
+        double minValue = 0;
+        assert list.length == feasibleList.length;
+        for (int i = 0; i < list.length; i++) {
+            if (!feasibleList[i] && isFeasible) // 当两者不一致时，跳过这次循环
+                continue;
+            if (pos == -1) {
+                pos = i;
+                minValue = list[i];
+            } else {
+                if (list[i] < minValue) {
+                    pos = i;
+                    minValue = list[i];
+                }
             }
         }
         return pos;
@@ -46,7 +75,7 @@ public class PsoUtil {
      * @param currentViolation 当前不等式偏差
      * @param dimension        维度
      */
-    public static void maxViolationArray(double[] maxViolation, double[] currentViolation, int dimension) {
+    public static synchronized void maxViolationArray(double[] maxViolation, double[] currentViolation, int dimension) {
         for (int i = 0; i < dimension; i++) {
             if (currentViolation[i] > maxViolation[i])
                 maxViolation[i] = currentViolation[i];
@@ -64,6 +93,9 @@ public class PsoUtil {
     public static double violationFitness(double[] maxViolation, double[] constrViolation, int dimension) {
         double fitness = 0;
         for (int i = 0; i < dimension; i++) {
+            // 如果第i个分量在可行域内，直接跳到下一个分量。为了防止0/0的情况
+            if (constrViolation[i] <= 0)
+                continue;
             fitness += constrViolation[i] / maxViolation[i];
         }
         return fitness;

@@ -7,10 +7,7 @@ package zju.pso;
  * @Time: 16:58
  */
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.Vector;
+import java.util.*;
 
 public class PsoProcess implements PsoConstants {
     private Vector<Particle> swarm = new Vector<>();
@@ -19,14 +16,15 @@ public class PsoProcess implements PsoConstants {
     private double gBest; // 全局最优适应度值
     private Location gBestLocation; // 全局最优位置
     private double[] fitnessValueList; // 各粒子当前适应度值
-    private boolean[] feasibleList; // 各粒子是否在可行域内
-    private boolean hasFeasibleOne; // 当前是否存在粒子在可行域内
-    private double[] maxViolation; // 本次迭代过程中的各不等式最大偏差
+    private boolean[] feasibleList; // 各粒子是否曾经在可行域内
+    private boolean hasFeasibleOne = false; // 当前是否存在粒子在可行域内
+    private boolean isGBestfeasible = false; // gBest是否在可行域内
+    private double[] maxViolation; // 历史最大偏差
 
     private OptModel optModel;
     private final int swarmSize;
 
-    Random generator = new Random();
+    private Random generator = new Random();
 
     public PsoProcess(OptModel optModel, int swarmSize) {
         this.optModel = optModel;
@@ -35,23 +33,23 @@ public class PsoProcess implements PsoConstants {
         this.feasibleList = new boolean[swarmSize];
         this.pBest = new double[swarmSize];
         this.maxViolation = new double[optModel.getDimentions()];
-        this.hasFeasibleOne = false;
     }
 
-    public void execute() {
+    public Location execute() {
         initializeSwarm();
 
         int iterNum = 0;
         int n = optModel.getDimentions();
         int maxIter = optModel.getMaxIter();
 
-        double err = 9999;
+        double tol = 9999;
         double w; // 惯性权重
 
-        while (iterNum < maxIter && err > optModel.getTol()) {
+        while (iterNum < maxIter && tol >= 0) {
 
             w = W_UPPERBOUND - (((double) iterNum) / maxIter) * (W_UPPERBOUND - W_LOWERBOUND); // 惯性逐渐减小
 
+            hasFeasibleOne = false; // 先把hasFeasibleOne默认赋值为false
             for (int i = 0; i < swarmSize; i++) {
                 double r1 = generator.nextDouble();
                 double r2 = generator.nextDouble();
@@ -75,15 +73,36 @@ public class PsoProcess implements PsoConstants {
                 }
                 Location loc = new Location(newLoc);
                 p.setLocation(loc);
-            }
 
-            // 步骤三：更新pBest
-            for (int i = 0; i < swarmSize; i++) {
-                // FIXME: 2018/6/8 未完成
+                // 步骤三：更新pBest
                 // 先计算约束
-                double[] constrValueList = optModel.evalConstr(swarm.get(i).getLocation());
-                if (PsoUtil.isFeasible(constrValueList)) {
+                double[] constrViolation = optModel.evalConstr(loc);
+                loc.setConstrViolation(constrViolation);
 
+                boolean isFeasible = PsoUtil.isFeasible(constrViolation);
+                // 当前粒子进入可行域但是之前不在可行域内
+                if (isFeasible && !feasibleList[i]) {
+                    feasibleList[i] = true;
+                    fitnessValueList[i] = optModel.evalObj(loc);
+                    pBest[i] = fitnessValueList[i];
+                    pBestLocation.set(i, loc);
+                    hasFeasibleOne = true;
+                } else if (isFeasible && feasibleList[i]) {
+                    fitnessValueList[i] = optModel.evalObj(loc);
+                    if (fitnessValueList[i] < pBest[i]) {
+                        pBest[i] = fitnessValueList[i];
+                        pBestLocation.set(i, loc);
+                    }
+                    hasFeasibleOne = true;
+                } else if (!isFeasible && !feasibleList[i]) {
+                    PsoUtil.maxViolationArray(maxViolation, constrViolation, n);
+                }
+            }
+            for (int i = 0; i < swarmSize; i++) {
+                // 如果粒子不在可行域内就计算适应度值
+                if (!feasibleList[i]) {
+                    fitnessValueList[i] = PsoUtil.violationFitness(maxViolation, swarm.get(i).getLocation().getConstrViolation(), n);
+                    pBest[i] = PsoUtil.violationFitness(maxViolation, pBestLocation.get(i).getLoc(), n);// 基值发生变化，pBest也要重算
                     if (fitnessValueList[i] < pBest[i]) {
                         pBest[i] = fitnessValueList[i];
                         pBestLocation.set(i, swarm.get(i).getLocation());
@@ -92,32 +111,48 @@ public class PsoProcess implements PsoConstants {
             }
 
             // 步骤四：更新gBest
-            int bestParticleIndex = PsoUtil.getMinPos(fitnessValueList);
-            if (iterNum == 0 || fitnessValueList[bestParticleIndex] < gBest) {
+            if (isGBestfeasible && hasFeasibleOne) { // 都在可行域内
+                int bestParticleIndex = PsoUtil.getMinPos(fitnessValueList, feasibleList, true);
+                assert bestParticleIndex != -1;
+                if (fitnessValueList[bestParticleIndex] < gBest) {
+                    gBest = fitnessValueList[bestParticleIndex];
+                    gBestLocation = swarm.get(bestParticleIndex).getLocation();
+                }
+            } else if (!isGBestfeasible && hasFeasibleOne) { // 之前不在现在在
+                isGBestfeasible = true;
+                int bestParticleIndex = PsoUtil.getMinPos(fitnessValueList, feasibleList, true);
+                assert bestParticleIndex != -1;
                 gBest = fitnessValueList[bestParticleIndex];
                 gBestLocation = swarm.get(bestParticleIndex).getLocation();
+            } else if (!isGBestfeasible && !hasFeasibleOne) { // 都不在
+                int bestParticleIndex = PsoUtil.getMinPos(fitnessValueList, feasibleList, false);
+                assert bestParticleIndex != -1;
+                gBest = PsoUtil.violationFitness(maxViolation, gBestLocation.getLoc(), n);// 基值发生变化，gBest也要重算
+                if (fitnessValueList[bestParticleIndex] < gBest) {
+                    gBest = fitnessValueList[bestParticleIndex];
+                    gBestLocation = swarm.get(bestParticleIndex).getLocation();
+                }
             }
 
-            err = optModel.evalObj(gBestLocation) - 0; // minimizing the functions means it's getting closer to 0
+            // 如果全局粒子在可行域内，如果已经达到模型的要求，是一个足够好的适应度值那么就结束寻优
+            if (isGBestfeasible)
+                tol = gBest - optModel.getTolFitness(); // minimizing the functions means it's getting closer to 0
 
             System.out.println("ITERATION " + iterNum + ": ");
-            System.out.println("     Best X: " + gBestLocation.getLoc()[0]);
-            System.out.println("     Best Y: " + gBestLocation.getLoc()[1]);
-            System.out.println("     Value: " + optModel.evalObj(gBestLocation));
+            System.out.println("     Best Location: " + Arrays.toString(gBestLocation.getLoc()));
+            System.out.println("     Value: " + gBest);
 
             iterNum++;
-            updateFitnessList();
         }
 
-        System.out.println("\nSolution found at iteration " + (iterNum - 1) + ", the solutions is:");
-        System.out.println("     Best X: " + gBestLocation.getLoc()[0]);
-        System.out.println("     Best Y: " + gBestLocation.getLoc()[1]);
+        System.out.println("\nSolution found at iteration " + iterNum + ", the solutions is:");
+        System.out.println("     Best Location: " + Arrays.toString(gBestLocation.getLoc()));
+        return gBestLocation;
     }
 
     // 初始化粒子群
     private void initializeSwarm() {
         Particle p;
-        List<double[]> constrViolationList = new ArrayList<>();
         // 在粒子已知可行范围内初始化粒子群
         int n = optModel.getDimentions();
         double[] minLoc = optModel.getMinLoc();
@@ -126,7 +161,7 @@ public class PsoProcess implements PsoConstants {
         double[] maxVel = optModel.getMaxVel();
 
         for (int i = 0; i < swarmSize; i++) {
-            p = new Particle(optModel);
+            p = new Particle();
 
             double[] loc = new double[n];
             double[] vel = new double[n];
@@ -146,11 +181,11 @@ public class PsoProcess implements PsoConstants {
 
             // 获得约束向量
             double[] constrViolation = optModel.evalConstr(location);
-            constrViolationList.add(constrViolation);
+            location.setConstrViolation(constrViolation);
             // 如果是满足约束的粒子
             if (PsoUtil.isFeasible(constrViolation)) {
                 feasibleList[i] = true;
-                fitnessValueList[i] = p.getFitnessValue();
+                fitnessValueList[i] = optModel.evalObj(location);
                 pBest[i] = fitnessValueList[i];
                 if (hasFeasibleOne) {
                     if (gBest > pBest[i]) {
@@ -162,7 +197,7 @@ public class PsoProcess implements PsoConstants {
                     gBestLocation = swarm.get(i).getLocation();
                     hasFeasibleOne = true;
                 }
-
+                isGBestfeasible = true;
             } else {
                 feasibleList[i] = false;
                 PsoUtil.maxViolationArray(maxViolation, constrViolation, n);
@@ -173,7 +208,7 @@ public class PsoProcess implements PsoConstants {
         for (int i = 0; i < swarmSize; i++) {
             // 如果粒子不在可行域内就计算适应度值
             if (!feasibleList[i]) {
-                fitnessValueList[i] = PsoUtil.violationFitness(maxViolation, constrViolationList.get(i), n);
+                fitnessValueList[i] = PsoUtil.violationFitness(maxViolation, swarm.get(i).getLocation().getConstrViolation(), n);
                 pBest[i] = fitnessValueList[i];
             }
         }
@@ -189,10 +224,8 @@ public class PsoProcess implements PsoConstants {
         }
     }
 
-    // 更新粒子群的适应度值
-    public void updateFitnessList() {
-        for (int i = 0; i < swarmSize; i++) {
-            fitnessValueList[i] = swarm.get(i).getFitnessValue();
-        }
+    // 获得最优情况下的适应度值
+    public double getgBest() {
+        return gBest;
     }
 }

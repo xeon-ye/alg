@@ -57,6 +57,6 @@ public interface OptModel {
     /**
      * @return 收敛精度
      */
-    double getTol();
+    double getTolFitness();
 
 }

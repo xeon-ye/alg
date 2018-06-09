@@ -1,8 +1,11 @@
 package zju.pso;
 
-/* author: gandhi - gandhi.mtm [at] gmail [dot] com - Depok, Indonesia */
-
-// bean class to represent velocity
+/**
+ * @Description: 粒子速度
+ * @Author: Fang Rui
+ * @Date: 2018/6/7
+ * @Time: 17:43
+ */
 
 public class Velocity {
     // store the Velocity in an array to accommodate multi-dimensional problem space

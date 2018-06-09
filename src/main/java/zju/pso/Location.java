@@ -1,12 +1,16 @@
 package zju.pso;
 
-/* author: gandhi - gandhi.mtm [at] gmail [dot] com - Depok, Indonesia */
-
-// bean class to represent location
+/**
+ * @Description: 粒子位置
+ * @Author: Fang Rui
+ * @Date: 2018/6/7
+ * @Time: 17:43
+ */
 
 public class Location {
     // store the Location in an array to accommodate multi-dimensional problem space
     private double[] loc;
+    private double[] constrViolation;
 
     public Location(double[] loc) {
         super();
@@ -21,4 +25,11 @@ public class Location {
         this.loc = loc;
     }
 
+    public double[] getConstrViolation() {
+        return constrViolation;
+    }
+
+    public void setConstrViolation(double[] constrViolation) {
+        this.constrViolation = constrViolation;
+    }
 }

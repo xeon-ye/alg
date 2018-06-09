@@ -1,9 +1,11 @@
 package zju.pso;
 
-/* author: gandhi - gandhi.mtm [at] gmail [dot] com - Depok, Indonesia */
-
-// this is an interface to keep the configuration for the PSO
-// you can modify the value depends on your needs
+/**
+ * @Description: 常量接口
+ * @Author: Fang Rui
+ * @Date: 2018/6/7
+ * @Time: 17:43
+ */
 
 public interface PsoConstants {
     int SWARM_SIZE = 30;

@@ -1,15 +1,16 @@
 package zju.pso;
 
+/**
+ * @Description: 粒子类
+ * @Author: Fang Rui
+ * @Date: 2018/6/7
+ * @Time: 17:43
+ */
+
 public class Particle {
-    private double fitnessValue;
     private Velocity velocity;
     private Location location; // 位置就是粒子对应状态向量的值
 
-    OptModel optModel;
-
-    public Particle(OptModel optModel) {
-        this.optModel = optModel;
-    }
 
     public Velocity getVelocity() {
         return velocity;
@@ -27,9 +28,4 @@ public class Particle {
         this.location = location;
     }
 
-    // 根据当前位置计算适应度值
-    public double getFitnessValue() {
-        fitnessValue = optModel.evalObj(location);
-        return fitnessValue;
-    }
 }
