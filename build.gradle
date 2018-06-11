@@ -1,7 +1,7 @@
 apply plugin: 'java'
 
 group = 'cn.zju'
-version = '2.1.1-rc21'
+version = '2.1.1-rc22'
 
 // 1.中心库
 repositories {

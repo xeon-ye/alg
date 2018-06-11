@@ -2,6 +2,7 @@ package zju.dsmodel;
 
 import zju.devmodel.MapObject;
 
+import java.io.IOException;
 import java.io.InputStream;
 
 /**
@@ -35,8 +36,12 @@ public class IeeeDsInHand implements DsModelCons {
     public final static DistriSys FEEDER8500;
 
     static {
-        FEEDER_CONF.readImpedanceConf(IeeeDsInHand.class.getResourceAsStream("/dsieee/common/feederconfig.txt"));
-        FEEDER_CONF_CASE8500.readImpedanceConf(IeeeDsInHand.class.getResourceAsStream("/dsieee/common/feederconfig8500.txt"));
+        try {
+            FEEDER_CONF.readImpedanceConf(IeeeDsInHand.class.getResourceAsStream("/dsieee/common/feederconfig.txt"));
+            FEEDER_CONF_CASE8500.readImpedanceConf(IeeeDsInHand.class.getResourceAsStream("/dsieee/common/feederconfig8500.txt"));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         InputStream ieeeFile = IeeeDsInHand.class.getResourceAsStream("/dsieee/case4/case4_D-D_Bload.txt");
         FEEDER4_DD_B = createDs(ieeeFile, "1", 12.47 / sqrt3);

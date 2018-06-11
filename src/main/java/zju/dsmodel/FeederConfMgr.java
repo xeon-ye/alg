@@ -10,7 +10,7 @@ import java.util.Map;
  * Created by IntelliJ IDEA.
  *
  * @author Dong Shufeng
- *         Date: 2010-4-22
+ * Date: 2010-4-22
  */
 public class FeederConfMgr implements Serializable, DsModelCons {
     private transient static Logger log = Logger.getLogger(FeederConfMgr.class);
@@ -81,7 +81,7 @@ public class FeederConfMgr implements Serializable, DsModelCons {
         calPara(id, length, unit, 1000.0, 1.0, feeder);
     }
 
-    public void readImpedanceConf(String f) {
+    public void readImpedanceConf(String f) throws Exception {
         try {
             readImpedanceConf(new FileInputStream(f));
         } catch (FileNotFoundException e) {
@@ -89,7 +89,7 @@ public class FeederConfMgr implements Serializable, DsModelCons {
         }
     }
 
-    public void readImpedanceConf(File f) {
+    public void readImpedanceConf(File f) throws Exception {
         try {
             readImpedanceConf(new FileInputStream(f));
         } catch (FileNotFoundException e) {
@@ -105,49 +105,45 @@ public class FeederConfMgr implements Serializable, DsModelCons {
         this.lengthUnit = lengthUnit;
     }
 
-    public void readImpedanceConf(InputStream stream) {
-        try {
-            zRealPerLen.clear();
-            zImagPerLen.clear();
-            bPerLen.clear();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
-            String str;
-            setLengthUnit(reader.readLine().trim());
-            while ((str = reader.readLine()) != null) {
-                if (str.startsWith("#"))
-                    continue;
-                if (str.equals(""))
-                    continue;
-                double[][] real = new double[3][3];
-                double[][] imag = new double[3][3];
-                double[][] b = new double[3][3];
-                zRealPerLen.put(str, real);
-                zImagPerLen.put(str, imag);
-                bPerLen.put(str, b);
+    public void readImpedanceConf(InputStream stream) throws Exception {
+        zRealPerLen.clear();
+        zImagPerLen.clear();
+        bPerLen.clear();
+        BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+        String str;
+        setLengthUnit(reader.readLine().trim());
+        while ((str = reader.readLine()) != null) {
+            if (str.startsWith("#"))
+                continue;
+            if (str.equals(""))
+                continue;
+            double[][] real = new double[3][3];
+            double[][] imag = new double[3][3];
+            double[][] b = new double[3][3];
+            zRealPerLen.put(str, real);
+            zImagPerLen.put(str, imag);
+            bPerLen.put(str, b);
 
-                String[] s = new String[6];
-                for (int i = 0; i < s.length; i++)
-                    s[i] = reader.readLine();
-                for (int i = 0; i < 3; i++) {
-                    real[i] = new double[3];
-                    String[] ss = s[i].split("\t");
-                    for (int j = 0; j < 3; j++) {
-                        real[i][j] = Double.parseDouble(ss[2 * j]);
-                        imag[i][j] = Double.parseDouble(ss[2 * j + 1]);
-                    }
-                }
-                for (int i = 0; i < 3; i++) {
-                    String[] ss = s[i + 3].split("\t");
-                    for (int j = 0; j < 3; j++) {
-                        b[i][j] = Double.parseDouble(ss[j]);
-                    }
+            String[] s = new String[6];
+            for (int i = 0; i < s.length; i++)
+                s[i] = reader.readLine();
+            for (int i = 0; i < 3; i++) {
+                real[i] = new double[3];
+                String[] ss = s[i].split("\t");
+                for (int j = 0; j < 3; j++) {
+                    real[i][j] = Double.parseDouble(ss[2 * j]);
+                    imag[i][j] = Double.parseDouble(ss[2 * j + 1]);
                 }
             }
-            reader.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-            log.warn(e);
+            for (int i = 0; i < 3; i++) {
+                String[] ss = s[i + 3].split("\t");
+                for (int j = 0; j < 3; j++) {
+                    b[i][j] = Double.parseDouble(ss[j]);
+                }
+            }
         }
+        reader.close();
+
     }
 
     public Map<String, double[][]> getzRealPerLen() {

@@ -176,7 +176,7 @@ public class DsDeviceParser implements DsModelCons {
             island.setRegulators(regulators);
             island.setDispersedGens(dgs);
             return island;
-        } catch (IOException e) {
+        } catch (Exception e) {
             log.error("IO exception occured when trying to parse ieee data file!");
             return null;
         }
