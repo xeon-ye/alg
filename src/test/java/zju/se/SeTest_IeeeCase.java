@@ -174,6 +174,9 @@ public class SeTest_IeeeCase extends TestCase implements MeasTypeCons {
         long start = System.currentTimeMillis();
         if (alg instanceof IpoptSeAlg)
             ((IpoptSeAlg) alg).getObjFunc().setObjType(SeObjective.OBJ_TYPE_WLS); // 设置目标函数
+        else if (alg instanceof PsoSeAlg)
+            ((IpoptSeAlg) alg).getObjFunc().setObjType(SeObjective.OBJ_TYPE_WLS); // 设置目标函数
+
         SeResultInfo r;
 
         //下面这一段测试传统最小二乘的效果
