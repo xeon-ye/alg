@@ -149,7 +149,7 @@ public class LoadTransferOptTest extends TestCase implements DsModelCons {
         model.loadMax("L1");
     }
 
-    public void testCase1All() throws IOException {
+    public void testCase1All() throws Exception {
         DistriSys testsys;
         String[] supplyID;
 
@@ -176,6 +176,7 @@ public class LoadTransferOptTest extends TestCase implements DsModelCons {
         model.setFeederCapacityConst(20000);
         model.setLoad(load);
         model.setSupplyCap(supplyCap);
+        model.buildPathes();
         model.allMinSwitch();
         this.minSwitchResult = model.getOptResult();
         for (int i = 0; i < minSwitchResult.getSupplyId().length; i++) {
@@ -187,7 +188,7 @@ public class LoadTransferOptTest extends TestCase implements DsModelCons {
             }
         }
 
-        model.allLoadMax();
+        model.allLoadMax_1();
 //        model.allLoadMaxN();
         this.maxLoadResult = model.maxLoadResult;
         for (int i = 0; i < maxLoadResult.size(); i++) {
@@ -201,7 +202,7 @@ public class LoadTransferOptTest extends TestCase implements DsModelCons {
         }
     }
 
-    public void testCase2All() throws IOException {
+    public void testCase2All() throws Exception {
         DistriSys testsys;
         String[] supplyID;
         InputStream ieeeFile = this.getClass().getResourceAsStream("/loadtransferfiles/testcase2/graphtestNew.txt");
@@ -227,18 +228,19 @@ public class LoadTransferOptTest extends TestCase implements DsModelCons {
         model.setFeederCapacityConst(20000);
         model.setLoad(load);
         model.setSupplyCap(supplyCap);
-        model.allMinSwitch();
-        this.minSwitchResult = model.getOptResult();
-        for (int i = 0; i < minSwitchResult.getSupplyId().length; i++) {
-            System.out.println(minSwitchResult.getSupplyId()[i]);
-            System.out.println(minSwitchResult.getMinSwitch()[i]);
-            // if(minSwitchResult.getSupplyId()[i] != null) {
-            for (int j = 0; j < minSwitchResult.getMinSwitch()[i]; j++)
-                System.out.println(minSwitchResult.getSwitchChanged().get(i)[j]);
-            //   }
-        }
+        model.buildPathes();
+//        model.allMinSwitch();
+//        this.minSwitchResult = model.getOptResult();
+//        for (int i = 0; i < minSwitchResult.getSupplyId().length; i++) {
+//            System.out.println(minSwitchResult.getSupplyId()[i]);
+//            System.out.println(minSwitchResult.getMinSwitch()[i]);
+//            // if(minSwitchResult.getSupplyId()[i] != null) {
+//            for (int j = 0; j < minSwitchResult.getMinSwitch()[i]; j++)
+//                System.out.println(minSwitchResult.getSwitchChanged().get(i)[j]);
+//            //   }
+//        }
 
-        model.allLoadMax();
+        model.allLoadMax_1();
 //        model.allLoadMaxN();
         this.maxLoadResult = model.getMaxLoadResult();
         for (int i = 0; i < maxLoadResult.size(); i++) {
@@ -325,7 +327,7 @@ public class LoadTransferOptTest extends TestCase implements DsModelCons {
         testsys.setSupplyCns(supplyID);
         testsys.setSupplyCnBaseKv(supplyBaseKv);
 
-        LoadTransferOptNew model = new LoadTransferOptNew(testsys);
+        LoadTransferOpt model = new LoadTransferOpt(testsys);
         String loadsPath = this.getClass().getResource("/loadtransferfiles/testcase4/loads.txt").getPath();
         String supplyCapacityPath = this.getClass().getResource("/loadtransferfiles/testcase4/supplyCapacity.txt").getPath();
         String feederCapacityPath = this.getClass().getResource("/loadtransferfiles/testcase4/feederCapacity.txt").getPath();
@@ -337,7 +339,7 @@ public class LoadTransferOptTest extends TestCase implements DsModelCons {
         model.setSupplyCap(supplyCap);
         model.setFeederCap(feederCap);
         model.buildPathes();
-        model.makeFeederCapArray();
+//        model.makeFeederCapArray();
         model.allMinSwitch();
         this.minSwitchResult = model.getOptResult();
         for (int i = 0; i < minSwitchResult.getSupplyId().length; i++) {
@@ -349,7 +351,7 @@ public class LoadTransferOptTest extends TestCase implements DsModelCons {
             //   }
         }
 
-        model.allLoadMax();
+        model.allLoadMax_1();
         this.maxLoadResult = model.maxLoadResult;
         for (int i = 0; i < maxLoadResult.size(); i++) {
             System.out.println(model.nodes.get(i).getId());
