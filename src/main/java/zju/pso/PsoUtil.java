@@ -28,9 +28,10 @@ public class PsoUtil {
 
     /**
      * 找到指定元素中的最小元素
-     * @param list 数组
+     *
+     * @param list         数组
      * @param feasibleList 可行序列
-     * @param isFeasible 是否可行
+     * @param isFeasible   是否可行
      * @return 下标
      */
     public static int getMinPos(double[] list, boolean[] feasibleList, boolean isFeasible) {
@@ -99,5 +100,21 @@ public class PsoUtil {
             fitness += constrViolation[i] / maxViolation[i];
         }
         return fitness;
+    }
+
+    /**
+     * 将值限制在范围内
+     * @param val 输入值
+     * @param upper 上限
+     * @param lower 下限
+     * @return
+     */
+    public static double restrictByBoundary(double val, double upper, double lower) {
+        if (val < lower)
+            return lower;
+        else if (val > upper)
+            return upper;
+        else
+            return val;
     }
 }

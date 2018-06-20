@@ -41,6 +41,11 @@ public class PsoProcess implements PsoConstants {
         int iterNum = 0;
         int n = optModel.getDimentions();
         int maxIter = optModel.getMaxIter();
+        double[] minLoc = optModel.getMinLoc();
+        double[] maxLoc = optModel.getMaxLoc();
+        double[] minVel = optModel.getMinVel();
+        double[] maxVel = optModel.getMaxVel();
+
 
         double tol = 9999;
         double w; // 惯性权重
@@ -59,9 +64,10 @@ public class PsoProcess implements PsoConstants {
                 // 步骤一：更新速度
                 double[] newVel = new double[n];
                 for (int j = 0; j < n; j++) {
-                    newVel[j] = (w * p.getVelocity().getVel()[j]) +
+                    double tempVel = (w * p.getVelocity().getVel()[j]) +
                             (r1 * C1) * (pBestLocation.get(i).getLoc()[j] - p.getLocation().getLoc()[j]) +
                             (r2 * C2) * (gBestLocation.getLoc()[j] - p.getLocation().getLoc()[j]);
+                    newVel[j] = PsoUtil.restrictByBoundary(tempVel, maxVel[j], minVel[j]);
                 }
                 Velocity vel = new Velocity(newVel);
                 p.setVelocity(vel);
@@ -69,7 +75,8 @@ public class PsoProcess implements PsoConstants {
                 // 步骤二：更新位置
                 double[] newLoc = new double[n];
                 for (int j = 0; j < n; j++) {
-                    newLoc[j] = p.getLocation().getLoc()[j] + newVel[j];
+                    double tempLoc = p.getLocation().getLoc()[j] + newVel[j];
+                    newLoc[j] = PsoUtil.restrictByBoundary(tempLoc, maxLoc[j], minLoc[j]);
                 }
                 Location loc = new Location(newLoc);
                 p.setLocation(loc);

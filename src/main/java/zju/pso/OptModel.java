@@ -1,5 +1,7 @@
 package zju.pso;
 
+import java.util.Arrays;
+
 /**
  * @Description: 优化模型接口定义
  * @Author: Fang Rui
@@ -19,30 +21,49 @@ public interface OptModel {
 
     /**
      * 根据当前位置计算约束函数值，其中等式约束作不等式约束处理
+     *
      * @param location
      * @return 约束函数值
      */
-    double[] evalConstr(Location location);
+    default double[] evalConstr(Location location){
+        return new double[getDimentions()];
+    }
 
     /**
      * @return 粒子位置的最小值
      */
-    double[] getMinLoc();
+    default double[] getMinLoc() {
+        double[] minLoc = new double[getDimentions()];
+        Arrays.fill(minLoc, Double.MIN_VALUE);
+        return minLoc;
+    }
 
     /**
      * @return 粒子位置的最大值
      */
-    double[] getMaxLoc();
+    default double[] getMaxLoc() {
+        double[] maxLoc = new double[getDimentions()];
+            Arrays.fill(maxLoc, Double.MAX_VALUE);
+        return maxLoc;
+    }
 
     /**
      * @return 粒子速度的最小值
      */
-    double[] getMinVel();
+    default double[] getMinVel() {
+        double[] minVel = new double[getDimentions()];
+        Arrays.fill(minVel, Double.MIN_VALUE);
+        return minVel;
+    }
 
     /**
      * @return 粒子速度的最大值
      */
-    double[] getMaxVel();
+    default double[] getMaxVel() {
+        double[] maxVel = new double[getDimentions()];
+        Arrays.fill(maxVel, Double.MAX_VALUE);
+        return maxVel;
+    }
 
     /**
      * @return 获取状态变量的个数
@@ -50,13 +71,17 @@ public interface OptModel {
     int getDimentions();
 
     /**
-     * @return 最大迭代次数
+     * @return 最大迭代次数，默认50次
      */
-    int getMaxIter();
+    default int getMaxIter() {
+        return 50;
+    }
 
     /**
      * @return 收敛精度
      */
-    double getTolFitness();
+    default double getTolFitness(){
+        return Double.MIN_VALUE;
+    }
 
 }
