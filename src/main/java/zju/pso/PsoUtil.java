@@ -74,10 +74,10 @@ public class PsoUtil {
      *
      * @param maxViolation     最大偏差数组
      * @param currentViolation 当前不等式偏差
-     * @param dimension        维度
      */
-    public static synchronized void maxViolationArray(double[] maxViolation, double[] currentViolation, int dimension) {
-        for (int i = 0; i < dimension; i++) {
+    public static synchronized void maxViolationArray(double[] maxViolation, double[] currentViolation) {
+        assert maxViolation.length == currentViolation.length;
+        for (int i = 0; i < maxViolation.length; i++) {
             if (currentViolation[i] > maxViolation[i])
                 maxViolation[i] = currentViolation[i];
         }
@@ -88,12 +88,12 @@ public class PsoUtil {
      *
      * @param maxViolation    最大偏差数组
      * @param constrViolation 粒子约束偏差
-     * @param dimension       维度
      * @return
      */
-    public static double violationFitness(double[] maxViolation, double[] constrViolation, int dimension) {
+    public static double violationFitness(double[] maxViolation, double[] constrViolation) {
+        assert maxViolation.length == constrViolation.length;
         double fitness = 0;
-        for (int i = 0; i < dimension; i++) {
+        for (int i = 0; i < maxViolation.length; i++) {
             // 如果第i个分量在可行域内，直接跳到下一个分量。为了防止0/0的情况
             if (constrViolation[i] <= 0)
                 continue;

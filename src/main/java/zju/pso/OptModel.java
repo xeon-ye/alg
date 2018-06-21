@@ -25,8 +25,8 @@ public interface OptModel {
      * @param location
      * @return 约束函数值
      */
-    default double[] evalConstr(Location location){
-        return new double[getDimentions()];
+    default double[] evalConstr(Location location) {
+        return new double[]{0};
     }
 
     /**
@@ -43,7 +43,7 @@ public interface OptModel {
      */
     default double[] getMaxLoc() {
         double[] maxLoc = new double[getDimentions()];
-            Arrays.fill(maxLoc, Double.MAX_VALUE);
+        Arrays.fill(maxLoc, Double.MAX_VALUE);
         return maxLoc;
     }
 
@@ -74,13 +74,13 @@ public interface OptModel {
      * @return 最大迭代次数，默认50次
      */
     default int getMaxIter() {
-        return 50;
+        return 100;
     }
 
     /**
      * @return 收敛精度
      */
-    default double getTolFitness(){
+    default double getTolFitness() {
         return Double.MIN_VALUE;
     }
 
