@@ -104,7 +104,8 @@ public class PsoUtil {
 
     /**
      * 将值限制在范围内
-     * @param val 输入值
+     *
+     * @param val   输入值
      * @param upper 上限
      * @param lower 下限
      * @return
@@ -114,6 +115,24 @@ public class PsoUtil {
             return lower;
         else if (val > upper)
             return upper;
+        else
+            return val;
+    }
+
+    /**
+     * 将值限制在中点处
+     *
+     * @param val      输入值
+     * @param upper    上限
+     * @param lower    下限
+     * @param previous 下限
+     * @return
+     */
+    public static double restrictByBoundary(double val, double upper, double lower, double previous) {
+        if (val < lower)
+            return (lower + previous) / 2;
+        else if (val > upper)
+            return (upper + previous) / 2;
         else
             return val;
     }

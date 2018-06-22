@@ -20,6 +20,7 @@ public class PsoTest {
     public void testDifficultModel() {
         new PsoProcess(new DifficultModel_1(), 1000).execute();
         new PsoProcess(new DifficultModel_2(), 1000).execute();
+        new PsoProcess(new DifficultModel_3(), 30).execute();
     }
 
 }

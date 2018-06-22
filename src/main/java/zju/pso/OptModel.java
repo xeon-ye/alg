@@ -32,38 +32,23 @@ public interface OptModel {
     /**
      * @return 粒子位置的最小值
      */
-    default double[] getMinLoc() {
-        double[] minLoc = new double[getDimentions()];
-        Arrays.fill(minLoc, Double.MIN_VALUE);
-        return minLoc;
-    }
+    double[] getMinLoc();
 
     /**
      * @return 粒子位置的最大值
      */
-    default double[] getMaxLoc() {
-        double[] maxLoc = new double[getDimentions()];
-        Arrays.fill(maxLoc, Double.MAX_VALUE);
-        return maxLoc;
-    }
+    double[] getMaxLoc();
 
     /**
      * @return 粒子速度的最小值
      */
-    default double[] getMinVel() {
-        double[] minVel = new double[getDimentions()];
-        Arrays.fill(minVel, Double.MIN_VALUE);
-        return minVel;
-    }
+    double[] getMinVel();
 
     /**
      * @return 粒子速度的最大值
      */
-    default double[] getMaxVel() {
-        double[] maxVel = new double[getDimentions()];
-        Arrays.fill(maxVel, Double.MAX_VALUE);
-        return maxVel;
-    }
+    double[] getMaxVel();
+
 
     /**
      * @return 获取状态变量的个数
@@ -71,7 +56,7 @@ public interface OptModel {
     int getDimentions();
 
     /**
-     * @return 最大迭代次数，默认50次
+     * @return 最大迭代次数，默认100次
      */
     default int getMaxIter() {
         return 100;
@@ -81,7 +66,7 @@ public interface OptModel {
      * @return 收敛精度
      */
     default double getTolFitness() {
-        return Double.MIN_VALUE;
+        return -99999;
     }
 
 }

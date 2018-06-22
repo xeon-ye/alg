@@ -37,7 +37,7 @@ public class PsoProcess implements PsoConstants {
         this.pBest = new double[swarmSize];
     }
 
-    public Location execute() {
+    public void execute() {
         initializeSwarm();
 
         int iterNum = 0;
@@ -49,7 +49,7 @@ public class PsoProcess implements PsoConstants {
         double[] maxVel = optModel.getMaxVel();
 
 
-        double tol = 9999;
+        double tol = 99999;
         double w; // 惯性权重
 
         while (iterNum < maxIter && tol >= 0) {
@@ -77,8 +77,9 @@ public class PsoProcess implements PsoConstants {
                 // 步骤二：更新位置
                 double[] newLoc = new double[n];
                 for (int j = 0; j < n; j++) {
-                    double tempLoc = p.getLocation().getLoc()[j] + newVel[j];
-                    newLoc[j] = PsoUtil.restrictByBoundary(tempLoc, maxLoc[j], minLoc[j]);
+                    double previousLoc = p.getLocation().getLoc()[j];
+                    double tempLoc = previousLoc + newVel[j];
+                    newLoc[j] = PsoUtil.restrictByBoundary(tempLoc, maxLoc[j], minLoc[j], previousLoc);
                 }
                 Location loc = new Location(newLoc);
                 p.setLocation(loc);
@@ -145,19 +146,22 @@ public class PsoProcess implements PsoConstants {
             }
 
             // 如果全局粒子在可行域内，如果已经达到模型的要求，是一个足够好的适应度值那么就结束寻优
-            //if (isGBestfeasible)
-            //    tol = gBest - optModel.getTolFitness(); // minimizing the functions means it's getting closer to 0
+            if (isGBestfeasible)
+                tol = gBest - optModel.getTolFitness(); // minimizing the functions means it's getting closer to 0
 
             System.out.println("ITERATION " + iterNum + ": ");
             System.out.println("     Best Location: " + Arrays.toString(gBestLocation.getLoc()));
-            System.out.println("     Value: " + gBest);
+            System.out.println("     Value: " + gBest + "  " + isGBestfeasible);
 
             iterNum++;
         }
 
-        System.out.println("\nSolution found at iteration " + iterNum + ", the solutions is:");
-        System.out.println("     Best Location: " + Arrays.toString(gBestLocation.getLoc()));
-        return gBestLocation;
+        if (isGBestfeasible) {
+            System.out.println("\nSolution found at iteration " + iterNum + ", the solutions is:");
+            System.out.println("     Best Location: " + Arrays.toString(gBestLocation.getLoc()));
+        } else {
+            System.out.println("Solution not found");
+        }
     }
 
     // 初始化粒子群
@@ -178,8 +182,7 @@ public class PsoProcess implements PsoConstants {
 
             // 随机化粒子的位置和速度
             for (int j = 0; j < n; j++) {
-                loc[j] = minLoc[j] + generator.nextDouble() * (maxLoc[j] - minLoc[j]); // 初始时粒子一定在可行域内
-                // TODO: 2018/6/8 粒子速度问题
+                loc[j] = minLoc[j] + generator.nextDouble() * (maxLoc[j] - minLoc[j]); // 初始时粒子一定满足显式约束
                 vel[j] = minVel[j] + generator.nextDouble() * (maxVel[j] - minVel[j]);
             }
             Location location = new Location(loc);
@@ -228,10 +231,6 @@ public class PsoProcess implements PsoConstants {
         }
         // 如果每一个粒子都不在可行域内，要找到一个gBest
         if (!hasFeasibleOne) {
-            // TODO: 2018/6/8 断言
-            for (int i = 0; i < swarmSize; i++) {
-                assert !feasibleList[i];
-            }
             int bestParticleIndex = PsoUtil.getMinPos(fitnessValueList);
             gBest = fitnessValueList[bestParticleIndex];
             gBestLocation = swarm.get(bestParticleIndex).getLocation();

@@ -4,6 +4,8 @@ import zju.pso.Location;
 import zju.pso.OptModel;
 
 /**
+ * 本算例测试效果不是很好
+ *
  * @Author: Fang Rui
  * @Date: 2018/6/21
  * @Time: 15:41
@@ -21,13 +23,13 @@ public class DifficultModel_2 implements OptModel {
         double[] x = location.getLoc();
         double[] constr = new double[6];
 
-        constr[0] = x[0] * x[0] + x[1] * x[1] + x[2] * x[2] + x[3] * x[3] + x[4] * x[4] - 10 - 0.001;
-        constr[1] = x[1] * x[2] - 5 * x[3] * x[4] - 0.001;
-        constr[2] = x[0] * x[0] * x[0] + x[1] * x[1] * x[1] + 1 - 0.001;
+        constr[0] = x[0] * x[0] + x[1] * x[1] + x[2] * x[2] + x[3] * x[3] + x[4] * x[4] - 10 - 1e-3;
+        constr[1] = x[1] * x[2] - 5 * x[3] * x[4] - 1e-3;
+        constr[2] = x[0] * x[0] * x[0] + x[1] * x[1] * x[1] + 1 - 1e-3;
 
-        constr[3] = -(x[0] * x[0] + x[1] * x[1] + x[2] * x[2] + x[3] * x[3] + x[4] * x[4] - 10) - 0.001;
-        constr[4] = -(x[1] * x[2] - 5 * x[3] * x[4]) - 0.001;
-        constr[5] = -(x[0] * x[0] * x[0] + x[1] * x[1] * x[1] + 1) - 0.001;
+        constr[3] = -(x[0] * x[0] + x[1] * x[1] + x[2] * x[2] + x[3] * x[3] + x[4] * x[4] - 10) - 1e-3;
+        constr[4] = -(x[1] * x[2] - 5 * x[3] * x[4]) - 1e-3;
+        constr[5] = -(x[0] * x[0] * x[0] + x[1] * x[1] * x[1] + 1) - 1e-3;
         return constr;
     }
 
@@ -58,6 +60,6 @@ public class DifficultModel_2 implements OptModel {
 
     @Override
     public int getMaxIter() {
-        return 500;
+        return 200;
     }
 }

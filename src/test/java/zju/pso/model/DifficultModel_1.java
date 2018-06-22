@@ -67,23 +67,28 @@ public class DifficultModel_1 implements OptModel {
     @Override
     public double[] getMinVel() {
         double[] minVel = new double[getDimentions()];
-        Arrays.fill(minVel, 0, 9, -0.1);
-        Arrays.fill(minVel, 9, 12, -10);
-        minVel[12] = -0.1;
+        Arrays.fill(minVel, 0, 9, -0.5);
+        Arrays.fill(minVel, 9, 12, -50);
+        minVel[12] = -0.5;
         return minVel;
     }
 
     @Override
     public double[] getMaxVel() {
         double[] maxVel = new double[getDimentions()];
-        Arrays.fill(maxVel, 0, 9, 0.1);
-        Arrays.fill(maxVel, 9, 12, 10);
-        maxVel[12] = 0.1;
+        Arrays.fill(maxVel, 0, 9, 0.5);
+        Arrays.fill(maxVel, 9, 12, 50);
+        maxVel[12] = 0.5;
         return maxVel;
     }
 
     @Override
     public int getDimentions() {
         return 13;
+    }
+
+    @Override
+    public int getMaxIter() {
+        return 200;
     }
 }
