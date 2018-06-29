@@ -19,9 +19,8 @@ public class DifficultModel_3 implements OptModel {
     @Override
     public double[] evalConstr(Location location) {
         double[] x = location.getLoc();
-        double[] constr = new double[2];
-        constr[0] = x[1] - x[0] * x[0] - 1e-3;
-        constr[1] = -(x[1] - x[0] * x[0]) - 1e-3;
+        double[] constr = new double[1];
+        constr[0] = Math.abs(x[1] - x[0] * x[0]) - 1e-3;
         return constr;
     }
 

@@ -18,7 +18,7 @@ public abstract class AbstractSeAlg implements SeConstants, MeasTypeCons {
     public static final int VARIABLE_VTHETA_PQ = 3;
     public static final int VARIABLE_UI = 4;
 
-    private int variable_type = -1;
+    protected int variable_type = -1;
 
     protected int maxIter = 500;
 

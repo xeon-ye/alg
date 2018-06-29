@@ -175,7 +175,7 @@ public class SeTest_IeeeCase extends TestCase implements MeasTypeCons {
         if (alg instanceof IpoptSeAlg)
             ((IpoptSeAlg) alg).getObjFunc().setObjType(SeObjective.OBJ_TYPE_WLS); // 设置目标函数
         else if (alg instanceof PsoSeAlg)
-            ((IpoptSeAlg) alg).getObjFunc().setObjType(SeObjective.OBJ_TYPE_WLS); // 设置目标函数
+            ((PsoSeAlg) alg).getObjFunc().setObjType(SeObjective.OBJ_TYPE_VOTE); // 设置目标函数
 
         SeResultInfo r;
 

@@ -237,8 +237,16 @@ public class PsoProcess implements PsoConstants {
         }
     }
 
+    public boolean isGBestfeasible() {
+        return isGBestfeasible;
+    }
+
     // 获得最优情况下的适应度值
     public double getgBest() {
         return gBest;
+    }
+
+    public Location getgBestLocation() {
+        return gBestLocation;
     }
 }

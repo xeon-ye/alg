@@ -16,10 +16,6 @@ import zju.util.*;
  *         Date: 2009-3-15
  */
 public class IpoptSeAlg extends AbstractSeAlg implements MeasTypeCons, IpoptModel {
-    public static final int VARIABLE_VTHETA = 1;
-    public static final int VARIABLE_U = 2;
-    public static final int VARIABLE_VTHETA_PQ = 3;
-    public static final int VARIABLE_UI = 4;
 
     private int variable_type = -1;
     // Problem sizes

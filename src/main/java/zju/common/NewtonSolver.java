@@ -57,9 +57,9 @@ public class NewtonSolver {
      * @return 是否收敛
      */
     public boolean solve() {
-        state = model.getInitial();
-        AVector z = model.getZ();
-        AVector z_est;
+        state = model.getInitial(); // 初始化状态变量
+        AVector z = model.getZ(); // 量测值
+        AVector z_est; // 量测估计值
 
         iterNum = 0;
         double[] result = model.getDeltaArray();
