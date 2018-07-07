@@ -8,22 +8,27 @@ import java.util.List;
  */
 public class LoadTransferOptResult {
     String[] supplyId;
+    String[] feederId;
     int[] minSwitch;
     List<String[]> switchChanged;
 
     String[] loadId;
     double[] maxLoad;
 
-    public LoadTransferOptResult(int supplyNum, int loadNum) {
-        this.supplyId = new String[supplyNum];
-        this.minSwitch = new int[supplyNum];
-        this.switchChanged = new ArrayList<>(supplyNum);
+    public LoadTransferOptResult(int feederNum, int loadNum) {
+        this.feederId = new String[feederNum];
+        this.minSwitch = new int[feederNum];
+        this.switchChanged = new ArrayList<>(feederNum);
         this.loadId = new String[loadNum];
         this.maxLoad = new double[loadNum];
     }
 
     public void setSupplyId(int index, String supplyId) {
         this.supplyId[index] = supplyId;
+    }
+
+    public void setFeederId(int index, String feederId) {
+        this.feederId[index] = feederId;
     }
 
     public void setMinSwitch(int index, int minSwitch) {
@@ -44,6 +49,10 @@ public class LoadTransferOptResult {
 
     public String[] getSupplyId() {
         return supplyId;
+    }
+
+    public String[] getFeederId() {
+        return feederId;
     }
 
     public int[] getMinSwitch() {

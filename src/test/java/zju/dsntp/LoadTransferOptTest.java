@@ -1,9 +1,11 @@
 package zju.dsntp;
 
 import junit.framework.TestCase;
+import org.jgrapht.UndirectedGraph;
 import org.junit.Assert;
 import zju.devmodel.MapObject;
 import zju.dsmodel.DistriSys;
+import zju.dsmodel.DsConnectNode;
 import zju.dsmodel.DsModelCons;
 
 import java.io.*;
@@ -167,21 +169,29 @@ public class LoadTransferOptTest extends TestCase implements DsModelCons {
         Double[] supplyBaseKv = new Double[]{100., 200., 100.};
         testsys.setSupplyCns(supplyID);
         testsys.setSupplyCnBaseKv(supplyBaseKv);
+        UndirectedGraph<DsConnectNode, MapObject> g = testsys.getOrigGraph();
+        for (MapObject e : g.edgeSet()) {
+            e.setProperty(MapObject.KEY_ID, e.getProperty(KEY_CONNECTED_NODE));
+        }
 
         LoadTransferOpt model = new LoadTransferOpt(testsys);
         String loadsPath = this.getClass().getResource("/loadtransferfiles/testcase1/loads.txt").getPath();
         String supplyCapacityPath = this.getClass().getResource("/loadtransferfiles/testcase1/supplyCapacity.txt").getPath();
+        String feederCapacityPath = this.getClass().getResource("/loadtransferfiles/testcase1/edgeCapacity.txt").getPath();
         readSupplyCapacity(supplyCapacityPath);
         readLoads(loadsPath);
-        model.setFeederCapacityConst(20000);
+        readEdgeCapacity(feederCapacityPath);
+        model.setFeederCapacityConst(200);
         model.setLoad(load);
         model.setSupplyCap(supplyCap);
+        model.setFeederCap(feederCap);
         model.buildPathes();
+        model.makeFeederCapArray();
         model.allMinSwitch();
         this.minSwitchResult = model.getOptResult();
-        for (int i = 0; i < minSwitchResult.getSupplyId().length; i++) {
-            if (minSwitchResult.getSupplyId()[i] != null) {
-                System.out.println(minSwitchResult.getSupplyId()[i]);
+        for (int i = 0; i < minSwitchResult.getFeederId().length; i++) {
+            if (minSwitchResult.getFeederId()[i] != null) {
+                System.out.println(minSwitchResult.getFeederId()[i]);
                 System.out.println(minSwitchResult.getMinSwitch()[i]);
                 for (int j = 0; j < minSwitchResult.getMinSwitch()[i]; j++)
                     System.out.println(minSwitchResult.getSwitchChanged().get(i)[j]);
@@ -219,26 +229,34 @@ public class LoadTransferOptTest extends TestCase implements DsModelCons {
         Double[] supplyBaseKv = new Double[]{100., 200., 100.};
         testsys.setSupplyCns(supplyID);
         testsys.setSupplyCnBaseKv(supplyBaseKv);
+        UndirectedGraph<DsConnectNode, MapObject> g = testsys.getOrigGraph();
+        for (MapObject e : g.edgeSet()) {
+            e.setProperty(MapObject.KEY_ID, e.getProperty(KEY_CONNECTED_NODE));
+        }
 
         LoadTransferOpt model = new LoadTransferOpt(testsys);
         String loadsPath = this.getClass().getResource("/loadtransferfiles/testcase2/loads.txt").getPath();
         String supplyCapacityPath = this.getClass().getResource("/loadtransferfiles/testcase2/supplyCapacity.txt").getPath();
+        String feederCapacityPath = this.getClass().getResource("/loadtransferfiles/testcase2/edgeCapacity.txt").getPath();
         readSupplyCapacity(supplyCapacityPath);
         readLoads(loadsPath);
-        model.setFeederCapacityConst(20000);
+        readEdgeCapacity(feederCapacityPath);
+        model.setFeederCapacityConst(20);
         model.setLoad(load);
         model.setSupplyCap(supplyCap);
+        model.setFeederCap(feederCap);
         model.buildPathes();
-//        model.allMinSwitch();
-//        this.minSwitchResult = model.getOptResult();
-//        for (int i = 0; i < minSwitchResult.getSupplyId().length; i++) {
-//            System.out.println(minSwitchResult.getSupplyId()[i]);
-//            System.out.println(minSwitchResult.getMinSwitch()[i]);
-//            // if(minSwitchResult.getSupplyId()[i] != null) {
-//            for (int j = 0; j < minSwitchResult.getMinSwitch()[i]; j++)
-//                System.out.println(minSwitchResult.getSwitchChanged().get(i)[j]);
-//            //   }
-//        }
+        model.makeFeederCapArray();
+        model.allMinSwitch();
+        this.minSwitchResult = model.getOptResult();
+        for (int i = 0; i < minSwitchResult.getFeederId().length; i++) {
+            System.out.println(minSwitchResult.getFeederId()[i]);
+            System.out.println(minSwitchResult.getMinSwitch()[i]);
+            // if(minSwitchResult.getSupplyId()[i] != null) {
+            for (int j = 0; j < minSwitchResult.getMinSwitch()[i]; j++)
+                System.out.println(minSwitchResult.getSwitchChanged().get(i)[j]);
+            //   }
+        }
 
         model.allLoadMax_1();
 //        model.allLoadMaxN();
@@ -254,7 +272,7 @@ public class LoadTransferOptTest extends TestCase implements DsModelCons {
         }
     }
 
-    public void testCase3All() throws IOException {
+    public void testCase3All() throws Exception {
         DistriSys testsys;
         String[] supplyID;
         InputStream ieeeFile = this.getClass().getResourceAsStream("/loadtransferfiles/testcase3/graphtestNew.txt");
@@ -271,19 +289,28 @@ public class LoadTransferOptTest extends TestCase implements DsModelCons {
         Double[] supplyBaseKv = new Double[]{100., 200., 100., 100.};
         testsys.setSupplyCns(supplyID);
         testsys.setSupplyCnBaseKv(supplyBaseKv);
+        UndirectedGraph<DsConnectNode, MapObject> g = testsys.getOrigGraph();
+        for (MapObject e : g.edgeSet()) {
+            e.setProperty(MapObject.KEY_ID, e.getProperty(KEY_CONNECTED_NODE));
+        }
 
         LoadTransferOpt model = new LoadTransferOpt(testsys);
         String loadsPath = this.getClass().getResource("/loadtransferfiles/testcase3/loads.txt").getPath();
         String supplyCapacityPath = this.getClass().getResource("/loadtransferfiles/testcase3/supplyCapacity.txt").getPath();
+        String feederCapacityPath = this.getClass().getResource("/loadtransferfiles/testcase3/edgeCapacity.txt").getPath();
         readSupplyCapacity(supplyCapacityPath);
         readLoads(loadsPath);
-        model.setFeederCapacityConst(20000);
+        readEdgeCapacity(feederCapacityPath);
+        model.setFeederCapacityConst(16302);
         model.setLoad(load);
         model.setSupplyCap(supplyCap);
+        model.setFeederCap(feederCap);
+        model.buildPathes();
+        model.makeFeederCapArray();
         model.allMinSwitch();
         this.minSwitchResult = model.getOptResult();
-        for (int i = 0; i < minSwitchResult.getSupplyId().length; i++) {
-            System.out.println(minSwitchResult.getSupplyId()[i]);
+        for (int i = 0; i < minSwitchResult.getFeederId().length; i++) {
+            System.out.println(minSwitchResult.getFeederId()[i]);
             System.out.println(minSwitchResult.getMinSwitch()[i]);
             // if(minSwitchResult.getSupplyId()[i] != null) {
             for (int j = 0; j < minSwitchResult.getMinSwitch()[i]; j++)
@@ -291,8 +318,8 @@ public class LoadTransferOptTest extends TestCase implements DsModelCons {
             //   }
         }
 
-//        model.allLoadMax();
-        model.allLoadMaxN();
+        model.allLoadMax_1();
+//        model.allLoadMaxN();
         this.maxLoadResult = model.maxLoadResult;
         for (int i = 0; i < maxLoadResult.size(); i++) {
             System.out.println(model.nodes.get(i).getId());
@@ -326,24 +353,28 @@ public class LoadTransferOptTest extends TestCase implements DsModelCons {
         Double[] supplyBaseKv = new Double[]{100., 200., 100., 100., 100.};
         testsys.setSupplyCns(supplyID);
         testsys.setSupplyCnBaseKv(supplyBaseKv);
+        UndirectedGraph<DsConnectNode, MapObject> g = testsys.getOrigGraph();
+        for (MapObject e : g.edgeSet()) {
+            e.setProperty(MapObject.KEY_ID, e.getProperty(KEY_CONNECTED_NODE));
+        }
 
         LoadTransferOpt model = new LoadTransferOpt(testsys);
         String loadsPath = this.getClass().getResource("/loadtransferfiles/testcase4/loads.txt").getPath();
         String supplyCapacityPath = this.getClass().getResource("/loadtransferfiles/testcase4/supplyCapacity.txt").getPath();
-        String feederCapacityPath = this.getClass().getResource("/loadtransferfiles/testcase4/feederCapacity.txt").getPath();
+        String feederCapacityPath = this.getClass().getResource("/loadtransferfiles/testcase4/edgeCapacity.txt").getPath();
         readSupplyCapacity(supplyCapacityPath);
         readLoads(loadsPath);
-        readFeederCapacity(feederCapacityPath);
-        model.setFeederCapacityConst(20000);
+        readEdgeCapacity(feederCapacityPath);
+        model.setFeederCapacityConst(19334);
         model.setLoad(load);
         model.setSupplyCap(supplyCap);
         model.setFeederCap(feederCap);
         model.buildPathes();
-//        model.makeFeederCapArray();
+        model.makeFeederCapArray();
         model.allMinSwitch();
         this.minSwitchResult = model.getOptResult();
-        for (int i = 0; i < minSwitchResult.getSupplyId().length; i++) {
-            System.out.println(minSwitchResult.getSupplyId()[i]);
+        for (int i = 0; i < minSwitchResult.getFeederId().length; i++) {
+            System.out.println(minSwitchResult.getFeederId()[i]);
             System.out.println(minSwitchResult.getMinSwitch()[i]);
             // if(minSwitchResult.getSupplyId()[i] != null) {
             for (int j = 0; j < minSwitchResult.getMinSwitch()[i]; j++)
@@ -653,6 +684,17 @@ public class LoadTransferOptTest extends TestCase implements DsModelCons {
             feederId = newdata[0] + ";" + newdata[1];
             feederCapacity = Double.parseDouble(newdata[2]);
             feederCap.put(feederId, feederCapacity);
+        }
+    }
+
+    //读取馈线容量
+    public void readEdgeCapacity(String path) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(path)));
+        String data;
+        String[] newdata;
+        while((data = br.readLine()) != null) {
+            newdata = data.split(" ", 2);
+            feederCap.put(newdata[0], Double.parseDouble(newdata[1]));
         }
     }
 
