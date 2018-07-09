@@ -27,7 +27,7 @@ public class SeTest_IeeeCase extends TestCase implements MeasTypeCons {
     public SeTest_IeeeCase(String name) {
         super(name);
         se = new StateEstimator();
-        alg = new IpoptSeAlg();
+        alg = new PsoSeAlg();
         se.setAlg(alg); // se中也有这个变量
     }
 

@@ -297,7 +297,7 @@ public class StateEstimator implements SeConstants, MeasTypeCons {
         } else if (objFunc.getObjType() == SeObjective.OBJ_TYPE_VOTE) {
             badData_threshhold = new double[meas.getZ().getN()];
             for (int i = 0; i < meas.getZ().getN(); i++) {
-                para1[i] = meas.getSigma().getValue(i) * alpha1; // 代表与置信区间p对应的扩展不确定度，偏移在此区域内代表为合格测点
+                para1[i] = meas.getSigma().getValue(i) * 3; // 代表与置信区间p对应的扩展不确定度，偏移在此区域内代表为合格测点
                 badData_threshhold[i] = para1[i];
             }
             objFunc.setThresholds(para1);

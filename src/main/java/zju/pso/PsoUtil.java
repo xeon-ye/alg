@@ -6,7 +6,7 @@ package zju.pso;
  * @Date: 2018/6/7
  * @Time: 17:43
  */
-public class PsoUtil {
+public class PsoUtil implements PsoConstants {
 
     /**
      * 找到数组中的最小元素
@@ -135,5 +135,36 @@ public class PsoUtil {
             return (upper + previous) / 2;
         else
             return val;
+    }
+
+    /**
+     * 计算不可行粒子的适应度值，利用惩罚的方式
+     *
+     * @param constrViolation
+     * @return
+     */
+    public static double evalInfeasibleFitness(double[] constrViolation) {
+        double fitness = PUNISHMENT;
+        for (double aConstrViolation : constrViolation) {
+            if (aConstrViolation > 0)
+                fitness += aConstrViolation;
+        }
+        return fitness;
+    }
+
+
+    /**
+     * 计算向量的模
+     *
+     * @param vector 向量
+     * @return 模长
+     */
+    public static double getVecNorm(double[] vector) {
+        double norm = 0;
+        for (double aVector : vector) {
+            norm += aVector * aVector;
+        }
+        norm = Math.sqrt(norm);
+        return norm;
     }
 }

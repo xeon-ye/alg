@@ -3,6 +3,7 @@ package zju.se;
 import zju.matrix.AVector;
 import zju.measure.MeasTypeCons;
 import zju.measure.MeasVector;
+import zju.pso.HybridPso;
 import zju.pso.Location;
 import zju.pso.OptModel;
 import zju.pso.PsoProcess;
@@ -41,7 +42,7 @@ public class PsoSeAlg extends AbstractSeAlg implements OptModel, MeasTypeCons {
     public void doSeAnalyse() {
         long start = System.currentTimeMillis();
         initial();
-        PsoProcess solver = new PsoProcess(this, 1000);
+        HybridPso solver = new HybridPso(this, 1000);
         solver.execute();
 
         if (solver.isGBestfeasible())
@@ -98,8 +99,8 @@ public class PsoSeAlg extends AbstractSeAlg implements OptModel, MeasTypeCons {
         if (variable_type == VARIABLE_VTHETA
                 || variable_type == VARIABLE_VTHETA_PQ) {
             for (int i = 0; i < busNumber; i++) {
-                minLoc[i] = 0.95;
-                minLoc[i + busNumber] = -Math.PI/2;
+                minLoc[i] = 1.;
+                minLoc[i + busNumber] = -Math.PI / 2;
             }
             if (slackBusCol >= 0) {
                 minLoc[slackBusCol + busNumber] = getSlackBusAngle();
@@ -122,7 +123,7 @@ public class PsoSeAlg extends AbstractSeAlg implements OptModel, MeasTypeCons {
                 || variable_type == VARIABLE_VTHETA_PQ) {
             for (int i = 0; i < busNumber; i++) {
                 maxLoc[i] = 1.1;
-                maxLoc[i + busNumber] = Math.PI/2;
+                maxLoc[i + busNumber] = Math.PI / 2;
             }
             if (slackBusCol >= 0) {
                 maxLoc[slackBusCol + busNumber] = getSlackBusAngle();
@@ -132,7 +133,7 @@ public class PsoSeAlg extends AbstractSeAlg implements OptModel, MeasTypeCons {
             }
         } else {
             for (int i = 0; i < 2 * busNumber; i++) {
-                maxLoc[i] = 1.1;
+                maxLoc[i] = 2;
             }
         }
         return maxLoc;
@@ -144,7 +145,7 @@ public class PsoSeAlg extends AbstractSeAlg implements OptModel, MeasTypeCons {
         double[] maxLoc = getMaxLoc();
         double[] minVel = new double[getDimentions()];
         for (int i = 0; i < getDimentions(); i++) {
-            minVel[i] = (minLoc[i] - maxLoc[i])*0.2 ;
+            minVel[i] = (minLoc[i] - maxLoc[i]) * 0.5;
         }
         return minVel;
     }
@@ -155,7 +156,7 @@ public class PsoSeAlg extends AbstractSeAlg implements OptModel, MeasTypeCons {
         double[] maxLoc = getMaxLoc();
         double[] maxVel = new double[getDimentions()];
         for (int i = 0; i < getDimentions(); i++) {
-            maxVel[i] = (maxLoc[i] - minLoc[i])*0.2 ;
+            maxVel[i] = (maxLoc[i] - minLoc[i]) * 0.5;
         }
         return maxVel;
     }
@@ -167,7 +168,7 @@ public class PsoSeAlg extends AbstractSeAlg implements OptModel, MeasTypeCons {
 
     @Override
     public int getMaxIter() {
-        return 1000;
+        return 10000;
     }
 
     public MeasVector getPqMeasure() {

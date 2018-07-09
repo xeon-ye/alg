@@ -11,5 +11,9 @@ public interface PsoConstants {
     double C1 = 1.4961;
     double C2 = 1.4961;
     double W_UPPERBOUND = 0.9;
-    double W_LOWERBOUND = 0.1;
+    double W_LOWERBOUND = 0.9;
+    double PUNISHMENT = 1e6;
+    double HYBRID_PROBABILITY = 0.5;
+    double MUTATION_UPPERBOUND = 0.1;
+    double MUTATION_LOWERBOUND = 0.1;
 }

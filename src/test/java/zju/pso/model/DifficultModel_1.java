@@ -89,6 +89,6 @@ public class DifficultModel_1 implements OptModel {
 
     @Override
     public int getMaxIter() {
-        return 200;
+        return 2000;
     }
 }

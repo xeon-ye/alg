@@ -10,31 +10,19 @@ import java.util.*;
  * @Time: 16:58
  */
 
-public class PsoProcess implements PsoConstants {
-    private Vector<Particle> swarm = new Vector<>();
-    private double[] pBest; // 各粒子个体最优适应度值
-    private Vector<Location> pBestLocation = new Vector<>(); // 各粒子个体最优位置
-    private double gBest; // 全局最优适应度值
-    private Location gBestLocation; // 全局最优位置
+public final class PsoProcess extends AbstractPso implements PsoConstants {
     private double[] fitnessValueList; // 各粒子当前适应度值
     private boolean[] feasibleList; // 各粒子是否曾经在可行域内
     private boolean[] currentFeasibleList; // 各粒子本次迭代是否在可行域内
     private boolean hasFeasibleOne = false; // 当前是否存在粒子在可行域内
-    private boolean isGBestfeasible = false; // gBest是否在可行域内
     private double[] maxViolation; // 历史最大偏差
-
-    private OptModel optModel;
-    private final int swarmSize;
-
-    private Random generator = new Random();
+    private boolean isGBestfeasible = false; // gBest是否在可行域内
 
     public PsoProcess(OptModel optModel, int swarmSize) {
-        this.optModel = optModel;
-        this.swarmSize = swarmSize;
+        super(optModel, swarmSize);
         this.fitnessValueList = new double[swarmSize];
         this.feasibleList = new boolean[swarmSize];
         this.currentFeasibleList = new boolean[swarmSize];
-        this.pBest = new double[swarmSize];
     }
 
     public void execute() {
@@ -165,7 +153,7 @@ public class PsoProcess implements PsoConstants {
     }
 
     // 初始化粒子群
-    private void initializeSwarm() {
+    protected void initializeSwarm() {
         Particle p;
         // 在粒子已知可行范围内初始化粒子群
         int n = optModel.getDimentions();
@@ -241,12 +229,4 @@ public class PsoProcess implements PsoConstants {
         return isGBestfeasible;
     }
 
-    // 获得最优情况下的适应度值
-    public double getgBest() {
-        return gBest;
-    }
-
-    public Location getgBestLocation() {
-        return gBestLocation;
-    }
 }
