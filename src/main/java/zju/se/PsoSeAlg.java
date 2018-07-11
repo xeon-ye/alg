@@ -21,7 +21,6 @@ public class PsoSeAlg extends AbstractSeAlg implements OptModel, MeasTypeCons {
 
     protected SeObjective objFunc = new SeObjective();
     private MeasVector pqMeasure;
-    private double equaTol = 1e-5;
     private int slackBusCol;
     private int busNumber;
     private double objective;
@@ -73,25 +72,25 @@ public class PsoSeAlg extends AbstractSeAlg implements OptModel, MeasTypeCons {
         return obj;
     }
 
-//    @Override
-//    public double[] evalConstr(Location location) {
-//        // 先处理等式约束
-//        double[] variableState = location.getLoc();
-//        double[] z_est = new double[0];
-//
-//        if (variable_type == IpoptSeAlg.VARIABLE_VTHETA)
-//            z_est = StateCalByPolar.getEstimatedZ(pqMeasure, Y, variableState).getValues(); //获得了测点的估计值
-//        else if (variable_type == IpoptSeAlg.VARIABLE_U)
-//            z_est = StateCalByRC.getEstimatedZ_U(pqMeasure, Y, variableState).getValues(); //获得了测点的估计值
-//        double[] z = pqMeasure.getZ().getValues(); // 获得了测点的量测值
-//        assert z_est.length == z.length;
-//
-//        double[] constr = new double[z_est.length];
-//        for (int i = 0; i < constr.length; i++) {
-//            constr[i] = Math.abs(z[i] - z_est[i]) - equaTol;
-//        }
-//        return constr;
-//    }
+    @Override
+    public double[] evalConstr(Location location) {
+        // 处理等式约束
+        double[] variableState = location.getLoc();
+        int[] zeroPBuses = this.zeroPBuses;
+        int[] zeroQBuses = this.zeroQBuses;
+        double[] constr = new double[zeroPBuses.length + zeroQBuses.length];
+        int index = 0;
+        for (int zeroPBuse : zeroPBuses) {
+            double p = StateCalByPolar.calBusP(zeroPBuse, Y, variableState);
+            constr[index++] = Math.abs(p) - tol_p;
+        }
+        for (int zeroQBus : zeroQBuses) {
+            double q = StateCalByPolar.calBusQ(zeroQBus, Y, variableState);
+            constr[index++] = Math.abs(q) - tol_q;
+        }
+
+        return constr;
+    }
 
     @Override
     public double[] getMinLoc() {
@@ -181,13 +180,5 @@ public class PsoSeAlg extends AbstractSeAlg implements OptModel, MeasTypeCons {
 
     public SeObjective getObjFunc() {
         return objFunc;
-    }
-
-    public double getEquaTol() {
-        return equaTol;
-    }
-
-    public void setEquaTol(double equaTol) {
-        this.equaTol = equaTol;
     }
 }
