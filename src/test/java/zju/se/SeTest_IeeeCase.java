@@ -27,7 +27,7 @@ public class SeTest_IeeeCase extends TestCase implements MeasTypeCons {
     public SeTest_IeeeCase(String name) {
         super(name);
         se = new StateEstimator();
-        alg = new PsoSeAlg();
+        alg = new IpoptSeAlg();
         se.setAlg(alg); // se中也有这个变量
     }
 
@@ -175,7 +175,7 @@ public class SeTest_IeeeCase extends TestCase implements MeasTypeCons {
         if (alg instanceof IpoptSeAlg)
             ((IpoptSeAlg) alg).getObjFunc().setObjType(SeObjective.OBJ_TYPE_WLS); // 设置目标函数
         else if (alg instanceof PsoSeAlg)
-            ((PsoSeAlg) alg).getObjFunc().setObjType(SeObjective.OBJ_TYPE_VOTE); // 设置目标函数
+            ((PsoSeAlg) alg).getObjFunc().setObjType(SeObjective.OBJ_TYPE_MNMR); // 设置目标函数
 
         SeResultInfo r;
 

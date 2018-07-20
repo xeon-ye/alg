@@ -90,7 +90,7 @@ public class DsStateEstimator implements DsModelCons {
         if (objFunc.getObjType() == SeObjective.OBJ_TYPE_WLS) {
             objFunc.setMeas(meas);
         } else if (objFunc.getObjType() == SeObjective.OBJ_TYPE_SIGMOID) {
-            System.out.println("k=" + k + ", lambda = " + ((alpha2 - alpha1) / alpha1));
+            System.out.println("k = " + k + ", lambda = " + ((alpha2 - alpha1) / alpha1));
             badData_threshhold = new double[meas.getZ().getN()];
             for (int i = 0; i < meas.getZ().getN(); i++) {
                 double a0 = meas.getSigma().getValue(i) * alpha1;

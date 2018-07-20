@@ -1,5 +1,8 @@
 package zju.pso;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.util.*;
 
 /**
@@ -10,11 +13,19 @@ import java.util.*;
  * @Time: 17:05
  */
 public class HybridPso extends AbstractPso implements PsoConstants {
+
+    private static Logger logger = LogManager.getLogger(HybridPso.class);
+
     private double[] fitness; // 各粒子当前适应度值
     private boolean isGBestfeasible = false; // gBest是否在可行域内
 
     public HybridPso(OptModel optModel, int swarmSize) {
         super(optModel, swarmSize);
+        this.fitness = new double[swarmSize];
+    }
+
+    public HybridPso(OptModel optModel, int swarmSize, double[] initVariableState) {
+        super(optModel, swarmSize, initVariableState);
         this.fitness = new double[swarmSize];
     }
 
@@ -35,9 +46,17 @@ public class HybridPso extends AbstractPso implements PsoConstants {
             double[] vel = new double[n];
 
             // 随机化粒子的位置和速度
-            for (int j = 0; j < n; j++) {
-                loc[j] = minLoc[j] + generator.nextDouble() * (maxLoc[j] - minLoc[j]); // 初始时粒子一定满足显式约束
-                vel[j] = minVel[j] + generator.nextDouble() * (maxVel[j] - minVel[j]);
+            if (isWarmStart) {
+                for (int j = 0; j < n; j++) {
+                    assert initVariableState.length == n;
+                    loc[j] = initVariableState[j]; // 初始时粒子一定满足显式约束
+                    vel[j] = minVel[j] + generator.nextDouble() * (maxVel[j] - minVel[j]);
+                }
+            } else {
+                for (int j = 0; j < n; j++) {
+                    loc[j] = minLoc[j] + generator.nextDouble() * (maxLoc[j] - minLoc[j]); // 初始时粒子一定满足显式约束
+                    vel[j] = minVel[j] + generator.nextDouble() * (maxVel[j] - minVel[j]);
+                }
             }
             Location location = new Location(loc);
             Velocity velocity = new Velocity(vel);
@@ -218,18 +237,14 @@ public class HybridPso extends AbstractPso implements PsoConstants {
             if (isGBestfeasible)
                 tol = gBest - optModel.getTolFitness();
 
-            System.out.println("ITERATION " + iterNum + ": ");
-            System.out.println("     Best Location: " + Arrays.toString(gBestLocation.getLoc()));
-            System.out.println("     Value: " + gBest + "  " + isGBestfeasible);
-
+            logger.debug("ITERATION " + iterNum + ": Value: " + gBest + "  " + isGBestfeasible);
             iterNum++;
         }
 
         if (isGBestfeasible) {
-            System.out.println("\nSolution found at iteration " + iterNum + ", the solutions is:");
-            System.out.println("     Best Location: " + Arrays.toString(gBestLocation.getLoc()));
+            logger.info("Solution found at iteration " + iterNum + ", best fitness value: " + gBest);
         } else {
-            System.out.println("Solution not found");
+            logger.warn("Solution not found");
         }
     }
 

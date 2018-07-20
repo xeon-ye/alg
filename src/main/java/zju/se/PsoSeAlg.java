@@ -1,13 +1,13 @@
 package zju.se;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import zju.matrix.AVector;
 import zju.measure.MeasTypeCons;
 import zju.measure.MeasVector;
 import zju.pso.HybridPso;
 import zju.pso.Location;
 import zju.pso.OptModel;
-import zju.pso.PsoProcess;
-import zju.util.PfUtil;
 import zju.util.StateCalByPolar;
 import zju.util.StateCalByRC;
 
@@ -23,26 +23,57 @@ public class PsoSeAlg extends AbstractSeAlg implements OptModel, MeasTypeCons {
     private MeasVector pqMeasure;
     private int slackBusCol;
     private int busNumber;
+    private double[] initVariableState;
+    private boolean isWarmStart;
     private double objective;
 
     private void initial() {
         if (getSlackBusNum() > 0)
             slackBusCol = getSlackBusNum() - 1; // 得到松弛节点的列号
         busNumber = Y.getAdmittance()[0].getM(); // 节点数量
-
+        isSlackBusVoltageFixed = false;
     }
 
     @Override
     public AVector getFinalVTheta() {
-        return null;
+        switch (variable_type) {
+            case VARIABLE_VTHETA:
+                return new AVector(variableState);
+            case VARIABLE_VTHETA_PQ:
+                double[] vTheta = new double[2 * busNumber];
+                System.arraycopy(variableState, 0, vTheta, 0, vTheta.length);
+                return new AVector(vTheta);
+            case VARIABLE_U:
+            case VARIABLE_UI:
+                double[] state = new double[2 * busNumber];
+                for (int i = 0; i < busNumber; i++) {
+                    double a = variableState[i];
+                    double b = variableState[i + busNumber];
+                    state[i] = Math.sqrt(a * a + b * b);
+                    state[i + busNumber] = Math.atan2(b, a);
+                }
+                return new AVector(state);
+            default:
+                return null;
+        }
     }
 
     @Override
     public void doSeAnalyse() {
         long start = System.currentTimeMillis();
         initial();
-        HybridPso solver = new HybridPso(this, 1000);
+        HybridPso solver;
+        if (isWarmStart) {
+            solver = new HybridPso(this, 100, initVariableState);
+        } else {
+            solver = new HybridPso(this, 100);
+        }
         solver.execute();
+        variableState = solver.getgBestLocation().getLoc();
+        if (variable_type == IpoptSeAlg.VARIABLE_VTHETA)
+            StateCalByPolar.getEstimatedZ(meas, Y, variableState); //获得了测点的估计值
+        else if (variable_type == IpoptSeAlg.VARIABLE_U)
+            StateCalByRC.getEstimatedZ_U(meas, Y, variableState); //获得了测点的估计值
 
         if (solver.isGBestfeasible())
             objective = solver.getgBest();
@@ -60,10 +91,9 @@ public class PsoSeAlg extends AbstractSeAlg implements OptModel, MeasTypeCons {
         else if (variable_type == IpoptSeAlg.VARIABLE_U)
             z_est = StateCalByRC.getEstimatedZ_U(meas, Y, variableState).getValues(); //获得了测点的估计值
         double[] z = meas.getZ().getValues(); // 获得了测点的量测值
-
-        assert z_est.length == z.length;
-        double[] threshold = objFunc.getThresholds();
         double obj = 0;
+
+        double[] threshold = objFunc.getThresholds();
         for (int i = 0; i < z_est.length; i++) {
             double d = (z_est[i] - z[i]) / threshold[i]; // 测点相对偏移
             if (Math.abs(d) > 1)
@@ -144,7 +174,7 @@ public class PsoSeAlg extends AbstractSeAlg implements OptModel, MeasTypeCons {
         double[] maxLoc = getMaxLoc();
         double[] minVel = new double[getDimentions()];
         for (int i = 0; i < getDimentions(); i++) {
-            minVel[i] = (minLoc[i] - maxLoc[i]) * 0.5;
+            minVel[i] = (minLoc[i] - maxLoc[i]) * 0.2;
         }
         return minVel;
     }
@@ -155,7 +185,7 @@ public class PsoSeAlg extends AbstractSeAlg implements OptModel, MeasTypeCons {
         double[] maxLoc = getMaxLoc();
         double[] maxVel = new double[getDimentions()];
         for (int i = 0; i < getDimentions(); i++) {
-            maxVel[i] = (maxLoc[i] - minLoc[i]) * 0.5;
+            maxVel[i] = (maxLoc[i] - minLoc[i]) * 0.2;
         }
         return maxVel;
     }
@@ -167,7 +197,7 @@ public class PsoSeAlg extends AbstractSeAlg implements OptModel, MeasTypeCons {
 
     @Override
     public int getMaxIter() {
-        return 10000;
+        return 1000;
     }
 
     public MeasVector getPqMeasure() {
@@ -180,5 +210,17 @@ public class PsoSeAlg extends AbstractSeAlg implements OptModel, MeasTypeCons {
 
     public SeObjective getObjFunc() {
         return objFunc;
+    }
+
+    public void setWarmStart(boolean warmStart) {
+        isWarmStart = warmStart;
+    }
+
+    public double[] getInitVariableState() {
+        return initVariableState;
+    }
+
+    public void setInitVariableState(double[] initVariableState) {
+        this.initVariableState = initVariableState;
     }
 }

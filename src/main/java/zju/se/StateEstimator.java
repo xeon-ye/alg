@@ -141,8 +141,8 @@ public class StateEstimator implements SeConstants, MeasTypeCons {
         objFunc.setQMeas(new MeasureInfo[0]);
         objFunc.setQMeasPos(new int[0]);
         // 采用VTHETA作为状态变量时，会把sm中对应的量测给抹去
-        if (variable_type == IpoptSeAlg.VARIABLE_VTHETA
-                || variable_type == IpoptSeAlg.VARIABLE_VTHETA_PQ) {
+        if (variable_type == AbstractSeAlg.VARIABLE_VTHETA
+                || variable_type == AbstractSeAlg.VARIABLE_VTHETA_PQ) {
             if (objFunc.getObjType() == SeObjective.OBJ_TYPE_WLS) {
                 //todo; system measure is changed, must pay attention to it.
                 MeasureInfo[] vMeas = new MeasureInfo[origVMeas.size()];
@@ -154,7 +154,7 @@ public class StateEstimator implements SeConstants, MeasTypeCons {
                 objFunc.setVMeas(vMeas);
                 objFunc.setVMeasPos(vMeasPos);
 
-                if (variable_type == IpoptSeAlg.VARIABLE_VTHETA_PQ) {
+                if (variable_type == AbstractSeAlg.VARIABLE_VTHETA_PQ) {
                     MeasureInfo[] pMeas = new MeasureInfo[origPMeas.size()];
                     origPMeas.values().toArray(pMeas);
                     int[] pMeasPos = new int[pMeas.length];
@@ -175,8 +175,8 @@ public class StateEstimator implements SeConstants, MeasTypeCons {
                 }
             }
         }
-        if (variable_type == IpoptSeAlg.VARIABLE_U
-                || variable_type == IpoptSeAlg.VARIABLE_UI) { // 采用直角坐标
+        if (variable_type == AbstractSeAlg.VARIABLE_U
+                || variable_type == AbstractSeAlg.VARIABLE_UI) { // 采用直角坐标
             for (MeasureInfo info : origVMeas.values()) {
                 double v = info.getValue();
                 info.setValue(v * v); // 对于PV节点不平衡量是v * v
@@ -205,8 +205,8 @@ public class StateEstimator implements SeConstants, MeasTypeCons {
         sm.setBus_q(origQMeas);
         if (alg instanceof IpoptSeAlg || alg instanceof PsoSeAlg) {
             switch (variable_type) {
-                case IpoptSeAlg.VARIABLE_UI:
-                case IpoptSeAlg.VARIABLE_U:
+                case AbstractSeAlg.VARIABLE_UI:
+                case AbstractSeAlg.VARIABLE_U:
                     for (MeasureInfo info : origVMeas.values())
                         info.setValue(Math.sqrt(info.getValue()));
                     break;
@@ -252,7 +252,7 @@ public class StateEstimator implements SeConstants, MeasTypeCons {
         if (objFunc.getObjType() == SeObjective.OBJ_TYPE_WLS) {
             objFunc.setMeas(meas);
         } else if (objFunc.getObjType() == SeObjective.OBJ_TYPE_SIGMOID) {
-            System.out.println("k=" + k + ", lambda = " + ((alpha2 - alpha1) / alpha1));
+            System.out.println("k = " + k + ", lambda = " + ((alpha2 - alpha1) / alpha1));
             badData_threshhold = new double[meas.getZ().getN()];
             for (int i = 0; i < meas.getZ().getN(); i++) {
                 double a0 = meas.getSigma().getValue(i) * alpha1; // 代表与置信区间p对应的扩展不确定度，偏移在此区域内代表为合格测点
@@ -294,13 +294,24 @@ public class StateEstimator implements SeConstants, MeasTypeCons {
             //objFunc.setThresholds1(para1);
             //objFunc.setThresholds2(para2);
             //objFunc.setMeas(meas);
-        } else if (objFunc.getObjType() == SeObjective.OBJ_TYPE_VOTE) {
+        } else if (objFunc.getObjType() == SeObjective.OBJ_TYPE_MNMR) {
+            System.out.println("k = " + k + ", lambda = " + ((alpha2 - alpha1) / alpha1));
             badData_threshhold = new double[meas.getZ().getN()];
             for (int i = 0; i < meas.getZ().getN(); i++) {
-                para1[i] = meas.getSigma().getValue(i) * 3; // 代表与置信区间p对应的扩展不确定度，偏移在此区域内代表为合格测点
-                badData_threshhold[i] = para1[i];
+                double a0 = meas.getSigma().getValue(i) * alpha1; // 代表与置信区间p对应的扩展不确定度，偏移在此区域内代表为合格测点
+                double a1 = meas.getSigma().getValue(i) * alpha2; // 1 + lamda = a1/a0 偏移在此区域外为不合格测点
+                //if (a1 < 1e-3)
+                //    a1 = 0.01;
+                // a和b代表的是指数的ax+b形式
+                double a = (2 * k / (a0 - a1));
+                double b = (k * (a1 + a0) / (a1 - a0));
+                para1[i] = b / a;
+                para2[i] = a;
+                badData_threshhold[i] = a0;
             }
-            objFunc.setThresholds(para1);
+            objFunc.setA(para1);
+            objFunc.setB(para2);
+            objFunc.setThresholds(badData_threshhold);
             objFunc.setMeas(meas);
         }
         return badData_threshhold;

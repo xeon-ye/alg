@@ -19,11 +19,19 @@ public abstract class AbstractPso {
     protected double gBest; // 全局最优适应度值
     protected Location gBestLocation; // 全局最优位置
     protected Random generator = new Random(); // 随机数产生器
+    protected boolean isWarmStart = false;
+    protected double[] initVariableState;
 
     protected AbstractPso(OptModel optModel, int swarmSize) {
         this.optModel = optModel;
         this.swarmSize = swarmSize;
         this.pBest = new double[swarmSize];
+    }
+
+    protected AbstractPso(OptModel optModel, int swarmSize, double[] initVariableState) {
+        this(optModel, swarmSize);
+        this.isWarmStart = true;
+        this.initVariableState = initVariableState;
     }
 
     protected abstract void initializeSwarm();
