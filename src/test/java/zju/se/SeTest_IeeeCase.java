@@ -1,6 +1,7 @@
 package zju.se;
 
 import junit.framework.TestCase;
+import org.junit.Test;
 import zju.ieeeformat.BusData;
 import zju.ieeeformat.DefaultIcfParser;
 import zju.ieeeformat.IEEEDataIsland;
@@ -21,13 +22,13 @@ import java.util.Map;
 public class SeTest_IeeeCase extends TestCase implements MeasTypeCons {
 
     StateEstimator se;
-    IpoptSeAlg alg;
+    AbstractSeAlg alg;
 
     public SeTest_IeeeCase(String name) {
         super(name);
         se = new StateEstimator();
         alg = new IpoptSeAlg();
-        se.setAlg(alg);
+        se.setAlg(alg); // se中也有这个变量
     }
 
     public void setUp() throws Exception {
@@ -155,7 +156,7 @@ public class SeTest_IeeeCase extends TestCase implements MeasTypeCons {
                 IpoptSeAlg.VARIABLE_VTHETA_PQ,
                 IpoptSeAlg.VARIABLE_U,
                 IpoptSeAlg.VARIABLE_UI,
-        };
+        }; // 状态变量类型
         doSE(island, sm, ref, variables_types, isTrueValue, isZeroInjection);
     }
 
@@ -166,12 +167,16 @@ public class SeTest_IeeeCase extends TestCase implements MeasTypeCons {
         double slackBusAngle = island.getBus(island.getSlackBusNum()).getFinalAngle() * Math.PI / 180.;
         alg.setSlackBusAngle(slackBusAngle);
 
-        se.setOriIsland(island);
+        se.setOriIsland(island); // 初始化电气岛
         se.setSm(sm);
-        se.setFlatStart(true);
+        se.setFlatStart(true); // 平启动
 
         long start = System.currentTimeMillis();
-        alg.getObjFunc().setObjType(SeObjective.OBJ_TYPE_WLS);
+        if (alg instanceof IpoptSeAlg)
+            ((IpoptSeAlg) alg).getObjFunc().setObjType(SeObjective.OBJ_TYPE_WLS); // 设置目标函数
+        else if (alg instanceof PsoSeAlg)
+            ((PsoSeAlg) alg).getObjFunc().setObjType(SeObjective.OBJ_TYPE_MNMR); // 设置目标函数
+
         SeResultInfo r;
 
         //下面这一段测试传统最小二乘的效果
@@ -184,8 +189,8 @@ public class SeTest_IeeeCase extends TestCase implements MeasTypeCons {
         //printZeroInjectionDelta(ref, r);
 
         //下面这一段测试所有模型的最小二乘效果
-        if(ref != null)
-            dealZeroInjection(sm, ref, isZeroInjection);
+        if (ref != null) // ref是潮流计算的结果
+            dealZeroInjection(sm, ref, isZeroInjection); // 将零注入功率节点的节点注入功率量测从sm中剔除
         for (int variable_type : variables_types) {
             alg.setVariable_type(variable_type);
             se.doSe();
@@ -199,8 +204,16 @@ public class SeTest_IeeeCase extends TestCase implements MeasTypeCons {
         }
 
         //下面这一段测试sigmoid函数的效果
-        //start = System.currentTimeMillis();
-        //alg.getObjFunc().setObjType(SeObjective.OBJ_TYPE_SIGMOID);
+//        start = System.currentTimeMillis();
+//        alg.getObjFunc().setObjType(SeObjective.OBJ_TYPE_SIGMOID);
+//        dealZeroInjection(sm, ref, false);
+//        alg.setVariable_type(IpoptSeAlg.VARIABLE_VTHETA);
+//        se.doSe();
+//        assertTrue(alg.isConverged());
+//        r = se.createPfResult();
+//        printS1(ref, se.createPfResult(), isTrueValue);
+//        printZeroInjectionDelta(ref, r);
+
         //for (int variable_type : variables_types) {
         //    alg.setVariable_type(variable_type);
         //    r = se.doSe();
@@ -273,8 +286,9 @@ public class SeTest_IeeeCase extends TestCase implements MeasTypeCons {
             int num = b.getBusNumber();
             double p = StateCalByPolar.calBusP(num, se.getY(), vtheta);
             double q = StateCalByPolar.calBusQ(num, se.getY(), vtheta);
+            // 将零注入功率节点从注入功率量测中除去
             if (Math.abs(p) < alg.getTol_p()) {//是否是有功零注入节点
-                String key = String.valueOf(se.getNumOpt().getNew2old().get(num));
+                String key = String.valueOf(se.getNumOpt().getNew2old().get(num)); // clonedIsland已经重新编号，这里获取原始编号
                 sm.getBus_p().remove(key);
                 count1++;
             }
@@ -296,7 +310,7 @@ public class SeTest_IeeeCase extends TestCase implements MeasTypeCons {
                 double p = StateCalByPolar.calBusP(num, se.getY(), vtheta);
                 double q = StateCalByPolar.calBusQ(num, se.getY(), vtheta);
                 if (Math.abs(p) < alg.getTol_p())
-                    zeroPInjection[count1++] = num;
+                    zeroPInjection[count1++] = num; // 标记零注入功率节点(重新编号后)
                 if (Math.abs(q) < alg.getTol_q())
                     zeroQInjection[count2++] = num;
             }
@@ -321,7 +335,7 @@ public class SeTest_IeeeCase extends TestCase implements MeasTypeCons {
 
     public static void doSeStudy(IEEEDataIsland island, double tol_p, double tol_q) {
         SeTest_IeeeCase seTest = new SeTest_IeeeCase("do 20 time study.");
-        IpoptSeAlg alg = seTest.alg;
+        AbstractSeAlg alg = seTest.alg;
         alg.setTol_p(tol_p);
         alg.setTol_q(tol_q);
         alg.setPrintPath(false);
@@ -348,7 +362,7 @@ public class SeTest_IeeeCase extends TestCase implements MeasTypeCons {
         return se;
     }
 
-    public IpoptSeAlg getAlg() {
+    public AbstractSeAlg getAlg() {
         return alg;
     }
 }

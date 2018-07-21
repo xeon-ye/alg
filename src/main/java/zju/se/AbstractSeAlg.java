@@ -13,6 +13,13 @@ import zju.util.YMatrixGetter;
  *         Date: 2007-12-19
  */
 public abstract class AbstractSeAlg implements SeConstants, MeasTypeCons {
+    public static final int VARIABLE_VTHETA = 1;
+    public static final int VARIABLE_U = 2;
+    public static final int VARIABLE_VTHETA_PQ = 3;
+    public static final int VARIABLE_UI = 4;
+
+    protected int variable_type = -1;
+
     protected int maxIter = 500;
 
     protected double tolerance = 1e-4;
@@ -44,6 +51,16 @@ public abstract class AbstractSeAlg implements SeConstants, MeasTypeCons {
     protected long timeUsed = 0;
 
     protected int[] measInObjFunc;
+
+    protected double tol_p = 0.005, tol_q = 0.005;
+
+    public int getVariable_type() {
+        return variable_type;
+    }
+
+    public void setVariable_type(int variable_type) {
+        this.variable_type = variable_type;
+    }
 
     public abstract AVector getFinalVTheta();
 
@@ -209,5 +226,21 @@ public abstract class AbstractSeAlg implements SeConstants, MeasTypeCons {
 
     public void setTimeUsed(long timeUsed) {
         this.timeUsed = timeUsed;
+    }
+
+    public double getTol_p() {
+        return tol_p;
+    }
+
+    public void setTol_p(double tol_p) {
+        this.tol_p = tol_p;
+    }
+
+    public double getTol_q() {
+        return tol_q;
+    }
+
+    public void setTol_q(double tol_q) {
+        this.tol_q = tol_q;
     }
 }
