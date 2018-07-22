@@ -2301,7 +2301,7 @@ public class LoadTransferOpt extends PathBasedModel {
         maxCircuitLoad = new HashMap<String, Double>(supplies.length);
         double[] feederLoad = new double[edges.size()];
         for (i = 0; i < edges.size(); i++) {
-            minFeederLoadChanged[i] = Double.MAX_VALUE;
+            minFeederLoadChanged[i] = feederCapArray[i];
             if (i == edgeStart.length - 1)
                 endIndex = edgepathes.size();
             else
@@ -2508,7 +2508,7 @@ public class LoadTransferOpt extends PathBasedModel {
         maxCircuitLoad = new HashMap<String, Double>(supplies.length);
         double[] feederLoad = new double[edges.size()];
         for (i = 0; i < edges.size(); i++) {
-            minFeederLoadChanged[i] = Double.MAX_VALUE;
+            minFeederLoadChanged[i] = feederCapArray[i];
             if (i == edgeStart.length - 1)
                 endIndex = edgepathes.size();
             else
