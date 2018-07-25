@@ -1,10 +1,13 @@
 package zju.se;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.*;
 import zju.ieeeformat.BusData;
 import zju.ieeeformat.IEEEDataIsland;
 import zju.ieeeformat.IcfDataUtil;
 import zju.measure.MeasTypeCons;
+import zju.measure.MeasureInfo;
 import zju.measure.SystemMeasure;
 import zju.pf.SimuMeasMaker;
 import zju.util.StateCalByPolar;
@@ -22,6 +25,8 @@ import static junit.framework.TestCase.assertTrue;
  * @Time: 15:03
  */
 public class PsoSeTest_IeeeCase implements MeasTypeCons {
+
+    private static Logger log = LogManager.getLogger(PsoSeTest_IeeeCase.class);
 
     private StateEstimator se;
     private IpoptSeAlg ipoptSeAlg;
@@ -187,13 +192,69 @@ public class PsoSeTest_IeeeCase implements MeasTypeCons {
         doSE(island, sm, IcfDataUtil.ISLAND_300, false, true);
     }
 
+    /**
+     * 给所有量测加入2%的高斯噪声，且加入零功率注入节点等式约束
+     */
+    @Test
+    public void testCaseGauss_zeroInjection_withBadData() {
+        ipoptSeAlg.setTol_p(5e-3);
+        ipoptSeAlg.setTol_q(5e-3);
+        psoSeAlg.setTol_p(5e-3);
+        psoSeAlg.setTol_q(5e-3);
+
+        IEEEDataIsland island;
+        SystemMeasure sm;
+        SystemMeasure smRef;
+
+        island = IcfDataUtil.ISLAND_14.clone();
+        smRef = SimuMeasMaker.createFullMeasure(island, 1, 0);
+        sm = SimuMeasMaker.createFullMeasure_withBadData(island, 1, 0.02, 0.0635);
+        doSE(island, sm, smRef, IcfDataUtil.ISLAND_14, false, true);
+
+        island = IcfDataUtil.ISLAND_30.clone();
+        smRef = SimuMeasMaker.createFullMeasure(island, 1, 0);
+        sm = SimuMeasMaker.createFullMeasure_withBadData(island, 1, 0.02, 0.0635);
+        doSE(island, sm, smRef, IcfDataUtil.ISLAND_30, false, true);
+
+        island = IcfDataUtil.ISLAND_39.clone();
+        smRef = SimuMeasMaker.createFullMeasure(island, 1, 0);
+        sm = SimuMeasMaker.createFullMeasure_withBadData(island, 1, 0.02, 0.0635);
+        doSE(island, sm, smRef, IcfDataUtil.ISLAND_39, false, true);
+
+        island = IcfDataUtil.ISLAND_57.clone();
+        smRef = SimuMeasMaker.createFullMeasure(island, 1, 0);
+        sm = SimuMeasMaker.createFullMeasure_withBadData(island, 1, 0.02, 0.0635);
+        doSE(island, sm, smRef, IcfDataUtil.ISLAND_57, false, true);
+
+        island = IcfDataUtil.ISLAND_118.clone();
+        smRef = SimuMeasMaker.createFullMeasure(island, 1, 0);
+        sm = SimuMeasMaker.createFullMeasure_withBadData(island, 1, 0.02, 0.0635);
+        doSE(island, sm, smRef, IcfDataUtil.ISLAND_118, false, true);
+
+        island = IcfDataUtil.ISLAND_300.clone();
+        smRef = SimuMeasMaker.createFullMeasure(island, 1, 0);
+        sm = SimuMeasMaker.createFullMeasure_withBadData(island, 1, 0.02, 0.0635);
+        doSE(island, sm, smRef, IcfDataUtil.ISLAND_300, false, true);
+    }
 
     private void doSE(IEEEDataIsland island, SystemMeasure sm,
                       IEEEDataIsland ref, boolean isTrueValue, boolean isZeroInjection) {
         int[] variables_types = {
                 IpoptSeAlg.VARIABLE_VTHETA,
         }; // 状态变量类型
-        doIpoptSE(island, sm, ref, variables_types, isTrueValue, isZeroInjection);
+        doIpoptSE(island, sm, ref, variables_types, isTrueValue, isZeroInjection, SeObjective.OBJ_TYPE_SIGMOID);
+        double[] variableState = ipoptSeAlg.getVariableState();
+        psoSeAlg.setInitVariableState(variableState);
+        psoSeAlg.setWarmStart(true);
+        doPsoSE(island, sm, ref, variables_types, isTrueValue, isZeroInjection);
+    }
+
+    private void doSE(IEEEDataIsland island, SystemMeasure sm, SystemMeasure smRef,
+                      IEEEDataIsland ref, boolean isTrueValue, boolean isZeroInjection) {
+        int[] variables_types = {
+                IpoptSeAlg.VARIABLE_VTHETA,
+        }; // 状态变量类型
+        doIpoptSE(island, smRef, ref, variables_types, isTrueValue, isZeroInjection, SeObjective.OBJ_TYPE_SIGMOID);
         double[] variableState = ipoptSeAlg.getVariableState();
         psoSeAlg.setInitVariableState(variableState);
         psoSeAlg.setWarmStart(true);
@@ -202,7 +263,7 @@ public class PsoSeTest_IeeeCase implements MeasTypeCons {
 
     private void doIpoptSE(IEEEDataIsland island, SystemMeasure sm,
                            IEEEDataIsland ref, int[] variables_types,
-                           boolean isTrueValue, boolean isZeroInjection) {
+                           boolean isTrueValue, boolean isZeroInjection, int objType) {
         //alg.setPrintPath(false);
         se.setAlg(ipoptSeAlg);
         double slackBusAngle = island.getBus(island.getSlackBusNum()).getFinalAngle() * Math.PI / 180.;
@@ -213,7 +274,7 @@ public class PsoSeTest_IeeeCase implements MeasTypeCons {
         se.setFlatStart(true); // 平启动
 
         long start = System.currentTimeMillis();
-        ipoptSeAlg.getObjFunc().setObjType(SeObjective.OBJ_TYPE_SIGMOID); // 设置目标函数
+        ipoptSeAlg.getObjFunc().setObjType(objType); // 设置目标函数
 
         SeResultInfo r;
 
@@ -226,10 +287,10 @@ public class PsoSeTest_IeeeCase implements MeasTypeCons {
             assertTrue(ipoptSeAlg.isConverged());
             r = se.createPfResult();
             assertNotNull(r);
-//            printS1(ref, r, isTrueValue);
+            printS1(ref, r, isTrueValue);
             printZeroInjectionDelta(ref, r, ipoptSeAlg);
-//            System.out.println("WLS状态估计迭代次数：" + ipoptSeAlg.getIterNum() + "\t用时：" + ipoptSeAlg.getTimeUsed() + "\t");
-//            System.out.println("WLS状态估计用时：" + (System.currentTimeMillis() - start) + "ms");
+            System.out.println("WLS状态估计迭代次数：" + ipoptSeAlg.getIterNum() + "\t用时：" + ipoptSeAlg.getTimeUsed() + "\t");
+            System.out.println("WLS状态估计用时：" + (System.currentTimeMillis() - start) + "ms");
         }
     }
 
@@ -257,12 +318,69 @@ public class PsoSeTest_IeeeCase implements MeasTypeCons {
             psoSeAlg.setVariable_type(variable_type);
             psoSeAlg.setConverged(true);
             se.doSe();
+            printBadDataResult();
             r = se.createPfResult();
             assertNotNull(r);
             printS1(ref, r, isTrueValue);
             printZeroInjectionDelta(ref, r, psoSeAlg);
             System.out.println("MNMR状态估计用时：" + (System.currentTimeMillis() - start) + "ms");
         }
+    }
+
+    private void printBadDataResult() {
+        SystemMeasure sm = se.getSm();
+        int count = 0;
+        log.info("粒子群算法计算后识别的坏数据为：");
+        for (MeasureInfo info : sm.getLine_from_p().values()) {
+            double d = (info.getValue_est() - info.getValue()) / (info.getSigma() * 3); // 测点相对偏移
+            if (Math.abs(d) > 1) {
+                count++;
+                log.info("Branch " + info.getPositionId() + " " + info.getValue_est() + " " + info.getValue());
+            }
+        }
+        for (MeasureInfo info : sm.getLine_from_q().values()) {
+            double d = (info.getValue_est() - info.getValue()) / (info.getSigma() * 3); // 测点相对偏移
+            if (Math.abs(d) > 1) {
+                count++;
+                System.out.println("Branch " + info.getPositionId() + " " + info.getValue_est() + " " + info.getValue());
+            }
+        }
+        for (MeasureInfo info : sm.getLine_to_p().values()) {
+            double d = (info.getValue_est() - info.getValue()) / (info.getSigma() * 3); // 测点相对偏移
+            if (Math.abs(d) > 1) {
+                count++;
+                System.out.println("Branch " + info.getPositionId() + " " + info.getValue_est() + " " + info.getValue());
+            }
+        }
+        for (MeasureInfo info : sm.getLine_to_q().values()) {
+            double d = (info.getValue_est() - info.getValue()) / (info.getSigma() * 3); // 测点相对偏移
+            if (Math.abs(d) > 1) {
+                count++;
+                System.out.println("Branch " + info.getPositionId() + " " + info.getValue_est() + " " + info.getValue());
+            }
+        }
+        for (MeasureInfo info : sm.getBus_p().values()) {
+            double d = (info.getValue_est() - info.getValue()) / (info.getSigma() * 3); // 测点相对偏移
+            if (Math.abs(d) > 1) {
+                count++;
+                System.out.println("Bus " + info.getPositionId() + " " + info.getValue_est() + " " + info.getValue());
+            }
+        }
+        for (MeasureInfo info : sm.getBus_q().values()) {
+            double d = (info.getValue_est() - info.getValue()) / (info.getSigma() * 3); // 测点相对偏移
+            if (Math.abs(d) > 1) {
+                count++;
+                System.out.println("Bus " + info.getPositionId() + " " + info.getValue_est() + " " + info.getValue());
+            }
+        }
+        for (MeasureInfo info : sm.getBus_v().values()) {
+            double d = (info.getValue_est() - info.getValue()) / (info.getSigma() * 3); // 测点相对偏移
+            if (Math.abs(d) > 1) {
+                count++;
+                System.out.println("Bus " + info.getPositionId() + " " + info.getValue_est() + " " + info.getValue());
+            }
+        }
+        log.info("不良数据个数：" + count);
     }
 
     private void dealZeroInjection(SystemMeasure sm, IEEEDataIsland ref, boolean isAddConstraint, AbstractSeAlg alg) {

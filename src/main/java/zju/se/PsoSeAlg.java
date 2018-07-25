@@ -64,9 +64,9 @@ public class PsoSeAlg extends AbstractSeAlg implements OptModel, MeasTypeCons {
         initial();
         HybridPso solver;
         if (isWarmStart) {
-            solver = new HybridPso(this, 100, initVariableState);
+            solver = new HybridPso(this, 1000, initVariableState);
         } else {
-            solver = new HybridPso(this, 100);
+            solver = new HybridPso(this, 1000);
         }
         solver.execute();
         variableState = solver.getgBestLocation().getLoc();
@@ -93,6 +93,14 @@ public class PsoSeAlg extends AbstractSeAlg implements OptModel, MeasTypeCons {
         double[] z = meas.getZ().getValues(); // 获得了测点的量测值
         double obj = 0;
 
+//        double[] a = objFunc.getA();
+//        double[] b = objFunc.getB();
+//        for (int i = 0; i < z_est.length; i++) {
+//            double v = z_est[i] - z[i];
+//            double y1 = 1.0 / (1.0 + Math.exp(-b[i] * (v - a[i])));
+//            double y2 = 1.0 / (1.0 + Math.exp(b[i] * (v + a[i])));
+//            obj += (y1 + y2);
+//        }
         double[] threshold = objFunc.getThresholds();
         for (int i = 0; i < z_est.length; i++) {
             double d = (z_est[i] - z[i]) / threshold[i]; // 测点相对偏移
@@ -128,7 +136,7 @@ public class PsoSeAlg extends AbstractSeAlg implements OptModel, MeasTypeCons {
         if (variable_type == VARIABLE_VTHETA
                 || variable_type == VARIABLE_VTHETA_PQ) {
             for (int i = 0; i < busNumber; i++) {
-                minLoc[i] = 1.;
+                minLoc[i] = 0.9;
                 minLoc[i + busNumber] = -Math.PI / 2;
             }
             if (slackBusCol >= 0) {
@@ -197,7 +205,7 @@ public class PsoSeAlg extends AbstractSeAlg implements OptModel, MeasTypeCons {
 
     @Override
     public int getMaxIter() {
-        return 1000;
+        return 100000;
     }
 
     public MeasVector getPqMeasure() {

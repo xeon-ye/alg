@@ -80,4 +80,12 @@ public class SeTest_RealCase extends TestCase implements MeasTypeCons {
         doPf(island);
         SeTest_IeeeCase.doSeStudy(island, 0.005, 0.005);
     }
+
+    public void testCaseShanghai() {
+        InputStream ieeeFile = this.getClass().getResourceAsStream("/ieeefiles/shanghai_ieee.dat");
+        IEEEDataIsland island = new DefaultIcfParser().parse(ieeeFile, "GBK");
+        //先算一遍潮流
+        doPf(island);
+        SeTest_IeeeCase.doSeStudy(island, 0.005, 0.005);
+    }
 }

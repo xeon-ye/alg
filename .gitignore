@@ -53,3 +53,4 @@ target
 /src/main/cpp/*.d
 /src/main/cpp/*.o
 *.a
+*.log
