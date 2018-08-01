@@ -30,8 +30,8 @@ dependencies {
 }
 
 // 3. 编码设置
-tasks.withType(Javadoc) {  options.encoding = "UTF-8" }
-tasks.withType(JavaCompile) {  options.encoding = "UTF-8" }
+tasks.withType(Javadoc) { options.encoding = "UTF-8" }
+tasks.withType(JavaCompile) { options.encoding = "UTF-8" }
 
 // 4. 发布设置
 apply plugin: 'maven-publish'
@@ -43,7 +43,7 @@ publishing {
     }
     repositories {
         maven {
-            credentials {username 'admin';  password 'admin19881109'}
+            credentials { username 'admin'; password 'admin19881109' }
             url "http://dsp.sgool.cn:8887/nexus/content/repositories/releases"
         }
     }

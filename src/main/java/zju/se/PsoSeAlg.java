@@ -64,9 +64,9 @@ public class PsoSeAlg extends AbstractSeAlg implements OptModel, MeasTypeCons {
         initial();
         HybridPso solver;
         if (isWarmStart) {
-            solver = new HybridPso(this, 1000, initVariableState);
+            solver = new HybridPso(this, 100, initVariableState);
         } else {
-            solver = new HybridPso(this, 1000);
+            solver = new HybridPso(this, 100);
         }
         solver.execute();
         variableState = solver.getgBestLocation().getLoc();
@@ -205,7 +205,7 @@ public class PsoSeAlg extends AbstractSeAlg implements OptModel, MeasTypeCons {
 
     @Override
     public int getMaxIter() {
-        return 100000;
+        return 10000;
     }
 
     public MeasVector getPqMeasure() {
