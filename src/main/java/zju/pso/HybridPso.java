@@ -66,16 +66,12 @@ public class HybridPso extends AbstractPso implements PsoConstants {
             swarm.add(p);
 
             // 获得约束向量
-            double[] constrViolation = optModel.evalConstr(location);
-            location.setConstrViolation(constrViolation);
-
-            // 计算适应度值
-            boolean isFeasible = PsoUtil.isFeasible(constrViolation);
-            if (isFeasible) {
+            double violation = optModel.evalConstr(location);
+            if (violation > 0) {
+                fitness[i] = violation + PUNISHMENT;
+            } else {
                 fitness[i] = optModel.evalObj(location);
                 isGBestfeasible = true;
-            } else {
-                fitness[i] = PsoUtil.evalInfeasibleFitness(constrViolation);
             }
 
             pBest[i] = fitness[i];
@@ -209,14 +205,12 @@ public class HybridPso extends AbstractPso implements PsoConstants {
                 Location location = swarm.get(i).getLocation();
 
                 // 步骤六：更新适应度值
-                double[] constrViolation = optModel.evalConstr(location);
-                location.setConstrViolation(constrViolation);
-                boolean isFeasible = PsoUtil.isFeasible(constrViolation);
-                if (isFeasible) {
+                double violation = optModel.evalConstr(location);
+                if (violation > 0) {
+                    fitness[i] = violation + PUNISHMENT;
+                } else {
                     fitness[i] = optModel.evalObj(location);
                     isGBestfeasible = true;
-                } else {
-                    fitness[i] = PsoUtil.evalInfeasibleFitness(constrViolation);
                 }
 
                 // 步骤七：更新pBest

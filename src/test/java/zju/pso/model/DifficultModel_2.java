@@ -19,17 +19,17 @@ public class DifficultModel_2 implements OptModel {
     }
 
     @Override
-    public double[] evalConstr(Location location) {
+    public double evalConstr(Location location) {
         double[] x = location.getLoc();
-        double[] constr = new double[6];
+        double constr = 0;
 
-        constr[0] = x[0] * x[0] + x[1] * x[1] + x[2] * x[2] + x[3] * x[3] + x[4] * x[4] - 10 - 1e-3;
-        constr[1] = x[1] * x[2] - 5 * x[3] * x[4] - 1e-3;
-        constr[2] = x[0] * x[0] * x[0] + x[1] * x[1] * x[1] + 1 - 1e-3;
+        constr += x[0] * x[0] + x[1] * x[1] + x[2] * x[2] + x[3] * x[3] + x[4] * x[4] - 10 - 1e-3;
+        constr += x[1] * x[2] - 5 * x[3] * x[4] - 1e-3;
+        constr += x[0] * x[0] * x[0] + x[1] * x[1] * x[1] + 1 - 1e-3;
 
-        constr[3] = -(x[0] * x[0] + x[1] * x[1] + x[2] * x[2] + x[3] * x[3] + x[4] * x[4] - 10) - 1e-3;
-        constr[4] = -(x[1] * x[2] - 5 * x[3] * x[4]) - 1e-3;
-        constr[5] = -(x[0] * x[0] * x[0] + x[1] * x[1] * x[1] + 1) - 1e-3;
+        constr += -(x[0] * x[0] + x[1] * x[1] + x[2] * x[2] + x[3] * x[3] + x[4] * x[4] - 10) - 1e-3;
+        constr += -(x[1] * x[2] - 5 * x[3] * x[4]) - 1e-3;
+        constr += -(x[0] * x[0] * x[0] + x[1] * x[1] * x[1] + 1) - 1e-3;
         return constr;
     }
 

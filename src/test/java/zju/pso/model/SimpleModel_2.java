@@ -19,12 +19,14 @@ public class SimpleModel_2 implements OptModel {
     }
 
     @Override
-    public double[] evalConstr(Location location) {
+    public double evalConstr(Location location) {
         double[] x = location.getLoc();
-        double[] constr = new double[2];
+        double constr = 0;
 
-        constr[0] = 2 * x[0] + 3 * x[1] - 6;
-        constr[1] = x[0] + 4 * x[1] - 5;
+        if (2 * x[0] + 3 * x[1] - 6 > 0)
+            constr += 2 * x[0] + 3 * x[1] - 6;
+        if (x[0] + 4 * x[1] - 5 > 0)
+            constr += x[0] + 4 * x[1] - 5;
         return constr;
     }
 

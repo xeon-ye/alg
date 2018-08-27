@@ -111,23 +111,26 @@ public class PsoSeAlg extends AbstractSeAlg implements OptModel, MeasTypeCons {
     }
 
     @Override
-    public double[] evalConstr(Location location) {
+    public double evalConstr(Location location) {
         // 处理等式约束
+        double violation = 0;
         double[] variableState = location.getLoc();
         int[] zeroPBuses = this.zeroPBuses;
         int[] zeroQBuses = this.zeroQBuses;
         double[] constr = new double[zeroPBuses.length + zeroQBuses.length];
-        int index = 0;
         for (int zeroPBuse : zeroPBuses) {
             double p = StateCalByPolar.calBusP(zeroPBuse, Y, variableState);
-            constr[index++] = Math.abs(p) - tol_p;
+            double deviation = Math.abs(p) - tol_p;
+            if (deviation > 0)
+                violation += deviation;
         }
         for (int zeroQBus : zeroQBuses) {
             double q = StateCalByPolar.calBusQ(zeroQBus, Y, variableState);
-            constr[index++] = Math.abs(q) - tol_q;
+            double deviation = Math.abs(q) - tol_q;
+            if (deviation > 0)
+                violation += deviation;
         }
-
-        return constr;
+        return violation;
     }
 
     @Override
