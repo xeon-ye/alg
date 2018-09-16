@@ -66,7 +66,7 @@ public class SeTest_RealCase extends TestCase implements MeasTypeCons {
 
     public void testCaseAnhui() {
         InputStream ieeeFile = this.getClass().getResourceAsStream("/ieeefiles/sdxx201307081415.txt");
-        //InputStream ieeeFile = this.getClass().getResourceAsStream("/ieeefiles/ahxx201312041630.txt");
+//        InputStream ieeeFile = this.getClass().getResourceAsStream("/ieeefiles/ahxx201312041630.txt");
         IEEEDataIsland island = new DefaultIcfParser().parse(ieeeFile, "UTF-8");
         //先算一遍潮流
         doPf(island);

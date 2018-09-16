@@ -12,9 +12,12 @@ public class PsoTest {
 
     @Test
     public void testHybridPso() {
-        new HybridPso(new SimpleModel_1(), 50).execute();
-        new HybridPso(new SimpleModel_2(), 50).execute();
-        new HybridPso(new DifficultModel_1(), 40).execute();
+        new HybridPso(new DifficultModel_1(), 17).execute();
+    }
+
+    @Test
+    public void testParallelPso() {
+        new ParallelPso(new DifficultModel_1()).execute();
     }
 
 }

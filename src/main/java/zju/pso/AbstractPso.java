@@ -11,7 +11,6 @@ import java.util.Vector;
  * @Time: 9:36
  */
 public abstract class AbstractPso {
-    protected OptModel optModel;
     protected Vector<Particle> swarm = new Vector<>();
     protected final int swarmSize;
     protected double[] pBest; // 各粒子个体最优适应度值
@@ -22,14 +21,13 @@ public abstract class AbstractPso {
     protected boolean isWarmStart = false;
     protected double[] initVariableState;
 
-    protected AbstractPso(OptModel optModel, int swarmSize) {
-        this.optModel = optModel;
+    protected AbstractPso(int swarmSize) {
         this.swarmSize = swarmSize;
         this.pBest = new double[swarmSize];
     }
 
-    protected AbstractPso(OptModel optModel, int swarmSize, double[] initVariableState) {
-        this(optModel, swarmSize);
+    protected AbstractPso(int swarmSize, double[] initVariableState) {
+        this(swarmSize);
         this.isWarmStart = true;
         this.initVariableState = initVariableState;
     }

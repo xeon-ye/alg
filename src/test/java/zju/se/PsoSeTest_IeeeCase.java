@@ -4,6 +4,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.*;
 import zju.ieeeformat.BusData;
+import zju.ieeeformat.DefaultIcfParser;
 import zju.ieeeformat.IEEEDataIsland;
 import zju.ieeeformat.IcfDataUtil;
 import zju.measure.MeasTypeCons;
@@ -12,6 +13,7 @@ import zju.measure.SystemMeasure;
 import zju.pf.SimuMeasMaker;
 import zju.util.StateCalByPolar;
 
+import java.io.InputStream;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -207,7 +209,7 @@ public class PsoSeTest_IeeeCase implements MeasTypeCons {
         SystemMeasure sm;
         SystemMeasure smRef;
 
-        island = IcfDataUtil.ISLAND_14.clone();
+        island = IcfDataUtil.ISLAND_300.clone();
         smRef = SimuMeasMaker.createFullMeasure(island, 1, 0);
         sm = SimuMeasMaker.createFullMeasure_withBadData(island, 1, 0.02, 0.06);
         doSE(island, sm, smRef, IcfDataUtil.ISLAND_14, false, true);
@@ -251,10 +253,21 @@ public class PsoSeTest_IeeeCase implements MeasTypeCons {
         SystemMeasure sm;
         SystemMeasure smRef;
 
-        island = IcfDataUtil.ISLAND_118.clone();
+        island = IcfDataUtil.ISLAND_300.clone();
         smRef = SimuMeasMaker.createFullMeasure(island, 1, 0);
         sm = SimuMeasMaker.createFullMeasure_withBadData(island, 1, 0.02, 0.06);
-        doSE(island, sm, smRef, IcfDataUtil.ISLAND_118, false, true);
+        doSE(island, sm, smRef, IcfDataUtil.ISLAND_300, false, false);
+    }
+
+    @Test
+    public void testCaseShanghai() {
+//        InputStream ieeeFile = this.getClass().getResourceAsStream("/ieeefiles/sdxx201307081415.txt");
+        InputStream ieeeFile = this.getClass().getResourceAsStream("/ieeefiles/ahxx201312041630.txt");
+        IEEEDataIsland island = new DefaultIcfParser().parse(ieeeFile, "UTF-8");
+        //先算一遍潮流
+        SystemMeasure smRef = SimuMeasMaker.createFullMeasure(island, 1, 0);
+        SystemMeasure sm = SimuMeasMaker.createFullMeasure_withBadData(island, 1, 0.02, 0.06);
+        doSE(island, sm, smRef, island, false, false);
     }
 
     private void doSE(IEEEDataIsland island, SystemMeasure sm,
@@ -274,13 +287,13 @@ public class PsoSeTest_IeeeCase implements MeasTypeCons {
         int[] variables_types = {
                 IpoptSeAlg.VARIABLE_VTHETA,
         }; // 状态变量类型
-        log.debug("先算一遍MNMR方法：");
-        doIpoptSE(island, sm, ref, variables_types, isTrueValue, isZeroInjection, SeObjective.OBJ_TYPE_SIGMOID);
-        log.debug("计算真值：");
-        doIpoptSE(island, smRef, ref, variables_types, isTrueValue, isZeroInjection, SeObjective.OBJ_TYPE_WLS);
+//        log.debug("先算一遍MNMR方法：");
+//        doIpoptSE(island, sm, ref, variables_types, isTrueValue, isZeroInjection, SeObjective.OBJ_TYPE_SIGMOID);
+//        log.debug("计算真值：");
+//        doIpoptSE(island, smRef, ref, variables_types, isTrueValue, isZeroInjection, SeObjective.OBJ_TYPE_WLS);
         double[] variableState = ipoptSeAlg.getVariableState();
         psoSeAlg.setInitVariableState(variableState);
-        psoSeAlg.setWarmStart(true);
+        psoSeAlg.setWarmStart(false);
         log.debug("开始粒子群算法：");
         doPsoSE(island, sm, ref, variables_types, isTrueValue, isZeroInjection);
     }

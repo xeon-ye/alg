@@ -12,7 +12,7 @@ import zju.measure.MeasVector;
  * this class provides method to calculate system state like line power load or bus power, and so on...
  *
  * @author Dong Shufeng
- *         Date: 2007-12-12
+ * Date: 2007-12-12
  */
 public class StateCalByPolar implements MeasTypeCons {
 
@@ -95,6 +95,68 @@ public class StateCalByPolar implements MeasTypeCons {
      */
     public static AVector getEstimatedZ(MeasVector meas, YMatrixGetter Y, double[] state) {
         return getEstimatedZ(meas, Y, state, meas.getZ_estimate());
+    }
+
+    public static float[] getEstimatedZ(MeasVector meas, YMatrixGetter Y, float[] state, int offset) {
+        int index = 0;
+        int n = Y.getAdmittance()[0].getM();
+        float[] result = new float[meas.getZ_estimate().getN()];
+        for (int type : meas.getMeasureOrder()) {
+            switch (type) {
+                case TYPE_BUS_ANGLE:
+                    for (int i = 0; i < meas.getBus_a_pos().length; i++, index++) {
+                        int num = meas.getBus_a_pos()[i] - 1;//num starts from 0
+                        result[index] = state[offset + num + n];
+                    }
+                    break;
+                case TYPE_BUS_VOLOTAGE:
+                    for (int i = 0; i < meas.getBus_v_pos().length; i++, index++) {
+                        int num = meas.getBus_v_pos()[i] - 1;//num starts from 0
+                        result[index] = state[offset + num];
+                    }
+                    break;
+                case TYPE_BUS_ACTIVE_POWER:
+                    for (int i = 0; i < meas.getBus_p_pos().length; i++, index++) {
+                        int num = meas.getBus_p_pos()[i];//num starts from 1
+                        result[index] = calBusP(num, Y, state, offset);
+                    }
+                    break;
+                case TYPE_BUS_REACTIVE_POWER:
+                    for (int i = 0; i < meas.getBus_q_pos().length; i++, index++) {
+                        int num = meas.getBus_q_pos()[i];//num starts from 1
+                        result[index] = calBusQ(num, Y, state, offset);
+                    }
+                    break;
+                case TYPE_LINE_FROM_ACTIVE:
+                    for (int k = 0; k < meas.getLine_from_p_pos().length; k++, index++) {
+                        int num = meas.getLine_from_p_pos()[k];//num starts from 1
+                        result[index] = calLinePFrom(num, Y, state, offset);
+                    }
+                    break;
+                case TYPE_LINE_FROM_REACTIVE:
+                    for (int k = 0; k < meas.getLine_from_q_pos().length; k++, index++) {
+                        int num = meas.getLine_from_q_pos()[k];//num starts from 1
+                        result[index] = calLineQFrom(num, Y, state, offset);
+                    }
+                    break;
+                case TYPE_LINE_TO_ACTIVE:
+                    for (int k = 0; k < meas.getLine_to_p_pos().length; k++, index++) {
+                        int num = meas.getLine_to_p_pos()[k];//num starts from 1
+                        result[index] = calLinePTo(num, Y, state, offset);
+                    }
+                    break;
+                case TYPE_LINE_TO_REACTIVE:
+                    for (int k = 0; k < meas.getLine_to_q_pos().length; k++, index++) {
+                        int num = meas.getLine_to_q_pos()[k];//num starts from 1
+                        result[index] = calLineQTo(num, Y, state, offset);
+                    }
+                    break;
+                default:
+                    //log.error("unsupported measure type: " + type);//todo: not good
+                    break;
+            }
+        }
+        return result;
     }
 
     /**
@@ -200,6 +262,23 @@ public class StateCalByPolar implements MeasTypeCons {
         return value;
     }
 
+    public static float calBusP(int num, YMatrixGetter Y, float[] state, int offset) {
+        num = num - 1;
+        ASparseMatrixLink[] admittance = Y.getAdmittance();
+        int n = admittance[0].getM();
+        double value = 0;
+        int k = admittance[0].getIA()[num];
+        while (k != -1) {
+            int j = admittance[0].getJA().get(k);
+            double thetaIJ = state[offset + num + n] - state[offset + j + n];
+            double gij = admittance[0].getVA().get(k);
+            double bij = admittance[1].getVA().get(k);
+            value += (state[offset + num] * state[offset + j] * (gij * Math.cos(thetaIJ) + bij * Math.sin(thetaIJ)));
+            k = admittance[0].getLINK().get(k);
+        }
+        return (float) value;
+    }
+
     public static double calBusP(double[][] y, double[] state) {
         double value = 0;
         for (int i = 0; i < y[0].length; i++) {
@@ -235,6 +314,22 @@ public class StateCalByPolar implements MeasTypeCons {
         return value;
     }
 
+    public static float calBusQ(int num, YMatrixGetter Y, float[] state, int offset) {
+        num = num - 1;
+        ASparseMatrixLink[] admittance = Y.getAdmittance();
+        double value = 0;
+        int n = Y.getAdmittance()[0].getM();
+        int k = admittance[0].getIA()[num];
+        while (k != -1) {
+            int j = admittance[0].getJA().get(k);
+            double thetaIJ = state[offset + num + n] - state[offset + j + n];
+            value += (state[offset + num] * state[offset + j] * (admittance[0].getVA().get(k) * Math.sin(thetaIJ)
+                    - admittance[1].getVA().get(k) * Math.cos(thetaIJ)));
+            k = admittance[0].getLINK().get(k);
+        }
+        return (float) value;
+    }
+
     public static double calBusQ(double[][] y, double[] state) {
         double value = 0;
         for (int i = 0; i < y[0].length; i++) {
@@ -263,6 +358,17 @@ public class StateCalByPolar implements MeasTypeCons {
         double thetaIJ = state[i + n] - state[j + n];
         return state[i] * state[i] * (gbg1b1[0] + gbg1b1[2]) - state[i] * state[j] * (gbg1b1[0] * Math.cos(thetaIJ)
                 + gbg1b1[1] * Math.sin(thetaIJ));
+    }
+
+    public static float calLinePFrom(int branchId, YMatrixGetter Y, float[] state, int offset) {
+        int n = Y.getAdmittance()[0].getM();
+        int[] ij = Y.getFromTo(branchId);
+        int i = ij[0] - 1;
+        int j = ij[1] - 1;
+        double[] gbg1b1 = Y.getLineAdmittance(branchId, YMatrixGetter.LINE_FROM);
+        double thetaIJ = state[offset + i + n] - state[offset + j + n];
+        return (float) (state[offset + i] * state[offset + i] * (gbg1b1[0] + gbg1b1[2]) - state[offset + i] * state[offset + j] * (gbg1b1[0] * Math.cos(thetaIJ)
+                + gbg1b1[1] * Math.sin(thetaIJ)));
     }
 
     public static double calLinePFrom(BranchData branch, double[] state) {
@@ -294,6 +400,17 @@ public class StateCalByPolar implements MeasTypeCons {
                 + gbg1b1[1] * Math.sin(thetaJI));
     }
 
+    public static float calLinePTo(int num, YMatrixGetter Y, float[] state, int offset) {
+        int n = Y.getAdmittance()[0].getM();
+        int[] ij = Y.getFromTo(num);
+        int i = ij[0] - 1;
+        int j = ij[1] - 1;
+        double[] gbg1b1 = Y.getLineAdmittance(num, YMatrixGetter.LINE_TO);
+        double thetaJI = state[offset + j + n] - state[offset + i + n];
+        return (float) (state[offset + j] * state[offset + j] * (gbg1b1[0] + gbg1b1[2]) - state[offset + i] * state[offset + j] * (gbg1b1[0] * Math.cos(thetaJI)
+                + gbg1b1[1] * Math.sin(thetaJI)));
+    }
+
     public static double calLinePTo(BranchData branch, double[] state) {
         double[] gbg1b1 = YMatrixGetter.getBranchAdmittance(branch)[1];
         double thetaJI = -state[2];
@@ -323,6 +440,17 @@ public class StateCalByPolar implements MeasTypeCons {
                 - gbg1b1[1] * Math.cos(thetaIJ));
     }
 
+    public static float calLineQFrom(int num, YMatrixGetter Y, float[] state, int offset) {
+        int n = Y.getAdmittance()[0].getM();
+        int[] ij = Y.getFromTo(num);
+        int i = ij[0] - 1;
+        int j = ij[1] - 1;
+        double[] gbg1b1 = Y.getLineAdmittance(num, YMatrixGetter.LINE_FROM);
+        double thetaIJ = state[offset + i + n] - state[offset + j + n];
+        return (float) (-state[offset + i] * state[offset + i] * (gbg1b1[1] + gbg1b1[3]) - state[offset + i] * state[offset + j] * (gbg1b1[0] * Math.sin(thetaIJ)
+                - gbg1b1[1] * Math.cos(thetaIJ)));
+    }
+
     public static double calLineQFrom(BranchData branch, double[] state) {
         double[] gbg1b1 = YMatrixGetter.getBranchAdmittance(branch)[0];
         double thetaIJ = state[2];
@@ -349,6 +477,17 @@ public class StateCalByPolar implements MeasTypeCons {
         double thetaJI = state[j + n] - state[i + n];
         return -state[j] * state[j] * (gbg1b1[1] + gbg1b1[3]) - state[i] * state[j] * (gbg1b1[0] * Math.sin(thetaJI)
                 - gbg1b1[1] * Math.cos(thetaJI));
+    }
+
+    public static float calLineQTo(int num, YMatrixGetter Y, float[] state, int offset) {
+        int n = Y.getAdmittance()[0].getM();
+        int[] ij = Y.getFromTo(num);
+        int i = ij[0] - 1;
+        int j = ij[1] - 1;
+        double[] gbg1b1 = Y.getLineAdmittance(num, YMatrixGetter.LINE_TO);
+        double thetaJI = state[offset + j + n] - state[offset + i + n];
+        return (float) (-state[offset + j] * state[offset + j] * (gbg1b1[1] + gbg1b1[3]) - state[offset + i] * state[offset + j] * (gbg1b1[0] * Math.sin(thetaJI)
+                - gbg1b1[1] * Math.cos(thetaJI)));
     }
 
     public static double calLineQTo(BranchData branch, double[] state) {
@@ -384,22 +523,22 @@ public class StateCalByPolar implements MeasTypeCons {
     }
 
     /*
-    * calculate current amplitude in polar system
-    * */
+     * calculate current amplitude in polar system
+     * */
     public static double calLineCurrentAmp(int branchId, YMatrixGetter Y, AVector state, int fromOrTo) {
         return calLineCurrent(branchId, Y, state, fromOrTo)[0];
     }
 
     /*
-    * calculate current angle in polar system
-    * */
+     * calculate current angle in polar system
+     * */
     public static double calLineCurrentAngle(int branchId, YMatrixGetter Y, AVector state, int fromOrTo) {
         return calLineCurrent(branchId, Y, state, fromOrTo)[1];
     }
 
     /*
-    * calculate current in polar system
-    * */
+     * calculate current in polar system
+     * */
     public static double[] calLineCurrent(int branchId, YMatrixGetter Y, AVector state, int fromOrTo) {
         IEEEDataIsland island = Y.getIsland();
         int n = island.getBuses().size();

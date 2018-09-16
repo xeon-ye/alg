@@ -167,4 +167,12 @@ public class PsoUtil implements PsoConstants {
         norm = Math.sqrt(norm);
         return norm;
     }
+
+    public static float[] doubleArr2floatArr(double[] array) {
+        float[] result = new float[array.length];
+        for (int i = 0; i < array.length; i++) {
+            result[i] = (float) array[i];
+        }
+        return result;
+    }
 }

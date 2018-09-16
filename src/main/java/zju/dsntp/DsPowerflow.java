@@ -1,6 +1,7 @@
 package zju.dsntp;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import zju.common.NewtonSolver;
 import zju.devmodel.MapObject;
 import zju.dsmodel.*;
@@ -14,7 +15,7 @@ import java.util.Map;
  * Date: 13-10-31
  */
 public class DsPowerflow implements DsModelCons {
-    private static Logger log = Logger.getLogger(DsPowerflow.class);
+    private static Logger log = LogManager.getLogger(DsPowerflow.class);
 
     private int maxIter = 50;
     private double tolerance = 1e-5;
