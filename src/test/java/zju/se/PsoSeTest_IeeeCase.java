@@ -209,7 +209,7 @@ public class PsoSeTest_IeeeCase implements MeasTypeCons {
         SystemMeasure sm;
         SystemMeasure smRef;
 
-        island = IcfDataUtil.ISLAND_300.clone();
+        island = IcfDataUtil.ISLAND_14.clone();
         smRef = SimuMeasMaker.createFullMeasure(island, 1, 0);
         sm = SimuMeasMaker.createFullMeasure_withBadData(island, 1, 0.02, 0.06);
         doSE(island, sm, smRef, IcfDataUtil.ISLAND_14, false, true);
@@ -260,8 +260,7 @@ public class PsoSeTest_IeeeCase implements MeasTypeCons {
     }
 
     @Test
-    public void testCaseShanghai() {
-//        InputStream ieeeFile = this.getClass().getResourceAsStream("/ieeefiles/sdxx201307081415.txt");
+    public void testRealCase() {
         InputStream ieeeFile = this.getClass().getResourceAsStream("/ieeefiles/ahxx201312041630.txt");
         IEEEDataIsland island = new DefaultIcfParser().parse(ieeeFile, "UTF-8");
         //先算一遍潮流

@@ -72,6 +72,13 @@ public class PsoSeAlg extends AbstractSeAlg implements OptModel, ParallelOptMode
         } else {
             solver = new ParallelPso(this);
         }
+        solver.setMeas(meas);
+        solver.setY(Y);
+        solver.setThreshold(objFunc.getThresholds());
+        solver.setZeroPBuses(this.zeroPBuses);
+        solver.setZeroQBuses(this.zeroQBuses);
+        solver.setTol_p((float) this.tol_p);
+        solver.setTol_q((float) this.tol_q);
         solver.execute();
         variableState = solver.getgBestLocation().getLoc();
         if (variable_type == IpoptSeAlg.VARIABLE_VTHETA)
