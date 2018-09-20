@@ -2,7 +2,6 @@ package zju.pso.model;
 
 import zju.pso.Location;
 import zju.pso.OptModel;
-import zju.pso.ParallelOptModel;
 
 /**
  * 使用粒子群算法求解非线性规划
@@ -13,7 +12,7 @@ import zju.pso.ParallelOptModel;
  * @Date: 2018/6/19
  * @Time: 14:53
  */
-public class SimpleModel_1 implements OptModel, ParallelOptModel {
+public class SimpleModel_1 implements OptModel {
 
     @Override
     public double evalObj(Location location) {
@@ -48,36 +47,6 @@ public class SimpleModel_1 implements OptModel, ParallelOptModel {
     @Override
     public double[] getMaxVel() {
         return new double[]{1, 1};
-    }
-
-    @Override
-    public double paraEvalObj(float[] location, int offset) {
-        double x = location[offset];
-        double y = location[offset + 1];
-
-        return Math.pow(2.8125 - x + x * Math.pow(y, 4), 2) +
-                Math.pow(2.25 - x + x * Math.pow(y, 2), 2) +
-                Math.pow(1.5 - x + x * y, 2);
-    }
-
-    @Override
-    public float[] paraGetMinLoc() {
-        return new float[]{1, -1};
-    }
-
-    @Override
-    public float[] paraGetMaxLoc() {
-        return new float[]{4, 1};
-    }
-
-    @Override
-    public float[] paraGetMinVel() {
-        return new float[]{-1, -1};
-    }
-
-    @Override
-    public float[] paraGetMaxVel() {
-        return new float[]{1, 1};
     }
 
     @Override

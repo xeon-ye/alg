@@ -16,8 +16,8 @@ import static jcuda.driver.CUstream_flags.*;
 import static jcuda.driver.JCudaDriver.*;
 import static jcuda.jcurand.JCurand.*;
 import static jcuda.jcurand.curandRngType.*;
-import static zju.jcuda.JCudaUtil.*;
 import static jcuda.runtime.JCuda.*;
+import static zju.pso.PsoUtil.*;
 
 
 /**
@@ -31,10 +31,10 @@ public class ParallelPso extends AbstractPso implements PsoConstants {
 
     private static Logger logger = LogManager.getLogger(ParallelPso.class);
 
-    private ParallelOptModel optModel;
+    private OptModel optModel;
     private float[] fitness; // 各粒子当前适应度值
     private float[] pBest; // 各粒子当前适应度值
-    private float[] gBest;
+    private float[] gBestFitness;
     private float[] gBestLoc;
     private boolean isGBestfeasible = false; // gBest是否在可行域内
 
@@ -137,21 +137,21 @@ public class ParallelPso extends AbstractPso implements PsoConstants {
 
     private float[] gpuLocation;
 
-    public ParallelPso(ParallelOptModel optModel) {
+    public ParallelPso(OptModel optModel) {
         this(optModel, (int) (10 + 2 * Math.sqrt(optModel.getDimentions())));
     }
 
-    public ParallelPso(ParallelOptModel optModel, int swarmSize) {
+    public ParallelPso(OptModel optModel, int swarmSize) {
         super(swarmSize);
         this.optModel = optModel;
         this.fitness = new float[swarmSize];
     }
 
-    public ParallelPso(ParallelOptModel optModel, double[] initVariableState) {
+    public ParallelPso(OptModel optModel, double[] initVariableState) {
         this(optModel, (int) (10 + 2 * Math.sqrt(optModel.getDimentions())), initVariableState);
     }
 
-    public ParallelPso(ParallelOptModel optModel, int swarmSize, double[] initVariableState) {
+    public ParallelPso(OptModel optModel, int swarmSize, double[] initVariableState) {
         super(swarmSize, initVariableState);
         this.optModel = optModel;
         this.fitness = new float[swarmSize];
@@ -212,13 +212,13 @@ public class ParallelPso extends AbstractPso implements PsoConstants {
         numBytesOfOneParticle = n * Sizeof.FLOAT;
         blockSizeX = 512;
 
-        float[] minLoc = optModel.paraGetMinLoc();
-        float[] maxLoc = optModel.paraGetMaxLoc();
-        float[] minVel = optModel.paraGetMinVel();
-        float[] maxVel = optModel.paraGetMaxVel();
+        float[] minLoc = doubleArr2floatArr(optModel.getMinLoc());
+        float[] maxLoc = doubleArr2floatArr(optModel.getMaxLoc());
+        float[] minVel = doubleArr2floatArr(optModel.getMinVel());
+        float[] maxVel = doubleArr2floatArr(optModel.getMaxVel());
 
         gpuLocation = new float[numElements];
-        gBest = new float[1];
+        gBestFitness = new float[1];
         gBestLoc = new float[n];
 
         cuMemAlloc(devicePBest, swarmSize * Sizeof.FLOAT);
@@ -255,7 +255,7 @@ public class ParallelPso extends AbstractPso implements PsoConstants {
         // Set up the kernel parameters: A pointer to an array
         // of pointers which point to the actual values.
         if (isWarmStart) {
-            float[] initArray = double2float(initVariableState);
+            float[] initArray = doubleArr2floatArr(initVariableState);
             for (int i = 0; i < swarmSize; i++) {
                 System.arraycopy(initArray, 0, gpuLocation, i * initArray.length, initArray.length);
             }
@@ -333,11 +333,11 @@ public class ParallelPso extends AbstractPso implements PsoConstants {
             start = System.currentTimeMillis();
             w = (float) (W_UPPERBOUND - (((double) iterNum) / maxIter) * (W_UPPERBOUND - W_LOWERBOUND)); // 惯性逐渐减小
 
-//            curandSetPseudoRandomGeneratorSeed(generator, System.currentTimeMillis());
-//            curandGenerateUniform(generator, deviceRandom1, numElements);
-//            curandSetPseudoRandomGeneratorSeed(generator, System.currentTimeMillis() + 1);
-//            curandGenerateUniform(generator, deviceRandom2, numElements);
-//            logger.info("随机数产生用时: " + (System.currentTimeMillis() - start) + "ms");
+            curandSetPseudoRandomGeneratorSeed(generator, System.currentTimeMillis());
+            curandGenerateUniform(generator, deviceRandom1, numElements);
+            curandSetPseudoRandomGeneratorSeed(generator, System.currentTimeMillis() + 1);
+            curandGenerateUniform(generator, deviceRandom2, numElements);
+            logger.info("随机数产生用时: " + (System.currentTimeMillis() - start) + "ms");
 
             updateSwarm(w);
             calFitness();
@@ -350,19 +350,22 @@ public class ParallelPso extends AbstractPso implements PsoConstants {
 
             // 如果全局粒子在可行域内，如果已经达到模型的要求，是一个足够好的适应度值那么就结束寻优
             if (isGBestfeasible) {
-                cuMemcpyDtoH(Pointer.to(gBest), deviceGBestObj, Sizeof.FLOAT);
-                tol = gBest[0] - optModel.getTolFitness();
+                cuMemcpyDtoH(Pointer.to(gBestFitness), deviceGBestObj, Sizeof.FLOAT);
+                tol = gBestFitness[0] - optModel.getTolFitness();
             }
             logger.info("ITERATION " + iterNum + ": " + (System.currentTimeMillis() - start) + "ms");
             iterNum++;
         }
 
         logger.info("PSO执行过程用时: " + (System.currentTimeMillis() - start) + "ms");
-        cuMemcpyDtoH(Pointer.to(gBest), deviceGBestObj, Sizeof.FLOAT);
+        cuMemcpyDtoH(Pointer.to(gBestFitness), deviceGBestObj, Sizeof.FLOAT);
         cuMemcpyDtoH(Pointer.to(gBestLoc), deviceGBestLocation, n * Sizeof.FLOAT);
 
+        gBest = gBestFitness[0];
+        gBestLocation.setLoc(floatArr2doubleArr(gBestLoc));
+
         if (isGBestfeasible) {
-            logger.info("Solution found at iteration " + iterNum + ", best fitness value: " + gBest[0]);
+            logger.info("Solution found at iteration " + iterNum + ", best fitness value: " + gBest);
         } else {
             logger.warn("Solution not found");
         }
@@ -392,15 +395,15 @@ public class ParallelPso extends AbstractPso implements PsoConstants {
         cuMemAlloc(deviceIA, IA.length * Sizeof.INT);
         cuMemAlloc(deviceLink, LINK.size() * Sizeof.INT);
 
-        cuMemcpyHtoD(deviceZ, Pointer.to(double2float(meas.getZ().getValues())), meas.getZ().getN() * Sizeof.FLOAT);
-        cuMemcpyHtoD(deviceThreshold, Pointer.to(double2float(threshold)), threshold.length * Sizeof.FLOAT);
+        cuMemcpyHtoD(deviceZ, Pointer.to(doubleArr2floatArr(meas.getZ().getValues())), meas.getZ().getN() * Sizeof.FLOAT);
+        cuMemcpyHtoD(deviceThreshold, Pointer.to(doubleArr2floatArr(threshold)), threshold.length * Sizeof.FLOAT);
 
         cuMemcpyHtoD(deviceBusVPosition, Pointer.to(meas.getBus_v_pos()), meas.getBus_v_pos().length * Sizeof.INT);
         cuMemcpyHtoD(deviceBusPPosition, Pointer.to(meas.getBus_p_pos()), meas.getBus_p_pos().length * Sizeof.INT);
         cuMemcpyHtoD(deviceBusQPosition, Pointer.to(meas.getBus_q_pos()), meas.getBus_q_pos().length * Sizeof.INT);
 
-        cuMemcpyHtoD(deviceG, Pointer.to(double2float(G.stream().mapToDouble(Double::doubleValue).toArray())), G.size() * Sizeof.FLOAT);
-        cuMemcpyHtoD(deviceB, Pointer.to(double2float(B.stream().mapToDouble(Double::doubleValue).toArray())), B.size() * Sizeof.FLOAT);
+        cuMemcpyHtoD(deviceG, Pointer.to(doubleArr2floatArr(G.stream().mapToDouble(Double::doubleValue).toArray())), G.size() * Sizeof.FLOAT);
+        cuMemcpyHtoD(deviceB, Pointer.to(doubleArr2floatArr(B.stream().mapToDouble(Double::doubleValue).toArray())), B.size() * Sizeof.FLOAT);
         cuMemcpyHtoD(deviceJA, Pointer.to(JA.stream().mapToInt(Integer::intValue).toArray()), JA.size() * Sizeof.INT);
         cuMemcpyHtoD(deviceIA, Pointer.to(IA), IA.length * Sizeof.INT);
         cuMemcpyHtoD(deviceLink, Pointer.to(LINK.stream().mapToInt(Integer::intValue).toArray()), LINK.size() * Sizeof.INT);

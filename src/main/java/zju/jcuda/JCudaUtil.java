@@ -84,14 +84,6 @@ public class JCudaUtil {
         return ptxFileName;
     }
 
-    public static float[] double2float(double[] doubles) {
-        float[] floats = new float[doubles.length];
-        for (int i = 0; i < floats.length; i++) {
-            floats[i] = (float) doubles[i];
-        }
-        return floats;
-    }
-
     /**
      * Queries and prints all attributes of all available devices
      */

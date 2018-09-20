@@ -175,4 +175,12 @@ public class PsoUtil implements PsoConstants {
         }
         return result;
     }
+
+    public static double[] floatArr2doubleArr(float[] array) {
+        double[] result = new double[array.length];
+        for (int i = 0; i < array.length; i++) {
+            result[i] = array[i];
+        }
+        return result;
+    }
 }
