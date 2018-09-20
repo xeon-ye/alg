@@ -40,8 +40,6 @@ public class HybridPso extends AbstractPso implements PsoConstants {
         this.fitness = new double[swarmSize];
     }
 
-    long timeObj = 0;
-
     @Override
     protected void initializeSwarm() {
         Particle p;
@@ -77,7 +75,6 @@ public class HybridPso extends AbstractPso implements PsoConstants {
             p.setLocation(location);
             p.setVelocity(velocity);
             swarm.add(p);
-            long temp = System.currentTimeMillis();
 
             // 获得约束向量
             double violation = optModel.evalConstr(location);
@@ -87,7 +84,6 @@ public class HybridPso extends AbstractPso implements PsoConstants {
                 fitness[i] = optModel.evalObj(location);
                 isGBestfeasible = true;
             }
-            timeObj += (System.currentTimeMillis() - temp);
 
             pBest[i] = fitness[i];
             pBestLocation.add(location);
@@ -101,8 +97,6 @@ public class HybridPso extends AbstractPso implements PsoConstants {
 
     @Override
     public void execute() {
-        long start = System.currentTimeMillis();
-
         initializeSwarm();
 
         int iterNum = 0;
@@ -118,7 +112,6 @@ public class HybridPso extends AbstractPso implements PsoConstants {
         double w; // 惯性权重
 
         while (iterNum < maxIter && tol > 0) {
-            start = System.currentTimeMillis();
             w = W_UPPERBOUND - (((double) iterNum) / maxIter) * (W_UPPERBOUND - W_LOWERBOUND); // 惯性逐渐减小
 
             for (int i = 0; i < swarmSize; i++) {
@@ -218,7 +211,6 @@ public class HybridPso extends AbstractPso implements PsoConstants {
                 p.setLocation(new Location(mutationLoc));
             }
 
-            long temp = System.currentTimeMillis();
             for (int i = 0; i < swarmSize; i++) {
                 Location location = swarm.get(i).getLocation();
 
@@ -237,7 +229,6 @@ public class HybridPso extends AbstractPso implements PsoConstants {
                     pBestLocation.set(i, location);
                 }
             }
-            timeObj += (System.currentTimeMillis() - temp);
 
             // 步骤八：更新gBest
             int bestParticleIndex = PsoUtil.getMinPos(fitness);
@@ -249,13 +240,9 @@ public class HybridPso extends AbstractPso implements PsoConstants {
             // 如果全局粒子在可行域内，如果已经达到模型的要求，是一个足够好的适应度值那么就结束寻优
             if (isGBestfeasible)
                 tol = gBest - optModel.getTolFitness();
-//            logger.info("本次迭代用时: " + (System.currentTimeMillis() - start) + "ms");
             logger.debug("ITERATION " + iterNum + ": Value: " + gBest + "  " + isGBestfeasible);
             iterNum++;
         }
-        logger.info("PSO迭代过程用时: " + (System.currentTimeMillis() - start) + "ms");
-        logger.info("计算目标函数值用时: " + timeObj + "ms");
-
 
         if (isGBestfeasible) {
             logger.info("Solution found at iteration " + iterNum + ", best fitness value: " + gBest);

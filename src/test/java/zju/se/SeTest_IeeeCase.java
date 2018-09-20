@@ -352,8 +352,8 @@ public class SeTest_IeeeCase extends TestCase implements MeasTypeCons {
             totalTimeUsed += alg.getTimeUsed();
             totalIterNum += alg.getIterNum();
         }
-//        if (studyCount == 0)
-//            return;
+        if (studyCount == 0)
+            return;
         System.out.println("Average time used: " + (totalTimeUsed / studyCount) + "ms");
         System.out.println("Average iter number: " + (totalIterNum / studyCount));
     }
