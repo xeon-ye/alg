@@ -1592,7 +1592,7 @@ public class LoadTransferOpt extends PathBasedModel {
      */
     public void calcTSC() throws Exception {
         //生成路径
-        buildPathes();
+        buildPathes(5000);
 
         int endIndex;
         int i, j, k;

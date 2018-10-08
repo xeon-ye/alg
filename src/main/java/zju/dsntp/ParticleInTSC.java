@@ -106,7 +106,7 @@ class ParticleInTSC {
         loadTransferOpt.setFeederCapacityConst(20000);
 
         //搜索路径
-        loadTransferOpt.buildPathes();
+        loadTransferOpt.buildPathes(5000);
     }
 
     /**

@@ -185,7 +185,7 @@ public class LoadTransferOptTest extends TestCase implements DsModelCons {
         model.setLoad(load);
         model.setSupplyCap(supplyCap);
         model.setFeederCap(feederCap);
-        model.buildPathes();
+        model.buildPathes(5000);
         model.makeFeederCapArray();
         model.allMinSwitch();
         this.minSwitchResult = model.getOptResult();
@@ -245,7 +245,7 @@ public class LoadTransferOptTest extends TestCase implements DsModelCons {
         model.setLoad(load);
         model.setSupplyCap(supplyCap);
         model.setFeederCap(feederCap);
-        model.buildPathes();
+        model.buildPathes(5000);
         model.makeFeederCapArray();
         model.allMinSwitch();
         this.minSwitchResult = model.getOptResult();
@@ -305,7 +305,7 @@ public class LoadTransferOptTest extends TestCase implements DsModelCons {
         model.setLoad(load);
         model.setSupplyCap(supplyCap);
         model.setFeederCap(feederCap);
-        model.buildPathes();
+        model.buildPathes(5000);
         model.makeFeederCapArray();
         model.allMinSwitch();
         this.minSwitchResult = model.getOptResult();
@@ -369,7 +369,7 @@ public class LoadTransferOptTest extends TestCase implements DsModelCons {
         model.setLoad(load);
         model.setSupplyCap(supplyCap);
         model.setFeederCap(feederCap);
-        model.buildPathes();
+        model.buildPathes(5000);
         model.makeFeederCapArray();
         model.allMinSwitch();
         this.minSwitchResult = model.getOptResult();
@@ -408,7 +408,7 @@ public class LoadTransferOptTest extends TestCase implements DsModelCons {
         testsys.setSupplyCnBaseKv(supplyBaseKv);
 
         LoadTransferOpt model = new LoadTransferOpt(testsys);
-        model.buildPathes();
+        model.buildPathes(5000);
     }
 
     public void testCase6() throws IOException {
