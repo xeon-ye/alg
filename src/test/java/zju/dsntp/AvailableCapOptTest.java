@@ -27,6 +27,7 @@ public class AvailableCapOptTest extends TestCase {
         String[] supplyID;
         InputStream ieeeFile = this.getClass().getResourceAsStream("/loadtransferfiles/testcase1/graphtest.txt");
         testsys = createDs(ieeeFile, "S1", 100);
+
         for (MapObject obj : testsys.getDevices().getSwitches()) {
             if (obj.getProperty(KEY_CONNECTED_NODE).equals("L2;L9"))
                 obj.setProperty(KEY_SWITCH_STATUS, SWITCH_OFF);
@@ -35,6 +36,7 @@ public class AvailableCapOptTest extends TestCase {
             else if (obj.getProperty(KEY_CONNECTED_NODE).equals("L7;L8"))
                 obj.setProperty(KEY_SWITCH_STATUS, SWITCH_OFF);
         }
+
         supplyID = new String[]{"S1", "S2", "S3"};
         Double[] supplyBaseKv = new Double[]{100., 200., 100.};
         String[] ErrorSupply = new String[]{"S1"};
@@ -53,10 +55,11 @@ public class AvailableCapOptTest extends TestCase {
         model.setLoads(loads);
         model.setSupplyCap(supplyCap);
         model.buildLoops();
+        model.printLoop();
         model.doOpt();
 //        Assert.assertEquals(1, model.minSwitch);
 
-//        ieeeFile = this.getClass().getResourceAsStream("/loadtransferfiles/testcase1/graphtest.txt");
+//        ieeeFile = this.getClass().getResourceAsStream("/loadtransferfiles/case1/graphtest.txt");
 //        testsys = createDs(ieeeFile, "S1", 100);
 //        testsys.setSupplyCns(supplyID);
 //        testsys.setSupplyCnBaseKv(supplyBaseKv);

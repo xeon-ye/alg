@@ -2,7 +2,6 @@ package zju.dsmodel;
 
 import zju.devmodel.MapObject;
 
-import java.io.IOException;
 import java.io.InputStream;
 
 /**
@@ -30,7 +29,6 @@ public class IeeeDsInHand implements DsModelCons {
     public final static DistriSys FEEDER13;
     public final static DistriSys FEEDER34;
     public final static DistriSys FEEDER37;
-    public final static DistriSys FEEDER69;
     public final static DistriSys FEEDER123;
     public final static DistriSys FEEDER123x50;
     public final static DistriSys FEEDER8500;
@@ -38,6 +36,10 @@ public class IeeeDsInHand implements DsModelCons {
     static {
         try {
             FEEDER_CONF.readImpedanceConf(IeeeDsInHand.class.getResourceAsStream("/dsieee/common/feederconfig.txt"));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
             FEEDER_CONF_CASE8500.readImpedanceConf(IeeeDsInHand.class.getResourceAsStream("/dsieee/common/feederconfig8500.txt"));
         } catch (Exception e) {
             e.printStackTrace();
@@ -75,9 +77,6 @@ public class IeeeDsInHand implements DsModelCons {
 
         ieeeFile = IeeeDsInHand.class.getResourceAsStream("/dsieee/case37/case37.txt");
         FEEDER37 = createDs(ieeeFile, "799", 4.8 / sqrt3);
-
-        ieeeFile = IeeeDsInHand.class.getResourceAsStream("/dsieee/case69/case69.txt");
-        FEEDER69 = createDs(ieeeFile, "0", 12.66 / sqrt3);
 
         ieeeFile = IeeeDsInHand.class.getResourceAsStream("/dsieee/case123/case123.txt");
         FEEDER123 = createDs(ieeeFile, "150", 4.16 / sqrt3);
@@ -132,6 +131,13 @@ public class IeeeDsInHand implements DsModelCons {
         }
     }
 
+    /**
+     * 生成配网模型。
+     * @param ieeeFile 待解析的文件
+     * @param slackCnId
+     * @param baseKv 基准电压
+     * @return
+     */
     public static DistriSys createDs(InputStream ieeeFile, String slackCnId, double baseKv) {
         DsDevices devices = new DsDeviceParser().parse(ieeeFile);
         DistriSys dsTopo = new DistriSys();

@@ -53,7 +53,7 @@ public class AvailableCapOptTreeTest extends TestCase {
         model.doOpt();
 //        Assert.assertEquals(1, model.minSwitch);
 
-//        ieeeFile = this.getClass().getResourceAsStream("/loadtransferfiles/testcase1/graphtest.txt");
+//        ieeeFile = this.getClass().getResourceAsStream("/loadtransferfiles/case1/graphtest.txt");
 //        testsys = createDs(ieeeFile, "S1", 100);
 //        testsys.setSupplyCns(supplyID);
 //        testsys.setSupplyCnBaseKv(supplyBaseKv);

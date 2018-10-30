@@ -126,6 +126,10 @@ public class DistriSys implements DsModelCons, Serializable {
         }
     }
 
+    /**
+     *
+     * @param devs
+     */
     public void buildOrigTopo(DsDevices devs) {
         this.devices = devs;
         cns = new HashMap<>();
@@ -340,6 +344,12 @@ public class DistriSys implements DsModelCons, Serializable {
         }
     }
 
+    /**
+     * 处理支路。
+     * obj的ConnectedNode属性以;中断为2个连接点名。若连接点名未在cns中出现过，则新建以连接点名为id值的DsConnectNode，并加入cns。
+     * 将新增节点和边加入origGraph
+     * @param objs
+     */
     private void dealBranch(List<MapObject> objs) {
         for (MapObject obj : objs) {
             String[] s = obj.getProperty(KEY_CONNECTED_NODE).split(";");
@@ -354,6 +364,11 @@ public class DistriSys implements DsModelCons, Serializable {
         }
     }
 
+    /**
+     * 用设备填充点。
+     * 根据obj的ConnectedNode属性，将设备加入对应的DsConnectNode中。
+     * @param objs
+     */
     private void fillNode(List<MapObject> objs) {
         for (MapObject obj : objs) {
             String[] s = obj.getProperty(KEY_CONNECTED_NODE).split(";");

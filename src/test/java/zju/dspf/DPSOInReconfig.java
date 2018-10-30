@@ -39,7 +39,7 @@ class DPSOInReconfig {
         ParticleInReconfig.setC2(2);
         ParticleInReconfig.setW(0.8);
         //todo:维度
-        ParticleInReconfig.setDimension(73);
+        ParticleInReconfig.setDimension(37);
         //todo:最大为1的个数
         ParticleInReconfig.setOneNumber(5);
         //todo:传递网络
@@ -70,7 +70,6 @@ class DPSOInReconfig {
                 globalBestPosition[i] = particles[index].getPosition()[i];//更新全局最优位置，根据index
             }
         } else {
-            System.out.println();
             globalBestPosition[1] = 1;
             globalBestPosition[2] = 1;
             globalBestPosition[3] = 1;
@@ -127,7 +126,7 @@ class DPSOInReconfig {
                 FileWriter fileWriter = new FileWriter("G:\\voltage.csv", true);
                 fileWriter.write("第" + runTimes + "次迭代发现更好解\n");
                 fileWriter.close();
-                DsPowerflowTest.printBusV(particles[index].getCalIsland(), true, false);
+//                DsPowerflowTest.printBusV(particles[index].getCalIsland(), true, false);
             }
             runTimes++;
         }

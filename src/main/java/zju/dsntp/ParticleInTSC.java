@@ -73,6 +73,7 @@ class ParticleInTSC {
         rnd = new Random();
 
         for (int i = 0; i < dimension; ++i) {
+            //内部调参
             position[i] = getRandomPostion();
             pBestPositon[i] = position[i];
             velocity[i] = 0;
@@ -293,7 +294,7 @@ class ParticleInTSC {
             while ((data = br.readLine()) != null) {
                 newdata = data.split(" ", 2);
                 supplyId = newdata[0];
-                supplyLoad = new Double(Double.parseDouble(newdata[1]));
+                supplyLoad = Double.parseDouble(newdata[1]);
                 supplyCap.put(supplyId, supplyLoad);
             }
         } catch (IOException e) {

@@ -334,14 +334,14 @@ public class DsPowerflowTest extends TestCase implements DsModelCons {
         island2 = ds2.getActiveIslands()[0];
         assertStateEquals(island1, island2);
 
-        ds1 = IeeeDsInHand.FEEDER69.clone();
-        ds2 = IeeeDsInHand.FEEDER69.clone();
-        testConverged(ds1, false);
-        testKCL(ds1);
-        testConverged(ds2, true);
-        island1 = ds1.getActiveIslands()[0];
-        island2 = ds2.getActiveIslands()[0];
-        assertStateEquals(island1, island2);
+//        ds1 = IeeeDsInHand.FEEDER69.clone();
+//        ds2 = IeeeDsInHand.FEEDER69.clone();
+//        testConverged(ds1, false);
+//        testKCL(ds1);
+//        testConverged(ds2, true);
+//        island1 = ds1.getActiveIslands()[0];
+//        island2 = ds2.getActiveIslands()[0];
+//        assertStateEquals(island1, island2);
 
         ds1 = IeeeDsInHand.FEEDER123.clone();
         ds2 = IeeeDsInHand.FEEDER123.clone();
