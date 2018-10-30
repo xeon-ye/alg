@@ -1594,7 +1594,7 @@ public class LoadTransferOpt extends PathBasedModel {
      */
     public void calcTSC() throws Exception {
         //生成路径
-        buildPathes();
+        buildPathes(5000);
 
         int endIndex;
         int i, j, k;
@@ -2576,7 +2576,7 @@ public class LoadTransferOpt extends PathBasedModel {
         maxCircuitLoad = new HashMap<String, Double>(supplies.length);
         double[] feederLoad = new double[edges.size()];
         for (i = 0; i < edges.size(); i++) {
-            minFeederLoadChanged[i] = Double.MAX_VALUE;
+            minFeederLoadChanged[i] = feederCapArray[i];
             if (i == edgeStart.length - 1)
                 endIndex = edgepathes.size();
             else
@@ -2783,7 +2783,7 @@ public class LoadTransferOpt extends PathBasedModel {
         maxCircuitLoad = new HashMap<String, Double>(supplies.length);
         double[] feederLoad = new double[edges.size()];
         for (i = 0; i < edges.size(); i++) {
-            minFeederLoadChanged[i] = Double.MAX_VALUE;
+            minFeederLoadChanged[i] = feederCapArray[i];
             if (i == edgeStart.length - 1)
                 endIndex = edgepathes.size();
             else

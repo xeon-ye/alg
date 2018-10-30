@@ -46,7 +46,7 @@ public class PathBasedModel {
     }
 
     //重复搜索太多次，待优化
-    public void buildPathes() throws Exception {
+    public Boolean buildPathes(int pathNumLimit) throws Exception {
         String[] supplies = sys.getSupplyCns();
         UndirectedGraph<DsConnectNode, MapObject> g = sys.getOrigGraph();
         //用于深度优先搜索的栈
@@ -158,6 +158,9 @@ public class PathBasedModel {
                 }
                 if (flag1)
                     stack.pop();
+                // 限制计算规模
+                if (pathes.size() > pathNumLimit)
+                    return false;
             }
         }
 
@@ -172,6 +175,7 @@ public class PathBasedModel {
         if(isDebug) {
             printPathes(pathes);
         }
+        return true;
     }
 
     //以某个结点为终点的所有路径

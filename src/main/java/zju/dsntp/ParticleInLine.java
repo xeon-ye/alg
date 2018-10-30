@@ -85,7 +85,7 @@ class ParticleInLine {
         distriSys = dis.clone();
         //搜索路径
         loadTransferOpt = new LoadTransferOpt(distriSys);
-        loadTransferOpt.buildPathes();
+        loadTransferOpt.buildPathes(5000);
         //粒子维数
         dimension = loadTransferOpt.getPathes().size();
 
