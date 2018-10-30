@@ -20,7 +20,7 @@ public abstract class AbstractSeAlg implements SeConstants, MeasTypeCons {
 
     protected int variable_type = -1;
 
-    protected int maxIter = 500;
+    protected int maxIter = 5000;
 
     protected double tolerance = 1e-4;
 

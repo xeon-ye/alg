@@ -371,6 +371,18 @@ public class DsPowerflowTest extends TestCase implements DsModelCons {
         assertStateEquals(island1, island2);
     }
 
+    public void testOneCase() throws IOException {
+        DistriSys ds1 = IeeeDsInHand.FEEDER13.clone();
+        DistriSys ds2 = IeeeDsInHand.FEEDER13.clone();
+        testConverged(ds1, false);
+        testKCL(ds1);
+        testConverged(ds2, true);
+        DsTopoIsland island1 = ds1.getActiveIslands()[0];
+        DsTopoIsland island2 = ds2.getActiveIslands()[0];
+        assertStateEquals(island1, island2);
+        printBusV(ds2.getActiveIslands()[0], false, false);
+    }
+
     public static void assertStateEquals(DsTopoIsland island1, DsTopoIsland island2) {
         double[][] v1, v2;
         DsTopoNode tn2;

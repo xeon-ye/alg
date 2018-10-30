@@ -21,7 +21,7 @@ import java.util.Map;
 public class StateEstimator implements SeConstants, MeasTypeCons {
     private static Logger log = Logger.getLogger(StateEstimator.class);
 
-    private double k = 3, lambda = 4, alpha1 = 1, alpha2 = alpha1 * (1 + lambda);
+    private double k = 3, lambda = 4, alpha1 = 3, alpha2 = alpha1 * (1 + lambda);
 
     private IEEEDataIsland oriIsland;
 
@@ -127,59 +127,64 @@ public class StateEstimator implements SeConstants, MeasTypeCons {
         Map<String, MeasureInfo> origPMeas = sm.getContainer(TYPE_BUS_ACTIVE_POWER);
         Map<String, MeasureInfo> origQMeas = sm.getContainer(TYPE_BUS_REACTIVE_POWER);
 
-        int variable_type = alg.getVariable_type();
         SeObjective objFunc = null;
-        if (alg instanceof IpoptSeAlg)
+        if (alg instanceof IpoptSeAlg) {
             objFunc = ((IpoptSeAlg) alg).getObjFunc();
-        else if (alg instanceof PsoSeAlg)
+        } else if (alg instanceof PsoSeAlg) {
             objFunc = ((PsoSeAlg) alg).getObjFunc();
-        assert objFunc != null;
-        objFunc.setVMeas(new MeasureInfo[0]);
-        objFunc.setVMeasPos(new int[0]);
-        objFunc.setPMeas(new MeasureInfo[0]);
-        objFunc.setPMeasPos(new int[0]);
-        objFunc.setQMeas(new MeasureInfo[0]);
-        objFunc.setQMeasPos(new int[0]);
-        // 采用VTHETA作为状态变量时，会把sm中对应的量测给抹去
-        if (variable_type == AbstractSeAlg.VARIABLE_VTHETA
-                || variable_type == AbstractSeAlg.VARIABLE_VTHETA_PQ) {
-            if (objFunc.getObjType() == SeObjective.OBJ_TYPE_WLS) {
-                //todo; system measure is changed, must pay attention to it.
-                MeasureInfo[] vMeas = new MeasureInfo[origVMeas.size()];
-                origVMeas.values().toArray(vMeas); // 把origVMeas中的量测排成数组存入vMeas
-                int[] vMeasPos = new int[vMeas.length];
-                for (int i = 0; i < vMeasPos.length; i++)
-                    vMeasPos[i] = Integer.parseInt(vMeas[i].getPositionId()) - 1; // 在状态变量中的位置
-                sm.setBus_v(new HashMap<>(0)); // 把节点电压量测抹除
-                objFunc.setVMeas(vMeas);
-                objFunc.setVMeasPos(vMeasPos);
+        }
 
-                if (variable_type == AbstractSeAlg.VARIABLE_VTHETA_PQ) {
-                    MeasureInfo[] pMeas = new MeasureInfo[origPMeas.size()];
-                    origPMeas.values().toArray(pMeas);
-                    int[] pMeasPos = new int[pMeas.length];
-                    for (int i = 0; i < pMeasPos.length; i++)
-                        pMeasPos[i] = Integer.parseInt(pMeas[i].getPositionId()) - 1 + 2 * clonedIsland.getBuses().size();
-                    sm.setBus_p(new HashMap<>(0));
-                    objFunc.setPMeas(pMeas);
-                    objFunc.setPMeasPos(pMeasPos);
+        if (alg instanceof IpoptSeAlg || alg instanceof PsoSeAlg) {
+            int variable_type = alg.getVariable_type();
+            assert objFunc != null;
+            objFunc.setVMeas(new MeasureInfo[0]);
+            objFunc.setVMeasPos(new int[0]);
+            objFunc.setPMeas(new MeasureInfo[0]);
+            objFunc.setPMeasPos(new int[0]);
+            objFunc.setQMeas(new MeasureInfo[0]);
+            objFunc.setQMeasPos(new int[0]);
+            // 采用VTHETA作为状态变量时，会把sm中对应的量测给抹去
+            if (variable_type == AbstractSeAlg.VARIABLE_VTHETA
+                    || variable_type == AbstractSeAlg.VARIABLE_VTHETA_PQ) {
+                if (objFunc.getObjType() == SeObjective.OBJ_TYPE_WLS) {
+                    //todo; system measure is changed, must pay attention to it.
+                    MeasureInfo[] vMeas = new MeasureInfo[origVMeas.size()];
+                    origVMeas.values().toArray(vMeas); // 把origVMeas中的量测排成数组存入vMeas
+                    int[] vMeasPos = new int[vMeas.length];
+                    for (int i = 0; i < vMeasPos.length; i++)
+                        vMeasPos[i] = Integer.parseInt(vMeas[i].getPositionId()) - 1; // 在状态变量中的位置
+                    sm.setBus_v(new HashMap<>(0)); // 把节点电压量测抹除
+                    objFunc.setVMeas(vMeas);
+                    objFunc.setVMeasPos(vMeasPos);
 
-                    MeasureInfo[] qMeas = new MeasureInfo[origQMeas.size()];
-                    origQMeas.values().toArray(qMeas);
-                    int[] qMeasPos = new int[qMeas.length];
-                    for (int i = 0; i < qMeasPos.length; i++)
-                        qMeasPos[i] = Integer.parseInt(qMeas[i].getPositionId()) - 1 + 3 * clonedIsland.getBuses().size();
-                    sm.setBus_q(new HashMap<>(0));
-                    objFunc.setQMeas(qMeas);
-                    objFunc.setQMeasPos(qMeasPos);
+                    if (variable_type == IpoptSeAlg.VARIABLE_VTHETA_PQ) {
+                        MeasureInfo[] pMeas = new MeasureInfo[origPMeas.size()];
+                        origPMeas.values().toArray(pMeas);
+                        int[] pMeasPos = new int[pMeas.length];
+                        for (int i = 0; i < pMeasPos.length; i++)
+                            pMeasPos[i] = Integer.parseInt(pMeas[i].getPositionId()) - 1 + 2 * clonedIsland.getBuses().size();
+                        sm.setBus_p(new HashMap<>(0));
+                        objFunc.setPMeas(pMeas);
+                        objFunc.setPMeasPos(pMeasPos);
+
+                        MeasureInfo[] qMeas = new MeasureInfo[origQMeas.size()];
+                        origQMeas.values().toArray(qMeas);
+                        int[] qMeasPos = new int[qMeas.length];
+                        for (int i = 0; i < qMeasPos.length; i++)
+                            qMeasPos[i] = Integer.parseInt(qMeas[i].getPositionId()) - 1 + 3 * clonedIsland.getBuses().size();
+                        sm.setBus_q(new HashMap<>(0));
+                        objFunc.setQMeas(qMeas);
+                        objFunc.setQMeasPos(qMeasPos);
+                    }
                 }
             }
-        }
-        if (variable_type == AbstractSeAlg.VARIABLE_U
-                || variable_type == AbstractSeAlg.VARIABLE_UI) { // 采用直角坐标
-            for (MeasureInfo info : origVMeas.values()) {
-                double v = info.getValue();
-                info.setValue(v * v); // 对于PV节点不平衡量是v * v
+
+            if (variable_type == AbstractSeAlg.VARIABLE_U
+                    || variable_type == AbstractSeAlg.VARIABLE_UI) { // 采用直角坐标
+                for (MeasureInfo info : origVMeas.values()) {
+                    double v = info.getValue();
+                    info.setValue(v * v); // 对于PV节点不平衡量是v * v
+                }
             }
         }
 
@@ -204,6 +209,7 @@ public class StateEstimator implements SeConstants, MeasTypeCons {
         sm.setBus_p(origPMeas);
         sm.setBus_q(origQMeas);
         if (alg instanceof IpoptSeAlg || alg instanceof PsoSeAlg) {
+            int variable_type = alg.getVariable_type();
             switch (variable_type) {
                 case AbstractSeAlg.VARIABLE_UI:
                 case AbstractSeAlg.VARIABLE_U:
@@ -217,6 +223,7 @@ public class StateEstimator implements SeConstants, MeasTypeCons {
         if (alg.isConverged()) {
             log.debug("状态估计迭代收敛.");
             if (alg instanceof IpoptSeAlg) {
+                int variable_type = alg.getVariable_type();
                 switch (variable_type) {
                     case IpoptSeAlg.VARIABLE_UI:
                     case IpoptSeAlg.VARIABLE_U:
@@ -387,6 +394,10 @@ public class StateEstimator implements SeConstants, MeasTypeCons {
         Y.setIsland(clonedIsland);
         Y.formYMatrix(); // 形成导纳矩阵
         Y.formConnectedBusCount(); // 形成存储各节点所相连节点数量的数组
+    }
+
+    public void setLambda(double lambda) {
+        this.lambda = lambda;
     }
 }
 

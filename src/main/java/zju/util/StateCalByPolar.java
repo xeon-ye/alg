@@ -12,7 +12,7 @@ import zju.measure.MeasVector;
  * this class provides method to calculate system state like line power load or bus power, and so on...
  *
  * @author Dong Shufeng
- *         Date: 2007-12-12
+ * Date: 2007-12-12
  */
 public class StateCalByPolar implements MeasTypeCons {
 
@@ -384,22 +384,22 @@ public class StateCalByPolar implements MeasTypeCons {
     }
 
     /*
-    * calculate current amplitude in polar system
-    * */
+     * calculate current amplitude in polar system
+     * */
     public static double calLineCurrentAmp(int branchId, YMatrixGetter Y, AVector state, int fromOrTo) {
         return calLineCurrent(branchId, Y, state, fromOrTo)[0];
     }
 
     /*
-    * calculate current angle in polar system
-    * */
+     * calculate current angle in polar system
+     * */
     public static double calLineCurrentAngle(int branchId, YMatrixGetter Y, AVector state, int fromOrTo) {
         return calLineCurrent(branchId, Y, state, fromOrTo)[1];
     }
 
     /*
-    * calculate current in polar system
-    * */
+     * calculate current in polar system
+     * */
     public static double[] calLineCurrent(int branchId, YMatrixGetter Y, AVector state, int fromOrTo) {
         IEEEDataIsland island = Y.getIsland();
         int n = island.getBuses().size();

@@ -25,8 +25,8 @@ public interface OptModel {
      * @param location
      * @return 约束函数值
      */
-    default double[] evalConstr(Location location) {
-        return new double[]{0};
+    default double evalConstr(Location location) {
+        return 0;
     }
 
     /**

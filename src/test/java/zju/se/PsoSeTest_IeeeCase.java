@@ -1,14 +1,20 @@
 package zju.se;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.*;
 import zju.ieeeformat.BusData;
+import zju.ieeeformat.DefaultIcfParser;
 import zju.ieeeformat.IEEEDataIsland;
 import zju.ieeeformat.IcfDataUtil;
 import zju.measure.MeasTypeCons;
+import zju.measure.MeasureInfo;
 import zju.measure.SystemMeasure;
 import zju.pf.SimuMeasMaker;
 import zju.util.StateCalByPolar;
 
+import java.io.InputStream;
+import java.util.Iterator;
 import java.util.Map;
 
 import static junit.framework.TestCase.assertEquals;
@@ -22,6 +28,8 @@ import static junit.framework.TestCase.assertTrue;
  * @Time: 15:03
  */
 public class PsoSeTest_IeeeCase implements MeasTypeCons {
+
+    private static Logger log = LogManager.getLogger(PsoSeTest_IeeeCase.class);
 
     private StateEstimator se;
     private IpoptSeAlg ipoptSeAlg;
@@ -187,22 +195,117 @@ public class PsoSeTest_IeeeCase implements MeasTypeCons {
         doSE(island, sm, IcfDataUtil.ISLAND_300, false, true);
     }
 
+    /**
+     * 给所有量测加入2%的高斯噪声，且加入零功率注入节点等式约束
+     */
+    @Test
+    public void testCaseGauss_zeroInjection_withBadData() {
+        ipoptSeAlg.setTol_p(5e-3);
+        ipoptSeAlg.setTol_q(5e-3);
+        psoSeAlg.setTol_p(5e-3);
+        psoSeAlg.setTol_q(5e-3);
+
+        IEEEDataIsland island;
+        SystemMeasure sm;
+        SystemMeasure smRef;
+
+        island = IcfDataUtil.ISLAND_14.clone();
+        smRef = SimuMeasMaker.createFullMeasure(island, 1, 0);
+        sm = SimuMeasMaker.createFullMeasure_withBadData(island, 1, 0.02, 0.06);
+        doSE(island, sm, smRef, IcfDataUtil.ISLAND_14, false, true);
+
+        island = IcfDataUtil.ISLAND_30.clone();
+        smRef = SimuMeasMaker.createFullMeasure(island, 1, 0);
+        sm = SimuMeasMaker.createFullMeasure_withBadData(island, 1, 0.02, 0.06);
+        doSE(island, sm, smRef, IcfDataUtil.ISLAND_30, false, true);
+
+        island = IcfDataUtil.ISLAND_39.clone();
+        smRef = SimuMeasMaker.createFullMeasure(island, 1, 0);
+        sm = SimuMeasMaker.createFullMeasure_withBadData(island, 1, 0.02, 0.06);
+        doSE(island, sm, smRef, IcfDataUtil.ISLAND_39, false, true);
+
+        island = IcfDataUtil.ISLAND_57.clone();
+        smRef = SimuMeasMaker.createFullMeasure(island, 1, 0);
+        sm = SimuMeasMaker.createFullMeasure_withBadData(island, 1, 0.02, 0.06);
+        doSE(island, sm, smRef, IcfDataUtil.ISLAND_57, false, true);
+
+        island = IcfDataUtil.ISLAND_118.clone();
+        smRef = SimuMeasMaker.createFullMeasure(island, 1, 0);
+        sm = SimuMeasMaker.createFullMeasure_withBadData(island, 1, 0.02, 0.06);
+        doSE(island, sm, smRef, IcfDataUtil.ISLAND_118, false, true);
+
+        island = IcfDataUtil.ISLAND_300.clone();
+        smRef = SimuMeasMaker.createFullMeasure(island, 1, 0);
+        sm = SimuMeasMaker.createFullMeasure_withBadData(island, 1, 0.02, 0.06);
+        doSE(island, sm, smRef, IcfDataUtil.ISLAND_300, false, true);
+    }
+    /**
+     * 单个算例测试
+     */
+    @Test
+    public void testOneCase_zeroInjection_withBadData() {
+        ipoptSeAlg.setTol_p(5e-3);
+        ipoptSeAlg.setTol_q(5e-3);
+        psoSeAlg.setTol_p(5e-3);
+        psoSeAlg.setTol_q(5e-3);
+
+        IEEEDataIsland island;
+        SystemMeasure sm;
+        SystemMeasure smRef;
+
+        island = IcfDataUtil.ISLAND_300.clone();
+        smRef = SimuMeasMaker.createFullMeasure(island, 1, 0);
+        sm = SimuMeasMaker.createFullMeasure_withBadData(island, 1, 0.02, 0.03);
+        doSE(island, sm, smRef, IcfDataUtil.ISLAND_300, false, true);
+    }
+
+    @Test
+    public void testRealCase() {
+        InputStream ieeeFile = this.getClass().getResourceAsStream("/ieeefiles/ahxx201312041630.txt");
+        IEEEDataIsland island = new DefaultIcfParser().parse(ieeeFile, "UTF-8");
+        //先算一遍潮流
+        SystemMeasure smRef = SimuMeasMaker.createFullMeasure(island, 1, 0);
+        SystemMeasure sm = SimuMeasMaker.createFullMeasure_withBadData(island, 1, 0.02, 0.03);
+        doSE(island, sm, smRef, island, false, false);
+    }
 
     private void doSE(IEEEDataIsland island, SystemMeasure sm,
                       IEEEDataIsland ref, boolean isTrueValue, boolean isZeroInjection) {
         int[] variables_types = {
                 IpoptSeAlg.VARIABLE_VTHETA,
         }; // 状态变量类型
-        doIpoptSE(island, sm, ref, variables_types, isTrueValue, isZeroInjection);
+        doIpoptSE(island, sm, ref, variables_types, isTrueValue, isZeroInjection, SeObjective.OBJ_TYPE_SIGMOID);
         double[] variableState = ipoptSeAlg.getVariableState();
         psoSeAlg.setInitVariableState(variableState);
         psoSeAlg.setWarmStart(true);
         doPsoSE(island, sm, ref, variables_types, isTrueValue, isZeroInjection);
     }
 
+    private void doSE(IEEEDataIsland island, SystemMeasure sm, SystemMeasure smRef,
+                      IEEEDataIsland ref, boolean isTrueValue, boolean isZeroInjection) {
+        int[] variables_types = {
+                IpoptSeAlg.VARIABLE_VTHETA,
+        }; // 状态变量类型
+//        log.info("################使用内点法计算：################");
+//        se.setLambda(90);
+//        doIpoptSE(island, sm, ref, variables_types, isTrueValue, isZeroInjection, SeObjective.OBJ_TYPE_SIGMOID);
+//        se.setLambda(2);
+//        se.setInitial(ipoptSeAlg.getVariableState());
+//        doIpoptSE(island, sm, ref, variables_types, isTrueValue, isZeroInjection, SeObjective.OBJ_TYPE_SIGMOID);
+//
+//        log.info("################计算状态变量真值：################");
+//        doIpoptSE(island, smRef, ref, variables_types, isTrueValue, isZeroInjection, SeObjective.OBJ_TYPE_WLS);
+//        double[] variableState = ipoptSeAlg.getVariableState();
+//        psoSeAlg.setInitVariableState(variableState);
+        psoSeAlg.setWarmStart(false);
+        psoSeAlg.setParallel(true);
+        log.info("################开始粒子群算法：################");
+        doPsoSE(island, sm, ref, variables_types, isTrueValue, isZeroInjection);
+    }
+
     private void doIpoptSE(IEEEDataIsland island, SystemMeasure sm,
                            IEEEDataIsland ref, int[] variables_types,
-                           boolean isTrueValue, boolean isZeroInjection) {
+                           boolean isTrueValue, boolean isZeroInjection, int objType) {
         //alg.setPrintPath(false);
         se.setAlg(ipoptSeAlg);
         double slackBusAngle = island.getBus(island.getSlackBusNum()).getFinalAngle() * Math.PI / 180.;
@@ -213,7 +316,7 @@ public class PsoSeTest_IeeeCase implements MeasTypeCons {
         se.setFlatStart(true); // 平启动
 
         long start = System.currentTimeMillis();
-        ipoptSeAlg.getObjFunc().setObjType(SeObjective.OBJ_TYPE_SIGMOID); // 设置目标函数
+        ipoptSeAlg.getObjFunc().setObjType(objType); // 设置目标函数
 
         SeResultInfo r;
 
@@ -224,12 +327,15 @@ public class PsoSeTest_IeeeCase implements MeasTypeCons {
             ipoptSeAlg.setVariable_type(variable_type);
             se.doSe();
             assertTrue(ipoptSeAlg.isConverged());
+            delBadDataResult();
             r = se.createPfResult();
             assertNotNull(r);
-//            printS1(ref, r, isTrueValue);
+//            printS1AndS2(ref, r, isTrueValue);
+//            printS1_AndS2_(ref, r, sm, isTrueValue);
+//            printXi(sm);
             printZeroInjectionDelta(ref, r, ipoptSeAlg);
-//            System.out.println("WLS状态估计迭代次数：" + ipoptSeAlg.getIterNum() + "\t用时：" + ipoptSeAlg.getTimeUsed() + "\t");
-//            System.out.println("WLS状态估计用时：" + (System.currentTimeMillis() - start) + "ms");
+            System.out.println("WLS状态估计迭代次数：" + ipoptSeAlg.getIterNum() + "\t用时：" + ipoptSeAlg.getTimeUsed() + "\t");
+            System.out.println("WLS状态估计用时：" + (System.currentTimeMillis() - start) + "ms");
         }
     }
 
@@ -257,12 +363,173 @@ public class PsoSeTest_IeeeCase implements MeasTypeCons {
             psoSeAlg.setVariable_type(variable_type);
             psoSeAlg.setConverged(true);
             se.doSe();
+            delBadDataResult();
             r = se.createPfResult();
             assertNotNull(r);
-            printS1(ref, r, isTrueValue);
+//            printS1AndS2(ref, r, isTrueValue);
+//            printS1_AndS2_(ref, r, sm, isTrueValue);
+//            printXi(sm);
             printZeroInjectionDelta(ref, r, psoSeAlg);
             System.out.println("MNMR状态估计用时：" + (System.currentTimeMillis() - start) + "ms");
         }
+    }
+
+    private void delBadDataResult() {
+        SystemMeasure sm = se.getSm();
+        int count = 0;
+        int count1 = 0;
+        log.info("坏数据为：");
+        for (Map.Entry<String, MeasureInfo> entry : sm.getLine_from_p().entrySet()) {
+            MeasureInfo info = entry.getValue();
+            double d = (info.getValue_est() - info.getValue()) / (info.getSigma() * 3); // 测点相对偏移
+            if (Math.abs(d) > 1) {
+                count++;
+                log.info("Branch " + info.getPositionId() + " " + info.getValue_est() + " " + info.getValue());
+                if (Math.abs(d) <= 3)
+                    count1++;
+            }
+        }
+        for (Map.Entry<String, MeasureInfo> entry : sm.getLine_from_q().entrySet()) {
+            MeasureInfo info = entry.getValue();
+            double d = (info.getValue_est() - info.getValue()) / (info.getSigma() * 3); // 测点相对偏移
+            if (Math.abs(d) > 1) {
+                count++;
+                log.info("Branch " + info.getPositionId() + " " + info.getValue_est() + " " + info.getValue());
+                if (Math.abs(d) <= 3)
+                    count1++;
+            }
+        }
+        for (Map.Entry<String, MeasureInfo> entry : sm.getLine_to_p().entrySet()) {
+            MeasureInfo info = entry.getValue();
+            double d = (info.getValue_est() - info.getValue()) / (info.getSigma() * 3); // 测点相对偏移
+            if (Math.abs(d) > 1) {
+                count++;
+                log.info("Branch " + info.getPositionId() + " " + info.getValue_est() + " " + info.getValue());
+                if (Math.abs(d) <= 3)
+                    count1++;
+            }
+        }
+        for (Map.Entry<String, MeasureInfo> entry : sm.getLine_to_q().entrySet()) {
+            MeasureInfo info = entry.getValue();
+            double d = (info.getValue_est() - info.getValue()) / (info.getSigma() * 3); // 测点相对偏移
+            if (Math.abs(d) > 1) {
+                count++;
+                log.info("Branch " + info.getPositionId() + " " + info.getValue_est() + " " + info.getValue());
+                if (Math.abs(d) <= 3)
+                    count1++;
+            }
+        }
+        for (Map.Entry<String, MeasureInfo> entry : sm.getBus_p().entrySet()) {
+            MeasureInfo info = entry.getValue();
+            double d = (info.getValue_est() - info.getValue()) / (info.getSigma() * 3); // 测点相对偏移
+            if (Math.abs(d) > 1) {
+                count++;
+                log.info("Bus " + info.getPositionId() + " " + info.getValue_est() + " " + info.getValue());
+                if (Math.abs(d) <= 3)
+                    count1++;
+            }
+        }
+        for (Map.Entry<String, MeasureInfo> entry : sm.getBus_q().entrySet()) {
+            MeasureInfo info = entry.getValue();
+            double d = (info.getValue_est() - info.getValue()) / (info.getSigma() * 3); // 测点相对偏移
+            if (Math.abs(d) > 1) {
+                count++;
+                log.info("Bus " + info.getPositionId() + " " + info.getValue_est() + " " + info.getValue());
+                if (Math.abs(d) <= 3)
+                    count1++;
+            }
+        }
+        for (Map.Entry<String, MeasureInfo> entry : sm.getBus_v().entrySet()) {
+            MeasureInfo info = entry.getValue();
+            double d = (info.getValue_est() - info.getValue()) / (info.getSigma() * 3); // 测点相对偏移
+            if (Math.abs(d) > 1) {
+                count++;
+                log.info("Bus " + info.getPositionId() + " " + info.getValue_est() + " " + info.getValue());
+                if (Math.abs(d) <= 3)
+                    count1++;
+            }
+        }
+
+//        // map里面循环又要删除元素，如果使用foreach会抛出异常，应该使用iterator
+//        Iterator<Map.Entry<String, MeasureInfo>> iterator = sm.getLine_from_p().entrySet().iterator();
+//        while (iterator.hasNext()) {
+//            Map.Entry<String, MeasureInfo> entry = iterator.next();
+//            MeasureInfo info = entry.getValue();
+//            double d = (info.getValue_est() - info.getValue()) / (info.getSigma() * 3); // 测点相对偏移
+//            if (Math.abs(d) > 1) {
+//                count++;
+//                log.info("Branch " + info.getPositionId() + " " + info.getValue_est() + " " + info.getValue());
+//                iterator.remove();
+//            }
+//        }
+//        iterator = sm.getLine_from_q().entrySet().iterator();
+//        while (iterator.hasNext()) {
+//            Map.Entry<String, MeasureInfo> entry = iterator.next();
+//            MeasureInfo info = entry.getValue();
+//            double d = (info.getValue_est() - info.getValue()) / (info.getSigma() * 3); // 测点相对偏移
+//            if (Math.abs(d) > 1) {
+//                count++;
+//                log.info("Branch " + info.getPositionId() + " " + info.getValue_est() + " " + info.getValue());
+//                iterator.remove();
+//            }
+//        }
+//        iterator = sm.getLine_to_p().entrySet().iterator();
+//        while (iterator.hasNext()) {
+//            Map.Entry<String, MeasureInfo> entry = iterator.next();
+//            MeasureInfo info = entry.getValue();
+//            double d = (info.getValue_est() - info.getValue()) / (info.getSigma() * 3); // 测点相对偏移
+//            if (Math.abs(d) > 1) {
+//                count++;
+//                log.info("Branch " + info.getPositionId() + " " + info.getValue_est() + " " + info.getValue());
+//                iterator.remove();
+//            }
+//        }
+//        iterator = sm.getLine_to_q().entrySet().iterator();
+//        while (iterator.hasNext()) {
+//            Map.Entry<String, MeasureInfo> entry = iterator.next();
+//            MeasureInfo info = entry.getValue();
+//            double d = (info.getValue_est() - info.getValue()) / (info.getSigma() * 3); // 测点相对偏移
+//            if (Math.abs(d) > 1) {
+//                count++;
+//                log.info("Branch " + info.getPositionId() + " " + info.getValue_est() + " " + info.getValue());
+//                iterator.remove();
+//            }
+//        }
+//        iterator = sm.getBus_p().entrySet().iterator();
+//        while (iterator.hasNext()) {
+//            Map.Entry<String, MeasureInfo> entry = iterator.next();
+//            MeasureInfo info = entry.getValue();
+//            double d = (info.getValue_est() - info.getValue()) / (info.getSigma() * 3); // 测点相对偏移
+//            if (Math.abs(d) > 1) {
+//                count++;
+//                log.info("Bus " + info.getPositionId() + " " + info.getValue_est() + " " + info.getValue());
+//                iterator.remove();
+//            }
+//        }
+//        iterator = sm.getBus_q().entrySet().iterator();
+//        while (iterator.hasNext()) {
+//            Map.Entry<String, MeasureInfo> entry = iterator.next();
+//            MeasureInfo info = entry.getValue();
+//            double d = (info.getValue_est() - info.getValue()) / (info.getSigma() * 3); // 测点相对偏移
+//            if (Math.abs(d) > 1) {
+//                count++;
+//                log.info("Bus " + info.getPositionId() + " " + info.getValue_est() + " " + info.getValue());
+//                iterator.remove();
+//            }
+//        }
+//        iterator = sm.getBus_v().entrySet().iterator();
+//        while (iterator.hasNext()) {
+//            Map.Entry<String, MeasureInfo> entry = iterator.next();
+//            MeasureInfo info = entry.getValue();
+//            double d = (info.getValue_est() - info.getValue()) / (info.getSigma() * 3); // 测点相对偏移
+//            if (Math.abs(d) > 1) {
+//                count++;
+//                log.info("Bus " + info.getPositionId() + " " + info.getValue_est() + " " + info.getValue());
+//                iterator.remove();
+//            }
+//        }
+        log.info("不良数据个数：" + count);
+        log.info("可疑测点个数：" + count1);
     }
 
     private void dealZeroInjection(SystemMeasure sm, IEEEDataIsland ref, boolean isAddConstraint, AbstractSeAlg alg) {
@@ -312,13 +579,14 @@ public class PsoSeTest_IeeeCase implements MeasTypeCons {
         }
     }
 
-    private static void printS1(IEEEDataIsland ref, SeResultInfo r, boolean isTrueValue) {
+    private static void printS1AndS2(IEEEDataIsland ref, SeResultInfo r, boolean isTrueValue) {
         if (ref != null) {
             if (isTrueValue)
                 assertTrueSe(ref, r);
             Map<Integer, Double> busV = r.getPfResult().getBusV();
             Map<Integer, Double> busTheta = r.getPfResult().getBusTheta();
             double s1 = 0.0;
+            double s2 = 0.0;
             for (BusData b : ref.getBuses()) {
                 double v = busV.get(b.getBusNumber());
                 double theta = busTheta.get(b.getBusNumber());
@@ -326,10 +594,123 @@ public class PsoSeTest_IeeeCase implements MeasTypeCons {
                 double trueTheta = b.getFinalAngle() * Math.PI / 180.;
                 s1 += Math.abs(v - trueV);
                 s1 += Math.abs(theta - trueTheta);
+                s2 = Math.max(s2, Math.max(Math.abs(v - trueV), Math.abs(theta - trueTheta)));
             }
-            System.out.println("计算指标S1：" + s1);
+            log.info("计算指标S1：" + s1);
+            log.info("计算指标S2：" + s2);
         }
     }
+
+    private static void printS1_AndS2_(IEEEDataIsland ref, SeResultInfo r, SystemMeasure sm, boolean isTrueValue) {
+        if (ref != null) {
+            if (isTrueValue)
+                assertTrueSe(ref, r);
+            double s1 = 0.0;
+            double s2 = 0.0;
+            for (MeasureInfo info : sm.getBus_p().values()) {
+                s1 += Math.abs(info.getValue_est() - info.getValue_true());
+                s2 = Math.max(s2, Math.abs(info.getValue_est() - info.getValue_true()));
+            }
+            for (MeasureInfo info : sm.getBus_q().values()) {
+                s1 += Math.abs(info.getValue_est() - info.getValue_true());
+                s2 = Math.max(s2, Math.abs(info.getValue_est() - info.getValue_true()));
+            }
+            for (MeasureInfo info : sm.getLine_from_p().values()) {
+                s1 += Math.abs(info.getValue_est() - info.getValue_true());
+                s2 = Math.max(s2, Math.abs(info.getValue_est() - info.getValue_true()));
+            }
+            for (MeasureInfo info : sm.getLine_from_q().values()) {
+                s1 += Math.abs(info.getValue_est() - info.getValue_true());
+                s2 = Math.max(s2, Math.abs(info.getValue_est() - info.getValue_true()));
+            }
+            for (MeasureInfo info : sm.getLine_to_p().values()) {
+                s1 += Math.abs(info.getValue_est() - info.getValue_true());
+                s2 = Math.max(s2, Math.abs(info.getValue_est() - info.getValue_true()));
+            }
+            for (MeasureInfo info : sm.getLine_to_q().values()) {
+                s1 += Math.abs(info.getValue_est() - info.getValue_true());
+                s2 = Math.max(s2, Math.abs(info.getValue_est() - info.getValue_true()));
+            }
+            log.info("计算指标S1_：" + s1);
+            log.info("计算指标S2_：" + s2);
+        }
+    }
+
+    private void printXi(SystemMeasure sm) {
+        int totalNum = sm.getBus_v().size() + sm.getBus_p().size() + sm.getBus_q().size()
+                + sm.getLine_from_p().size() + sm.getLine_from_q().size()
+                + sm.getLine_to_p().size() + sm.getLine_to_q().size();
+        int N3sigma = 0;
+        int N2sigma = 0;
+        int N1sigma = 0;
+        for (MeasureInfo info : sm.getBus_v().values()) {
+            double deviation = Math.abs(info.getValue_est() - info.getValue_true());
+            if (deviation <= 3 * info.getSigma())
+                N3sigma++;
+            if (deviation <= 2 * info.getSigma())
+                N2sigma++;
+            if (deviation <= info.getSigma())
+                N1sigma++;
+        }
+        for (MeasureInfo info : sm.getBus_p().values()) {
+            double deviation = Math.abs(info.getValue_est() - info.getValue_true());
+            if (deviation <= 3 * info.getSigma())
+                N3sigma++;
+            if (deviation <= 2 * info.getSigma())
+                N2sigma++;
+            if (deviation <= info.getSigma())
+                N1sigma++;
+        }
+        for (MeasureInfo info : sm.getBus_q().values()) {
+            double deviation = Math.abs(info.getValue_est() - info.getValue_true());
+            if (deviation <= 3 * info.getSigma())
+                N3sigma++;
+            if (deviation <= 2 * info.getSigma())
+                N2sigma++;
+            if (deviation <= info.getSigma())
+                N1sigma++;
+        }
+        for (MeasureInfo info : sm.getLine_from_p().values()) {
+            double deviation = Math.abs(info.getValue_est() - info.getValue_true());
+            if (deviation <= 3 * info.getSigma())
+                N3sigma++;
+            if (deviation <= 2 * info.getSigma())
+                N2sigma++;
+            if (deviation <= info.getSigma())
+                N1sigma++;
+        }
+        for (MeasureInfo info : sm.getLine_from_q().values()) {
+            double deviation = Math.abs(info.getValue_est() - info.getValue_true());
+            if (deviation <= 3 * info.getSigma())
+                N3sigma++;
+            if (deviation <= 2 * info.getSigma())
+                N2sigma++;
+            if (deviation <= info.getSigma())
+                N1sigma++;
+        }
+        for (MeasureInfo info : sm.getLine_to_p().values()) {
+            double deviation = Math.abs(info.getValue_est() - info.getValue_true());
+            if (deviation <= 3 * info.getSigma())
+                N3sigma++;
+            if (deviation <= 2 * info.getSigma())
+                N2sigma++;
+            if (deviation <= info.getSigma())
+                N1sigma++;
+        }
+        for (MeasureInfo info : sm.getLine_to_q().values()) {
+            double deviation = Math.abs(info.getValue_est() - info.getValue_true());
+            if (deviation <= 3 * info.getSigma())
+                N3sigma++;
+            if (deviation <= 2 * info.getSigma())
+                N2sigma++;
+            if (deviation <= info.getSigma())
+                N1sigma++;
+        }
+        log.info("计算指标Xi3sigma：" + ((double) N3sigma / totalNum));
+        log.info("计算指标Xi2sigma：" + ((double) N2sigma / totalNum));
+        log.info("计算指标Xi1sigma：" + ((double) N1sigma / totalNum));
+    }
+
 
     private static void assertTrueSe(IEEEDataIsland ref, SeResultInfo r) {
         assertEquals(1.0, r.getEligibleRate());

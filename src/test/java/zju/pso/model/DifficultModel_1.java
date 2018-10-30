@@ -29,19 +29,28 @@ public class DifficultModel_1 implements OptModel {
     }
 
     @Override
-    public double[] evalConstr(Location location) {
+    public double evalConstr(Location location) {
         double[] x = location.getLoc();
-        double[] constr = new double[9];
+        double constr = 0;
 
-        constr[0] = 2 * x[0] + 2 * x[1] + x[9] + x[10] - 10;
-        constr[1] = 2 * x[0] + 2 * x[2] + x[9] + x[11] - 10;
-        constr[2] = 2 * x[1] + 2 * x[2] + x[10] + x[11] - 10;
-        constr[3] = -8 * x[0] + x[9];
-        constr[4] = -8 * x[1] + x[10];
-        constr[5] = -8 * x[2] + x[11];
-        constr[6] = -2 * x[3] - x[4] + x[9];
-        constr[7] = -2 * x[5] - x[6] + x[10];
-        constr[8] = -2 * x[7] - x[8] + x[11];
+        if (2 * x[0] + 2 * x[1] + x[9] + x[10] - 10 > 0)
+            constr += 2 * x[0] + 2 * x[1] + x[9] + x[10] - 10;
+        if (2 * x[0] + 2 * x[2] + x[9] + x[11] - 10 > 0)
+            constr += 2 * x[0] + 2 * x[2] + x[9] + x[11] - 10;
+        if (2 * x[1] + 2 * x[2] + x[10] + x[11] - 10 > 0)
+            constr += 2 * x[1] + 2 * x[2] + x[10] + x[11] - 10;
+        if (-8 * x[0] + x[9] > 0)
+            constr += -8 * x[0] + x[9];
+        if (-8 * x[1] + x[10] > 0)
+            constr += -8 * x[1] + x[10];
+        if (-8 * x[2] + x[11] > 0)
+            constr += -8 * x[2] + x[11];
+        if (-2 * x[3] - x[4] + x[9] > 0)
+            constr += -2 * x[3] - x[4] + x[9];
+        if (-2 * x[5] - x[6] + x[10] > 0)
+            constr += -2 * x[5] - x[6] + x[10];
+        if (-2 * x[7] - x[8] + x[11] > 0)
+            constr += -2 * x[7] - x[8] + x[11];
 
         return constr;
     }
@@ -90,5 +99,10 @@ public class DifficultModel_1 implements OptModel {
     @Override
     public int getMaxIter() {
         return 2000;
+    }
+
+    @Override
+    public double getTolFitness() {
+        return -99999;
     }
 }
