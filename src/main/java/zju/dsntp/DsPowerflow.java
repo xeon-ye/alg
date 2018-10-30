@@ -67,7 +67,7 @@ public class DsPowerflow implements DsModelCons {
         //solver.setLinearSolver(NewtonSolver.LINEAR_SOLVER_COLT);
         long start = System.nanoTime();
         isConverged = solver.solve();
-        log.debug("Time used for 潮流计算 : " + (System.nanoTime() - start) / 1000 + "us");
+//        log.debug("Time used for 潮流计算 : " + (System.nanoTime() - start) / 1000 + "us");
         if (isConverged) {
             //计算节点电压
             newtonModel.fillStateInIsland();

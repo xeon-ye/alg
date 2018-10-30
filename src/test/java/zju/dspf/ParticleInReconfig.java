@@ -126,6 +126,7 @@ class ParticleInReconfig {
     public void evaluateFitness() {
         //todo:修改适应度的计算公式
         fitness = 0;
+        //克隆一个计算版
         calIsland = originIsland.clone();
         calIsland.initialIsland();
         tns = DsCase33.createTnMap(calIsland);

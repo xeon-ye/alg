@@ -1,7 +1,9 @@
 package zju.dsntp;
 
 import junit.framework.TestCase;
+import zju.devmodel.MapObject;
 import zju.dsmodel.DistriSys;
+import zju.dsmodel.DsConnectNode;
 import zju.dsmodel.DsModelCons;
 import zju.dsmodel.IeeeDsInHand;
 
@@ -31,6 +33,32 @@ public class PathBasedModelTest extends TestCase implements DsModelCons {
     public void testDscase13() throws Exception {
         PathBasedModel model = new PathBasedModel(IeeeDsInHand.FEEDER13);
         model.buildPathes();
+        System.out.println("打印路径");
+        model.printPathes(model.getPathes());
+
+        System.out.println("打印点");
+        for (DsConnectNode i : model.getNodes()) {
+            System.out.println(i.getId());
+        }
+        System.out.println(model.cnpathesIndex);
+        for(int i : model.cnStart) {
+            System.out.println(i);
+        }
+        System.out.println("打印点路径");
+        model.printPathes(model.getCnPathes());
+
+        System.out.println("打印边");
+        for (MapObject i : model.getEdges()) {
+            System.out.println(i.getProperties());
+        }
+
+        System.out.println(model.edgepathesIndex);
+        System.out.println("打印边路径");
+        model.printPathes(model.getEdgePathes());
+        for(int i : model.edgeStart){
+            System.out.println(i);
+        }
+
         assertEquals(12, model.getPathes().size());
     }
 
@@ -111,7 +139,7 @@ public class PathBasedModelTest extends TestCase implements DsModelCons {
             r.readLine();
             while ((str = r.readLine()) != null) {
                 customerList = str.split(",");
-                bw.write(customerList[1] + "\t" + customerList[3] + "\t" + customerList[5] + "\t" +"4");
+                bw.write(customerList[1] + "\t" + customerList[3] + "\t" + customerList[5] + "\t" + "4");
                 bw.newLine();
             }
             r.close();
@@ -119,7 +147,7 @@ public class PathBasedModelTest extends TestCase implements DsModelCons {
         } catch (Exception e) {
             isSucess = false;
         } finally {
-            if(bw != null) {
+            if (bw != null) {
                 try {
                     bw.close();
                     bw = null;
@@ -127,7 +155,7 @@ public class PathBasedModelTest extends TestCase implements DsModelCons {
                     e.printStackTrace();
                 }
             }
-            if(osw != null) {
+            if (osw != null) {
                 try {
                     osw.close();
                     osw = null;
@@ -135,11 +163,11 @@ public class PathBasedModelTest extends TestCase implements DsModelCons {
                     e.printStackTrace();
                 }
             }
-            if(out!=null) {
+            if (out != null) {
                 try {
                     out.close();
                     out = null;
-                } catch(IOException e) {
+                } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
