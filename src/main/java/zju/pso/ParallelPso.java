@@ -362,7 +362,7 @@ public class ParallelPso extends AbstractPso implements PsoConstants {
         cuMemcpyDtoH(Pointer.to(gBestLoc), deviceGBestLocation, n * Sizeof.FLOAT);
 
         gBest = gBestFitness[0];
-        gBestLocation.setLoc(floatArr2doubleArr(gBestLoc));
+        gBestLocation = new Location(floatArr2doubleArr(gBestLoc));
 
         if (isGBestfeasible) {
             logger.info("Solution found at iteration " + iterNum + ", best fitness value: " + gBest);

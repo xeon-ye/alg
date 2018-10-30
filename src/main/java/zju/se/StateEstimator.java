@@ -395,5 +395,9 @@ public class StateEstimator implements SeConstants, MeasTypeCons {
         Y.formYMatrix(); // 形成导纳矩阵
         Y.formConnectedBusCount(); // 形成存储各节点所相连节点数量的数组
     }
+
+    public void setLambda(double lambda) {
+        this.lambda = lambda;
+    }
 }
 

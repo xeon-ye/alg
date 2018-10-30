@@ -255,8 +255,8 @@ public class PsoSeTest_IeeeCase implements MeasTypeCons {
 
         island = IcfDataUtil.ISLAND_300.clone();
         smRef = SimuMeasMaker.createFullMeasure(island, 1, 0);
-        sm = SimuMeasMaker.createFullMeasure_withBadData(island, 1, 0.02, 0.06);
-        doSE(island, sm, smRef, IcfDataUtil.ISLAND_300, false, false);
+        sm = SimuMeasMaker.createFullMeasure_withBadData(island, 1, 0.02, 0.03);
+        doSE(island, sm, smRef, IcfDataUtil.ISLAND_300, false, true);
     }
 
     @Test
@@ -265,7 +265,7 @@ public class PsoSeTest_IeeeCase implements MeasTypeCons {
         IEEEDataIsland island = new DefaultIcfParser().parse(ieeeFile, "UTF-8");
         //先算一遍潮流
         SystemMeasure smRef = SimuMeasMaker.createFullMeasure(island, 1, 0);
-        SystemMeasure sm = SimuMeasMaker.createFullMeasure_withBadData(island, 1, 0.02, 0.06);
+        SystemMeasure sm = SimuMeasMaker.createFullMeasure_withBadData(island, 1, 0.02, 0.03);
         doSE(island, sm, smRef, island, false, false);
     }
 
@@ -286,14 +286,20 @@ public class PsoSeTest_IeeeCase implements MeasTypeCons {
         int[] variables_types = {
                 IpoptSeAlg.VARIABLE_VTHETA,
         }; // 状态变量类型
-//        log.debug("先算一遍MNMR方法：");
+//        log.info("################使用内点法计算：################");
+//        se.setLambda(90);
 //        doIpoptSE(island, sm, ref, variables_types, isTrueValue, isZeroInjection, SeObjective.OBJ_TYPE_SIGMOID);
-//        log.debug("计算真值：");
+//        se.setLambda(2);
+//        se.setInitial(ipoptSeAlg.getVariableState());
+//        doIpoptSE(island, sm, ref, variables_types, isTrueValue, isZeroInjection, SeObjective.OBJ_TYPE_SIGMOID);
+//
+//        log.info("################计算状态变量真值：################");
 //        doIpoptSE(island, smRef, ref, variables_types, isTrueValue, isZeroInjection, SeObjective.OBJ_TYPE_WLS);
-        double[] variableState = ipoptSeAlg.getVariableState();
-        psoSeAlg.setInitVariableState(variableState);
+//        double[] variableState = ipoptSeAlg.getVariableState();
+//        psoSeAlg.setInitVariableState(variableState);
         psoSeAlg.setWarmStart(false);
-        log.debug("开始粒子群算法：");
+        psoSeAlg.setParallel(true);
+        log.info("################开始粒子群算法：################");
         doPsoSE(island, sm, ref, variables_types, isTrueValue, isZeroInjection);
     }
 
@@ -321,11 +327,12 @@ public class PsoSeTest_IeeeCase implements MeasTypeCons {
             ipoptSeAlg.setVariable_type(variable_type);
             se.doSe();
             assertTrue(ipoptSeAlg.isConverged());
+            delBadDataResult();
             r = se.createPfResult();
             assertNotNull(r);
-            printS1AndS2(ref, r, isTrueValue);
-            printS1_AndS2_(ref, r, sm, isTrueValue);
-            printXi(sm);
+//            printS1AndS2(ref, r, isTrueValue);
+//            printS1_AndS2_(ref, r, sm, isTrueValue);
+//            printXi(sm);
             printZeroInjectionDelta(ref, r, ipoptSeAlg);
             System.out.println("WLS状态估计迭代次数：" + ipoptSeAlg.getIterNum() + "\t用时：" + ipoptSeAlg.getTimeUsed() + "\t");
             System.out.println("WLS状态估计用时：" + (System.currentTimeMillis() - start) + "ms");
@@ -356,12 +363,12 @@ public class PsoSeTest_IeeeCase implements MeasTypeCons {
             psoSeAlg.setVariable_type(variable_type);
             psoSeAlg.setConverged(true);
             se.doSe();
-//            delBadDataResult();
+            delBadDataResult();
             r = se.createPfResult();
             assertNotNull(r);
-            printS1AndS2(ref, r, isTrueValue);
-            printS1_AndS2_(ref, r, sm, isTrueValue);
-            printXi(sm);
+//            printS1AndS2(ref, r, isTrueValue);
+//            printS1_AndS2_(ref, r, sm, isTrueValue);
+//            printXi(sm);
             printZeroInjectionDelta(ref, r, psoSeAlg);
             System.out.println("MNMR状态估计用时：" + (System.currentTimeMillis() - start) + "ms");
         }
@@ -370,86 +377,159 @@ public class PsoSeTest_IeeeCase implements MeasTypeCons {
     private void delBadDataResult() {
         SystemMeasure sm = se.getSm();
         int count = 0;
-        log.info("粒子群算法计算后识别的坏数据为：");
-        // map里面循环又要删除元素，如果使用foreach会抛出异常，应该使用iterator
-        Iterator<Map.Entry<String, MeasureInfo>> iterator = sm.getLine_from_p().entrySet().iterator();
-        while (iterator.hasNext()) {
-            Map.Entry<String, MeasureInfo> entry = iterator.next();
+        int count1 = 0;
+        log.info("坏数据为：");
+        for (Map.Entry<String, MeasureInfo> entry : sm.getLine_from_p().entrySet()) {
             MeasureInfo info = entry.getValue();
             double d = (info.getValue_est() - info.getValue()) / (info.getSigma() * 3); // 测点相对偏移
             if (Math.abs(d) > 1) {
                 count++;
                 log.info("Branch " + info.getPositionId() + " " + info.getValue_est() + " " + info.getValue());
-                iterator.remove();
+                if (Math.abs(d) <= 3)
+                    count1++;
             }
         }
-        iterator = sm.getLine_from_q().entrySet().iterator();
-        while (iterator.hasNext()) {
-            Map.Entry<String, MeasureInfo> entry = iterator.next();
+        for (Map.Entry<String, MeasureInfo> entry : sm.getLine_from_q().entrySet()) {
             MeasureInfo info = entry.getValue();
             double d = (info.getValue_est() - info.getValue()) / (info.getSigma() * 3); // 测点相对偏移
             if (Math.abs(d) > 1) {
                 count++;
                 log.info("Branch " + info.getPositionId() + " " + info.getValue_est() + " " + info.getValue());
-                iterator.remove();
+                if (Math.abs(d) <= 3)
+                    count1++;
             }
         }
-        iterator = sm.getLine_to_p().entrySet().iterator();
-        while (iterator.hasNext()) {
-            Map.Entry<String, MeasureInfo> entry = iterator.next();
+        for (Map.Entry<String, MeasureInfo> entry : sm.getLine_to_p().entrySet()) {
             MeasureInfo info = entry.getValue();
             double d = (info.getValue_est() - info.getValue()) / (info.getSigma() * 3); // 测点相对偏移
             if (Math.abs(d) > 1) {
                 count++;
                 log.info("Branch " + info.getPositionId() + " " + info.getValue_est() + " " + info.getValue());
-                iterator.remove();
+                if (Math.abs(d) <= 3)
+                    count1++;
             }
         }
-        iterator = sm.getLine_to_q().entrySet().iterator();
-        while (iterator.hasNext()) {
-            Map.Entry<String, MeasureInfo> entry = iterator.next();
+        for (Map.Entry<String, MeasureInfo> entry : sm.getLine_to_q().entrySet()) {
             MeasureInfo info = entry.getValue();
             double d = (info.getValue_est() - info.getValue()) / (info.getSigma() * 3); // 测点相对偏移
             if (Math.abs(d) > 1) {
                 count++;
                 log.info("Branch " + info.getPositionId() + " " + info.getValue_est() + " " + info.getValue());
-                iterator.remove();
+                if (Math.abs(d) <= 3)
+                    count1++;
             }
         }
-        iterator = sm.getBus_p().entrySet().iterator();
-        while (iterator.hasNext()) {
-            Map.Entry<String, MeasureInfo> entry = iterator.next();
+        for (Map.Entry<String, MeasureInfo> entry : sm.getBus_p().entrySet()) {
             MeasureInfo info = entry.getValue();
             double d = (info.getValue_est() - info.getValue()) / (info.getSigma() * 3); // 测点相对偏移
             if (Math.abs(d) > 1) {
                 count++;
                 log.info("Bus " + info.getPositionId() + " " + info.getValue_est() + " " + info.getValue());
-                iterator.remove();
+                if (Math.abs(d) <= 3)
+                    count1++;
             }
         }
-        iterator = sm.getBus_q().entrySet().iterator();
-        while (iterator.hasNext()) {
-            Map.Entry<String, MeasureInfo> entry = iterator.next();
+        for (Map.Entry<String, MeasureInfo> entry : sm.getBus_q().entrySet()) {
             MeasureInfo info = entry.getValue();
             double d = (info.getValue_est() - info.getValue()) / (info.getSigma() * 3); // 测点相对偏移
             if (Math.abs(d) > 1) {
                 count++;
                 log.info("Bus " + info.getPositionId() + " " + info.getValue_est() + " " + info.getValue());
-                iterator.remove();
+                if (Math.abs(d) <= 3)
+                    count1++;
             }
         }
-        iterator = sm.getBus_v().entrySet().iterator();
-        while (iterator.hasNext()) {
-            Map.Entry<String, MeasureInfo> entry = iterator.next();
+        for (Map.Entry<String, MeasureInfo> entry : sm.getBus_v().entrySet()) {
             MeasureInfo info = entry.getValue();
             double d = (info.getValue_est() - info.getValue()) / (info.getSigma() * 3); // 测点相对偏移
             if (Math.abs(d) > 1) {
                 count++;
                 log.info("Bus " + info.getPositionId() + " " + info.getValue_est() + " " + info.getValue());
-                iterator.remove();
+                if (Math.abs(d) <= 3)
+                    count1++;
             }
         }
+
+//        // map里面循环又要删除元素，如果使用foreach会抛出异常，应该使用iterator
+//        Iterator<Map.Entry<String, MeasureInfo>> iterator = sm.getLine_from_p().entrySet().iterator();
+//        while (iterator.hasNext()) {
+//            Map.Entry<String, MeasureInfo> entry = iterator.next();
+//            MeasureInfo info = entry.getValue();
+//            double d = (info.getValue_est() - info.getValue()) / (info.getSigma() * 3); // 测点相对偏移
+//            if (Math.abs(d) > 1) {
+//                count++;
+//                log.info("Branch " + info.getPositionId() + " " + info.getValue_est() + " " + info.getValue());
+//                iterator.remove();
+//            }
+//        }
+//        iterator = sm.getLine_from_q().entrySet().iterator();
+//        while (iterator.hasNext()) {
+//            Map.Entry<String, MeasureInfo> entry = iterator.next();
+//            MeasureInfo info = entry.getValue();
+//            double d = (info.getValue_est() - info.getValue()) / (info.getSigma() * 3); // 测点相对偏移
+//            if (Math.abs(d) > 1) {
+//                count++;
+//                log.info("Branch " + info.getPositionId() + " " + info.getValue_est() + " " + info.getValue());
+//                iterator.remove();
+//            }
+//        }
+//        iterator = sm.getLine_to_p().entrySet().iterator();
+//        while (iterator.hasNext()) {
+//            Map.Entry<String, MeasureInfo> entry = iterator.next();
+//            MeasureInfo info = entry.getValue();
+//            double d = (info.getValue_est() - info.getValue()) / (info.getSigma() * 3); // 测点相对偏移
+//            if (Math.abs(d) > 1) {
+//                count++;
+//                log.info("Branch " + info.getPositionId() + " " + info.getValue_est() + " " + info.getValue());
+//                iterator.remove();
+//            }
+//        }
+//        iterator = sm.getLine_to_q().entrySet().iterator();
+//        while (iterator.hasNext()) {
+//            Map.Entry<String, MeasureInfo> entry = iterator.next();
+//            MeasureInfo info = entry.getValue();
+//            double d = (info.getValue_est() - info.getValue()) / (info.getSigma() * 3); // 测点相对偏移
+//            if (Math.abs(d) > 1) {
+//                count++;
+//                log.info("Branch " + info.getPositionId() + " " + info.getValue_est() + " " + info.getValue());
+//                iterator.remove();
+//            }
+//        }
+//        iterator = sm.getBus_p().entrySet().iterator();
+//        while (iterator.hasNext()) {
+//            Map.Entry<String, MeasureInfo> entry = iterator.next();
+//            MeasureInfo info = entry.getValue();
+//            double d = (info.getValue_est() - info.getValue()) / (info.getSigma() * 3); // 测点相对偏移
+//            if (Math.abs(d) > 1) {
+//                count++;
+//                log.info("Bus " + info.getPositionId() + " " + info.getValue_est() + " " + info.getValue());
+//                iterator.remove();
+//            }
+//        }
+//        iterator = sm.getBus_q().entrySet().iterator();
+//        while (iterator.hasNext()) {
+//            Map.Entry<String, MeasureInfo> entry = iterator.next();
+//            MeasureInfo info = entry.getValue();
+//            double d = (info.getValue_est() - info.getValue()) / (info.getSigma() * 3); // 测点相对偏移
+//            if (Math.abs(d) > 1) {
+//                count++;
+//                log.info("Bus " + info.getPositionId() + " " + info.getValue_est() + " " + info.getValue());
+//                iterator.remove();
+//            }
+//        }
+//        iterator = sm.getBus_v().entrySet().iterator();
+//        while (iterator.hasNext()) {
+//            Map.Entry<String, MeasureInfo> entry = iterator.next();
+//            MeasureInfo info = entry.getValue();
+//            double d = (info.getValue_est() - info.getValue()) / (info.getSigma() * 3); // 测点相对偏移
+//            if (Math.abs(d) > 1) {
+//                count++;
+//                log.info("Bus " + info.getPositionId() + " " + info.getValue_est() + " " + info.getValue());
+//                iterator.remove();
+//            }
+//        }
         log.info("不良数据个数：" + count);
+        log.info("可疑测点个数：" + count1);
     }
 
     private void dealZeroInjection(SystemMeasure sm, IEEEDataIsland ref, boolean isAddConstraint, AbstractSeAlg alg) {

@@ -24,6 +24,7 @@ public class PsoSeAlg extends AbstractSeAlg implements OptModel, MeasTypeCons {
     private double[] initVariableState;
     private boolean isWarmStart;
     private double objective;
+    private boolean isParallel = false;
 
     private void initial() {
         if (getSlackBusNum() > 0)
@@ -60,25 +61,25 @@ public class PsoSeAlg extends AbstractSeAlg implements OptModel, MeasTypeCons {
     public void doSeAnalyse() {
         long start = System.currentTimeMillis();
         initial();
-//        HybridPso solver;
-//        if (isWarmStart) {
-//            solver = new HybridPso(this, initVariableState);
-//        } else {
-//            solver = new HybridPso(this);
-//        }
-        ParallelPso solver;
+        HybridPso solver;
         if (isWarmStart) {
-            solver = new ParallelPso(this, initVariableState);
+            solver = new HybridPso(this, initVariableState);
         } else {
-            solver = new ParallelPso(this);
+            solver = new HybridPso(this);
         }
-        solver.setMeas(meas);
-        solver.setY(Y);
-        solver.setThreshold(objFunc.getThresholds());
-        solver.setZeroPBuses(this.zeroPBuses);
-        solver.setZeroQBuses(this.zeroQBuses);
-        solver.setTol_p((float) this.tol_p);
-        solver.setTol_q((float) this.tol_q);
+//        ParallelPso solver;
+//        if (isWarmStart) {
+//            solver = new ParallelPso(this, initVariableState);
+//        } else {
+//            solver = new ParallelPso(this);
+//        }
+//        solver.setMeas(meas);
+//        solver.setY(Y);
+//        solver.setThreshold(objFunc.getThresholds());
+//        solver.setZeroPBuses(this.zeroPBuses);
+//        solver.setZeroQBuses(this.zeroQBuses);
+//        solver.setTol_p((float) this.tol_p);
+//        solver.setTol_q((float) this.tol_q);
         solver.execute();
         variableState = solver.getgBestLocation().getLoc();
         if (variable_type == IpoptSeAlg.VARIABLE_VTHETA)
@@ -241,5 +242,13 @@ public class PsoSeAlg extends AbstractSeAlg implements OptModel, MeasTypeCons {
 
     public void setInitVariableState(double[] initVariableState) {
         this.initVariableState = initVariableState;
+    }
+
+    public boolean isParallel() {
+        return isParallel;
+    }
+
+    public void setParallel(boolean parallel) {
+        isParallel = parallel;
     }
 }
