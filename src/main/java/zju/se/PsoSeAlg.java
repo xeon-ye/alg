@@ -5,9 +5,7 @@ import org.apache.logging.log4j.Logger;
 import zju.matrix.AVector;
 import zju.measure.MeasTypeCons;
 import zju.measure.MeasVector;
-import zju.pso.HybridPso;
-import zju.pso.Location;
-import zju.pso.OptModel;
+import zju.pso.*;
 import zju.util.StateCalByPolar;
 import zju.util.StateCalByRC;
 
@@ -26,6 +24,7 @@ public class PsoSeAlg extends AbstractSeAlg implements OptModel, MeasTypeCons {
     private double[] initVariableState;
     private boolean isWarmStart;
     private double objective;
+    private boolean isParallel = false;
 
     private void initial() {
         if (getSlackBusNum() > 0)
@@ -64,10 +63,23 @@ public class PsoSeAlg extends AbstractSeAlg implements OptModel, MeasTypeCons {
         initial();
         HybridPso solver;
         if (isWarmStart) {
-            solver = new HybridPso(this, 100, initVariableState);
+            solver = new HybridPso(this, initVariableState);
         } else {
-            solver = new HybridPso(this, 100);
+            solver = new HybridPso(this);
         }
+//        ParallelPso solver;
+//        if (isWarmStart) {
+//            solver = new ParallelPso(this, initVariableState);
+//        } else {
+//            solver = new ParallelPso(this);
+//        }
+//        solver.setMeas(meas);
+//        solver.setY(Y);
+//        solver.setThreshold(objFunc.getThresholds());
+//        solver.setZeroPBuses(this.zeroPBuses);
+//        solver.setZeroQBuses(this.zeroQBuses);
+//        solver.setTol_p((float) this.tol_p);
+//        solver.setTol_q((float) this.tol_q);
         solver.execute();
         variableState = solver.getgBestLocation().getLoc();
         if (variable_type == IpoptSeAlg.VARIABLE_VTHETA)
@@ -103,23 +115,26 @@ public class PsoSeAlg extends AbstractSeAlg implements OptModel, MeasTypeCons {
     }
 
     @Override
-    public double[] evalConstr(Location location) {
+    public double evalConstr(Location location) {
         // 处理等式约束
+        double violation = 0;
         double[] variableState = location.getLoc();
         int[] zeroPBuses = this.zeroPBuses;
         int[] zeroQBuses = this.zeroQBuses;
         double[] constr = new double[zeroPBuses.length + zeroQBuses.length];
-        int index = 0;
         for (int zeroPBuse : zeroPBuses) {
             double p = StateCalByPolar.calBusP(zeroPBuse, Y, variableState);
-            constr[index++] = Math.abs(p) - tol_p;
+            double deviation = Math.abs(p) - tol_p;
+            if (deviation > 0)
+                violation += deviation;
         }
         for (int zeroQBus : zeroQBuses) {
             double q = StateCalByPolar.calBusQ(zeroQBus, Y, variableState);
-            constr[index++] = Math.abs(q) - tol_q;
+            double deviation = Math.abs(q) - tol_q;
+            if (deviation > 0)
+                violation += deviation;
         }
-
-        return constr;
+        return violation;
     }
 
     @Override
@@ -128,7 +143,7 @@ public class PsoSeAlg extends AbstractSeAlg implements OptModel, MeasTypeCons {
         if (variable_type == VARIABLE_VTHETA
                 || variable_type == VARIABLE_VTHETA_PQ) {
             for (int i = 0; i < busNumber; i++) {
-                minLoc[i] = 1.;
+                minLoc[i] = 0.9;
                 minLoc[i + busNumber] = -Math.PI / 2;
             }
             if (slackBusCol >= 0) {
@@ -197,7 +212,12 @@ public class PsoSeAlg extends AbstractSeAlg implements OptModel, MeasTypeCons {
 
     @Override
     public int getMaxIter() {
-        return 1000;
+        return 10000;
+    }
+
+    @Override
+    public double getTolFitness() {
+        return -99999;
     }
 
     public MeasVector getPqMeasure() {
@@ -222,5 +242,13 @@ public class PsoSeAlg extends AbstractSeAlg implements OptModel, MeasTypeCons {
 
     public void setInitVariableState(double[] initVariableState) {
         this.initVariableState = initVariableState;
+    }
+
+    public boolean isParallel() {
+        return isParallel;
+    }
+
+    public void setParallel(boolean parallel) {
+        isParallel = parallel;
     }
 }

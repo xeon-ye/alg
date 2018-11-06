@@ -14,7 +14,7 @@ import java.util.*;
  */
 public class PathBasedModel {
 
-    private static boolean isDebug = false; //置成true, 打印调试信息
+    private static boolean isDebug = false;//置成true, 打印调试信息
 
     //配电系统
     DistriSys sys;
@@ -62,7 +62,7 @@ public class PathBasedModel {
         //遍历所有的电源
         for (String supply : supplies) {
             supplyStart[count++] = pathes.size();
-            //
+            //电源节点
             DsConnectNode supplyCn = sys.getCns().get(supply);
             //先将电源节点压入栈内
             stack.push(supplyCn);
@@ -97,6 +97,7 @@ public class PathBasedModel {
                         i = stack.size() - 2;
                         while (Iter.hasNext()) {
                             DsConnectNode temp2 = (DsConnectNode) Iter.next();
+                            //无向图可以颠倒source和target顺序
                             p[i] = g.getEdge(temp2, temp1);
                             temp1 = temp2;
                             i--;
@@ -144,7 +145,8 @@ public class PathBasedModel {
                                 flag2 = false;
                                 break;
                             }
-                        if (flag2) {  //cn2不在栈中，cn1不能是电源，且已有路径中没有生成的新路径为开头的
+                        //cn1不在栈中，cn1不能是电源，没有重复路径
+                        if (flag2) {
                             stack.push(cn1);
                             flag1 = false;
                             pathes.add(p);  //增加一条路径
@@ -171,7 +173,7 @@ public class PathBasedModel {
         buildCnsPathes();
         buildedgePathes();
         if(isDebug) {
-            printPathes(edgepathes);
+            printPathes(pathes);
         }
         return true;
     }
@@ -191,7 +193,7 @@ public class PathBasedModel {
             cn = nodes.get(k).getId();
             //遍历所有路径
             for (i = 0; i <= pathes.size() - 1; i++) {
-                //末端点的一种情况
+                //只有一条支路的路径
                 lastID = g.getEdgeTarget(pathes.get(i)[pathes.get(i).length - 1]).getId();
                 if (pathes.get(i).length == 1) {
                     for (String scn : supplies) {
@@ -201,7 +203,6 @@ public class PathBasedModel {
                             break;
                         }
                     }
-                    //必要条件
                     if (cn.equals(lastID)) {
                         cnpathes.add(pathes.get(i));
                         cnpathesIndex.add(i);
@@ -211,7 +212,6 @@ public class PathBasedModel {
                     //如果路径上倒数第二条边有节点与lastID相同，则lastID应取最后一条边的另一个端点才是路径上的最后一个点
                     if (lastID.equals(g.getEdgeSource(pathes.get(i)[pathes.get(i).length - 2]).getId()) || lastID.equals(g.getEdgeTarget(pathes.get(i)[pathes.get(i).length - 2]).getId()))
                         lastID = g.getEdgeSource(pathes.get(i)[pathes.get(i).length - 1]).getId();
-                    //必要条件
                     if (cn.equals(lastID)) {
                         cnpathes.add(pathes.get(i));
                         cnpathesIndex.add(i);
@@ -253,7 +253,7 @@ public class PathBasedModel {
     }
 
     //将图中除电源以外的节点和所有的边分别存入数组中
-    public void buildEdgesAndNodes() throws Exception {
+    public void buildEdgesAndNodes() {
         String[] supplies = sys.getSupplyCns();
         UndirectedGraph<DsConnectNode, MapObject> g = sys.getOrigGraph();
         edges = new ArrayList<>();//todo: not efficient
@@ -316,7 +316,7 @@ public class PathBasedModel {
         int i, j;
         boolean isSupply;
         String temp;
-        System.out.println("Number of pathes is " + pathes.size());
+//        System.out.println("Number of pathes is " + pathes.size());
         for (i = 0; i <= pathes.size() - 1; i++) {
             //找路径电源点
             isSupply = false;
@@ -344,7 +344,7 @@ public class PathBasedModel {
             System.out.printf("\n");
         }
         //END
-        System.out.println("-----END-----");
+//        System.out.println("-----END-----");
     }
 
     public List<MapObject[]> getPathes() {

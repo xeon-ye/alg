@@ -13,7 +13,7 @@ import zju.util.*;
  * Created by IntelliJ IDEA.
  *
  * @author Dong Shufeng
- *         Date: 2009-3-15
+ * Date: 2009-3-15
  */
 public class IpoptSeAlg extends AbstractSeAlg implements MeasTypeCons, IpoptModel {
 
@@ -425,6 +425,7 @@ public class IpoptSeAlg extends AbstractSeAlg implements MeasTypeCons, IpoptMode
         solver.solve(maxIter, tolerance, true);
         setConverged(solver.isConverged());
         objective = solver.getObjective();
+        System.out.println("状态估计目标函数值为：" + objective);
         setTimeUsed(System.currentTimeMillis() - start);
     }
 

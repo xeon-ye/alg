@@ -38,12 +38,14 @@ public class DsDeviceParser implements DsModelCons {
                 strLine = reader.readLine();
             String[] strings = strLine.split("\t");
             String s = strings[1];
+            //取出数值，数值即为拓扑支路数量
             ArrayList<MapObject> branches = new ArrayList<MapObject>(Integer.parseInt(s.substring(0, s.indexOf(" "))));
             while (true) {
                 strLine = reader.readLine();
                 log.debug(strLine);
                 if (strLine.trim().equalsIgnoreCase("-999"))
                     break;
+                //空行跳过。#开头行为注释行。
                 if (strLine.trim().equals("") || strLine.startsWith("#")) //Debug Mode,you can disable elements with"//"
                     continue;
                 MapObject obj = parseBranch(strLine, strings[2]);
@@ -95,8 +97,11 @@ public class DsDeviceParser implements DsModelCons {
                 shuntCapacitors.add(obj);
             }
 
+            //变压器计数
             int tfCount = 0;
+            //开关计数
             int switchCount = 0;
+            //配置为Switch的branch为开关；否则，长度为0的边为变压器。
             for (MapObject obj : branches) {
                 String length = obj.getProperty(KEY_LINE_LENGTH);
                 if (obj.getProperty(KEY_LINE_CONF).trim().equalsIgnoreCase("Switch")) {
@@ -111,10 +116,12 @@ public class DsDeviceParser implements DsModelCons {
                 String length = obj.getProperty(KEY_LINE_LENGTH);
                 if (obj.getProperty(KEY_LINE_CONF).trim().equalsIgnoreCase("Switch")) {
                     log.debug("Feeder config = Switch its a Switch");
+                    //将类型Feeder改为类型Switch
                     obj.setProperty(KEY_RESOURCE_TYPE, RESOURCE_SWITCH);
                     switches.add(obj);
                 } else if (Double.parseDouble(length) < 1e-5) {
                     log.debug("Feeder length = " + length + ", its a transformer");
+                    //将类型Feeder改为类型Transformer
                     obj.setProperty(KEY_RESOURCE_TYPE, RESOURCE_TRANSFORMER);
                     transformers.add(obj);
                 }
@@ -314,6 +321,7 @@ public class DsDeviceParser implements DsModelCons {
         obj.setProperty(KEY_RESOURCE_TYPE, RESOURCE_FEEDER);
         obj.setProperty(KEY_LENGTH_UNIT, lenthUnit);
         if (content[3].trim().equalsIgnoreCase("Switch")) {
+            //设置开关状态
             if (content.length == 5)
                 obj.setProperty(KEY_SWITCH_STATUS, content[4]);
         }

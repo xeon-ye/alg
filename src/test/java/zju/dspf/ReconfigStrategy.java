@@ -12,10 +12,7 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by zjq on 2017/4/26.
@@ -24,9 +21,16 @@ public class ReconfigStrategy {
     private static Map<String,String> branchesInfo33 = new HashMap<>();
     private static Map<String,String> branchesInfo69 = new HashMap<>();
 
-    private static double maxCurrent = 58;
+    private static double maxCurrent = 54;
+
+    //支路编号
+    private Map<String,Integer> numToBranch;
+    //不可行的拓扑值
+    private List<Integer> unableTopoValueList;
 
     public ReconfigStrategy() throws IOException {
+        unableTopoValueList = new ArrayList<>();
+
         BufferedReader reader = new BufferedReader(new FileReader(DsCase33.class.getResource("/other/case33.txt").getPath()));
         String buffer;
         try {
@@ -92,6 +96,18 @@ public class ReconfigStrategy {
         for (int i = 0; i < toCloseBranches.size(); i++) {
             //提取边的两端节点编号
             toCloseBranch = toCloseBranches.get(i);
+            System.out.println("尝试闭合："+toCloseBranch);
+
+            //暂时移除
+            toCloseBranches.remove(toCloseBranch);
+            int temp = calTopoValue(toOpenBranches, toCloseBranches);
+            toCloseBranches.add(i,toCloseBranch);
+            //如果包含则跳过
+            if(unableTopoValueList.contains(temp)){
+                System.out.println("闭合"+toCloseBranch+"后，重复无效拓扑");
+                continue;
+            }
+
 //            String[] nodeNames = toCloseBranch.split("-");
 //            int[] nodes = new int[2];
 //            //nodename从1开始编号，故减1
@@ -99,8 +115,8 @@ public class ReconfigStrategy {
 //            nodes[1] = Integer.parseInt(nodeNames[1]) - 1;
 
             //增加线路
-            DsCase33.addFeeder(calIsland, tns, branchesInfo69.get(toCloseBranch));
-
+            DsCase33.addFeeder(calIsland, tns, branchesInfo33.get(toCloseBranch));
+            //潮流计算
             calIsland.initialIsland();
             DsPowerflow pf = new DsPowerflow();
             pf.setTolerance(1e-1);
@@ -122,11 +138,10 @@ public class ReconfigStrategy {
                 surgeCurrentAmp[j] = 2 * Math.sqrt(branchI[j][0] * branchI[j][0] + branchI[j][1] * branchI[j][1]);
             }
 
-            System.out.println("尝试闭合："+toCloseBranch);
             System.out.println("A相冲击电流幅值："+surgeCurrentAmp[0]);
             System.out.println("B相冲击电流幅值："+surgeCurrentAmp[1]);
             System.out.println("C相冲击电流幅值："+surgeCurrentAmp[2]);
-            System.out.println("平均冲击电流幅值："+(surgeCurrentAmp[0]+surgeCurrentAmp[2]+surgeCurrentAmp[2])/3);
+            System.out.println("平均冲击电流幅值："+(surgeCurrentAmp[0]+surgeCurrentAmp[1]+surgeCurrentAmp[2])/3);
 //            //计算三相电压差
 //            double[][] nodeV1 = null;
 //            double[][] nodeV2 = null;
@@ -181,13 +196,27 @@ public class ReconfigStrategy {
                 for (int j = 0; j < toOpenBranches.size(); j++) {
                     toOpenBranch = toOpenBranches.get(j);
                     DsCase33.deleteFeeder(calIsland, tns, toOpenBranch);
-                    //检查线路辐射状
+                    //检查线路是否连通
                     ConnectivityInspector inspector = new ConnectivityInspector<>(calIsland.getGraph());
                     List<Set<DsConnectNode>> subGraphs = inspector.connectedSets();
                     if (subGraphs.size() == 1) {
                         //跳出找断开开关
                         //break;
-                        System.out.println("尝试断开：" + toOpenBranch+"\n");
+                        System.out.println("\n尝试断开：" + toOpenBranch+"\n");
+
+                        //暂时移除
+                        toOpenBranches.remove(toOpenBranch);
+                        toCloseBranches.remove(toCloseBranch);
+                        temp = calTopoValue(toOpenBranches, toCloseBranches);
+                        toOpenBranches.add(j,toOpenBranch);
+                        toCloseBranches.add(i, toCloseBranch);
+                        //如果包含则跳过
+                        if(unableTopoValueList.contains(temp)){
+                            System.out.println("断开"+toOpenBranch+"后，无效重复拓扑");
+                            DsCase33.addFeeder(calIsland, tns, branchesInfo69.get(toOpenBranch));
+                            continue;
+                        }
+
                         //去除列表中的内容
                         toCloseBranches.remove(toCloseBranch);
                         toOpenBranches.remove(toOpenBranch);
@@ -204,7 +233,10 @@ public class ReconfigStrategy {
                             return "闭合" + toCloseBranch + "断开" + toOpenBranch + strategy;
                         }else {
                             //还原
-                            System.out.println("尝试失败!\n");
+                            System.out.println("尝试断开"+toOpenBranch+"失败!\n");
+                            //计算不可行拓扑值
+                            unableTopoValueList.add(calTopoValue(toOpenBranches, toCloseBranches));
+
                             toCloseBranches.add(i, toCloseBranch);
                             toOpenBranches.add(j, toOpenBranch);
                             DsCase33.addFeeder(calIsland, tns, branchesInfo69.get(toOpenBranch));
@@ -214,12 +246,27 @@ public class ReconfigStrategy {
                         DsCase33.addFeeder(calIsland, tns, branchesInfo69.get(toOpenBranch));
                     }
                 }
+
                 DsCase33.deleteFeeder(calIsland, tns, toCloseBranch);
+                //暂时移除
+                toCloseBranches.remove(toCloseBranch);
+                //计算不可行拓扑值
+                unableTopoValueList.add(calTopoValue(toOpenBranches, toCloseBranches));
+                toCloseBranches.add(i,toCloseBranch);
+
             } else {
+                //暂时移除
+                toCloseBranches.remove(toCloseBranch);
+                //计算不可行拓扑值
+                unableTopoValueList.add(calTopoValue(toOpenBranches, toCloseBranches));
+                toCloseBranches.add(i,toCloseBranch);
+
                 System.out.println(toCloseBranch+"冲击电流幅值过大，合环校验不通过！\n");
                 DsCase33.deleteFeeder(calIsland, tns, toCloseBranch);
             }
         }
+
+
         return strategy;
     }
 
@@ -242,4 +289,22 @@ public class ReconfigStrategy {
         return zMatrix;
     }
 
+    private int calTopoValue(List<String> toOpenBranches,List<String> toCloseBranches){
+        int topoValue = 0;
+        for(String i : toCloseBranches){
+            topoValue += Math.pow(2, this.numToBranch.get(i));
+        }
+        for (String i : toOpenBranches) {
+            topoValue += Math.pow(2, this.numToBranch.get(i));
+        }
+        return topoValue;
+    }
+
+    public Map< String,Integer> getNumToBranch() {
+        return numToBranch;
+    }
+
+    public void setNumToBranch(Map<String,Integer> numToBranch) {
+        this.numToBranch = numToBranch;
+    }
 }

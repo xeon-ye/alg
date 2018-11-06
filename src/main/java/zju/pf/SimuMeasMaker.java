@@ -1,5 +1,7 @@
 package zju.pf;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import zju.ieeeformat.BusData;
 import zju.ieeeformat.IEEEDataIsland;
 import zju.matrix.AVector;
@@ -17,9 +19,11 @@ import java.util.Map;
  * Created by IntelliJ IDEA.
  *
  * @author Dong Shufeng
- *         Date: 2007-12-12
+ * Date: 2007-12-12
  */
 public class SimuMeasMaker implements MeasTypeCons {
+
+    private static Logger log = LogManager.getLogger(SimuMeasMaker.class);
 
     private static double min_p_value = 0.0001;
 
@@ -339,7 +343,7 @@ public class SimuMeasMaker implements MeasTypeCons {
                 sm.getLine_from_p().size() + sm.getLine_from_q().size() + sm.getLine_to_p().size() + sm.getLine_to_q().size();
         //int n = (int) Math.ceil(sm.getLine_from_p().size() * rate);
         int n = (int) Math.floor(total * rate);
-        System.out.println("Add bad data number:" + n + "\ttotal measurement number:" + total);
+        log.info("Add bad data number:" + n + "\ttotal measurement number:" + total);
         int[] j = new int[7];
         MeasureInfo[][] infos = new MeasureInfo[7][];
         infos[0] = sm.getLine_from_p().values().toArray(new MeasureInfo[]{});
@@ -363,6 +367,22 @@ public class SimuMeasMaker implements MeasTypeCons {
                     infos[i][j[i]].setValue(1.2 * v);
                 else
                     infos[i][j[i]].setValue(0.8 * v);
+
+                MeasureInfo info = infos[i][j[i]];
+                switch (info.getMeasureType()) {
+                    case TYPE_BUS_VOLOTAGE:
+                    case TYPE_BUS_ACTIVE_POWER:
+                    case TYPE_BUS_REACTIVE_POWER:
+                        log.info("Bus " + infos[i][j[i]].getPositionId() + " " + v + " " + infos[i][j[i]].getValue());
+                        break;
+                    case TYPE_LINE_FROM_ACTIVE:
+                    case TYPE_LINE_FROM_REACTIVE:
+                    case TYPE_LINE_TO_ACTIVE:
+                    case TYPE_LINE_TO_REACTIVE:
+                        log.info("Branch " + infos[i][j[i]].getPositionId() + " " + v + " " + infos[i][j[i]].getValue());
+                        break;
+                }
+
                 j[i]++;
                 n--;
                 if (n <= 0)

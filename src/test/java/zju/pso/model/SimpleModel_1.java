@@ -1,9 +1,7 @@
 package zju.pso.model;
 
-import org.junit.Test;
 import zju.pso.Location;
 import zju.pso.OptModel;
-import zju.pso.PsoProcess;
 
 /**
  * 使用粒子群算法求解非线性规划
@@ -49,5 +47,15 @@ public class SimpleModel_1 implements OptModel {
     @Override
     public double[] getMaxVel() {
         return new double[]{1, 1};
+    }
+
+    @Override
+    public int getMaxIter() {
+        return 1000;
+    }
+
+    @Override
+    public double getTolFitness() {
+        return -99999;
     }
 }

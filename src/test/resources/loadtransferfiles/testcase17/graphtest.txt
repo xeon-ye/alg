@@ -1,0 +1,65 @@
+Line Segment Data	51 items	feet
+S1	L1	0	Switch
+L1	L7	0	Switch
+L1	L8	0	Switch
+L1	L2	0	Switch
+S2	L2	0	Switch
+L2	L9	0	Switch
+L9	L21	0	Switch
+L21	L33	0	Switch
+L2	L10	0	Switch
+L10	L22	0	Switch
+L22	L34	0	Switch
+S3	L3	0	Switch
+L3	L11	0	Switch
+L11	L23	0	Switch
+L23	L35	0	Switch
+L3	L12	0	Switch
+L12	L24	0	Switch
+L24	L36	0	Switch
+L3	L13	0	Switch
+L13	L25	0	Switch
+L25	L37	0	Switch
+L3	L4	0	Switch
+S4	L4	0	Switch
+L4	L14	0	Switch
+L14	L26	0	Switch
+L26	L38	0	Switch
+L4	L15	0	Switch
+L15	L27	0	Switch
+L27	L39	0	Switch
+S5	L5	0	Switch
+L5	L16	0	Switch
+L16	L28	0	Switch
+L28	L40	0	Switch
+L5	L17	0	Switch
+L17	L29	0	Switch
+L29	L41	0	Switch
+L5	L18	0	Switch
+L18	L30	0	Switch
+L30	L42	0	Switch
+L5	L6	0	Switch
+S6	L6	0	Switch
+L6	L19	0	Switch
+L19	L31	0	Switch
+L31	L43	0	Switch
+L6	L20	0	Switch
+L20	L32	0	Switch
+L32	L44	0	Switch
+L21	L23	0	Switch
+L22	L30	0	Switch
+L24	L32	0	Switch
+L25	L29	0	Switch
+L26	L31	0	Switch
+L27	L28	0	Switch
+-999
+Spot Loads	0 items
+-999
+Distributed Loads	0 items
+-999
+Shunt Capacitors	0 items
+-999
+Transformer	0 item
+-999
+Regulator	0 item
+-999

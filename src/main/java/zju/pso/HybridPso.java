@@ -16,16 +16,27 @@ public class HybridPso extends AbstractPso implements PsoConstants {
 
     private static Logger logger = LogManager.getLogger(HybridPso.class);
 
+    private OptModel optModel;
     private double[] fitness; // 各粒子当前适应度值
     private boolean isGBestfeasible = false; // gBest是否在可行域内
 
+    public HybridPso(OptModel optModel) {
+        this(optModel, (int) (10 + 2 * Math.sqrt(optModel.getDimentions())));
+    }
+
     public HybridPso(OptModel optModel, int swarmSize) {
-        super(optModel, swarmSize);
+        super(swarmSize);
+        this.optModel = optModel;
         this.fitness = new double[swarmSize];
     }
 
+    public HybridPso(OptModel optModel, double[] initVariableState) {
+        this(optModel, (int) (10 + 2 * Math.sqrt(optModel.getDimentions())), initVariableState);
+    }
+
     public HybridPso(OptModel optModel, int swarmSize, double[] initVariableState) {
-        super(optModel, swarmSize, initVariableState);
+        super(swarmSize, initVariableState);
+        this.optModel = optModel;
         this.fitness = new double[swarmSize];
     }
 
@@ -66,16 +77,12 @@ public class HybridPso extends AbstractPso implements PsoConstants {
             swarm.add(p);
 
             // 获得约束向量
-            double[] constrViolation = optModel.evalConstr(location);
-            location.setConstrViolation(constrViolation);
-
-            // 计算适应度值
-            boolean isFeasible = PsoUtil.isFeasible(constrViolation);
-            if (isFeasible) {
+            double violation = optModel.evalConstr(location);
+            if (violation > 0) {
+                fitness[i] = violation + PUNISHMENT;
+            } else {
                 fitness[i] = optModel.evalObj(location);
                 isGBestfeasible = true;
-            } else {
-                fitness[i] = PsoUtil.evalInfeasibleFitness(constrViolation);
             }
 
             pBest[i] = fitness[i];
@@ -105,7 +112,6 @@ public class HybridPso extends AbstractPso implements PsoConstants {
         double w; // 惯性权重
 
         while (iterNum < maxIter && tol > 0) {
-
             w = W_UPPERBOUND - (((double) iterNum) / maxIter) * (W_UPPERBOUND - W_LOWERBOUND); // 惯性逐渐减小
 
             for (int i = 0; i < swarmSize; i++) {
@@ -209,14 +215,12 @@ public class HybridPso extends AbstractPso implements PsoConstants {
                 Location location = swarm.get(i).getLocation();
 
                 // 步骤六：更新适应度值
-                double[] constrViolation = optModel.evalConstr(location);
-                location.setConstrViolation(constrViolation);
-                boolean isFeasible = PsoUtil.isFeasible(constrViolation);
-                if (isFeasible) {
+                double violation = optModel.evalConstr(location);
+                if (violation > 0) {
+                    fitness[i] = violation + PUNISHMENT;
+                } else {
                     fitness[i] = optModel.evalObj(location);
                     isGBestfeasible = true;
-                } else {
-                    fitness[i] = PsoUtil.evalInfeasibleFitness(constrViolation);
                 }
 
                 // 步骤七：更新pBest
@@ -236,7 +240,6 @@ public class HybridPso extends AbstractPso implements PsoConstants {
             // 如果全局粒子在可行域内，如果已经达到模型的要求，是一个足够好的适应度值那么就结束寻优
             if (isGBestfeasible)
                 tol = gBest - optModel.getTolFitness();
-
             logger.debug("ITERATION " + iterNum + ": Value: " + gBest + "  " + isGBestfeasible);
             iterNum++;
         }
