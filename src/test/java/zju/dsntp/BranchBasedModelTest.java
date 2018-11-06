@@ -74,6 +74,19 @@ public class BranchBasedModelTest extends TestCase {
         model.buildImpPathes();
     }
 
+    public void testDscase8500() {
+        BranchBasedModel model = new BranchBasedModel(IeeeDsInHand.FEEDER8500);
+        long startT = System.currentTimeMillis();
+        model.buildLoops();
+        System.out.println(model.loops.size());
+        System.out.println(System.currentTimeMillis() - startT);
+//        model.printLoop();
+//        assertEquals(1, model.getLoops().size());
+//        String[] impLoads = {"93", "151"};
+//        model.setImpLoads(impLoads);
+//        model.buildImpPathes();
+    }
+
     public void testCase() throws IOException {
         DistriSys testsys;
         String[] supplyID;

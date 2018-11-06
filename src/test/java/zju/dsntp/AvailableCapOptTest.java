@@ -3,6 +3,8 @@ package zju.dsntp;
 import junit.framework.TestCase;
 import zju.devmodel.MapObject;
 import zju.dsmodel.DistriSys;
+import zju.dsmodel.DsConnectNode;
+import zju.dsmodel.IeeeDsInHand;
 
 import java.io.*;
 import java.util.HashMap;
@@ -16,8 +18,8 @@ import static zju.dsmodel.IeeeDsInHand.createDs;
  */
 public class AvailableCapOptTest extends TestCase {
 
-    Map<String, Double> supplyCap = new HashMap<String, Double>();
-    Map<String, Double> loads = new HashMap<String, Double>();
+    Map<String, Double> supplyCap = new HashMap<>();
+    Map<String, Double> loads = new HashMap<>();
     LoadTransferOptResult minSwitchResult;
     Map<String, Double> maxLoadResult;
     Map<String,Double> maxCircuitLoad;
@@ -354,6 +356,66 @@ public class AvailableCapOptTest extends TestCase {
 //        }
     }
 
+    public void testCase8500() throws IOException {
+        AvailableCapOpt model = new AvailableCapOpt(IeeeDsInHand.FEEDER8500);
+        for (String cn : model.sys.getCns().keySet()) {
+            String[] supplies = model.sys.getSupplyCns();
+            boolean isLoad = true;
+            for (String supply : supplies) {
+                if (supply.equals(cn)) {
+                    isLoad = false;
+                    break;
+                }
+            }
+            if (isLoad) {
+                loads.put(cn, 0.);
+            }
+        }
+        for (MapObject load : model.sys.getDevices().getSpotLoads()) {
+            double KW = Double.parseDouble(load.getProperty(KEY_KW_PH1)) +
+                    Double.parseDouble(load.getProperty(KEY_KW_PH2)) +
+                    Double.parseDouble(load.getProperty(KEY_KW_PH3));
+            loads.put(load.getId(), KW);
+        }
+        for (String supply : model.sys.getSupplyCns()) {
+            supplyCap.put(supply, 100000.);
+        }
+        model.setFeederCapacityConst(19334);
+        model.setLoads(loads);
+        model.setSupplyCap(supplyCap);
+        String[] impLoads = {};
+        model.setImpLoads(impLoads);
+        String[] ErrorSupply = new String[]{};
+        model.setErrorSupply(ErrorSupply);
+        model.buildLoops();
+//        model.buildImpPathes();
+        for (int i = 0; i < 1; i++) {
+            long startT = System.nanoTime();
+//            model.doOptPathLimit();
+            model.doOpt();
+            System.out.println(System.nanoTime() - startT);
+        }
+//        long startT = System.currentTimeMillis();
+//        model.allMinSwitch();
+//        System.out.println(System.currentTimeMillis() - startT);
+//        this.minSwitchResult = model.getOptResult();
+//        for(int i = 0; i < minSwitchResult.getSupplyId().length; i++) {
+//            System.out.println(minSwitchResult.getSupplyId()[i]);
+//            System.out.println(minSwitchResult.getMinSwitch()[i]);
+//            // if(minSwitchResult.getSupplyId()[i] != null) {
+//            for (int j = 0; j < minSwitchResult.getMinSwitch()[i]; j++)
+//                System.out.println(minSwitchResult.getSwitchChanged().get(i)[j]);
+//            //   }
+//        }
+
+//        model.allLoadMax();
+//        this.maxLoadResult = model.maxLoadResult;
+//        for(int i = 0; i < maxLoadResult.size(); i++) {
+//            System.out.println(model.loadNodes.get(i).getId());
+//            System.out.println(maxLoadResult.get(model.loadNodes.get(i).getId()));
+//        }
+    }
+
     //读取各节点带的负载
     public void readLoads(String path) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(path)));
@@ -381,7 +443,7 @@ public class AvailableCapOptTest extends TestCase {
         while((data = br.readLine()) != null) {
             newdata = data.split(" ", 2);
             supplyId = newdata[0];
-            supplyLoad = new Double(Double.parseDouble(newdata[1]));
+            supplyLoad = Double.parseDouble(newdata[1]);
             supplyCap.put(supplyId, supplyLoad);
         }
     }

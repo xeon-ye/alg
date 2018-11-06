@@ -73,6 +73,15 @@ public class PathBasedModelTest extends TestCase implements DsModelCons {
         assertEquals(193, model.getPathes().size());
     }
 
+    public void testDscase8500() throws Exception {
+        PathBasedModel model = new PathBasedModel(IeeeDsInHand.FEEDER8500);
+        long startT = System.currentTimeMillis();
+        model.buildPathes(1000000);
+        System.out.println(model.pathes.size());
+        System.out.println(System.currentTimeMillis() - startT);
+//        assertEquals(193, model.getPathes().size());
+    }
+
     public void testCase10() throws Exception {
         DistriSys testsys;
         String[] supplyID;
