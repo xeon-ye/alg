@@ -32,7 +32,7 @@ public class PathBasedModelTest extends TestCase implements DsModelCons {
 
     public void testDscase13() throws Exception {
         PathBasedModel model = new PathBasedModel(IeeeDsInHand.FEEDER13);
-        model.buildPathes();
+        model.buildPathes(5000);
         System.out.println("打印路径");
         model.printPathes(model.getPathes());
 
@@ -64,40 +64,40 @@ public class PathBasedModelTest extends TestCase implements DsModelCons {
 
     public void testDscase34() throws Exception {
         PathBasedModel model = new PathBasedModel(IeeeDsInHand.FEEDER34);
-        model.buildPathes();
+        model.buildPathes(5000);
         assertEquals(33, model.getPathes().size());
     }
 
     public void testDscase37() throws Exception {
         PathBasedModel model = new PathBasedModel(IeeeDsInHand.FEEDER37);
-        model.buildPathes();
+        model.buildPathes(5000);
         assertEquals(36, model.getPathes().size());
     }
 
     public void testDscase4() throws Exception {
         PathBasedModel model = new PathBasedModel(IeeeDsInHand.FEEDER4_DD_B);
-        model.buildPathes();
+        model.buildPathes(5000);
         assertEquals(3, model.getPathes().size());
         model = new PathBasedModel(IeeeDsInHand.FEEDER4_DD_UNB);
-        model.buildPathes();
+        model.buildPathes(5000);
         assertEquals(3, model.getPathes().size());
         model = new PathBasedModel(IeeeDsInHand.FEEDER4_DGrY_B);
-        model.buildPathes();
+        model.buildPathes(5000);
         assertEquals(3, model.getPathes().size());
         model = new PathBasedModel(IeeeDsInHand.FEEDER4_DGrY_UNB);
-        model.buildPathes();
+        model.buildPathes(5000);
         assertEquals(3, model.getPathes().size());
         model = new PathBasedModel(IeeeDsInHand.FEEDER4_GrYGrY_B);
-        model.buildPathes();
+        model.buildPathes(5000);
         assertEquals(3, model.getPathes().size());
         model = new PathBasedModel(IeeeDsInHand.FEEDER4_GrYGrY_UNB);
-        model.buildPathes();
+        model.buildPathes(5000);
         assertEquals(3, model.getPathes().size());
     }
 
     public void testDscase123() throws Exception {
         PathBasedModel model = new PathBasedModel(IeeeDsInHand.FEEDER123);
-        model.buildPathes();
+        model.buildPathes(5000);
         assertEquals(193, model.getPathes().size());
     }
 
@@ -122,7 +122,7 @@ public class PathBasedModelTest extends TestCase implements DsModelCons {
 
         PathBasedModel model = new PathBasedModel(testsys);
         long start = System.currentTimeMillis();
-        model.buildPathes();
+        model.buildPathes(5000);
         System.out.println((System.currentTimeMillis() - start) + "ms");
     }
 
