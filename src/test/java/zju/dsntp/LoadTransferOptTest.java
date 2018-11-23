@@ -678,10 +678,9 @@ public class LoadTransferOptTest extends TestCase implements DsModelCons {
         System.out.println("打印路径");
 //        loadTransferOpt.printPathes(loadTransferOpt.getPathes());
 
-        //读取负荷名
+        //读取负荷
         String loadsPath = this.getClass().getResource("/loadtransferfiles/testcase17/loads.txt").getPath();
         readLoads(loadsPath);
-
         loadTransferOpt.setLoad(load);
 
         //N-1校验
@@ -779,7 +778,62 @@ public class LoadTransferOptTest extends TestCase implements DsModelCons {
         loadTransferOpt.restoration(impLoadList);
     }
 
+    public void testLoadBalanceCase() throws Exception {
+        //生成系统
+        InputStream ieeeFile = this.getClass().getResourceAsStream("/loadtransferfiles/loadbalancecase/graphtest.txt");
+        DistriSys distriSys = createDs(ieeeFile, "S1", 100);
+        //设置电源节点，电源名
+        String[] supplyID = new String[]{"S1", "S2", "S3", "S4", "S5", "S6"};
+        distriSys.setSupplyCns(supplyID);
+        //设置电源基准电压
+        Double[] supplyBaseKv = new Double[]{100., 100., 100., 100., 100., 100.,};
+        distriSys.setSupplyCnBaseKv(supplyBaseKv);
 
+        for (MapObject obj : distriSys.getDevices().getSwitches()) {
+            if (obj.getProperty(KEY_CONNECTED_NODE).equals("L21;L23"))
+                obj.setProperty(KEY_SWITCH_STATUS, SWITCH_OFF);
+            else if (obj.getProperty(KEY_CONNECTED_NODE).equals("L22;L30"))
+                obj.setProperty(KEY_SWITCH_STATUS, SWITCH_OFF);
+            else if (obj.getProperty(KEY_CONNECTED_NODE).equals("L25;L29"))
+                obj.setProperty(KEY_SWITCH_STATUS, SWITCH_OFF);
+            else if (obj.getProperty(KEY_CONNECTED_NODE).equals("L26;L31"))
+                obj.setProperty(KEY_SWITCH_STATUS, SWITCH_OFF);
+            else if (obj.getProperty(KEY_CONNECTED_NODE).equals("L27;L28"))
+                obj.setProperty(KEY_SWITCH_STATUS, SWITCH_OFF);
+            else if (obj.getProperty(KEY_CONNECTED_NODE).equals("L1;L2"))
+                obj.setProperty(KEY_SWITCH_STATUS, SWITCH_OFF);
+            else if (obj.getProperty(KEY_CONNECTED_NODE).equals("L3;L4"))
+                obj.setProperty(KEY_SWITCH_STATUS, SWITCH_OFF);
+            else if (obj.getProperty(KEY_CONNECTED_NODE).equals("L5;L6"))
+                obj.setProperty(KEY_SWITCH_STATUS, SWITCH_OFF);
+
+        }
+
+        //新建计算模型
+        LoadBalance loadBalance = new LoadBalance(distriSys);
+
+        //设置电源容量
+        String supplyCapacityPath = this.getClass().getResource("/loadtransferfiles/loadbalancecase/supplyCapacity.txt").getPath();
+        readSupplyCapacity(supplyCapacityPath);
+        loadBalance.setSupplyCap(supplyCap);
+
+        //设置线路容量
+        loadBalance.setFeederCapacityConst(20000);
+
+        //搜索路径
+        loadBalance.buildPathes();
+
+        System.out.println("打印路径");
+//        loadTransferOpt.printPathes(loadTransferOpt.getPathes());
+
+        //读取负荷
+        String loadsPath = this.getClass().getResource("/loadtransferfiles/loadbalancecase/loads.txt").getPath();
+        readLoads(loadsPath);
+        loadBalance.setLoad(load);
+
+        //N-1校验
+        loadBalance.calculate();
+    }
 
     //读取各节点带的负载
     public void readLoads(String path) throws IOException {

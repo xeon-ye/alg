@@ -2416,6 +2416,10 @@ public class LoadTransferOpt extends PathBasedModel {
 
     }
 
+
+
+
+
     public void allMinSwitch() {
         String[] supplyIDs = sys.getSupplyCns();
         int supplyNum = supplyStart.length;
