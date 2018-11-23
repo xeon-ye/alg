@@ -66,11 +66,11 @@ public class NewtonSolver {
         DoubleMatrix2D left;
         while (iterNum < model.getMaxIter()) {
             iterNum++;
-            log.debug("At iteration " + iterNum);
+//            log.debug("At iteration " + iterNum);
             //compute estimated measurement
             long start = System.nanoTime();
             z_est = model.calZ(state);
-            log.debug("Time used for forming right hand b : " + (System.nanoTime() - start) / 1000 + " us");
+//            log.debug("Time used for forming right hand b : " + (System.nanoTime() - start) / 1000 + " us");
 
             if (z == null) {
                 for (int i = 0; i < z_est.getN(); i++)
@@ -84,7 +84,7 @@ public class NewtonSolver {
             start = System.nanoTime();
             //-----  evaluate jacobian  -----
             left = model.getJocobian(state);
-            log.debug("Time used for forming jocobian matrix J : " + (System.nanoTime() - start) / 1000 + "us");
+//            log.debug("Time used for forming jocobian matrix J : " + (System.nanoTime() - start) / 1000 + "us");
             if (linearSolver == LINEAR_SOLVER_COLT) {
                 //LUDecompositionQuick luSolver = new LUDecompositionQuick(1e-6);
                 LUDecompositionQuick solver = new LUDecompositionQuick();
@@ -115,7 +115,7 @@ public class NewtonSolver {
                     sluMTSolver.solve(jacStruc, left, result);
                 }
             }
-            log.debug("计算Jx=b用时: " + (System.nanoTime() - start) / 1000 + " us");
+//            log.debug("计算Jx=b用时: " + (System.nanoTime() - start) / 1000 + " us");
             //check for convergence
             double max = 0;
             int columns = left.columns();

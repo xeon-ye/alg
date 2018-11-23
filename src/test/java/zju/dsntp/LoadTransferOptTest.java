@@ -9,8 +9,7 @@ import zju.dsmodel.DsConnectNode;
 import zju.dsmodel.DsModelCons;
 
 import java.io.*;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import static zju.dsmodel.IeeeDsInHand.createDs;
 
@@ -22,6 +21,7 @@ public class LoadTransferOptTest extends TestCase implements DsModelCons {
     Map<String, Double> supplyCap = new HashMap<String, Double>();
     Map<String, Double> load = new HashMap<>();
     Map<String, Double> feederCap = new HashMap<>();
+    Map<String, Double> edgeCap = new HashMap<>();
     LoadTransferOptResult minSwitchResult;
     Map<String, Double> maxLoadResult;
     Map<String, Double> maxCircuitLoad;
@@ -38,12 +38,13 @@ public class LoadTransferOptTest extends TestCase implements DsModelCons {
         super.tearDown();
     }
 
-    public void testCase1() throws IOException {
+    public void testCase1() throws Exception {
         DistriSys testsys;
         String[] supplyID;
 
         InputStream ieeeFile = this.getClass().getResourceAsStream("/loadtransferfiles/testcase1/graphtest.txt");
         testsys = createDs(ieeeFile, "S1", 100);
+
         for (MapObject obj : testsys.getDevices().getSwitches()) {
             if (obj.getProperty(KEY_CONNECTED_NODE).equals("L2;L9"))
                 obj.setProperty(KEY_SWITCH_STATUS, SWITCH_OFF);
@@ -54,21 +55,27 @@ public class LoadTransferOptTest extends TestCase implements DsModelCons {
         }
         supplyID = new String[]{"S1", "S2", "S3"};
         Double[] supplyBaseKv = new Double[]{100., 200., 100.};
+
         String[] ErrorSupply = new String[]{"S1"};
         int[] ErrorEdge = {0};
+
         testsys.setSupplyCns(supplyID);
         testsys.setSupplyCnBaseKv(supplyBaseKv);
 
         LoadTransferOpt model = new LoadTransferOpt(testsys);
         model.setErrorFeeder(ErrorEdge);
         model.setErrorSupply(ErrorSupply);
+
         String loadsPath = this.getClass().getResource("/loadtransferfiles/testcase1/loads.txt").getPath();
         String supplyCapacityPath = this.getClass().getResource("/loadtransferfiles/testcase1/supplyCapacity.txt").getPath();
+
         readSupplyCapacity(supplyCapacityPath);
         readLoads(loadsPath);
+
         model.setFeederCapacityConst(20000);
         model.setLoad(load);
         model.setSupplyCap(supplyCap);
+        model.buildPathes();
         model.doOpt();
         Assert.assertEquals(1, model.minSwitch);
 
@@ -371,6 +378,9 @@ public class LoadTransferOptTest extends TestCase implements DsModelCons {
         model.setFeederCap(feederCap);
         model.buildPathes();
         model.makeFeederCapArray();
+
+
+        //
         model.allMinSwitch();
         this.minSwitchResult = model.getOptResult();
         for (int i = 0; i < minSwitchResult.getFeederId().length; i++) {
@@ -409,6 +419,7 @@ public class LoadTransferOptTest extends TestCase implements DsModelCons {
 
         LoadTransferOpt model = new LoadTransferOpt(testsys);
         model.buildPathes();
+        //model.checkN1();
     }
 
     public void testCase6() throws IOException {
@@ -639,6 +650,191 @@ public class LoadTransferOptTest extends TestCase implements DsModelCons {
         exportFile(new File(writePath), model);
     }
 
+    public void testCase17() throws Exception {
+        //生成系统
+        InputStream ieeeFile = this.getClass().getResourceAsStream("/loadtransferfiles/testcase17/graphtest.txt");
+        DistriSys distriSys = createDs(ieeeFile, "S1", 100);
+        //设置电源节点，电源名
+        String[] supplyID = new String[]{"S1", "S2", "S3", "S4", "S5", "S6"};
+        distriSys.setSupplyCns(supplyID);
+        //设置电源基准电压
+        Double[] supplyBaseKv = new Double[]{100., 100., 100., 100., 100., 100.,};
+        distriSys.setSupplyCnBaseKv(supplyBaseKv);
+
+        //新建计算模型
+        LoadTransferOpt loadTransferOpt = new LoadTransferOpt(distriSys);
+
+        //设置电源容量
+        String supplyCapacityPath = this.getClass().getResource("/loadtransferfiles/testcase17/supplyCapacity.txt").getPath();
+        readSupplyCapacity(supplyCapacityPath);
+        loadTransferOpt.setSupplyCap(supplyCap);
+
+        //设置线路容量
+        loadTransferOpt.setFeederCapacityConst(20000);
+
+        //搜索路径
+        loadTransferOpt.buildPathes();
+
+        System.out.println("打印路径");
+//        loadTransferOpt.printPathes(loadTransferOpt.getPathes());
+
+        //读取负荷
+        String loadsPath = this.getClass().getResource("/loadtransferfiles/testcase17/loads.txt").getPath();
+        readLoads(loadsPath);
+        loadTransferOpt.setLoad(load);
+
+        //N-1校验
+        loadTransferOpt.checkN1();
+    }
+
+    /**
+     * 灾后供电恢复程序测试
+     * @throws Exception
+     */
+    public void testCase18() throws Exception {
+        //生成系统
+        InputStream ieeeFile = this.getClass().getResourceAsStream("/loadtransferfiles/testcase18/graphtest.txt");
+        DistriSys distriSys = createDs(ieeeFile, "S1", 100);
+        //设置电源节点，电源名
+        String[] supplyID = new String[]{"S1", "S2"};
+        distriSys.setSupplyCns(supplyID);
+        //设置电源基准电压
+        Double[] supplyBaseKv = new Double[]{100., 100.};
+        distriSys.setSupplyCnBaseKv(supplyBaseKv);
+
+        //新建计算模型
+        LoadTransferOpt loadTransferOpt = new LoadTransferOpt(distriSys);
+
+        //设置电源容量
+        String supplyCapacityPath = this.getClass().getResource("/loadtransferfiles/testcase18/supplyCapacity.txt").getPath();
+        readSupplyCapacity(supplyCapacityPath);
+        loadTransferOpt.setSupplyCap(supplyCap);
+
+        //设置线路容量
+        loadTransferOpt.setFeederCapacityConst(20000);
+
+        //搜索路径
+        loadTransferOpt.buildPathes();
+
+        System.out.println("打印路径");
+        loadTransferOpt.printPathes(loadTransferOpt.getPathes());
+
+        //读取负荷
+        String loadsPath = this.getClass().getResource("/loadtransferfiles/testcase18/loads.txt").getPath();
+        readLoads(loadsPath);
+
+        loadTransferOpt.setLoad(load);
+
+        List<String> impLoadList = new LinkedList<>();
+        impLoadList.add("A");
+        //N-1校验
+        loadTransferOpt.restoration(impLoadList);
+    }
+
+    public void testCase19() throws Exception {
+        //生成系统
+        InputStream ieeeFile = this.getClass().getResourceAsStream("/loadtransferfiles/testcase19/graphtest.txt");
+        DistriSys distriSys = createDs(ieeeFile, "1", 100);
+        //设置电源节点，电源名
+        String[] supplyID = new String[]{"1"};
+        distriSys.setSupplyCns(supplyID);
+        //设置电源基准电压
+        Double[] supplyBaseKv = new Double[]{100., 100.};
+        distriSys.setSupplyCnBaseKv(supplyBaseKv);
+
+        //新建计算模型
+        LoadTransferOpt loadTransferOpt = new LoadTransferOpt(distriSys);
+
+        //设置电源容量
+        String supplyCapacityPath = this.getClass().getResource("/loadtransferfiles/testcase19/supplyCapacity.txt").getPath();
+        readSupplyCapacity(supplyCapacityPath);
+        loadTransferOpt.setSupplyCap(supplyCap);
+
+        //设置支路容量
+        String edgeCapacityPath = this.getClass().getResource("/loadtransferfiles/testcase19/edgecapacity.txt").getPath();
+        readEdgeCapacity(edgeCapacityPath);
+        loadTransferOpt.setEdgeCap(edgeCap);
+
+        //设置线路容量
+        loadTransferOpt.setFeederCapacityConst(20000);
+
+        //搜索路径
+        loadTransferOpt.buildPathes();
+
+        System.out.println("打印路径");
+        loadTransferOpt.printPathes(loadTransferOpt.getPathes());
+
+        //读取负荷
+        String loadsPath = this.getClass().getResource("/loadtransferfiles/testcase19/loads.txt").getPath();
+        readLoads(loadsPath);
+
+        loadTransferOpt.setLoad(load);
+
+        List<String> impLoadList = new LinkedList<>();
+        //设置重要负荷
+//        impLoadList.add("7");impLoadList.add("8");impLoadList.add("24");impLoadList.add("25");impLoadList.add("30");
+//        impLoadList.add("32");impLoadList.add("12");
+        //N-1校验
+        loadTransferOpt.restoration(impLoadList);
+    }
+
+    public void testLoadBalanceCase() throws Exception {
+        //生成系统
+        InputStream ieeeFile = this.getClass().getResourceAsStream("/loadtransferfiles/loadbalancecase/graphtest.txt");
+        DistriSys distriSys = createDs(ieeeFile, "S1", 100);
+        //设置电源节点，电源名
+        String[] supplyID = new String[]{"S1", "S2", "S3", "S4", "S5", "S6"};
+        distriSys.setSupplyCns(supplyID);
+        //设置电源基准电压
+        Double[] supplyBaseKv = new Double[]{100., 100., 100., 100., 100., 100.,};
+        distriSys.setSupplyCnBaseKv(supplyBaseKv);
+
+        for (MapObject obj : distriSys.getDevices().getSwitches()) {
+            if (obj.getProperty(KEY_CONNECTED_NODE).equals("L21;L23"))
+                obj.setProperty(KEY_SWITCH_STATUS, SWITCH_OFF);
+            else if (obj.getProperty(KEY_CONNECTED_NODE).equals("L22;L30"))
+                obj.setProperty(KEY_SWITCH_STATUS, SWITCH_OFF);
+            else if (obj.getProperty(KEY_CONNECTED_NODE).equals("L25;L29"))
+                obj.setProperty(KEY_SWITCH_STATUS, SWITCH_OFF);
+            else if (obj.getProperty(KEY_CONNECTED_NODE).equals("L26;L31"))
+                obj.setProperty(KEY_SWITCH_STATUS, SWITCH_OFF);
+            else if (obj.getProperty(KEY_CONNECTED_NODE).equals("L27;L28"))
+                obj.setProperty(KEY_SWITCH_STATUS, SWITCH_OFF);
+            else if (obj.getProperty(KEY_CONNECTED_NODE).equals("L1;L2"))
+                obj.setProperty(KEY_SWITCH_STATUS, SWITCH_OFF);
+            else if (obj.getProperty(KEY_CONNECTED_NODE).equals("L3;L4"))
+                obj.setProperty(KEY_SWITCH_STATUS, SWITCH_OFF);
+            else if (obj.getProperty(KEY_CONNECTED_NODE).equals("L5;L6"))
+                obj.setProperty(KEY_SWITCH_STATUS, SWITCH_OFF);
+
+        }
+
+        //新建计算模型
+        LoadBalance loadBalance = new LoadBalance(distriSys);
+
+        //设置电源容量
+        String supplyCapacityPath = this.getClass().getResource("/loadtransferfiles/loadbalancecase/supplyCapacity.txt").getPath();
+        readSupplyCapacity(supplyCapacityPath);
+        loadBalance.setSupplyCap(supplyCap);
+
+        //设置线路容量
+        loadBalance.setFeederCapacityConst(20000);
+
+        //搜索路径
+        loadBalance.buildPathes();
+
+        System.out.println("打印路径");
+//        loadTransferOpt.printPathes(loadTransferOpt.getPathes());
+
+        //读取负荷
+        String loadsPath = this.getClass().getResource("/loadtransferfiles/loadbalancecase/loads.txt").getPath();
+        readLoads(loadsPath);
+        loadBalance.setLoad(load);
+
+        //N-1校验
+        loadBalance.calculate();
+    }
+
     //读取各节点带的负载
     public void readLoads(String path) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(path)));
@@ -650,7 +846,7 @@ public class LoadTransferOptTest extends TestCase implements DsModelCons {
         while ((data = br.readLine()) != null) {
             newdata = data.split(" ", 2);
             cnId = newdata[0];
-            cnLoad = new Double(Double.parseDouble(newdata[1]));
+            cnLoad = Double.parseDouble(newdata[1]);
             load.put(cnId, cnLoad);
         }
     }
@@ -694,7 +890,7 @@ public class LoadTransferOptTest extends TestCase implements DsModelCons {
         String[] newdata;
         while((data = br.readLine()) != null) {
             newdata = data.split(" ", 2);
-            feederCap.put(newdata[0], Double.parseDouble(newdata[1]));
+            edgeCap.put(newdata[0], Double.parseDouble(newdata[1])*1.732*12.66);
         }
     }
 

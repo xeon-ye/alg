@@ -9,6 +9,7 @@ import zju.dsntp.DsPowerflow;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -315,25 +316,48 @@ public class MeshedDsPfTest extends TestCase implements DsModelCons {
         List<String> toOpenBranches = new ArrayList<>();
         List<String> toCloseBranches = new ArrayList<>();
 
-        //经检验，第一步必须断开“10-11”
-        toOpenBranches.add("10-11");
-        //经检验，第二步只能断开“14-15”或者“7-8”
+        toOpenBranches.add("7-8");
+        toOpenBranches.add("9-10");
+        toOpenBranches.add("32-33");
         toOpenBranches.add("14-15");
 
-        toOpenBranches.add("7-8");
-        toOpenBranches.add("32-33");
 
+//        //经检验，第一步必须断开“10-11”
+//        toOpenBranches.add("10-11");
+//        //经检验，第二步只能断开“14-15”或者“7-8”
+//        toOpenBranches.add("14-15");
+//
+//        toOpenBranches.add("7-8");
+//        toOpenBranches.add("32-33");
 
-        //经检验，第一步必须闭合“9-15”
-        toCloseBranches.add("9-15");
-        //经检验，第二步必须闭合“12-22”
-        toCloseBranches.add("12-22");
-
-        toCloseBranches.add("18-33");
         toCloseBranches.add("8-21");
+        toCloseBranches.add("12-22");
+        toCloseBranches.add("9-15");
+        toCloseBranches.add("18-33");
+
+
+//        //经检验，第一步必须闭合“9-15”
+//        toCloseBranches.add("9-15");
+//        //经检验，第二步必须闭合“12-22”
+//        toCloseBranches.add("12-22");
+//
+//        toCloseBranches.add("18-33");
+//        toCloseBranches.add("8-21");
+
+        //开关对应位
+        Map<String,Integer> numToBranch = new HashMap<>();
+
+        for(int i = 0; i < toCloseBranches.size();i++){
+            numToBranch.put(toCloseBranches.get(i),i);
+        }
+
+        for(int i = toCloseBranches.size();i<toCloseBranches.size()+toOpenBranches.size();i++){
+            numToBranch.put(toOpenBranches.get(i - toCloseBranches.size()),i);
+        }
 
         String result;
         ReconfigStrategy reconfigStrategy = new ReconfigStrategy();
+        reconfigStrategy.setNumToBranch(numToBranch);
         result = reconfigStrategy.getReconfigStrategy(originIsland, toOpenBranches, toCloseBranches);
         if(result != null){
             System.out.println("实施策略："+result);

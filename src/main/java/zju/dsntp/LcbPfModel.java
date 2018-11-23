@@ -723,7 +723,7 @@ public class LcbPfModel implements NewtonModel, DsModelCons {
     public AVector calZ(AVector state, boolean isUpdateDG) {
         long start = System.nanoTime();
         calLoopKVL(z_est.getValues(), 0, isUpdateDG);
-        log.debug("Time used for calLoopKVL : " + (System.nanoTime() - start) / 1000 + "us");
+//        log.debug("Time used for calLoopKVL : " + (System.nanoTime() - start) / 1000 + "us");
 
         calTfCurrent(z_est.getValues(), 2 * getLoopSize());
         int index = 2 * (getLoopSize() + windingEdges.size()), pos;
@@ -1301,7 +1301,7 @@ public class LcbPfModel implements NewtonModel, DsModelCons {
         //回路KVL方程的Jacobian
         long start = System.nanoTime();
         formJacStrucOfKVL(jacStruc, 0);
-        log.debug("Time used for formJacStrucOfKVL : " + (System.nanoTime() - start) / 1000 + "us");
+//        log.debug("Time used for formJacStrucOfKVL : " + (System.nanoTime() - start) / 1000 + "us");
         start = System.nanoTime();
         Transformer tf;
         int index = 2 * B.getM(), j1, j2, pos;
@@ -1380,7 +1380,7 @@ public class LcbPfModel implements NewtonModel, DsModelCons {
         //分布式电源
         for (DispersedGen dg : island.getDispersedGens().values())
             index += dg.fillJacStruc(this, index);
-        log.debug("Time used for 其他 : " + (System.nanoTime() - start) / 1000 + "us");
+//        log.debug("Time used for 其他 : " + (System.nanoTime() - start) / 1000 + "us");
         jacobian = new MySparseDoubleMatrix2D(jacStruc.getM(), jacStruc.getN(), jacStruc.getVA().size(), 0.2, 0.9);
         jacStruc.toColteMatrix(jacobian);
     }

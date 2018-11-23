@@ -1,5 +1,6 @@
 package zju.pf;
 
+import com.sun.scenario.effect.impl.sw.sse.SSEBlend_SRC_OUTPeer;
 import junit.framework.TestCase;
 import org.jgrapht.UndirectedGraph;
 import org.jgrapht.alg.ConnectivityInspector;
@@ -36,11 +37,11 @@ public class PfAlgorithmTest extends TestCase {
         pf.setTol_v(0.0);
 
         standardCasePf(IcfDataUtil.ISLAND_14.clone(), pf);
-        standardCasePf(IcfDataUtil.ISLAND_30.clone(), pf);
-        standardCasePf(IcfDataUtil.ISLAND_39.clone(), pf);
-        standardCasePf(IcfDataUtil.ISLAND_57.clone(), pf);
-        standardCasePf(IcfDataUtil.ISLAND_118.clone(), pf);
-        standardCasePf(IcfDataUtil.ISLAND_300.clone(), pf);
+//        standardCasePf(IcfDataUtil.ISLAND_30.clone(), pf);
+//        standardCasePf(IcfDataUtil.ISLAND_39.clone(), pf);
+//        standardCasePf(IcfDataUtil.ISLAND_57.clone(), pf);
+//        standardCasePf(IcfDataUtil.ISLAND_118.clone(), pf);
+//        standardCasePf(IcfDataUtil.ISLAND_300.clone(), pf);
     }
 
     public void testStandardCases_OutagePf_ipopt() {
@@ -384,6 +385,21 @@ public class PfAlgorithmTest extends TestCase {
         PfResultInfo result = pf.createPfResult();
         assertNotNull(result);
         assertStandardCasePf(island, refence);
+
+        System.out.println("==打印结果==");
+        System.out.println("==BUS==");
+        for (Integer i : result.getBusV().keySet()){
+            System.out.println(i + " "+ result.getBusV().get(i) + " "+result.getBusTheta().get(i)+" "+result.getBusPGen().get(i)
+            +" "+result.getBusQGen().get(i)+" " +result.getBusPLoad().get(i)+" "+result.getBusQLoad().get(i)+" "+result.getBusP().get(i)
+            +" "+result.getBusQ().get(i));
+        }
+        System.out.println("==BRANCH==");
+        for (Integer i : result.getBranchPLoss().keySet()){
+            System.out.println(i+" "+result.getBranchPLoss().get(i)+" "+result.getBranchQLoss().get(i));
+        }
+
+        System.out.println("\n"+result.getGenPCapacity()+"\n"+result.getGenQCapacity()+"\n"+result.getGenPTotal());
+
     }
 
     public static void assertStandardCasePf(IEEEDataIsland island, IEEEDataIsland refence) {
