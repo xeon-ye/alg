@@ -183,4 +183,13 @@ public class PsoUtil implements PsoConstants {
         }
         return result;
     }
+
+    public static double randomBool(double random) {
+        return random < 0.5 ? 0 : 1;
+    }
+
+    public static double sigmoid(double vel, double random) {
+        double val = 1 / (1 + Math.exp(-vel));
+        return val < random ? 0 : 1;
+    }
 }

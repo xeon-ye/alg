@@ -32,22 +32,30 @@ public interface OptModel {
     /**
      * @return 粒子位置的最小值
      */
-    double[] getMinLoc();
+    default double[] getMinLoc() {
+        return new double[0];
+    }
 
     /**
      * @return 粒子位置的最大值
      */
-    double[] getMaxLoc();
+    default double[] getMaxLoc() {
+        return new double[0];
+    }
 
     /**
      * @return 粒子速度的最小值
      */
-    double[] getMinVel();
+    default double[] getMinVel() {
+        return new double[0];
+    }
 
     /**
      * @return 粒子速度的最大值
      */
-    double[] getMaxVel();
+    default double[] getMaxVel() {
+        return new double[0];
+    }
 
 
     /**
