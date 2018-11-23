@@ -284,16 +284,23 @@ public class DsPowerflowTest extends TestCase implements DsModelCons {
         ieeeFile = this.getClass().getResourceAsStream("/dsieee/case123/case123-all-PQ.txt");
         ds = IeeeDsInHand.createDs(ieeeFile, "150", 4.16 / sqrt3);
         for (MapObject obj : ds.getDevices().getSwitches()) {
-            if (obj.getProperty(KEY_CONNECTED_NODE).equals("250;251"))
-                obj.setProperty(KEY_SWITCH_STATUS, SWITCH_OFF);
-            else if (obj.getProperty(KEY_CONNECTED_NODE).equals("450;451"))
-                obj.setProperty(KEY_SWITCH_STATUS, SWITCH_OFF);
-            else if (obj.getProperty(KEY_CONNECTED_NODE).equals("54;94"))
-                obj.setProperty(KEY_SWITCH_STATUS, SWITCH_OFF);
-            else if (obj.getProperty(KEY_CONNECTED_NODE).equals("151;300"))
-                obj.setProperty(KEY_SWITCH_STATUS, SWITCH_OFF);
-            else if (obj.getProperty(KEY_CONNECTED_NODE).equals("300;350"))
-                obj.setProperty(KEY_SWITCH_STATUS, SWITCH_OFF);
+            switch (obj.getProperty(KEY_CONNECTED_NODE)) {
+                case "250;251":
+                    obj.setProperty(KEY_SWITCH_STATUS, SWITCH_OFF);
+                    break;
+                case "450;451":
+                    obj.setProperty(KEY_SWITCH_STATUS, SWITCH_OFF);
+                    break;
+                case "54;94":
+                    obj.setProperty(KEY_SWITCH_STATUS, SWITCH_OFF);
+                    break;
+                case "151;300":
+                    obj.setProperty(KEY_SWITCH_STATUS, SWITCH_OFF);
+                    break;
+                case "300;350":
+                    obj.setProperty(KEY_SWITCH_STATUS, SWITCH_OFF);
+                    break;
+            }
         }
 
         ds1 = ds.clone();
@@ -369,6 +376,18 @@ public class DsPowerflowTest extends TestCase implements DsModelCons {
         island1 = ds1.getActiveIslands()[0];
         island2 = ds2.getActiveIslands()[0];
         assertStateEquals(island1, island2);
+    }
+
+    public void testOneCase() throws IOException {
+        DistriSys ds1 = IeeeDsInHand.FEEDER13.clone();
+        DistriSys ds2 = IeeeDsInHand.FEEDER13.clone();
+        testConverged(ds1, false);
+        testKCL(ds1);
+        testConverged(ds2, true);
+        DsTopoIsland island1 = ds1.getActiveIslands()[0];
+        DsTopoIsland island2 = ds2.getActiveIslands()[0];
+        assertStateEquals(island1, island2);
+        printBusV(ds2.getActiveIslands()[0], false, false);
     }
 
     public static void assertStateEquals(DsTopoIsland island1, DsTopoIsland island2) {
@@ -473,17 +492,12 @@ public class DsPowerflowTest extends TestCase implements DsModelCons {
         return lineToLineV;
     }
 
-    public static void printBusV(DsTopoIsland island, boolean isPerUnit, boolean isCartesian) throws IOException {
-        List<DsTopoNode> tns = new ArrayList<DsTopoNode>(island.getBusV().keySet());
-        Collections.sort(tns, new Comparator<Object>() {
-            @Override
-            public int compare(Object o1, Object o2) {
-                DsTopoNode tn1 = (DsTopoNode) o1;
-                DsTopoNode tn2 = (DsTopoNode) o2;
-                String id1 = tn1.getConnectivityNodes().get(0).getId();
-                String id2 = tn2.getConnectivityNodes().get(0).getId();
-                return new Integer(id1).compareTo(new Integer(id2));
-            }
+    public static void printBusV(DsTopoIsland island, boolean isPerUnit, boolean isCartesian) {
+        List<DsTopoNode> tns = new ArrayList<>(island.getBusV().keySet());
+        tns.sort((DsTopoNode tn1, DsTopoNode tn2) -> {
+            String id1 = tn1.getConnectivityNodes().get(0).getId();
+            String id2 = tn2.getConnectivityNodes().get(0).getId();
+            return new Integer(id1).compareTo(new Integer(id2));
         });
         DecimalFormat df1 = new DecimalFormat("0.00000");
         DecimalFormat df2;

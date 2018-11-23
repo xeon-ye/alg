@@ -1769,7 +1769,7 @@ public class LoadTransferOptNew extends PathBasedModel {
      * 求所有节点的非N-1可装容量
      */
     public void allLoadMaxN() throws Exception {
-        buildPathes();
+        buildPathes(5000);
         String[] supplies = sys.getSupplyCns();
         UndirectedGraph<DsConnectNode, MapObject> g = sys.getOrigGraph();
         maxLoadResult = new HashMap<String, Double>(nodes.size());

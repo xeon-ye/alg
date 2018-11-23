@@ -75,7 +75,7 @@ public class LoadTransferOptTest extends TestCase implements DsModelCons {
         model.setFeederCapacityConst(20000);
         model.setLoad(load);
         model.setSupplyCap(supplyCap);
-        model.buildPathes();
+        model.buildPathes(5000);
         model.doOpt();
         Assert.assertEquals(1, model.minSwitch);
 
@@ -192,7 +192,7 @@ public class LoadTransferOptTest extends TestCase implements DsModelCons {
         model.setLoad(load);
         model.setSupplyCap(supplyCap);
         model.setFeederCap(feederCap);
-        model.buildPathes();
+        model.buildPathes(5000);
         model.makeFeederCapArray();
         model.allMinSwitch();
         this.minSwitchResult = model.getOptResult();
@@ -252,7 +252,7 @@ public class LoadTransferOptTest extends TestCase implements DsModelCons {
         model.setLoad(load);
         model.setSupplyCap(supplyCap);
         model.setFeederCap(feederCap);
-        model.buildPathes();
+        model.buildPathes(5000);
         model.makeFeederCapArray();
         model.allMinSwitch();
         this.minSwitchResult = model.getOptResult();
@@ -312,7 +312,7 @@ public class LoadTransferOptTest extends TestCase implements DsModelCons {
         model.setLoad(load);
         model.setSupplyCap(supplyCap);
         model.setFeederCap(feederCap);
-        model.buildPathes();
+        model.buildPathes(5000);
         model.makeFeederCapArray();
         model.allMinSwitch();
         this.minSwitchResult = model.getOptResult();
@@ -376,7 +376,7 @@ public class LoadTransferOptTest extends TestCase implements DsModelCons {
         model.setLoad(load);
         model.setSupplyCap(supplyCap);
         model.setFeederCap(feederCap);
-        model.buildPathes();
+        model.buildPathes(5000);
         model.makeFeederCapArray();
 
 
@@ -418,7 +418,7 @@ public class LoadTransferOptTest extends TestCase implements DsModelCons {
         testsys.setSupplyCnBaseKv(supplyBaseKv);
 
         LoadTransferOpt model = new LoadTransferOpt(testsys);
-        model.buildPathes();
+        model.buildPathes(5000);
         //model.checkN1();
     }
 
@@ -673,7 +673,7 @@ public class LoadTransferOptTest extends TestCase implements DsModelCons {
         loadTransferOpt.setFeederCapacityConst(20000);
 
         //搜索路径
-        loadTransferOpt.buildPathes();
+        loadTransferOpt.buildPathes(5000);
 
         System.out.println("打印路径");
 //        loadTransferOpt.printPathes(loadTransferOpt.getPathes());
@@ -714,7 +714,7 @@ public class LoadTransferOptTest extends TestCase implements DsModelCons {
         loadTransferOpt.setFeederCapacityConst(20000);
 
         //搜索路径
-        loadTransferOpt.buildPathes();
+        loadTransferOpt.buildPathes(5000);
 
         System.out.println("打印路径");
         loadTransferOpt.printPathes(loadTransferOpt.getPathes());
@@ -759,7 +759,7 @@ public class LoadTransferOptTest extends TestCase implements DsModelCons {
         loadTransferOpt.setFeederCapacityConst(20000);
 
         //搜索路径
-        loadTransferOpt.buildPathes();
+        loadTransferOpt.buildPathes(5000);
 
         System.out.println("打印路径");
         loadTransferOpt.printPathes(loadTransferOpt.getPathes());

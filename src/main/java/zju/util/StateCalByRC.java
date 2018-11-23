@@ -135,11 +135,11 @@ public class StateCalByRC implements MeasTypeCons {
         }
     }
 
-    public static void getEstimatedZ_U(MeasVector meas, YMatrixGetter y, AVector state) {
-        getEstimatedZ_U(meas, y, state.getValues());
+    public static AVector getEstimatedZ_U(MeasVector meas, YMatrixGetter y, AVector state) {
+        return getEstimatedZ_U(meas, y, state.getValues());
     }
 
-    public static void getEstimatedZ_U(MeasVector meas, YMatrixGetter y, double[] state) {
+    public static AVector getEstimatedZ_U(MeasVector meas, YMatrixGetter y, double[] state) {
         AVector result = meas.getZ_estimate();
         int index = 0;
         int n = y.getAdmittance()[0].getM();
@@ -203,6 +203,7 @@ public class StateCalByRC implements MeasTypeCons {
                     break;
             }
         }
+        return result;
     }
 
     public static double calBusP_U(int num, YMatrixGetter y, AVector state) {

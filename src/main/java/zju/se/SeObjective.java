@@ -16,6 +16,7 @@ public class SeObjective {
     public static final int OBJ_TYPE_QC = 3;
     public static final int OBJ_TYPE_SIGMOID = 4;
     public static final int OBJ_TYPE_PARTION = 5;
+    public static final int OBJ_TYPE_MNMR = 6;
 
     protected MeasVector meas;
     protected MeasureInfo[] aMeas = new MeasureInfo[0];

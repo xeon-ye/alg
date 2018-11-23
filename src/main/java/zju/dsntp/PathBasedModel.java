@@ -45,8 +45,12 @@ public class PathBasedModel {
         this.sys = sys;
     }
 
+    public Boolean buildPathes() throws Exception {
+        return buildPathes(Integer.MAX_VALUE);
+    }
+
     //重复搜索太多次，待优化
-    public void buildPathes() throws Exception {
+    public Boolean buildPathes(int pathNumLimit) throws Exception {
         String[] supplies = sys.getSupplyCns();
         UndirectedGraph<DsConnectNode, MapObject> g = sys.getOrigGraph();
         //用于深度优先搜索的栈
@@ -115,7 +119,7 @@ public class PathBasedModel {
                             //将路径加入pathes
                             pathes.add(p);
                             //路径只有一条边
-                            if(p.length == 1)
+                            if (p.length == 1)
                                 supplyCnNum++;
                             //跳出边的遍历
                             break;
@@ -150,7 +154,7 @@ public class PathBasedModel {
                             stack.push(cn1);
                             flag1 = false;
                             pathes.add(p);  //增加一条路径
-                            if(p.length == 1)
+                            if (p.length == 1)
                                 supplyCnNum++;
                             break;
                         }
@@ -158,20 +162,24 @@ public class PathBasedModel {
                 }
                 if (flag1)
                     stack.pop();
+                // 限制计算规模
+                if (pathes.size() > pathNumLimit)
+                    return false;
             }
         }
 
 
-        if(isDebug) {
+        if (isDebug) {
             System.out.printf("\nAll the pathes started from a specific supply\n");
             printPathes(pathes);
         }
         buildEdgesAndNodes();
         buildCnsPathes();
         buildedgePathes();
-        if(isDebug) {
+        if (isDebug) {
             printPathes(pathes);
         }
+        return true;
     }
 
     //以某个结点为终点的所有路径
@@ -181,7 +189,7 @@ public class PathBasedModel {
         UndirectedGraph<DsConnectNode, MapObject> g = sys.getOrigGraph();
         cnpathes = new ArrayList<>(pathes.size());
         cnpathesIndex = new ArrayList<>(pathes.size());
-        int i,k;
+        int i, k;
         String cn, lastID;
         cnStart = new int[nodes.size()];
         for (k = 0; k <= nodes.size() - 1; k++) {
@@ -203,8 +211,7 @@ public class PathBasedModel {
                         cnpathes.add(pathes.get(i));
                         cnpathesIndex.add(i);
                     }
-                }
-                else {
+                } else {
                     //如果路径上倒数第二条边有节点与lastID相同，则lastID应取最后一条边的另一个端点才是路径上的最后一个点
                     if (lastID.equals(g.getEdgeSource(pathes.get(i)[pathes.get(i).length - 2]).getId()) || lastID.equals(g.getEdgeTarget(pathes.get(i)[pathes.get(i).length - 2]).getId()))
                         lastID = g.getEdgeSource(pathes.get(i)[pathes.get(i).length - 1]).getId();
@@ -216,7 +223,6 @@ public class PathBasedModel {
             }
         }
     }
-
 
 
     //通过某条边的所有路径
@@ -240,9 +246,9 @@ public class PathBasedModel {
                     }
             }
         }
-        if(isDebug) {
+        if (isDebug) {
             System.out.printf("\nThe pathes contain a specific edge\n");
-            for(i = 0; i < edges.size(); i++)
+            for (i = 0; i < edges.size(); i++)
                 System.out.printf("The start of the index that the pathes contain the edge %s %s is %d\n", g.getEdgeSource(edges.get(i)).getId(), g.getEdgeTarget(edges.get(i)).getId(), edgeStart[i]);
             printPathes(edgepathes);
         }
@@ -291,16 +297,16 @@ public class PathBasedModel {
             }
         }
         //删除电源节点
-        for(String scn : supplies)
-            for(int i = 0; i < nodes.size(); i++)
-                if(nodes.get(i).getId().equals(scn)) {
+        for (String scn : supplies)
+            for (int i = 0; i < nodes.size(); i++)
+                if (nodes.get(i).getId().equals(scn)) {
                     nodes.remove(i);
                     break;
                 }
         if (isDebug) {
             for (DsConnectNode cn3 : nodes)
                 System.out.println(cn3.getId());
-            for(MapObject edge : edges)
+            for (MapObject edge : edges)
                 System.out.printf("%s %s\n", g.getEdgeSource(edge).getId(), g.getEdgeTarget(edge).getId());
         }
     }
