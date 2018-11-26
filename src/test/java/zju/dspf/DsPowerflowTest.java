@@ -378,7 +378,7 @@ public class DsPowerflowTest extends TestCase implements DsModelCons {
         assertStateEquals(island1, island2);
     }
 
-    public void testOneCase() throws IOException {
+    public void testOneCase() {
         DistriSys ds1 = IeeeDsInHand.FEEDER13.clone();
         DistriSys ds2 = IeeeDsInHand.FEEDER13.clone();
         testConverged(ds1, false);
@@ -388,6 +388,48 @@ public class DsPowerflowTest extends TestCase implements DsModelCons {
         DsTopoIsland island2 = ds2.getActiveIslands()[0];
         assertStateEquals(island1, island2);
         printBusV(ds2.getActiveIslands()[0], false, false);
+    }
+
+    public void testRealCase() throws Exception {
+        FeederConfMgr feederConfMgr = new FeederConfMgr();
+        feederConfMgr.readImpedanceConf(DsPowerflowTest.class.getResourceAsStream("/dsfiles/fuzhou/feederconfig.txt"));
+        InputStream ieeeFile = DsPowerflowTest.class.getResourceAsStream("/dsfiles/fuzhou/case-normal.txt");
+
+        DistriSys ds1 = IeeeDsInHand.createDs(ieeeFile, feederConfMgr, "1", 12.66 / sqrt3);
+        ieeeFile = DsPowerflowTest.class.getResourceAsStream("/dsfiles/fuzhou/case-restore.txt");
+        DistriSys ds2 = IeeeDsInHand.createDs(ieeeFile, feederConfMgr, "1", 12.66 / sqrt3);
+        testConverged(ds1, false);
+        printBusV(ds1.getActiveIslands()[0], false, false);
+        DsTopoIsland dsIsland = ds1.getActiveIslands()[0];
+        double[][] headI = dsIsland.getBranchHeadI().get(dsIsland.getIdToBranch().get(1));
+        double[][] headV = dsIsland.getBusV().get(dsIsland.getTnNoToTn().get(1));
+        double pSum = 0;
+        double pLoad = 0;
+        for (int i = 0; i < 3; i++) {
+            pSum += headV[i][0] * Math.cos(Math.PI / 180 * headV[i][1]) * headI[i][0] + headV[i][0] * Math.sin(Math.PI / 180 * headV[i][1]) * headI[i][1];
+        }
+        for (MapObject spotLoad : ds1.getDevices().getSpotLoads()) {
+            pLoad += Double.parseDouble(spotLoad.getProperty("LoadKW1"));
+            pLoad += Double.parseDouble(spotLoad.getProperty("LoadKW2"));
+            pLoad += Double.parseDouble(spotLoad.getProperty("LoadKW3"));
+        }
+        System.out.println("网损为：" + (pSum - pLoad));
+        testConverged(ds2, false);
+        printBusV(ds2.getActiveIslands()[0], false, false);
+        dsIsland = ds2.getActiveIslands()[0];
+        headI = dsIsland.getBranchHeadI().get(dsIsland.getIdToBranch().get(1));
+        headV = dsIsland.getBusV().get(dsIsland.getTnNoToTn().get(1));
+        pSum = 0;
+        pLoad = 0;
+        for (int i = 0; i < 3; i++) {
+            pSum += headV[i][0] * Math.cos(Math.PI / 180 * headV[i][1]) * headI[i][0] + headV[i][0] * Math.sin(Math.PI / 180 * headV[i][1]) * headI[i][1];
+        }
+        for (MapObject spotLoad : ds2.getDevices().getSpotLoads()) {
+            pLoad += Double.parseDouble(spotLoad.getProperty("LoadKW1"));
+            pLoad += Double.parseDouble(spotLoad.getProperty("LoadKW2"));
+            pLoad += Double.parseDouble(spotLoad.getProperty("LoadKW3"));
+        }
+        System.out.println("网损为：" + (pSum - pLoad));
     }
 
     public static void assertStateEquals(DsTopoIsland island1, DsTopoIsland island2) {
@@ -428,7 +470,7 @@ public class DsPowerflowTest extends TestCase implements DsModelCons {
         DsPowerflow pf = new DsPowerflow(ds);
         //pf.setMaxIter(500);
         long start = System.currentTimeMillis();
-        pf.setTolerance(1e-1);
+        pf.setTolerance(1e-3);
         if (isBcfMethod) {
             pf.doLcbPf();
         } else

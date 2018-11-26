@@ -133,9 +133,10 @@ public class IeeeDsInHand implements DsModelCons {
 
     /**
      * 生成配网模型。
-     * @param ieeeFile 待解析的文件
+     *
+     * @param ieeeFile  待解析的文件
      * @param slackCnId
-     * @param baseKv 基准电压
+     * @param baseKv    基准电压
      * @return
      */
     public static DistriSys createDs(InputStream ieeeFile, String slackCnId, double baseKv) {
@@ -175,6 +176,21 @@ public class IeeeDsInHand implements DsModelCons {
         dsTopo.setSupplyCns(new String[]{slackCnId});
         dsTopo.setSupplyCnBaseKv(new Double[]{baseKv});
         dsTopo.setFeederConf(FEEDER_CONF_CASE8500);
+        dsTopo.fillCnBaseKv();
+
+        for (MapObject obj : devices.getSwitches())
+            obj.setProperty(KEY_SWITCH_STATUS, SWITCH_ON);
+        return dsTopo;
+    }
+
+    public static DistriSys createDs(InputStream ieeeFile, FeederConfMgr confMgr, String slackCnId, double baseKv) {
+        DsDevices devices = new DsDeviceParser().parse(ieeeFile);
+        DistriSys dsTopo = new DistriSys();
+        dsTopo.buildOrigTopo(devices);
+
+        dsTopo.setSupplyCns(new String[]{slackCnId});
+        dsTopo.setSupplyCnBaseKv(new Double[]{baseKv});
+        dsTopo.setFeederConf(confMgr);
         dsTopo.fillCnBaseKv();
 
         for (MapObject obj : devices.getSwitches())
