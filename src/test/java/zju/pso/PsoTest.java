@@ -12,12 +12,7 @@ public class PsoTest {
 
     @Test
     public void testHybridPso() {
-        new HybridPso(new DifficultModel_1(), 17).execute();
-    }
-
-    @Test
-    public void testParallelPso() {
-        new ParallelPso(new DifficultModel_1()).execute();
+        new MonteCarloSolver(new SimpleModel_1()).execute();
     }
 
 }

@@ -1,7 +1,5 @@
 package zju.se;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import zju.matrix.AVector;
 import zju.measure.MeasTypeCons;
 import zju.measure.MeasVector;
@@ -17,6 +15,10 @@ import zju.util.StateCalByRC;
  */
 public class PsoSeAlg extends AbstractSeAlg implements OptModel, MeasTypeCons {
 
+    public static final int HYBRID_PSO_SOLVER = 1;
+    public static final int PARALLEL_PSO_SOLVER = 2;
+    public static final int MONTE_CARLO_SOLVER = 3;
+
     protected SeObjective objFunc = new SeObjective();
     private MeasVector pqMeasure;
     private int slackBusCol;
@@ -24,7 +26,8 @@ public class PsoSeAlg extends AbstractSeAlg implements OptModel, MeasTypeCons {
     private double[] initVariableState;
     private boolean isWarmStart;
     private double objective;
-    private boolean isParallel = false;
+
+    private int solverType = HYBRID_PSO_SOLVER; // 默认求解器
 
     private void initial() {
         if (getSlackBusNum() > 0)
@@ -61,34 +64,45 @@ public class PsoSeAlg extends AbstractSeAlg implements OptModel, MeasTypeCons {
     public void doSeAnalyse() {
         long start = System.currentTimeMillis();
         initial();
-        HybridPso solver;
-        if (isWarmStart) {
-            solver = new HybridPso(this, initVariableState);
-        } else {
-            solver = new HybridPso(this);
+        if (solverType == HYBRID_PSO_SOLVER) {
+            HybridPso solver;
+            if (isWarmStart)
+                solver = new HybridPso(this, initVariableState);
+            else
+                solver = new HybridPso(this);
+            solver.execute();
+            variableState = solver.getgBestLocation().getLoc();
+            if (solver.isGBestfeasible())
+                objective = solver.getgBest();
+        } else if (solverType == PARALLEL_PSO_SOLVER) {
+            ParallelPso solver;
+            if (isWarmStart)
+                solver = new ParallelPso(this, initVariableState);
+            else
+                solver = new ParallelPso(this);
+            solver.setMeas(meas);
+            solver.setY(Y);
+            solver.setThreshold(objFunc.getThresholds());
+            solver.setZeroPBuses(this.zeroPBuses);
+            solver.setZeroQBuses(this.zeroQBuses);
+            solver.setTol_p((float) this.tol_p);
+            solver.setTol_q((float) this.tol_q);
+            solver.execute();
+            variableState = solver.getgBestLocation().getLoc();
+            if (solver.isGBestfeasible())
+                objective = solver.getgBest();
+        } else if (solverType == MONTE_CARLO_SOLVER) {
+            MonteCarloSolver solver = new MonteCarloSolver(this);
+            solver.execute();
+            variableState = solver.getgBestLoc();
+            if (solver.isGBestfeasible())
+                objective = solver.getgBest();
         }
-//        ParallelPso solver;
-//        if (isWarmStart) {
-//            solver = new ParallelPso(this, initVariableState);
-//        } else {
-//            solver = new ParallelPso(this);
-//        }
-//        solver.setMeas(meas);
-//        solver.setY(Y);
-//        solver.setThreshold(objFunc.getThresholds());
-//        solver.setZeroPBuses(this.zeroPBuses);
-//        solver.setZeroQBuses(this.zeroQBuses);
-//        solver.setTol_p((float) this.tol_p);
-//        solver.setTol_q((float) this.tol_q);
-        solver.execute();
-        variableState = solver.getgBestLocation().getLoc();
+
         if (variable_type == IpoptSeAlg.VARIABLE_VTHETA)
             StateCalByPolar.getEstimatedZ(meas, Y, variableState); //获得了测点的估计值
         else if (variable_type == IpoptSeAlg.VARIABLE_U)
             StateCalByRC.getEstimatedZ_U(meas, Y, variableState); //获得了测点的估计值
-
-        if (solver.isGBestfeasible())
-            objective = solver.getgBest();
 
         setTimeUsed(System.currentTimeMillis() - start);
     }
@@ -244,11 +258,7 @@ public class PsoSeAlg extends AbstractSeAlg implements OptModel, MeasTypeCons {
         this.initVariableState = initVariableState;
     }
 
-    public boolean isParallel() {
-        return isParallel;
-    }
-
-    public void setParallel(boolean parallel) {
-        isParallel = parallel;
+    public void setSolverType(int solverType) {
+        this.solverType = solverType;
     }
 }
