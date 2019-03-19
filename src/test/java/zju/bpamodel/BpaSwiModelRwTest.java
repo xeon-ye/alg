@@ -85,4 +85,114 @@ public class BpaSwiModelRwTest extends TestCase {
             }
         }
     }
+
+    public void testSwi003() throws IOException {
+        BpaSwiModel model = BpaSwiModelParser.parse(this.getClass().getResourceAsStream("/bpafiles/systemData/003_bus/bpa/003bpaswi.dat"), "GBK");
+        assertNotNull(model);
+
+        List<Exciter> exciters = new ArrayList<Exciter>();
+        for (String name : toFound) {
+            for (Exciter exciter : model.getExciters()) {
+                if (exciter.getBusName().contains(name)) {
+                    exciters.add(exciter);
+                }
+            }
+        }
+        BpaSwiModel modifiedModel = new BpaSwiModel();
+        modifiedModel.setGenerators(new ArrayList<Generator>());
+        modifiedModel.setExciters(exciters);
+        InputStream in = this.getClass().getResourceAsStream("/bpafiles/systemData/003_bus/bpa/003bpaswi.dat");
+        //FileOutputStream out = new FileOutputStream("003bpaswi-opted.swi");
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        boolean r = BpaSwiModelWriter.readAndWrite(in, "GBK", out, "GBK", modifiedModel);
+        assertTrue(r);
+    }
+
+    public void testSwi009() throws IOException {
+        BpaSwiModel model = BpaSwiModelParser.parse(this.getClass().getResourceAsStream("/bpafiles/systemData/009_bus/bpa/009bpaswi.dat"), "GBK");
+        assertNotNull(model);
+
+        List<Exciter> exciters = new ArrayList<Exciter>();
+        for (String name : toFound) {
+            for (Exciter exciter : model.getExciters()) {
+                if (exciter.getBusName().contains(name)) {
+                    exciters.add(exciter);
+                }
+            }
+        }
+        BpaSwiModel modifiedModel = new BpaSwiModel();
+        modifiedModel.setGenerators(new ArrayList<Generator>());
+        modifiedModel.setExciters(exciters);
+        InputStream in = this.getClass().getResourceAsStream("/bpafiles/systemData/009_bus/bpa/009bpaswi.dat");
+        //FileOutputStream out = new FileOutputStream("009bpaswi-opted.swi");
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        boolean r = BpaSwiModelWriter.readAndWrite(in, "GBK", out, "GBK", modifiedModel);
+        assertTrue(r);
+    }
+
+    public void testSwi039() throws IOException {
+        BpaSwiModel model = BpaSwiModelParser.parse(this.getClass().getResourceAsStream("/bpafiles/systemData/039_bus/bpa/039bpaswi.dat"), "GBK");
+        assertNotNull(model);
+
+        List<Exciter> exciters = new ArrayList<Exciter>();
+        for (String name : toFound) {
+            for (Exciter exciter : model.getExciters()) {
+                if (exciter.getBusName().contains(name)) {
+                    exciters.add(exciter);
+                }
+            }
+        }
+        BpaSwiModel modifiedModel = new BpaSwiModel();
+        modifiedModel.setGenerators(new ArrayList<Generator>());
+        modifiedModel.setExciters(exciters);
+        InputStream in = this.getClass().getResourceAsStream("/bpafiles/systemData/039_bus/bpa/039bpaswi.dat");
+        //FileOutputStream out = new FileOutputStream("039bpaswi-opted.swi");
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        boolean r = BpaSwiModelWriter.readAndWrite(in, "GBK", out, "GBK", modifiedModel);
+        assertTrue(r);
+    }
+
+    public void testSwi145() throws IOException {
+        BpaSwiModel model = BpaSwiModelParser.parse(this.getClass().getResourceAsStream("/bpafiles/systemData/145_bus/bpa/145bpaswi.dat"), "GBK");
+        assertNotNull(model);
+
+        List<Exciter> exciters = new ArrayList<Exciter>();
+        for (String name : toFound) {
+            for (Exciter exciter : model.getExciters()) {
+                if (exciter.getBusName().contains(name)) {
+                    exciters.add(exciter);
+                }
+            }
+        }
+        BpaSwiModel modifiedModel = new BpaSwiModel();
+        modifiedModel.setGenerators(new ArrayList<Generator>());
+        modifiedModel.setExciters(exciters);
+        InputStream in = this.getClass().getResourceAsStream("/bpafiles/systemData/145_bus/bpa/145bpaswi.dat");
+        //FileOutputStream out = new FileOutputStream("145bpaswi-opted.swi");
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        boolean r = BpaSwiModelWriter.readAndWrite(in, "GBK", out, "GBK", modifiedModel);
+        assertTrue(r);
+    }
+
+    public void testSwi162() throws IOException {
+        BpaSwiModel model = BpaSwiModelParser.parse(this.getClass().getResourceAsStream("/bpafiles/systemData/162_bus/bpa/162bpaswi.dat"), "GBK");
+        assertNotNull(model);
+
+        List<Exciter> exciters = new ArrayList<Exciter>();
+        for (String name : toFound) {
+            for (Exciter exciter : model.getExciters()) {
+                if (exciter.getBusName().contains(name)) {
+                    exciters.add(exciter);
+                }
+            }
+        }
+        BpaSwiModel modifiedModel = new BpaSwiModel();
+        modifiedModel.setGenerators(new ArrayList<Generator>());
+        modifiedModel.setExciters(exciters);
+        InputStream in = this.getClass().getResourceAsStream("/bpafiles/systemData/162_bus/bpa/162bpaswi.dat");
+        //FileOutputStream out = new FileOutputStream("162bpaswi-opted.swi");
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        boolean r = BpaSwiModelWriter.readAndWrite(in, "GBK", out, "GBK", modifiedModel);
+        assertTrue(r);
+    }
 }

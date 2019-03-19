@@ -1,10 +1,7 @@
 package zju.bpamodel;
 
 import org.apache.log4j.Logger;
-import zju.bpamodel.swi.Exciter;
-import zju.bpamodel.swi.ExciterExtraInfo;
-import zju.bpamodel.swi.Generator;
-import zju.bpamodel.swi.GeneratorDW;
+import zju.bpamodel.swi.*;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -69,6 +66,8 @@ public class BpaSwiModelParser {
             List<Generator> generators = new ArrayList<Generator>();
             List<Exciter> exciters = new ArrayList<Exciter>();
             List<ExciterExtraInfo> exciterExtraInfos = new ArrayList<ExciterExtraInfo>();
+            List<Load> loads = new ArrayList<>();
+            FFCard ffCard = null;
             while ((strLine = reader.readLine()) != null) {
                 try {
                     if (strLine.startsWith("M")) {
@@ -83,12 +82,21 @@ public class BpaSwiModelParser {
                     } else if (strLine.startsWith("F")) {
                         if ((strLine.charAt(1) >= 'A' && strLine.charAt(1) <= 'H')
                                 || (strLine.charAt(1) >= 'J' && strLine.charAt(1) <= 'L')
-                                || (strLine.charAt(1) >= 'M' && strLine.charAt(1) <= 'V'))
-                            exciters.add(Exciter.createExciter(strLine));
+                                || (strLine.charAt(1) >= 'M' && strLine.charAt(1) <= 'V')) {
+                            if (strLine.charAt(1) == 'F' && strLine.charAt(3) == ' ' && strLine.charAt(7) == ' ' && strLine.charAt(11) == ' ') {
+                                ffCard = FFCard.createFF(strLine);
+                            } else {
+                                exciters.add(Exciter.createExciter(strLine));
+                            }
+                        }
                     } else if (strLine.startsWith("E")) {
                         if ((strLine.charAt(1) >= 'A' && strLine.charAt(1) <= 'G')
                                 || (strLine.charAt(1) >= 'J' && strLine.charAt(1) <= 'K'))
                             exciters.add(Exciter.createExciter(strLine));
+                    } else if (strLine.startsWith("L")) {
+                        if (strLine.charAt(1) == 'A' || strLine.charAt(1) == 'B') {
+                            loads.add(Load.createLoad(strLine));
+                        }
                     }
                 } catch (NumberFormatException ex) {
                     log.warn("Failed to parse because NumberFormatException is found:");
@@ -102,6 +110,8 @@ public class BpaSwiModelParser {
             model.setGeneratorDws(generatorDws);
             model.setExciters(exciters);
             model.setExciterExtraInfos(exciterExtraInfos);
+            model.setLoads(loads);
+            model.setFf(ffCard);
             model.buildMaps();
             return model;
         } catch (IOException e) {

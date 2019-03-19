@@ -40,6 +40,7 @@ public class PsoSeTest_IeeeCase implements MeasTypeCons {
         se = new StateEstimator();
         ipoptSeAlg = new IpoptSeAlg();
         psoSeAlg = new PsoSeAlg();
+        psoSeAlg.setSolverType(PsoSeAlg.MONTE_CARLO_SOLVER);
     }
 
     /**
@@ -256,6 +257,7 @@ public class PsoSeTest_IeeeCase implements MeasTypeCons {
         island = IcfDataUtil.ISLAND_300.clone();
         smRef = SimuMeasMaker.createFullMeasure(island, 1, 0);
         sm = SimuMeasMaker.createFullMeasure_withBadData(island, 1, 0.02, 0.03);
+
         doSE(island, sm, smRef, IcfDataUtil.ISLAND_300, false, true);
     }
 
@@ -297,8 +299,7 @@ public class PsoSeTest_IeeeCase implements MeasTypeCons {
 //        doIpoptSE(island, smRef, ref, variables_types, isTrueValue, isZeroInjection, SeObjective.OBJ_TYPE_WLS);
 //        double[] variableState = ipoptSeAlg.getVariableState();
 //        psoSeAlg.setInitVariableState(variableState);
-        psoSeAlg.setWarmStart(false);
-        psoSeAlg.setParallel(true);
+//        psoSeAlg.setWarmStart(true);
         log.info("################开始粒子群算法：################");
         doPsoSE(island, sm, ref, variables_types, isTrueValue, isZeroInjection);
     }
