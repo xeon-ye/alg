@@ -106,13 +106,6 @@ public class BpaSwiModelRwTest extends TestCase {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         boolean r = BpaSwiModelWriter.readAndWrite(in, "GBK", out, "GBK", modifiedModel);
         assertTrue(r);
-
-        for (Exciter exciter : exciters) {
-            if (exciter.getBusName().equals("闽江阴_1")) {
-                exciter.setXc(-0.0396259400157145);
-                System.out.println(exciter.toString());
-            }
-        }
     }
 
     public void testSwi009() throws IOException {
@@ -135,13 +128,6 @@ public class BpaSwiModelRwTest extends TestCase {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         boolean r = BpaSwiModelWriter.readAndWrite(in, "GBK", out, "GBK", modifiedModel);
         assertTrue(r);
-
-        for (Exciter exciter : exciters) {
-            if (exciter.getBusName().equals("闽江阴_1")) {
-                exciter.setXc(-0.0396259400157145);
-                System.out.println(exciter.toString());
-            }
-        }
     }
 
     public void testSwi039() throws IOException {
@@ -164,13 +150,6 @@ public class BpaSwiModelRwTest extends TestCase {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         boolean r = BpaSwiModelWriter.readAndWrite(in, "GBK", out, "GBK", modifiedModel);
         assertTrue(r);
-
-        for (Exciter exciter : exciters) {
-            if (exciter.getBusName().equals("闽江阴_1")) {
-                exciter.setXc(-0.0396259400157145);
-                System.out.println(exciter.toString());
-            }
-        }
     }
 
     public void testSwi145() throws IOException {
@@ -193,13 +172,6 @@ public class BpaSwiModelRwTest extends TestCase {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         boolean r = BpaSwiModelWriter.readAndWrite(in, "GBK", out, "GBK", modifiedModel);
         assertTrue(r);
-
-        for (Exciter exciter : exciters) {
-            if (exciter.getBusName().equals("闽江阴_1")) {
-                exciter.setXc(-0.0396259400157145);
-                System.out.println(exciter.toString());
-            }
-        }
     }
 
     public void testSwi162() throws IOException {
@@ -222,12 +194,5 @@ public class BpaSwiModelRwTest extends TestCase {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         boolean r = BpaSwiModelWriter.readAndWrite(in, "GBK", out, "GBK", modifiedModel);
         assertTrue(r);
-
-        for (Exciter exciter : exciters) {
-            if (exciter.getBusName().equals("闽江阴_1")) {
-                exciter.setXc(-0.0396259400157145);
-                System.out.println(exciter.toString());
-            }
-        }
     }
 }
