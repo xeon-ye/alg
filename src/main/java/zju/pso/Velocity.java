@@ -1,7 +1,6 @@
 package zju.pso;
 
 /**
- * @Description: 粒子速度
  * @Author: Fang Rui
  * @Date: 2018/6/7
  * @Time: 17:43

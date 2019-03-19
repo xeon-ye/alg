@@ -61,11 +61,11 @@ public class PsoSeAlg extends AbstractSeAlg implements OptModel, MeasTypeCons {
     public void doSeAnalyse() {
         long start = System.currentTimeMillis();
         initial();
-        HybridPso solver;
+        HybridPSO solver;
         if (isWarmStart) {
-            solver = new HybridPso(this, initVariableState);
+            solver = new HybridPSO(this, initVariableState);
         } else {
-            solver = new HybridPso(this);
+            solver = new HybridPSO(this);
         }
 //        ParallelPso solver;
 //        if (isWarmStart) {

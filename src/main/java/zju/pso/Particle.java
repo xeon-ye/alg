@@ -1,7 +1,6 @@
 package zju.pso;
 
 /**
- * @Description: 粒子类
  * @Author: Fang Rui
  * @Date: 2018/6/7
  * @Time: 17:43
@@ -9,7 +8,7 @@ package zju.pso;
 
 public class Particle {
     private Velocity velocity;
-    private Location location; // 位置就是粒子对应状态向量的值
+    private Location location;
 
 
     public Velocity getVelocity() {
