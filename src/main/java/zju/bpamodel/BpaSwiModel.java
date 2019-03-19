@@ -1,9 +1,6 @@
 package zju.bpamodel;
 
-import zju.bpamodel.swi.Exciter;
-import zju.bpamodel.swi.ExciterExtraInfo;
-import zju.bpamodel.swi.Generator;
-import zju.bpamodel.swi.GeneratorDW;
+import zju.bpamodel.swi.*;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -20,6 +17,8 @@ public class BpaSwiModel implements Serializable {
     List<Generator> generators;
     List<Exciter> exciters;
     List<ExciterExtraInfo> exciterExtraInfos;
+    List<Load> loads;
+    FFCard ff;
     Map<Generator, Exciter> exciterMap;
     Map<Generator, GeneratorDW> generatorDwMap;
     Map<Exciter, ExciterExtraInfo> exciterExtraInfoMap;
@@ -88,6 +87,22 @@ public class BpaSwiModel implements Serializable {
 
     public void setExciterExtraInfos(List<ExciterExtraInfo> exciterExtraInfos) {
         this.exciterExtraInfos = exciterExtraInfos;
+    }
+
+    public List<Load> getLoads() {
+        return loads;
+    }
+
+    public void setLoads(List<Load> loads) {
+        this.loads = loads;
+    }
+
+    public FFCard getFf() {
+        return ff;
+    }
+
+    public void setFf(FFCard ff) {
+        this.ff = ff;
     }
 
     public Map<Generator, Exciter> getExciterMap() {
