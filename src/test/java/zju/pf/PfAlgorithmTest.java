@@ -37,11 +37,11 @@ public class PfAlgorithmTest extends TestCase {
         pf.setTol_v(0.0);
 
         standardCasePf(IcfDataUtil.ISLAND_14.clone(), pf);
-//        standardCasePf(IcfDataUtil.ISLAND_30.clone(), pf);
-//        standardCasePf(IcfDataUtil.ISLAND_39.clone(), pf);
-//        standardCasePf(IcfDataUtil.ISLAND_57.clone(), pf);
-//        standardCasePf(IcfDataUtil.ISLAND_118.clone(), pf);
-//        standardCasePf(IcfDataUtil.ISLAND_300.clone(), pf);
+        standardCasePf(IcfDataUtil.ISLAND_30.clone(), pf);
+        standardCasePf(IcfDataUtil.ISLAND_39.clone(), pf);
+        standardCasePf(IcfDataUtil.ISLAND_57.clone(), pf);
+        standardCasePf(IcfDataUtil.ISLAND_118.clone(), pf);
+        standardCasePf(IcfDataUtil.ISLAND_300.clone(), pf);
     }
 
     public void testStandardCases_OutagePf_ipopt() {
