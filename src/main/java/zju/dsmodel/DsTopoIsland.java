@@ -1,6 +1,7 @@
 package zju.dsmodel;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jgrapht.UndirectedGraph;
 import org.jgrapht.graph.SimpleGraph;
 import org.jgrapht.traverse.BreadthFirstIterator;
@@ -22,7 +23,7 @@ import java.util.*;
  */
 public class DsTopoIsland implements Serializable, DsModelCons {
 
-    private static Logger log = Logger.getLogger(DsTopoIsland.class);
+    private static Logger log = LogManager.getLogger(DsTopoIsland.class);
 
     public static final String EARTH_NODE_ID = "ground-node-3";
 

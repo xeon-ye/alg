@@ -1,7 +1,8 @@
 package zju.dsntp;
 
 import jpscpu.LinearSolver;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jgrapht.UndirectedGraph;
 import zju.devmodel.MapObject;
 import zju.dsmodel.DistriSys;
@@ -17,7 +18,7 @@ import static zju.dsmodel.DsModelCons.SWITCH_OFF;
 import static zju.dsmodel.IeeeDsInHand.createDs;
 
 public class LoadBalance extends LoadTransferOpt {
-    private static Logger log = Logger.getLogger(LoadTransferOpt.class);
+    private static Logger log = LogManager.getLogger(LoadTransferOpt.class);
 
     private static double LOAD_RATE_UPPER = 0.816;
     private static double LOAD_RATE_LOWER = 0.596;

@@ -1,6 +1,7 @@
 package zju.util;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import zju.ieeeformat.BranchData;
 import zju.matrix.ASparseMatrixLink;
 import zju.matrix.ASparseMatrixLink2D;
@@ -14,7 +15,7 @@ import zju.measure.MeasureInfo;
  *         Date: 2008-6-18
  */
 public class BranchCalUtil implements MeasTypeCons {
-    private static Logger log = Logger.getLogger(BranchCalUtil.class);
+    private static Logger log = LogManager.getLogger(BranchCalUtil.class);
 
     public static ASparseMatrixLink getJacobian(BranchData branch, MeasureInfo[] infos, double[] x) {
         ASparseMatrixLink result = new ASparseMatrixLink(infos.length, 3);

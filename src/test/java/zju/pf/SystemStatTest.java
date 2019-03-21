@@ -1,8 +1,9 @@
 package zju.pf;
 
 import junit.framework.TestCase;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import zju.ieeeformat.*;
 import zju.matrix.AVector;
 import zju.util.NumberOptHelper;
@@ -24,10 +25,6 @@ public class SystemStatTest extends TestCase {
         super(name);
     }
 
-    @Override
-    public void setUp() throws Exception {
-        Logger.getRootLogger().setLevel(Level.WARN);
-    }
 
     public void testStandardCases() {
         systemStatistic(IcfDataUtil.ISLAND_14.clone(), true);

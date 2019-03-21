@@ -3,7 +3,8 @@ package zju.dsntp;
 import cern.colt.function.IntIntDoubleFunction;
 import cern.colt.matrix.DoubleMatrix2D;
 import cern.colt.matrix.impl.SparseDoubleMatrix2D;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import zju.common.NewtonSolver;
 import zju.common.NewtonWlsModel;
 import zju.devmodel.MapObject;
@@ -22,7 +23,7 @@ import zju.util.JacobianMakerPC;
  */
 public class BcbNewtonSe extends AbstractSeAlg implements NewtonWlsModel {
 
-    private static Logger log = Logger.getLogger(BcbNewtonSe.class);
+    private static Logger log = LogManager.getLogger(BcbNewtonSe.class);
 
     //电气岛
     protected DsTopoIsland dsIsland;

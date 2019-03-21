@@ -1,7 +1,8 @@
 package zju.dsntp;
 
 import cern.colt.matrix.DoubleMatrix2D;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jgrapht.UndirectedGraph;
 import org.jgrapht.event.EdgeTraversalEvent;
 import org.jgrapht.event.TraversalListenerAdapter;
@@ -23,7 +24,7 @@ import java.util.*;
  * Date: 14-1-16
  */
 public class LcbPfModel implements NewtonModel, DsModelCons {
-    private static Logger log = Logger.getLogger(LcbPfModel.class);
+    private static Logger log = LogManager.getLogger(LcbPfModel.class);
 
     //最大迭代次数，复变量个数
     private int maxIter, dimension;

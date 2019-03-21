@@ -1,6 +1,7 @@
 package zju.measure;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -17,7 +18,7 @@ import java.util.Map;
  */
 public class SystemMeasure implements Serializable, MeasTypeCons, Cloneable {
 
-    public static Logger log = Logger.getLogger(SystemMeasure.class);
+    public static Logger log = LogManager.getLogger(SystemMeasure.class);
 
     //physical measurements
     private Map<String, List<MeasureInfo>> id2Measure = new HashMap<>();

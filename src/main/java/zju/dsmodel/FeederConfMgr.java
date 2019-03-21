@@ -1,6 +1,7 @@
 package zju.dsmodel;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.*;
 import java.util.HashMap;
@@ -13,7 +14,7 @@ import java.util.Map;
  * Date: 2010-4-22
  */
 public class FeederConfMgr implements Serializable, DsModelCons {
-    private transient static Logger log = Logger.getLogger(FeederConfMgr.class);
+    private transient static Logger log = LogManager.getLogger(FeederConfMgr.class);
     private String lengthUnit;
     private Map<String, double[][]> zRealPerLen = new HashMap<>();
     private Map<String, double[][]> zImagPerLen = new HashMap<>();

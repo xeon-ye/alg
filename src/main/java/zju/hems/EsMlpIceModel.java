@@ -1,13 +1,14 @@
 package zju.hems;
 
 import jpscpu.LinearSolver;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Created by Administrator on 2016/11/1.
  */
 public class EsMlpIceModel {
-    private static Logger log = Logger.getLogger(EsMlpModel.class);
+    private static Logger log = LogManager.getLogger(EsMlpModel.class);
 
     //储能能量初值,储能最大变化量,每段时间/h,蓄冰槽初始容量
     private double initEnergy, finalEnergyChange = 0, initIceCapacity, finalIceChange;

@@ -1,6 +1,7 @@
 package zju.dsmodel;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jgrapht.UndirectedGraph;
 import org.jgrapht.alg.ConnectivityInspector;
 import org.jgrapht.graph.SimpleGraph;
@@ -16,7 +17,7 @@ import java.util.*;
  * Date: 13-10-30
  */
 public class DistriSys implements DsModelCons, Serializable {
-    private static Logger log = Logger.getLogger(DistriSys.class);
+    private static Logger log = LogManager.getLogger(DistriSys.class);
 
     private static int virtual_cn_count = 1;
     //配电网络中所有的物理设备

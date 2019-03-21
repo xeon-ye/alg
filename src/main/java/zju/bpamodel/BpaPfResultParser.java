@@ -1,6 +1,7 @@
 package zju.bpamodel;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import zju.bpamodel.pfr.BusPfResult;
 import zju.bpamodel.pfr.PfResult;
 
@@ -13,7 +14,7 @@ import java.util.HashMap;
  * Date: 12-7-14
  */
 public class BpaPfResultParser {
-    private static Logger log = Logger.getLogger(BpaPfResultParser.class);
+    private static Logger log = LogManager.getLogger(BpaPfResultParser.class);
 
     public static PfResult parseFile(String file) {
         return parseFile(new File(file));

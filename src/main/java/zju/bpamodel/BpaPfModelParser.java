@@ -1,6 +1,7 @@
 package zju.bpamodel;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import zju.bpamodel.pf.*;
 
 import java.io.*;
@@ -14,7 +15,7 @@ import java.util.List;
  * Date: 12-7-12
  */
 public class BpaPfModelParser {
-    private static Logger log = Logger.getLogger(BpaPfModelParser.class);
+    private static Logger log = LogManager.getLogger(BpaPfModelParser.class);
 
     public static ElectricIsland parseFile(String file) {
         return parseFile(new File(file));

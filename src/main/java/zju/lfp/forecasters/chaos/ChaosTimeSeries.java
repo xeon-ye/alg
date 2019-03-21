@@ -1,6 +1,7 @@
 package zju.lfp.forecasters.chaos;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Created by IntelliJ IDEA.
@@ -9,7 +10,7 @@ import org.apache.log4j.Logger;
  * Time: 15:10:13
  */
 public class ChaosTimeSeries {
-    private static Logger log = Logger.getLogger(ChaosTimeSeries.class);
+    private static Logger log = LogManager.getLogger(ChaosTimeSeries.class);
 
     private double[] series;
 

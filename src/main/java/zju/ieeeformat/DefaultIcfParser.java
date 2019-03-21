@@ -1,6 +1,7 @@
 package zju.ieeeformat;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import sun.util.locale.StringTokenIterator;
 
 import java.io.*;
@@ -24,7 +25,7 @@ import java.util.ArrayList;
  * @Date: 2006-7-16
  */
 public class DefaultIcfParser {
-    private static Logger log = Logger.getLogger(DefaultIcfParser.class);
+    private static Logger log = LogManager.getLogger(DefaultIcfParser.class);
     private String charset = null;
     private boolean isHexBase = false;
     public StringBuilder busNumberStr;

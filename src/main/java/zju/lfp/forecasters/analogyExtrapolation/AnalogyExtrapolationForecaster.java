@@ -1,6 +1,7 @@
 package zju.lfp.forecasters.analogyExtrapolation;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import zju.lfp.Forecaster;
 import zju.lfp.utils.DataServiceFactory;
 import zju.lfp.utils.MultiTimeSeries;
@@ -17,7 +18,7 @@ import java.util.Map;
  * Time: 14:13:37
  */
 public class AnalogyExtrapolationForecaster extends UnicastRemoteObject implements Forecaster {
-    private final static Logger log = Logger.getLogger(AnalogyExtrapolationForecaster.class);
+    private final static Logger log = LogManager.getLogger(AnalogyExtrapolationForecaster.class);
 
     private final static String forecasterName = "AnalogyExtrapolation";
 

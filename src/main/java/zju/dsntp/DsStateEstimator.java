@@ -1,6 +1,7 @@
 package zju.dsntp;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import zju.dsmodel.DistriSys;
 import zju.dsmodel.DsModelCons;
 import zju.dsmodel.DsTopoIsland;
@@ -18,7 +19,7 @@ import zju.se.SeObjective;
  */
 public class DsStateEstimator implements DsModelCons {
 
-    private static Logger log = Logger.getLogger(DsStateEstimator.class);
+    private static Logger log = LogManager.getLogger(DsStateEstimator.class);
 
     private double k = 3;
 

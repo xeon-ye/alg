@@ -1,7 +1,8 @@
 package zju.dsmodel;
 
 import cern.colt.matrix.DoubleMatrix2D;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import zju.common.NewtonModel;
 import zju.common.NewtonSolver;
 import zju.matrix.ASparseMatrixLink2D;
@@ -25,7 +26,7 @@ public class InductionMachine implements ThreePhaseLoad, NewtonModel, Serializab
     //public static final int CAL_MODE_V_S = 1;
     //public static final int CAL_MODE_I_S = 2;
 
-    private static Logger log = Logger.getLogger(InductionMachine.class);
+    private static Logger log = LogManager.getLogger(InductionMachine.class);
 
     //定义常量
     private static final double[][] T = {{1., 0}, {0.5, -0.2886751346}, {0.5, 0.2886751346}};

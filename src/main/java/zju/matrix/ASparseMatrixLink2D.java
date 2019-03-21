@@ -1,6 +1,7 @@
 package zju.matrix;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -14,7 +15,7 @@ import java.util.List;
  */
 public class ASparseMatrixLink2D extends ASparseMatrixLink implements Serializable {
 
-    private static Logger log = Logger.getLogger(ASparseMatrixLink2D.class);
+    private static Logger log = LogManager.getLogger(ASparseMatrixLink2D.class);
 
     private List<Integer> IA2; //非零元行号
     private List<Integer> LINK2; //link of column

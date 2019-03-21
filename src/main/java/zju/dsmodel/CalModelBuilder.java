@@ -1,6 +1,7 @@
 package zju.dsmodel;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import zju.devmodel.MapObject;
 import zju.util.DoubleMatrixToolkit;
 
@@ -13,7 +14,7 @@ import java.util.HashMap;
  * Date: 14-1-15
  */
 public class CalModelBuilder implements DsModelCons, Serializable {
-    private static Logger log = Logger.getLogger(CalModelBuilder.class);
+    private static Logger log = LogManager.getLogger(CalModelBuilder.class);
 
     private FeederConfMgr feederConf;
 

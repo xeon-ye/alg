@@ -18,7 +18,7 @@ import zju.util.StateCalByPolar;
  *         Date: 2007-12-19
  */
 public class NewtonWlsSe extends AbstractSeAlg implements NewtonWlsModel {
-    //private static Logger log = Logger.getLogger(NewtonWlsSe.class);
+    //private static Logger log = LogManager.getLogger(NewtonWlsSe.class);
 
     public int vCount;
     public int aCount;

@@ -1,6 +1,7 @@
 package zju.bpamodel;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import zju.bpamodel.swi.Exciter;
 
 import java.io.*;
@@ -13,7 +14,7 @@ import java.util.Map;
  * Date: 12-7-17
  */
 public class BpaSwiModelWriter {
-    private static Logger log = Logger.getLogger(BpaSwiModelWriter.class);
+    private static Logger log = LogManager.getLogger(BpaSwiModelWriter.class);
 
     public static boolean writeFile(String file, String charset, BpaSwiModel swiModel) {
         return writeFile(new File(file), charset, swiModel);

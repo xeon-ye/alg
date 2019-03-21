@@ -1,7 +1,8 @@
 package zju.hems;
 
 import jpscpu.LinearSolver;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Created by IntelliJ IDEA.
@@ -9,7 +10,7 @@ import org.apache.log4j.Logger;
  * Date: 2014/6/11
  */
 public class EsMlpModel {
-    private static Logger log = Logger.getLogger(EsMlpModel.class);
+    private static Logger log = LogManager.getLogger(EsMlpModel.class);
 
     //储能能量初值,储能最大变化量
     private double iniEnergy, finalEnergyChanged = 0;

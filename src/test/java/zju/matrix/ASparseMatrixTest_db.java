@@ -21,7 +21,7 @@ import java.net.URL;
  */
 public class ASparseMatrixTest_db implements MeasTypeCons {
 
-    //public static Logger log = Logger.getLogger(ASparseMatrixTest_db.class);
+    //public static Logger log = LogManager.getLogger(ASparseMatrixTest_db.class);
     private static boolean bUsingColt = true;
     ASparseMatrixLink2D result;          // 109ms 172ms(t43)
     DoubleMatrix2D resultColt;           // 21 ms 47ms(t43)

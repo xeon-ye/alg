@@ -6,7 +6,8 @@ import cern.colt.matrix.impl.DenseDoubleMatrix1D;
 import cern.colt.matrix.linalg.LUDecompositionQuick;
 import jpscpu.LinearSolver;
 import jpscpu.LinearSolverMT;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import zju.matrix.ASparseMatrixLink2D;
 import zju.matrix.AVector;
 import zju.matrix.MySparseDoubleMatrix2D;
@@ -20,7 +21,7 @@ import zju.util.ColtMatrixUtil;
  */
 public class NewtonSolver {
 
-    private static Logger log = Logger.getLogger(NewtonSolver.class);
+    private static Logger log = LogManager.getLogger(NewtonSolver.class);
     //colt包求解器
     public static final int LINEAR_SOLVER_COLT = 1;
     //SuperLU求解器

@@ -40,7 +40,6 @@ public class PsoSeTest_IeeeCase implements MeasTypeCons {
         se = new StateEstimator();
         ipoptSeAlg = new IpoptSeAlg();
         psoSeAlg = new PsoSeAlg();
-        psoSeAlg.setSolverType(PsoSeAlg.MONTE_CARLO_SOLVER);
     }
 
     /**

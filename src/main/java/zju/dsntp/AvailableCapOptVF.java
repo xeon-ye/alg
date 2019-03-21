@@ -4,7 +4,8 @@ import ilog.concert.IloException;
 import ilog.concert.IloNumVar;
 import ilog.concert.IloNumVarType;
 import ilog.cplex.IloCplex;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jgrapht.UndirectedGraph;
 import zju.devmodel.MapObject;
 import zju.dsmodel.DistriSys;
@@ -21,7 +22,7 @@ import static zju.dsmodel.DsModelCons.*;
  */
 public class AvailableCapOptVF extends BranchBasedModel {
 
-    private static Logger log = Logger.getLogger(AvailableCapOptVF.class);
+    private static Logger log = LogManager.getLogger(AvailableCapOptVF.class);
 
     int[] errorFeeder;
 

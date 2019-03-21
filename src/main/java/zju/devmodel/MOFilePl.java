@@ -1,6 +1,7 @@
 package zju.devmodel;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import zju.util.JOFileUtil;
 
 import java.io.File;
@@ -14,7 +15,7 @@ import java.util.Map;
  *         Date: 2011-4-1
  */
 public class MOFilePl implements MOPersistLayer {
-    private static Logger log = Logger.getLogger(MOFilePl.class);
+    private static Logger log = LogManager.getLogger(MOFilePl.class);
 
     private File dir;//file dirtory of device objects to store
 

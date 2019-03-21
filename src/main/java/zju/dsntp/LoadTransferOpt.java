@@ -1,7 +1,8 @@
 package zju.dsntp;
 
 import jpscpu.LinearSolver;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jgrapht.UndirectedGraph;
 import zju.devmodel.MapObject;
 import zju.dsmodel.DistriSys;
@@ -20,7 +21,7 @@ import static zju.dsmodel.DsModelCons.*;
  */
 public class LoadTransferOpt extends PathBasedModel {
 
-    private static Logger log = Logger.getLogger(LoadTransferOpt.class);
+    private static Logger log = LogManager.getLogger(LoadTransferOpt.class);
 
     int[] errorFeeder;
     String[] errorLines;

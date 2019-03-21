@@ -1,6 +1,7 @@
 package zju.lfp.forecasters.chaos;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import weka.core.*;
 import zju.lfp.utils.MultiTimeSeries;
 
@@ -13,7 +14,7 @@ import java.util.ArrayList;
  * Time: 13:12:25
  */
 public class ChaosInstances {
-    private final static Logger log = Logger.getLogger(ChaosInstances.class);
+    private final static Logger log = LogManager.getLogger(ChaosInstances.class);
     private final static String ATTRIBUTE_NAME = "attribute_";
 
     private MultiTimeSeries multiTimeSeries;

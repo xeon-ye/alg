@@ -1,6 +1,7 @@
 package zju.lfp.forecasters.analogyExtrapolation;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import zju.lfp.MultiTimeSeriesPredictor;
 import zju.lfp.forecasters.singleDimensionalForecaster.extrapolation.ExtrapolationPredictor;
 import zju.lfp.utils.MultiTimeSeries;
@@ -13,7 +14,7 @@ import zju.lfp.utils.MultiTimeSeries;
  * Time: 11:06:03
  */
 public class AnalogyExtrapolationPredictor implements MultiTimeSeriesPredictor {
-    private final static Logger log = Logger.getLogger(AnalogyExtrapolationPredictor.class);
+    private final static Logger log = LogManager.getLogger(AnalogyExtrapolationPredictor.class);
     private ExtrapolationPredictor extrapolationPredictor;
 
     public AnalogyExtrapolationPredictor(int longPeriod, int shortPeriod, int usefulPointsNum) {

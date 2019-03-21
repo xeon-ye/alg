@@ -2,7 +2,8 @@ package zju.hems;
 
 
 import jpscpu.LinearSolver;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Created by cz274 on 16/08/2016.
@@ -10,7 +11,7 @@ import org.apache.log4j.Logger;
  */
 
 public class P2pMlpModel {
-    private static Logger log = Logger.getLogger(P2pMlpModel.class);
+    private static Logger log = LogManager.getLogger(P2pMlpModel.class);
 
     //储能能量初值,储能最大变化量
     private double iniEnergy, PG, R, maxBatteryChange, minBatteryChange;

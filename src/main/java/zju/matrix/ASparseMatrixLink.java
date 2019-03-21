@@ -1,7 +1,8 @@
 package zju.matrix;
 
 import cern.colt.matrix.DoubleMatrix2D;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -15,7 +16,7 @@ import java.util.List;
  */
 public class ASparseMatrixLink extends AbstractMatrix implements Serializable {
     private static final long serialVersionUID = -3831910468817616627l;
-    private static Logger log = Logger.getLogger(ASparseMatrixLink.class);
+    private static Logger log = LogManager.getLogger(ASparseMatrixLink.class);
     //非零元值
     protected List<Double> VA;
     //非零元列号

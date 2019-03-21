@@ -1,6 +1,7 @@
 package zju.bpamodel.sccpc;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.*;
 import java.util.HashMap;
@@ -12,7 +13,7 @@ import java.util.Map;
  * Date: 12-11-4
  */
 public class SccResult implements Serializable {
-    private static Logger log = Logger.getLogger(SccResult.class);
+    private static Logger log = LogManager.getLogger(SccResult.class);
     private Map<String, SccBusResult> busData;
 
     public Map<String, SccBusResult> getBusData() {

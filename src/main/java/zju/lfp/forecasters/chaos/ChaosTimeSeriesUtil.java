@@ -1,6 +1,7 @@
 package zju.lfp.forecasters.chaos;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import zju.lfp.utils.MultiTimeSeries;
 
 import java.util.ArrayList;
@@ -13,7 +14,7 @@ import java.util.List;
  * Time: 9:36:51
  */
 public class ChaosTimeSeriesUtil {
-    private static Logger log = Logger.getLogger(ChaosTimeSeriesUtil.class);
+    private static Logger log = LogManager.getLogger(ChaosTimeSeriesUtil.class);
 
     public static int[] getTimeDelayPoints(ChaosTimeSeries[] chaosTimeSerieses){
         return null;

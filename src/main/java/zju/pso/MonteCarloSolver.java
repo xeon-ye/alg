@@ -41,7 +41,7 @@ public class MonteCarloSolver {
                 Location location = new Location(loc);
                 double obj = optModel.evalObj(location);
                 if (optModel.evalConstr(location) > 0)
-                    obj += PsoConstants.PUNISHMENT;
+                    obj += PSOConstants.PUNISHMENT;
                 if (obj < gBest) {
                     gBest = obj;
                     gBestLoc = loc;
@@ -53,7 +53,7 @@ public class MonteCarloSolver {
 
         pool.shutdown();
 
-        if (gBest < PsoConstants.PUNISHMENT)
+        if (gBest < PSOConstants.PUNISHMENT)
             isGBestfeasible = true;
 
         if (isGBestfeasible) {
@@ -81,7 +81,7 @@ public class MonteCarloSolver {
                 double obj = optModel.evalObj(location);
                 double violation = optModel.evalConstr(location);
                 if (violation > 0)
-                    obj += PsoConstants.PUNISHMENT;
+                    obj += PSOConstants.PUNISHMENT;
                 if (obj < minObj) {
                     minObj = obj;
                     minLoc = loc;

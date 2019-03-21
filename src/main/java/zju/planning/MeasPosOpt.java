@@ -1,7 +1,8 @@
 package zju.planning;
 
 import jpscpu.LinearSolver;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import zju.devmodel.MapObject;
 import zju.dsmodel.DsTopoIsland;
 import zju.dsmodel.DsTopoNode;
@@ -23,7 +24,7 @@ import java.util.Map;
  */
 public class MeasPosOpt implements MeasTypeCons {
 
-    private static Logger log = Logger.getLogger(MeasPosOpt.class);
+    private static Logger log = LogManager.getLogger(MeasPosOpt.class);
     protected int maxDevNum;
 
     // --------------- 三相平衡的电网 ---------

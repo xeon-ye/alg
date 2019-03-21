@@ -1,6 +1,7 @@
 package zju.planning;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.coinor.Bonmin;
 import zju.dsmodel.DsTopoIsland;
 import zju.ieeeformat.IEEEDataIsland;
@@ -13,7 +14,7 @@ import zju.matrix.MySparseDoubleMatrix2D;
  */
 public class MeasPosOptByBonmin extends MeasPosOpt {
 
-    private static Logger log = Logger.getLogger(MeasPosOptByBonmin.class);
+    private static Logger log = LogManager.getLogger(MeasPosOptByBonmin.class);
 
     public MeasPosOptByBonmin(IEEEDataIsland island) {
         super(island);

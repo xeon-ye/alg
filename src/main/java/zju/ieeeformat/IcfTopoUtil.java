@@ -1,6 +1,7 @@
 package zju.ieeeformat;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jgrapht.UndirectedGraph;
 import org.jgrapht.alg.ConnectivityInspector;
 import org.jgrapht.graph.DefaultEdge;
@@ -19,7 +20,7 @@ import java.util.Set;
  */
 public class IcfTopoUtil {
 
-    private static Logger log = Logger.getLogger(IcfTopoUtil.class);
+    private static Logger log = LogManager.getLogger(IcfTopoUtil.class);
 
     //数据结构<图>
     private SimpleWeightedGraph<BusData, DefaultEdge> graph;

@@ -1,7 +1,8 @@
 package zju.opf;
 
 import cern.colt.function.IntIntDoubleFunction;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import zju.common.IpoptSolver;
 import zju.ieeeformat.BusData;
 import zju.ieeeformat.IEEEDataIsland;
@@ -23,7 +24,7 @@ import java.util.Map;
  *         Date: 2008-11-23
  */
 public class IpoptOpf extends IpoptPf {
-    private static Logger log = Logger.getLogger(IpoptOpf.class);
+    private static Logger log = LogManager.getLogger(IpoptOpf.class);
 
     //OPF计算参数，参数中的母线号都是节点编号前的
     protected OpfPara para;

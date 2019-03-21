@@ -1,6 +1,7 @@
 package zju.lfp.forecasters.chaos;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import weka.classifiers.functions.SMOreg;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -16,7 +17,7 @@ import java.util.List;
  * Time: 17:02:06
  */
 public class ChaosSVRForecaster extends MultiStepForecaster{
-    private final static Logger log = Logger.getLogger(ChaosSVRForecaster.class);
+    private final static Logger log = LogManager.getLogger(ChaosSVRForecaster.class);
 
     private int nExtend;
     private int[] delayPoints;

@@ -1,10 +1,12 @@
 package zju.pso;
 
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
-import java.util.logging.Logger;
 
 /**
  * Hybrid PSO algorithm with gaussian mutation.
@@ -15,7 +17,7 @@ import java.util.logging.Logger;
  */
 public class HybridPSO extends AbstractPSO implements PSOConstants {
 
-    private static Logger logger = Logger.getLogger(HybridPSO.class.getName());
+    private static Logger logger = LogManager.getLogger(HybridPSO.class.getName());
 
     private OptModel optModel;
     private double[] fitness;
@@ -261,14 +263,14 @@ public class HybridPSO extends AbstractPSO implements PSOConstants {
 
             if (isGBestfeasible)
                 tol = gBest - optModel.getTolFitness();
-            logger.fine("ITERATION " + iterNum + ": Value: " + gBest + "  " + isGBestfeasible);
+            logger.info("ITERATION " + iterNum + ": Value: " + gBest + "  " + isGBestfeasible);
             iterNum++;
         }
 
         if (isGBestfeasible) {
             logger.info("Solution found at iteration " + iterNum + ", best fitness value: " + gBest);
         } else {
-            logger.warning("Solution not found");
+            logger.warn("Solution not found");
         }
     }
 

@@ -1,6 +1,7 @@
 package zju.pf;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import zju.ieeeformat.BranchData;
 import zju.ieeeformat.BusData;
 import zju.ieeeformat.IEEEDataIsland;
@@ -19,7 +20,7 @@ import java.util.Map;
  *         Date: 2008-5-25
  */
 public class PfResultMaker {
-    private static Logger log = Logger.getLogger(PfResultMaker.class);
+    private static Logger log = LogManager.getLogger(PfResultMaker.class);
 
     /**
      * @param island IEEE format data

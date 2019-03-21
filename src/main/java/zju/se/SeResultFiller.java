@@ -1,6 +1,7 @@
 package zju.se;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import zju.ieeeformat.BranchData;
 import zju.ieeeformat.BusData;
 import zju.ieeeformat.IEEEDataIsland;
@@ -21,7 +22,7 @@ import java.util.Map;
  * date: 2010-8-16
  */
 public class SeResultFiller implements MeasTypeCons {
-    private static Logger log = Logger.getLogger(SeResultFiller.class);
+    private static Logger log = LogManager.getLogger(SeResultFiller.class);
 
     private double baseMVA;
     private IEEEDataIsland island;

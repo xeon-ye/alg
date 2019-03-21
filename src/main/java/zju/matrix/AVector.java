@@ -1,6 +1,7 @@
 package zju.matrix;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.Serializable;
 import java.text.NumberFormat;
@@ -14,7 +15,7 @@ import java.text.NumberFormat;
  */
 public class AVector implements Serializable {
 
-    private static Logger log = Logger.getLogger(AVector.class);
+    private static Logger log = LogManager.getLogger(AVector.class);
 
     private double[] values;
 

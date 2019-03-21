@@ -1,6 +1,7 @@
 package zju.ta;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import zju.bpamodel.sccpc.SccBusResult;
 import zju.bpamodel.swi.Generator;
 
@@ -10,7 +11,7 @@ import zju.bpamodel.swi.Generator;
  * Date: 12-11-4
  */
 public class TransferImpedanceC {
-    private static Logger log = Logger.getLogger(TransferImpedanceC.class);
+    private static Logger log = LogManager.getLogger(TransferImpedanceC.class);
     SccBusResult shuntResult;
     HeffronPhilipsSystem hpSys;
     public double infiniteBusVx;

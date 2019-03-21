@@ -1,6 +1,7 @@
 package zju.ta;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.coinor.Ipopt;
 import zju.common.IpoptModel;
 import zju.common.IpoptSolver;
@@ -11,7 +12,7 @@ import zju.common.IpoptSolver;
  * Date: 12-7-18
  */
 public class ExciterXcOpt implements IpoptModel {
-    private static Logger log = Logger.getLogger(ExciterXcOpt.class);
+    private static Logger log = LogManager.getLogger(ExciterXcOpt.class);
     public final static int OBJ_TS_MAX = 1;
     public final static int OBJ_TD_MAX = 2;
     public final static int OBJ_WEIGHTED_MAX = 3;

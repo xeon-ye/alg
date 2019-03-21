@@ -1,6 +1,7 @@
 package zju.measure;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import zju.matrix.AVector;
 
 import java.io.*;
@@ -18,7 +19,7 @@ import java.util.Map;
  */
 @SuppressWarnings({"unchecked"})
 public class MeasVectorCreator implements MeasTypeCons {
-    private static Logger log = Logger.getLogger(MeasVectorCreator.class);
+    private static Logger log = LogManager.getLogger(MeasVectorCreator.class);
 
     public double[] measures;
     public double[] sigmas;

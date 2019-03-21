@@ -1,6 +1,7 @@
 package zju.util;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import zju.ieeeformat.BusData;
 import zju.ieeeformat.IEEEDataIsland;
 import zju.matrix.ASparseMatrixLink;
@@ -19,7 +20,7 @@ import java.util.List;
  */
 public class JacobianMakerPCSlow implements MeasTypeCons {
 
-    private static Logger log = Logger.getLogger(JacobianMakerPCSlow.class);
+    private static Logger log = LogManager.getLogger(JacobianMakerPCSlow.class);
 
     /**
      * @param meas  num of every measure type

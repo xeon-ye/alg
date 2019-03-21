@@ -2,7 +2,8 @@ package zju.pf;
 
 import cern.colt.matrix.DoubleMatrix2D;
 import jpscpu.LinearSolver;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import zju.common.NewtonModel;
 import zju.common.NewtonSolver;
 import zju.ieeeformat.BranchData;
@@ -23,7 +24,7 @@ import zju.util.StateCalByPolar;
  *         Date: 2008-8-9
  */
 public class PolarPf extends AbstractPf implements PfConstants, NewtonModel, MeasTypeCons {
-    private static Logger log = Logger.getLogger(PolarPf.class);
+    private static Logger log = LogManager.getLogger(PolarPf.class);
 
     protected int maxQLimWatchTime = 10; //最大Q越限处理次数
     //母线个数

@@ -1,6 +1,7 @@
 package zju.se;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import zju.ieeeformat.BusData;
 import zju.ieeeformat.IEEEDataIsland;
 import zju.matrix.AVector;
@@ -19,7 +20,7 @@ import java.util.Map;
  * Date: 2009-3-28
  */
 public class StateEstimator implements SeConstants, MeasTypeCons {
-    private static Logger log = Logger.getLogger(StateEstimator.class);
+    private static Logger log = LogManager.getLogger(StateEstimator.class);
 
     private double k = 3, lambda = 4, alpha1 = 3, alpha2 = alpha1 * (1 + lambda);
 

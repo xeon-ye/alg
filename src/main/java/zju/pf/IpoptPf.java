@@ -1,7 +1,8 @@
 package zju.pf;
 
 import cern.colt.function.IntIntDoubleFunction;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import zju.common.IpoptModel;
 import zju.common.IpoptSolver;
 import zju.ieeeformat.IEEEDataIsland;
@@ -20,7 +21,7 @@ import zju.util.StateCalByPolar;
  *         Date: 2008-8-9
  */
 public class IpoptPf extends PolarPf implements IpoptModel, MeasTypeCons {
-    private static Logger log = Logger.getLogger(IpoptPf.class);
+    private static Logger log = LogManager.getLogger(IpoptPf.class);
 
     protected int iterNum;
     // roblem sizes

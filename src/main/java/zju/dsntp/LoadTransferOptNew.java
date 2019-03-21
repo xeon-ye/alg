@@ -5,7 +5,8 @@ import ilog.concert.IloNumVar;
 import ilog.concert.IloNumVarType;
 import ilog.cplex.IloCplex;
 import jpscpu.LinearSolver;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jgrapht.UndirectedGraph;
 import zju.devmodel.MapObject;
 import zju.dsmodel.DistriSys;
@@ -25,7 +26,7 @@ import static zju.dsmodel.DsModelCons.*;
  */
 public class LoadTransferOptNew extends PathBasedModel {
 
-    private static Logger log = Logger.getLogger(LoadTransferOptNew.class);
+    private static Logger log = LogManager.getLogger(LoadTransferOptNew.class);
 
     int[] errorFeeder;
     String[] errorLines;

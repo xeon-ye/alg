@@ -1,6 +1,7 @@
 package zju.lfp.forecasters.chaos;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import zju.lfp.utils.MultiTimeSeries;
 
 /**
@@ -10,7 +11,7 @@ import zju.lfp.utils.MultiTimeSeries;
  * Time: 16:26:43
  */
 public abstract class MultiStepForecaster {
-    private final static Logger log = Logger.getLogger(MultiStepForecaster.class);
+    private final static Logger log = LogManager.getLogger(MultiStepForecaster.class);
 
     protected MultiTimeSeries multiTimeSeries;
     protected int period;

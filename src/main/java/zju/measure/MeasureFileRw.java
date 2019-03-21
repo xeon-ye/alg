@@ -1,6 +1,7 @@
 package zju.measure;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
@@ -18,7 +19,7 @@ import java.util.Map;
  */
 @SuppressWarnings({"unchecked"})
 public class MeasureFileRw implements MeasTypeCons {
-    private static Logger log = Logger.getLogger(MeasureFileRw.class);
+    private static Logger log = LogManager.getLogger(MeasureFileRw.class);
     private static DecimalFormat format = new DecimalFormat("##.####");
 
     /**

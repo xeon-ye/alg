@@ -1,9 +1,11 @@
 package zju.pso;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
-import java.util.logging.Logger;
 
 /**
  * The core algorithm of Binary PSO.
@@ -14,7 +16,7 @@ import java.util.logging.Logger;
  */
 public class BinaryPSO extends AbstractPSO implements PSOConstants {
 
-    private static Logger logger = Logger.getLogger(BinaryPSO.class.getName());
+    private static Logger logger = LogManager.getLogger(BinaryPSO.class.getName());
 
     private OptModel optModel;
     private double[] fitness;
@@ -183,14 +185,14 @@ public class BinaryPSO extends AbstractPSO implements PSOConstants {
 
             if (isGBestfeasible)
                 tol = gBest - optModel.getTolFitness();
-            logger.fine("ITERATION " + iterNum + ": Value: " + gBest + "  " + isGBestfeasible);
+            logger.info("ITERATION " + iterNum + ": Value: " + gBest + "  " + isGBestfeasible);
             iterNum++;
         }
 
         if (isGBestfeasible) {
             logger.info("Solution found at iteration " + iterNum + ", best fitness value: " + gBest);
         } else {
-            logger.warning("Solution not found");
+            logger.warn("Solution not found");
         }
     }
 

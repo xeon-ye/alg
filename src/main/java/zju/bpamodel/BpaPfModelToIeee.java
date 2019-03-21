@@ -1,6 +1,7 @@
 package zju.bpamodel;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import zju.bpamodel.pf.AcLine;
 import zju.bpamodel.pf.Bus;
 import zju.bpamodel.pf.ElectricIsland;
@@ -17,7 +18,7 @@ import java.util.Map;
  * Date: 13-7-25
  */
 public class BpaPfModelToIeee {
-    private static Logger log = Logger.getLogger(BpaPfModelToIeee.class);
+    private static Logger log = LogManager.getLogger(BpaPfModelToIeee.class);
     private Map<BusData, Bus> ieeeBusToBpaBus;
     private Map<BranchData, Object> ieeeBranchToBpaBranch;
 

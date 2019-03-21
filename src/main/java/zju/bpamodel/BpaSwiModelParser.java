@@ -1,6 +1,7 @@
 package zju.bpamodel;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import zju.bpamodel.swi.*;
 
 import java.io.*;
@@ -13,7 +14,7 @@ import java.util.List;
  * Date: 12-7-11
  */
 public class BpaSwiModelParser {
-    private static Logger log = Logger.getLogger(BpaSwiModelParser.class);
+    private static Logger log = LogManager.getLogger(BpaSwiModelParser.class);
 
     public static BpaSwiModel parseFile(String file) {
         return parseFile(new File(file));
