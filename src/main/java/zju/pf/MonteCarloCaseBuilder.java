@@ -4,8 +4,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import zju.ieeeformat.BusData;
 import zju.ieeeformat.IEEEDataIsland;
-import zju.ieeeformat.IcfDataUtil;
-import zju.measure.SystemMeasure;
 
 import java.util.List;
 import java.util.Random;
@@ -17,15 +15,9 @@ public class MonteCarloCaseBuilder {
 
     private final static Logger logger = LogManager.getLogger(MonteCarloCaseBuilder.class);
 
-    private final IEEEDataIsland oriIsland;
-
-
-    public MonteCarloCaseBuilder(IEEEDataIsland oriIsland) {
-        this.oriIsland = oriIsland;
-    }
-
-    public void simulate(final int num) throws InterruptedException {
+    public static IEEEDataIsland[] simulatePowerFlow(final IEEEDataIsland oriIsland, final int num) {
         Random random = new Random();
+        IEEEDataIsland[] islands = new IEEEDataIsland[num];
         for (int i = 0; i < num; ) {
             IEEEDataIsland newIsland = oriIsland.clone();
             List<BusData> busDataList = newIsland.getBuses();
@@ -43,27 +35,20 @@ public class MonteCarloCaseBuilder {
                     busData.setGenerationMW(random.nextGaussian() * generationMW * 0.1 + generationMW);
                 if (generationMVAR != 0)
                     busData.setGenerationMVAR(random.nextGaussian() * generationMVAR * 0.1 + generationMVAR);
-                PolarPf pf = new PolarPf();
-                pf.setTol_p(1e-4);
-                pf.setTol_q(1e-4);
-                pf.setOriIsland(newIsland);
-                pf.setDecoupledPqNum(0);
-                //计算潮流
-                pf.doPf();
-                if (pf.isConverged) {
-                    i++;
-                    pf.fillOriIslandPfResult();
-                    SystemMeasure sm = SimuMeasMaker.createFullMeasure(newIsland, 1, 0.05); // 加上5%的高斯噪声
-
-                }
             }
+            PolarPf pf = new PolarPf();
+            pf.setTol_p(1e-4);
+            pf.setTol_q(1e-4);
+            pf.setOriIsland(newIsland);
+            pf.setDecoupledPqNum(0);
+            //计算潮流
+            pf.doPf();
+            if (pf.isConverged) {
+                islands[i++] = newIsland;
+                pf.fillOriIslandPfResult();
+            }
+
         }
-
+        return islands;
     }
-
-    public static void main(String[] args) throws InterruptedException {
-        MonteCarloCaseBuilder builder = new MonteCarloCaseBuilder(IcfDataUtil.ISLAND_30.clone());
-        builder.simulate(10);
-    }
-
 }
