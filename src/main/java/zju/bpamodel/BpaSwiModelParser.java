@@ -67,10 +67,11 @@ public class BpaSwiModelParser {
             List<Generator> generators = new ArrayList<Generator>();
             List<Exciter> exciters = new ArrayList<Exciter>();
             List<ExciterExtraInfo> exciterExtraInfos = new ArrayList<ExciterExtraInfo>();
+            List<PSS> pssList = new ArrayList<>();
+            List<PSSInfo> pssInfos = new ArrayList<>();
             List<ShortCircuitFault> shortCircuitFaults = new ArrayList<>();
             List<FLTCard> fltCards = new ArrayList<>();
             List<Load> loads = new ArrayList<>();
-            List<InductionMotor> inductionMotors = new ArrayList<>();
             FFCard ffCard = null;
             while ((strLine = reader.readLine()) != null) {
                 try {
@@ -80,7 +81,7 @@ public class BpaSwiModelParser {
                         else if (strLine.charAt(1) == 'H')
                             ;//todo: no aciton is done for MH data card
                         else if (strLine.charAt(1) == 'L' || strLine.charAt(1) == 'J' || strLine.charAt(1) == 'K')
-                            inductionMotors.add(InductionMotor.createInductionMotor(strLine));
+                            loads.add(Load.createLoad(strLine));
                         else
                             generatorDws.add(GeneratorDW.createGenDampingWinding(strLine));
                     } else if (strLine.startsWith("F+") || strLine.startsWith("F#")) {
@@ -107,6 +108,12 @@ public class BpaSwiModelParser {
                         } else if (strLine.charAt(1) == 'S') {
                             shortCircuitFaults.add(ShortCircuitFault.createFault(strLine));
                         }
+                    } else if (strLine.startsWith("S")) {
+                        if (strLine.charAt(1) == 'F' || strLine.charAt(1) == 'P' || strLine.charAt(1) == 'S' || strLine.charAt(1) == 'G' || strLine.charAt(1) == 'I')
+                            if (strLine.charAt(2) == '+')
+                                pssInfos.add(PSSInfo.createPSSInfo(strLine));
+                            else
+                                pssList.add(PSS.createPSS(strLine));
                     }
                 } catch (NumberFormatException ex) {
                     log.warn("Failed to parse because NumberFormatException is found:");
@@ -120,10 +127,11 @@ public class BpaSwiModelParser {
             model.setGeneratorDws(generatorDws);
             model.setExciters(exciters);
             model.setExciterExtraInfos(exciterExtraInfos);
+            model.setPssList(pssList);
+            model.setPssInfos(pssInfos);
             model.setShortCircuitFaults(shortCircuitFaults);
             model.setFltCards(fltCards);
             model.setLoads(loads);
-            model.setInductionMotors(inductionMotors);
             model.setFf(ffCard);
             model.buildMaps();
             return model;
