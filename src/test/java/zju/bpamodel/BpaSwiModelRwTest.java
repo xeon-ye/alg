@@ -195,4 +195,17 @@ public class BpaSwiModelRwTest extends TestCase {
         boolean r = BpaSwiModelWriter.readAndWrite(in, "GBK", out, "GBK", modifiedModel);
         assertTrue(r);
     }
+
+    public void testXJ() throws IOException {
+        BpaSwiModel model = BpaSwiModelParser.parse(this.getClass().getResourceAsStream("/bpafiles/示范区BPA运行方式/XIAOJIN.SWI"), "GBK");
+        assertNotNull(model);
+//        BpaSwiModel modifiedModel = new BpaSwiModel();
+//        modifiedModel.setGenerators(new ArrayList<Generator>());
+//        modifiedModel.setExciters(exciters);
+//        InputStream in = this.getClass().getResourceAsStream("/bpafiles/示范区BPA运行方式/XIAOJIN.SWI");
+//        //FileOutputStream out = new FileOutputStream("162bpaswi-opted.swi");
+//        ByteArrayOutputStream out = new ByteArrayOutputStream();
+//        boolean r = BpaSwiModelWriter.readAndWrite(in, "GBK", out, "GBK", modifiedModel);
+//        assertTrue(r);
+    }
 }

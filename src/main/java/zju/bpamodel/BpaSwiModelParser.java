@@ -67,15 +67,20 @@ public class BpaSwiModelParser {
             List<Generator> generators = new ArrayList<Generator>();
             List<Exciter> exciters = new ArrayList<Exciter>();
             List<ExciterExtraInfo> exciterExtraInfos = new ArrayList<ExciterExtraInfo>();
+            List<ShortCircuitFault> shortCircuitFaults = new ArrayList<>();
+            List<FLTCard> fltCards = new ArrayList<>();
             List<Load> loads = new ArrayList<>();
+            List<InductionMotor> inductionMotors = new ArrayList<>();
             FFCard ffCard = null;
             while ((strLine = reader.readLine()) != null) {
                 try {
                     if (strLine.startsWith("M")) {
-                        if (strLine.charAt(1) == 'C' || strLine.charAt(1) == 'F')
+                        if (strLine.charAt(1) == 'C' || strLine.charAt(1) == 'F' || strLine.charAt(1) == 'G')
                             generators.add(Generator.createGen(strLine));
                         else if (strLine.charAt(1) == 'H')
                             ;//todo: no aciton is done for MH data card
+                        else if (strLine.charAt(1) == 'L' || strLine.charAt(1) == 'J' || strLine.charAt(1) == 'K')
+                            inductionMotors.add(InductionMotor.createInductionMotor(strLine));
                         else
                             generatorDws.add(GeneratorDW.createGenDampingWinding(strLine));
                     } else if (strLine.startsWith("F+") || strLine.startsWith("F#")) {
@@ -86,6 +91,8 @@ public class BpaSwiModelParser {
                                 || (strLine.charAt(1) >= 'M' && strLine.charAt(1) <= 'V')) {
                             if (strLine.charAt(1) == 'F' && strLine.charAt(3) == ' ' && strLine.charAt(7) == ' ' && strLine.charAt(11) == ' ') {
                                 ffCard = FFCard.createFF(strLine);
+                            } else if (strLine.charAt(1) == 'L' && strLine.charAt(2) == 'T') {
+                                fltCards.add(FLTCard.createFault(strLine));
                             } else {
                                 exciters.add(Exciter.createExciter(strLine));
                             }
@@ -97,6 +104,8 @@ public class BpaSwiModelParser {
                     } else if (strLine.startsWith("L")) {
                         if (strLine.charAt(1) == 'A' || strLine.charAt(1) == 'B') {
                             loads.add(Load.createLoad(strLine));
+                        } else if (strLine.charAt(1) == 'S') {
+                            shortCircuitFaults.add(ShortCircuitFault.createFault(strLine));
                         }
                     }
                 } catch (NumberFormatException ex) {
@@ -111,7 +120,10 @@ public class BpaSwiModelParser {
             model.setGeneratorDws(generatorDws);
             model.setExciters(exciters);
             model.setExciterExtraInfos(exciterExtraInfos);
+            model.setShortCircuitFaults(shortCircuitFaults);
+            model.setFltCards(fltCards);
             model.setLoads(loads);
+            model.setInductionMotors(inductionMotors);
             model.setFf(ffCard);
             model.buildMaps();
             return model;

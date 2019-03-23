@@ -17,7 +17,10 @@ public class BpaSwiModel implements Serializable {
     List<Generator> generators;
     List<Exciter> exciters;
     List<ExciterExtraInfo> exciterExtraInfos;
+    List<ShortCircuitFault> shortCircuitFaults;
+    List<FLTCard> fltCards;
     List<Load> loads;
+    List<InductionMotor> inductionMotors;
     FFCard ff;
     Map<Generator, Exciter> exciterMap;
     Map<Generator, GeneratorDW> generatorDwMap;
@@ -89,12 +92,36 @@ public class BpaSwiModel implements Serializable {
         this.exciterExtraInfos = exciterExtraInfos;
     }
 
+    public List<ShortCircuitFault> getShortCircuitFaults() {
+        return shortCircuitFaults;
+    }
+
+    public void setShortCircuitFaults(List<ShortCircuitFault> shortCircuitFaults) {
+        this.shortCircuitFaults = shortCircuitFaults;
+    }
+
+    public List<FLTCard> getFltCards() {
+        return fltCards;
+    }
+
+    public void setFltCards(List<FLTCard> fltCards) {
+        this.fltCards = fltCards;
+    }
+
     public List<Load> getLoads() {
         return loads;
     }
 
     public void setLoads(List<Load> loads) {
         this.loads = loads;
+    }
+
+    public List<InductionMotor> getInductionMotors() {
+        return inductionMotors;
+    }
+
+    public void setInductionMotors(List<InductionMotor> inductionMotors) {
+        this.inductionMotors = inductionMotors;
     }
 
     public FFCard getFf() {

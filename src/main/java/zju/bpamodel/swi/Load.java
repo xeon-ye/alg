@@ -53,8 +53,11 @@ public class Load implements Serializable {
             busName = new String(BpaFileRwUtil.getTarget(src, 3, 11), charset).trim();
         else
             busName = new String(BpaFileRwUtil.getTarget(src, 3, 11)).trim();
-        baseKv = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 11, 15)).trim());
-        zone = new String(BpaFileRwUtil.getTarget(src, 15, 17)).trim();
+        baseKv = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 11, 15)).trim(), "4.3");
+        if(charset != null)
+            zone = new String(BpaFileRwUtil.getTarget(src, 15, 17), charset).trim();
+        else
+            zone = new String(BpaFileRwUtil.getTarget(src, 15, 17)).trim();
         if(charset != null)
             areaName = new String(BpaFileRwUtil.getTarget(src, 17, 27), charset).trim();
         else
