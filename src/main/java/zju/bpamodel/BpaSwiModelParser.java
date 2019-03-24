@@ -69,6 +69,10 @@ public class BpaSwiModelParser {
             List<ExciterExtraInfo> exciterExtraInfos = new ArrayList<ExciterExtraInfo>();
             List<PSS> pssList = new ArrayList<>();
             List<PSSInfo> pssInfos = new ArrayList<>();
+            List<PrimeMover> primeMovers = new ArrayList<>();
+            List<Servo> servos = new ArrayList<>();
+            List<Governor> governors = new ArrayList<>();
+            List<GovernorInfo> governorInfos = new ArrayList<>();
             List<ShortCircuitFault> shortCircuitFaults = new ArrayList<>();
             List<FLTCard> fltCards = new ArrayList<>();
             List<Load> loads = new ArrayList<>();
@@ -79,7 +83,7 @@ public class BpaSwiModelParser {
                         if (strLine.charAt(1) == 'C' || strLine.charAt(1) == 'F' || strLine.charAt(1) == 'G')
                             generators.add(Generator.createGen(strLine));
                         else if (strLine.charAt(1) == 'H')
-                            ;//todo: no aciton is done for MH data card
+                            break;//todo: no aciton is done for MH data card
                         else if (strLine.charAt(1) == 'L' || strLine.charAt(1) == 'J' || strLine.charAt(1) == 'K')
                             loads.add(Load.createLoad(strLine));
                         else
@@ -114,6 +118,20 @@ public class BpaSwiModelParser {
                                 pssInfos.add(PSSInfo.createPSSInfo(strLine));
                             else
                                 pssList.add(PSS.createPSS(strLine));
+                    } else if (strLine.startsWith("G")) {
+                        if (strLine.charAt(1) == 'A') {
+                            servos.add(Servo.createServo(strLine));
+                        } else if (strLine.charAt(1) == 'H') {
+                            primeMovers.add(PrimeMover.createPrimeMover(strLine));
+                        } else if (strLine.charAt(1) == 'M') {
+                            if (strLine.charAt(1) == '+') {
+                                governorInfos.add(GovernorInfo.createGovernorInfo(strLine));
+                            } else {
+                                governors.add(Governor.createGovernor(strLine));
+                            }
+                        }
+                    } else if (strLine.startsWith("T")) {
+                        primeMovers.add(PrimeMover.createPrimeMover(strLine));
                     }
                 } catch (NumberFormatException ex) {
                     log.warn("Failed to parse because NumberFormatException is found:");
@@ -129,6 +147,10 @@ public class BpaSwiModelParser {
             model.setExciterExtraInfos(exciterExtraInfos);
             model.setPssList(pssList);
             model.setPssInfos(pssInfos);
+            model.setPrimeMovers(primeMovers);
+            model.setServos(servos);
+            model.setGovernors(governors);
+            model.setGovernorInfos(governorInfos);
             model.setShortCircuitFaults(shortCircuitFaults);
             model.setFltCards(fltCards);
             model.setLoads(loads);

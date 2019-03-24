@@ -19,6 +19,10 @@ public class BpaSwiModel implements Serializable {
     List<ExciterExtraInfo> exciterExtraInfos;
     List<PSS> pssList;
     List<PSSInfo> pssInfos;
+    List<PrimeMover> primeMovers;
+    List<Servo> servos;
+    List<Governor> governors;
+    List<GovernorInfo> governorInfos;
     List<ShortCircuitFault> shortCircuitFaults;
     List<FLTCard> fltCards;
     List<Load> loads;
@@ -107,6 +111,38 @@ public class BpaSwiModel implements Serializable {
 
     public void setPssInfos(List<PSSInfo> pssInfos) {
         this.pssInfos = pssInfos;
+    }
+
+    public List<PrimeMover> getPrimeMovers() {
+        return primeMovers;
+    }
+
+    public void setPrimeMovers(List<PrimeMover> primeMovers) {
+        this.primeMovers = primeMovers;
+    }
+
+    public List<Servo> getServos() {
+        return servos;
+    }
+
+    public void setServos(List<Servo> servos) {
+        this.servos = servos;
+    }
+
+    public List<Governor> getGovernors() {
+        return governors;
+    }
+
+    public void setGovernors(List<Governor> governors) {
+        this.governors = governors;
+    }
+
+    public List<GovernorInfo> getGovernorInfos() {
+        return governorInfos;
+    }
+
+    public void setGovernorInfos(List<GovernorInfo> governorInfos) {
+        this.governorInfos = governorInfos;
     }
 
     public List<ShortCircuitFault> getShortCircuitFaults() {
