@@ -1,5 +1,6 @@
 package zju.bpamodel;
 
+import zju.bpamodel.swi.Exciter;
 import zju.bpamodel.swi.Generator;
 
 import java.io.File;
@@ -93,7 +94,7 @@ public class SqliteDb {
         }
     }
 
-    public Object queryData(String tableName) {
+    public List<Object> queryData(String tableName) {
         List<Object> objs = new LinkedList<>();
         Connection conn = createConn();
         String sql = "select * from " + tableName;
@@ -103,7 +104,7 @@ public class SqliteDb {
             stmt = conn.createStatement();
             rs = stmt.executeQuery(sql);
             while (rs.next()) {
-                Object obj= createObj(tableName,rs);
+                Object obj= createObj(tableName, rs);
                 objs.add(obj);
             }
         } catch (SQLException e) {
@@ -120,17 +121,37 @@ public class SqliteDb {
     }
 
     private Object createObj(String tableName, ResultSet rs) throws SQLException {
-        if(tableName.equals("Generator")){
-            Generator  obj = new Generator();
+        if (tableName.equals("Generator")) {
+            Generator obj = new Generator();
             while (rs.next()) {
                 String type = rs.getString("type");
                 obj.setType(type.charAt(0));
                 obj.setSubType(type.charAt(1));
-
+                obj.setBusName(rs.getString("busName"));
+                obj.setBaseKv(rs.getDouble("baseKv"));
+                obj.setId(rs.getString("id").charAt(0));
+                obj.seteMWS(rs.getDouble("eMWS"));
+                obj.setpPercent(rs.getDouble("pPercent"));
+                obj.setqPercent(rs.getDouble("qPercent"));
+                obj.setBaseMva(rs.getDouble("baseMva"));
+                obj.setRa(rs.getDouble("ra"));
+                obj.setXdp(rs.getDouble("xdp"));
+                obj.setXqp(rs.getDouble("xqp"));
+                obj.setXd(rs.getDouble("xd"));
+                obj.setXq(rs.getDouble("xq"));
+                obj.setTdop(rs.getDouble("tdop"));
+                obj.setTqop(rs.getDouble("tqop"));
+                obj.setXl(rs.getDouble("xl"));
+                obj.setSg10(rs.getDouble("sg10"));
+                obj.setSg12(rs.getDouble("sg12"));
+                obj.setD(rs.getDouble("d"));
             }
             return obj;
-        } else if (tableName.equals("")) {
+        } else if (tableName.equals("Exciter")) {
+            Exciter exciter = new Exciter();
+            while (rs.next()) {
 
+            }
         }
         return null;
     }
