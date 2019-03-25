@@ -226,7 +226,6 @@ public class BpaPfModelRwTest extends TestCase {
         assertEquals(2, acLines.size());
     }
 
-    // todo
     public void testBus145() {
         ElectricIsland island = BpaPfModelParser.parse(this.getClass().getResourceAsStream("/bpafiles/systemData/145_bus/bpa/145bpa.dat"), "GBK");
         assertNotNull(island);

@@ -62,7 +62,7 @@ public class Generator implements Serializable {
         qPercent = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 25, 28)).trim(), "3.2");
         baseMva = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 28, 32)).trim(), "4.0");
         ra = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 32, 36)).trim());
-        xdp = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 36, 41)).trim(), "4.4");
+        xdp = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 36, 41)).trim(), "5.4");
         xqp = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 41, 46)).trim(), "5.4");
         xd = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 46, 51)).trim(), "5.4");
         xq = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 51, 56)).trim(), "5.4");

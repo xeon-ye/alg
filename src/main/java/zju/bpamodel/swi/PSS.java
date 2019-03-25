@@ -177,12 +177,12 @@ public class PSS implements Serializable {
         this.subType = subType;
     }
 
-    public String getBusName() {
+    public String getGenName() {
         return genName;
     }
 
-    public void setBusName(String busName) {
-        this.genName = busName;
+    public void setGenName(String genName) {
+        this.genName = genName;
     }
 
     public double getBaseKv() {
