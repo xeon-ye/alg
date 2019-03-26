@@ -78,7 +78,7 @@ public class SeAccuracyTrainer {
                 labels.add(label);
             }
         }
-        model.train(attributes, labels);
+        model.fit(attributes, labels);
     }
 
     /**
@@ -87,8 +87,8 @@ public class SeAccuracyTrainer {
      * @param attribute 样本特征向量
      * @return 预测值
      */
-    public double forecast(double[] attribute) {
-        return model.forecast(attribute);
+    public double predict(double[] attribute) {
+        return model.predict(attribute);
     }
 
     public void setModel(SeAccuracyTrainModel model) {
