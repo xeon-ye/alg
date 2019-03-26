@@ -19,10 +19,19 @@ public class SeAccuracyTrainer {
 
     private SeAccuracyTrainModel model;
 
+    public SeAccuracyTrainer() {
+    }
+
     public SeAccuracyTrainer(SeAccuracyTrainModel model) {
         this.model = model;
     }
 
+    /**
+     * 产生样本进行模型训练
+     *
+     * @param oriIsland 初始电气岛
+     * @param num       测试样本个数
+     */
     public void trainModel(final IEEEDataIsland oriIsland, int num) {
         IEEEDataIsland[] islands = MonteCarloCaseBuilder.simulatePowerFlow(oriIsland, num);
         List<double[]> attributes = new ArrayList<>();
@@ -72,12 +81,21 @@ public class SeAccuracyTrainer {
         model.train(attributes, labels);
     }
 
+    /**
+     * 预测模型
+     *
+     * @param attribute 样本特征向量
+     * @return 预测值
+     */
     public double forecast(double[] attribute) {
         return model.forecast(attribute);
     }
 
+    public void setModel(SeAccuracyTrainModel model) {
+        this.model = model;
+    }
 
-    private void dealZeroInjection(StateEstimator se, IpoptSeAlg alg, SystemMeasure sm, IEEEDataIsland ref, boolean isAddConstraint) {
+    public static void dealZeroInjection(StateEstimator se, IpoptSeAlg alg, SystemMeasure sm, IEEEDataIsland ref, boolean isAddConstraint) {
         int busNumber = se.getOriIsland().getBuses().size();
         double[] vtheta = new double[busNumber * 2];
         for (BusData b : ref.getBuses()) {
