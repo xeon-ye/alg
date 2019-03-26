@@ -12,11 +12,6 @@ import zju.measure.SystemMeasure;
 import zju.pf.MonteCarloCaseBuilder;
 import zju.pf.SimuMeasMaker;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.junit.Assert.*;
-
 public class SeAccuracyTrainerTest {
 
     private final static Logger logger = LogManager.getLogger(SeAccuracyTrainerTest.class);
@@ -30,7 +25,7 @@ public class SeAccuracyTrainerTest {
 
     @Test
     public void testCase30() {
-        trainer.setModel(null);
+        trainer.setModel(new SeAccuracyTrainMlpModel());
         trainer.trainModel(IcfDataUtil.ISLAND_30, 1000);
         doSeAccuracyForecast(IcfDataUtil.ISLAND_30, 20);
     }
@@ -76,7 +71,7 @@ public class SeAccuracyTrainerTest {
                     label += Math.pow(estVar[j] - trueVar[j], 2);
                 }
                 label = Math.sqrt(label);
-                double ans = trainer.forecast(attribute);
+                double ans = trainer.predict(attribute);
                 logger.info("当前预测偏差为：" + Math.abs(ans - label));
             }
         }

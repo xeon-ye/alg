@@ -19,4 +19,13 @@ public interface SeAccuracyTrainModel {
      * @return 预测结果
      */
     double predict(double[] attribute);
+
+    /**
+     *
+     * @param attributes
+     * @param labels
+     * @return
+     */
+    double score(List<double[]> attributes, List<Double> labels);
+
 }
