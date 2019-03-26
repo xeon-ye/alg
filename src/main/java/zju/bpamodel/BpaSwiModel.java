@@ -17,6 +17,14 @@ public class BpaSwiModel implements Serializable {
     List<Generator> generators;
     List<Exciter> exciters;
     List<ExciterExtraInfo> exciterExtraInfos;
+    List<PSS> pssList;
+    List<PSSInfo> pssInfos;
+    List<PrimeMover> primeMovers;
+    List<Servo> servos;
+    List<Governor> governors;
+    List<GovernorInfo> governorInfos;
+    List<ShortCircuitFault> shortCircuitFaults;
+    List<FLTCard> fltCards;
     List<Load> loads;
     FFCard ff;
     Map<Generator, Exciter> exciterMap;
@@ -87,6 +95,70 @@ public class BpaSwiModel implements Serializable {
 
     public void setExciterExtraInfos(List<ExciterExtraInfo> exciterExtraInfos) {
         this.exciterExtraInfos = exciterExtraInfos;
+    }
+
+    public List<PSS> getPssList() {
+        return pssList;
+    }
+
+    public void setPssList(List<PSS> pssList) {
+        this.pssList = pssList;
+    }
+
+    public List<PSSInfo> getPssInfos() {
+        return pssInfos;
+    }
+
+    public void setPssInfos(List<PSSInfo> pssInfos) {
+        this.pssInfos = pssInfos;
+    }
+
+    public List<PrimeMover> getPrimeMovers() {
+        return primeMovers;
+    }
+
+    public void setPrimeMovers(List<PrimeMover> primeMovers) {
+        this.primeMovers = primeMovers;
+    }
+
+    public List<Servo> getServos() {
+        return servos;
+    }
+
+    public void setServos(List<Servo> servos) {
+        this.servos = servos;
+    }
+
+    public List<Governor> getGovernors() {
+        return governors;
+    }
+
+    public void setGovernors(List<Governor> governors) {
+        this.governors = governors;
+    }
+
+    public List<GovernorInfo> getGovernorInfos() {
+        return governorInfos;
+    }
+
+    public void setGovernorInfos(List<GovernorInfo> governorInfos) {
+        this.governorInfos = governorInfos;
+    }
+
+    public List<ShortCircuitFault> getShortCircuitFaults() {
+        return shortCircuitFaults;
+    }
+
+    public void setShortCircuitFaults(List<ShortCircuitFault> shortCircuitFaults) {
+        this.shortCircuitFaults = shortCircuitFaults;
+    }
+
+    public List<FLTCard> getFltCards() {
+        return fltCards;
+    }
+
+    public void setFltCards(List<FLTCard> fltCards) {
+        this.fltCards = fltCards;
     }
 
     public List<Load> getLoads() {

@@ -67,15 +67,25 @@ public class BpaSwiModelParser {
             List<Generator> generators = new ArrayList<Generator>();
             List<Exciter> exciters = new ArrayList<Exciter>();
             List<ExciterExtraInfo> exciterExtraInfos = new ArrayList<ExciterExtraInfo>();
+            List<PSS> pssList = new ArrayList<>();
+            List<PSSInfo> pssInfos = new ArrayList<>();
+            List<PrimeMover> primeMovers = new ArrayList<>();
+            List<Servo> servos = new ArrayList<>();
+            List<Governor> governors = new ArrayList<>();
+            List<GovernorInfo> governorInfos = new ArrayList<>();
+            List<ShortCircuitFault> shortCircuitFaults = new ArrayList<>();
+            List<FLTCard> fltCards = new ArrayList<>();
             List<Load> loads = new ArrayList<>();
             FFCard ffCard = null;
             while ((strLine = reader.readLine()) != null) {
                 try {
                     if (strLine.startsWith("M")) {
-                        if (strLine.charAt(1) == 'C' || strLine.charAt(1) == 'F')
+                        if (strLine.charAt(1) == 'C' || strLine.charAt(1) == 'F' || strLine.charAt(1) == 'G')
                             generators.add(Generator.createGen(strLine));
                         else if (strLine.charAt(1) == 'H')
-                            ;//todo: no aciton is done for MH data card
+                            break;//todo: no aciton is done for MH data card
+                        else if (strLine.charAt(1) == 'L' || strLine.charAt(1) == 'J' || strLine.charAt(1) == 'K')
+                            loads.add(Load.createLoad(strLine));
                         else
                             generatorDws.add(GeneratorDW.createGenDampingWinding(strLine));
                     } else if (strLine.startsWith("F+") || strLine.startsWith("F#")) {
@@ -86,6 +96,8 @@ public class BpaSwiModelParser {
                                 || (strLine.charAt(1) >= 'M' && strLine.charAt(1) <= 'V')) {
                             if (strLine.charAt(1) == 'F' && strLine.charAt(3) == ' ' && strLine.charAt(7) == ' ' && strLine.charAt(11) == ' ') {
                                 ffCard = FFCard.createFF(strLine);
+                            } else if (strLine.charAt(1) == 'L' && strLine.charAt(2) == 'T') {
+                                fltCards.add(FLTCard.createFault(strLine));
                             } else {
                                 exciters.add(Exciter.createExciter(strLine));
                             }
@@ -97,7 +109,29 @@ public class BpaSwiModelParser {
                     } else if (strLine.startsWith("L")) {
                         if (strLine.charAt(1) == 'A' || strLine.charAt(1) == 'B') {
                             loads.add(Load.createLoad(strLine));
+                        } else if (strLine.charAt(1) == 'S') {
+                            shortCircuitFaults.add(ShortCircuitFault.createFault(strLine));
                         }
+                    } else if (strLine.startsWith("S")) {
+                        if (strLine.charAt(1) == 'F' || strLine.charAt(1) == 'P' || strLine.charAt(1) == 'S' || strLine.charAt(1) == 'G' || strLine.charAt(1) == 'I')
+                            if (strLine.charAt(2) == '+')
+                                pssInfos.add(PSSInfo.createPSSInfo(strLine));
+                            else
+                                pssList.add(PSS.createPSS(strLine));
+                    } else if (strLine.startsWith("G")) {
+                        if (strLine.charAt(1) == 'A') {
+                            servos.add(Servo.createServo(strLine));
+                        } else if (strLine.charAt(1) == 'H') {
+                            primeMovers.add(PrimeMover.createPrimeMover(strLine));
+                        } else if (strLine.charAt(1) == 'M') {
+                            if (strLine.charAt(1) == '+') {
+                                governorInfos.add(GovernorInfo.createGovernorInfo(strLine));
+                            } else {
+                                governors.add(Governor.createGovernor(strLine));
+                            }
+                        }
+                    } else if (strLine.startsWith("T")) {
+                        primeMovers.add(PrimeMover.createPrimeMover(strLine));
                     }
                 } catch (NumberFormatException ex) {
                     log.warn("Failed to parse because NumberFormatException is found:");
@@ -111,6 +145,14 @@ public class BpaSwiModelParser {
             model.setGeneratorDws(generatorDws);
             model.setExciters(exciters);
             model.setExciterExtraInfos(exciterExtraInfos);
+            model.setPssList(pssList);
+            model.setPssInfos(pssInfos);
+            model.setPrimeMovers(primeMovers);
+            model.setServos(servos);
+            model.setGovernors(governors);
+            model.setGovernorInfos(governorInfos);
+            model.setShortCircuitFaults(shortCircuitFaults);
+            model.setFltCards(fltCards);
             model.setLoads(loads);
             model.setFf(ffCard);
             model.buildMaps();
