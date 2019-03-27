@@ -319,6 +319,21 @@ public class BpaSwiModelRwTest extends TestCase {
             sqls.add(insertSql);
         }
         sqliteDb.executeSqls(sqls);
+
+        sqls.clear();
+        TABLE_DATA_NAME = "PV";
+        for (PV pv : model.pvs) {
+            String insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
+                    "'" + pv.getType() + "'," + "'" + pv.getBusName() + "',"
+                    + pv.getBaseKv() + "," + "'" + pv.getId() + "'," +
+                    pv.getT() + "," + pv.getS() + "," +
+                    pv.getUoc() + "," + pv.getIsc() + "," +
+                    pv.getUm() + "," + pv.getIm() + "," +
+                    pv.getN1() + "," + pv.getN2() +
+                    ")";
+            sqls.add(insertSql);
+        }
+        sqliteDb.executeSqls(sqls);
     }
 
     public void testCreateTables() {
@@ -473,6 +488,23 @@ public class BpaSwiModelRwTest extends TestCase {
                 " openVel              decimal(5.3) NULL, " +
                 " dd              decimal(5.3) NULL, " +
                 " deadZone              decimal(6,5) NULL " +
+                ")";
+        sqliteDb.initDb(initSql);
+
+        TABLE_DATA_NAME = "PV";
+        initSql = "CREATE TABLE "  + TABLE_DATA_NAME + " (" +
+                " type     varchar(3) NOT NULL," +
+                " busName     varchar(8) NOT NULL," +
+                " baseKv              decimal(4,0) NOT NULL, " +
+                " id     varchar(1) DEFAULT NULL," +
+                " t              decimal(5,0) NULL, " +
+                " s           decimal(5.0)     NULL, " +
+                " uoc           decimal(5.0)     NULL, " +
+                " isc              decimal(5.0) NULL, " +
+                " um              decimal(5.0) NULL, " +
+                " im              decimal(5.0) NULL, " +
+                " n1              INTEGER NULL, " +
+                " n2              INTEGER NULL " +
                 ")";
         sqliteDb.initDb(initSql);
     }
