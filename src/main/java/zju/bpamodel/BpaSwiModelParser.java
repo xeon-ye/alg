@@ -74,6 +74,8 @@ public class BpaSwiModelParser {
             List<Governor> governors = new ArrayList<>();
             List<GovernorInfo> governorInfos = new ArrayList<>();
             List<PV> pvs = new ArrayList<>();
+            List<BC> bcs = new ArrayList<>();
+            List<BCInfo> bcInfos = new ArrayList<>();
             List<ShortCircuitFault> shortCircuitFaults = new ArrayList<>();
             List<FLTCard> fltCards = new ArrayList<>();
             List<Load> loads = new ArrayList<>();
@@ -135,6 +137,14 @@ public class BpaSwiModelParser {
                         primeMovers.add(PrimeMover.createPrimeMover(strLine));
                     } else if (strLine.startsWith("PV")) {
                         pvs.add(PV.createPV(strLine));
+                    } else if (strLine.startsWith("B")) {
+                        if (strLine.charAt(1) == 'C') {
+                            if (strLine.charAt(2) == '+') {
+                                bcInfos.add(BCInfo.createBCInfo(strLine));
+                            } else {
+                                bcs.add(BC.createBC(strLine));
+                            }
+                        }
                     }
                 } catch (NumberFormatException ex) {
                     log.warn("Failed to parse because NumberFormatException is found:");
@@ -155,6 +165,8 @@ public class BpaSwiModelParser {
             model.setGovernors(governors);
             model.setGovernorInfos(governorInfos);
             model.setPvs(pvs);
+            model.setBcs(bcs);
+            model.setBcInfos(bcInfos);
             model.setShortCircuitFaults(shortCircuitFaults);
             model.setFltCards(fltCards);
             model.setLoads(loads);

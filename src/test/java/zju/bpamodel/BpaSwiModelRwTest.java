@@ -334,6 +334,24 @@ public class BpaSwiModelRwTest extends TestCase {
             sqls.add(insertSql);
         }
         sqliteDb.executeSqls(sqls);
+
+        sqls.clear();
+        TABLE_DATA_NAME = "BC";
+        for (BC bc : model.bcs) {
+            String insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
+                    "'" + bc.getType() + "'," + "'" + bc.getBusName() + "',"
+                    + bc.getBaseKv() + "," + "'" + bc.getId() + "'," +
+                    bc.getpPercent() + "," + bc.getIpCon() + "," +
+                    bc.getTma() + "," + bc.getTa1() + "," +
+                    bc.getTa() + "," + bc.getKpa() + "," +
+                    bc.getKia() + "," + bc.getTsa() + "," +
+                    bc.getC() + "," + bc.getDcBaseKv() + "," +
+                    bc.getK() + "," + bc.getMva() + "," +
+                    bc.getKover() + "," + bc.getConverterNum() +
+                    ")";
+            sqls.add(insertSql);
+        }
+        sqliteDb.executeSqls(sqls);
     }
 
     public void testCreateTables() {
@@ -505,6 +523,29 @@ public class BpaSwiModelRwTest extends TestCase {
                 " im              decimal(5.0) NULL, " +
                 " n1              INTEGER NULL, " +
                 " n2              INTEGER NULL " +
+                ")";
+        sqliteDb.initDb(initSql);
+
+        TABLE_DATA_NAME = "BC";
+        initSql = "CREATE TABLE "  + TABLE_DATA_NAME + " (" +
+                " type     varchar(3) NOT NULL," +
+                " busName     varchar(8) NOT NULL," +
+                " baseKv              decimal(4,0) NOT NULL, " +
+                " id     varchar(1) DEFAULT NULL," +
+                " pPercent              decimal(5,0) NULL, " +
+                " ipCon           INTEGER     NULL, " +
+                " tma           decimal(5.0)     NULL, " +
+                " ta1              decimal(5.0) NULL, " +
+                " ta              decimal(5.0) NULL, " +
+                " kpa              decimal(5.0) NULL, " +
+                " kia              decimal(5.0) NULL, " +
+                " tsa              decimal(5.0) NULL, " +
+                " c              decimal(5.0) NULL, " +
+                " dcBaseKv              decimal(5.0) NULL, " +
+                " k              decimal(5.0) NULL, " +
+                " mva              decimal(5.0) NULL, " +
+                " kover              decimal(5.0) NULL, " +
+                " converterNum              INTEGER NULL " +
                 ")";
         sqliteDb.initDb(initSql);
     }
