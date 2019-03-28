@@ -12,6 +12,8 @@ import zju.measure.SystemMeasure;
 import zju.pf.MonteCarloCaseBuilder;
 import zju.pf.SimuMeasMaker;
 
+import java.util.List;
+
 public class SeAccuracyTrainerTest {
 
     private final static Logger logger = LogManager.getLogger(SeAccuracyTrainerTest.class);
@@ -20,17 +22,22 @@ public class SeAccuracyTrainerTest {
 
     @Before
     public void setUp() throws Exception {
-        trainer = new SeAccuracyTrainer();
+        trainer = new SeAccuracyTrainer(new SeAccuracyTrainMlpModel());
     }
 
     @Test
     public void testCase30() {
-        trainer.setModel(new SeAccuracyTrainMlpModel());
         trainer.trainModel(IcfDataUtil.ISLAND_30, 1000);
-        doSeAccuracyForecast(IcfDataUtil.ISLAND_30, 20);
+        doSeAccuracyPredict(IcfDataUtil.ISLAND_30, 20);
     }
 
-    private void doSeAccuracyForecast(final IEEEDataIsland oriIsland, int num) {
+    @Test
+    public void testCase30ByFile() {
+        trainer.trainModel(this.getClass().getResourceAsStream("/sefiles/train/case30.txt"));
+        List<Double> res = trainer.predict(this.getClass().getResourceAsStream("/sefiles/test/case30.txt"));
+    }
+
+    private void doSeAccuracyPredict(final IEEEDataIsland oriIsland, int num) {
         IEEEDataIsland[] islands = MonteCarloCaseBuilder.simulatePowerFlow(oriIsland, num);
 
         StateEstimator se = new StateEstimator();
@@ -58,7 +65,7 @@ public class SeAccuracyTrainerTest {
             alg.getObjFunc().setObjType(SeObjective.OBJ_TYPE_WLS); // 设置目标函数
 
             //传统最小二乘法
-            SeAccuracyTrainer.dealZeroInjection(se, alg, sm, ref, false);
+            //SeAccuracyTrainer.dealZeroInjection(se, alg, sm, ref, false);
             alg.setVariable_type(IpoptSeAlg.VARIABLE_VTHETA);
             se.doSe();
 
