@@ -273,6 +273,26 @@ public class BpaSwiModelRwTest extends TestCase {
         sqliteDb.executeSqls(sqls);
 
         sqls.clear();
+        TABLE_DATA_NAME = "ExciterExtraInfo";
+        for (ExciterExtraInfo exciterExtraInfo : model.exciterExtraInfos) {
+            String insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
+                    "'" + exciterExtraInfo.getType() + "'," + "'" + exciterExtraInfo.getBusName() + "'," +
+                    exciterExtraInfo.getBaseKv() + "," + "'" + exciterExtraInfo.getGeneratorCode() + "'," +
+                    exciterExtraInfo.getVamax() + "," + exciterExtraInfo.getVamin() + "," +
+                    exciterExtraInfo.getVaimax() + "," + exciterExtraInfo.getVaimin() + "," +
+                    exciterExtraInfo.getKb() + "," + exciterExtraInfo.getT5() + "," +
+                    exciterExtraInfo.getKe() + "," + exciterExtraInfo.getTe() + "," +
+                    exciterExtraInfo.getSe1() + "," + exciterExtraInfo.getSe2() + "," +
+                    exciterExtraInfo.getVrmax() + "," + exciterExtraInfo.getVrmin() + "," +
+                    exciterExtraInfo.getKc() + "," + exciterExtraInfo.getKd() + "," +
+                    exciterExtraInfo.getKli() + "," + exciterExtraInfo.getVlir() + "," +
+                    exciterExtraInfo.getEfdmax() +
+                    ")";
+            sqls.add(insertSql);
+        }
+        sqliteDb.executeSqls(sqls);
+
+        sqls.clear();
         TABLE_DATA_NAME = "PSS";
         for (PSS pss : model.pssList) {
             String insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
@@ -300,6 +320,24 @@ public class BpaSwiModelRwTest extends TestCase {
         sqliteDb.executeSqls(sqls);
 
         sqls.clear();
+        TABLE_DATA_NAME = "PSSExtraInfo";
+        for (PSSExtraInfo pssExtraInfo : model.pssExtraInfos) {
+            String insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
+                    "'" + pssExtraInfo.getType() + "'," + "'" + pssExtraInfo.getGenName() + "'," +
+                    pssExtraInfo.getBaseKv() + ",'" + pssExtraInfo.getId() + "'," +
+                    pssExtraInfo.getKp() + "," + pssExtraInfo.getT1() + "," +
+                    pssExtraInfo.getT2() + "," + pssExtraInfo.getT13() + "," +
+                    pssExtraInfo.getT14() + "," + pssExtraInfo.getT3() + "," +
+                    pssExtraInfo.getT4() + "," + pssExtraInfo.getMaxVs() + "," +
+                    pssExtraInfo.getMinVs() + "," + pssExtraInfo.getIb() + ",'" +
+                    pssExtraInfo.getBusName() + "'," + pssExtraInfo.getBusBaseKv() + "," +
+                    pssExtraInfo.getXq() + "," + pssExtraInfo.getkMVA() +
+                    ")";
+            sqls.add(insertSql);
+        }
+        sqliteDb.executeSqls(sqls);
+
+        sqls.clear();
         TABLE_DATA_NAME = "Governor";
         for (Governor governor : model.governors) {
             String insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
@@ -313,6 +351,22 @@ public class BpaSwiModelRwTest extends TestCase {
                     governor.getMinIntg() + "," + governor.getMaxPID() + "," +
                     governor.getMinPID() + "," + governor.getDelt() + "," +
                     governor.getMaxDb() + ",'" + governor.getMinDb() +
+                    ")";
+            sqls.add(insertSql);
+        }
+        sqliteDb.executeSqls(sqls);
+
+        sqls.clear();
+        TABLE_DATA_NAME = "GovernorExtraInfo";
+        for (GovernorExtraInfo governorExtraInfo : model.governorExtraInfos) {
+            String insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
+                    "'" + governorExtraInfo.getType() + "'," + "'" + governorExtraInfo.getGenName() + "'," +
+                    governorExtraInfo.getBaseKv() + "," + "'" + governorExtraInfo.getGeneratorCode() + "'," +
+                    governorExtraInfo.getDelt2() + "," + governorExtraInfo.getTr2() + "," +
+                    governorExtraInfo.getEp() + "," + governorExtraInfo.getMinusDb2() + "," +
+                    governorExtraInfo.getDb2() + "," + governorExtraInfo.getMaxDb2() + "," +
+                    governorExtraInfo.getMinDb2() + "," + governorExtraInfo.getItyp() + "," +
+                    governorExtraInfo.getItyp2() +
                     ")";
             sqls.add(insertSql);
         }
@@ -363,6 +417,41 @@ public class BpaSwiModelRwTest extends TestCase {
                     bc.getC() + "," + bc.getDcBaseKv() + "," +
                     bc.getK() + "," + bc.getMva() + "," +
                     bc.getKover() + "," + bc.getConverterNum() +
+                    ")";
+            sqls.add(insertSql);
+        }
+        sqliteDb.executeSqls(sqls);
+
+        sqls.clear();
+        TABLE_DATA_NAME = "BCExtraInfo";
+        for (BCExtraInfo bcExtraInfo : model.bcExtraInfos) {
+            String insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
+                    "'" + bcExtraInfo.getType() + "'," + "'" + bcExtraInfo.getBusName() + "',"
+                    + bcExtraInfo.getBaseKv() + "," + "'" + bcExtraInfo.getId() + "'," +
+                    bcExtraInfo.getqPercent() + "," + bcExtraInfo.getRpCon() + "," +
+                    bcExtraInfo.getTmb() + "," + bcExtraInfo.getTb1() + "," +
+                    bcExtraInfo.getTb() + "," + bcExtraInfo.getKpb() + "," +
+                    bcExtraInfo.getKib() + "," + bcExtraInfo.getTsb() + "," +
+                    bcExtraInfo.getKd() +
+                    ")";
+            sqls.add(insertSql);
+        }
+        sqliteDb.executeSqls(sqls);
+
+        sqls.clear();
+        TABLE_DATA_NAME = "Servo";
+        for (Servo servo : model.servos) {
+            String insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
+                    "'" + servo.getType() + servo.getSubType() + "'," +
+                    "'" + servo.getGenName() + "'," + servo.getBaseKv() + "," +
+                    "'" + servo.getGeneratorCode() + "'," + servo.getPe() + "," +
+                    servo.getTc() + "," + servo.getTo() + "," +
+                    servo.getCloseVel() + "," + servo.getOpenVel() + "," +
+                    servo.getMaxPower() + "," + servo.getMinPower() + "," +
+                    servo.getT1() + "," + servo.getKp() + "," +
+                    servo.getKd() + "," + servo.getKi() + "," +
+                    servo.getMaxIntg() + "," + servo.getMinIntg() + "," +
+                    servo.getMaxPID() + ",'" + servo.getMinPID() +
                     ")";
             sqls.add(insertSql);
         }
@@ -458,6 +547,32 @@ public class BpaSwiModelRwTest extends TestCase {
                 ")";
         sqliteDb.initDb(initSql);
 
+        TABLE_DATA_NAME = "ExciterExtraInfo";
+        initSql = "CREATE TABLE "  + TABLE_DATA_NAME + " (" +
+                " type     varchar(3) NOT NULL," +
+                " busName     varchar(8) NOT NULL," +
+                " baseKv              decimal(4,0) NOT NULL, " +
+                " generatorCode     varchar(1) DEFAULT NULL," +
+                " vamax              decimal(5,3) NULL, " +
+                " vamin           decimal(5,3)     NULL, " +
+                " vaimax           decimal(5,0)     NULL, " +
+                " vaimin              decimal(5,0) NULL, " +
+                " kb              decimal(4,2) NULL, " +
+                " t5              decimal(4,2) NULL, " +
+                " ke              decimal(4,2) NULL, " +
+                " te              decimal(4,2) NULL, " +
+                " se1              decimal(5,4) NULL, " +
+                " se2              decimal(5,4) NULL, " +
+                " vrmax              decimal(4,2) NULL, " +
+                " vrmin              decimal(4,2) NULL, " +
+                " kc              decimal(4,2) NULL, " +
+                " kd              decimal(4,2) NULL, " +
+                " kli              decimal(4,2) NULL, " +
+                " vlir              decimal(4,2) NULL, " +
+                " efdmax              decimal(4,2) NULL " +
+                ")";
+        sqliteDb.initDb(initSql);
+
         TABLE_DATA_NAME = "PSS";
         initSql = "CREATE TABLE "  + TABLE_DATA_NAME + " (" +
                 " type     varchar(3) NOT NULL," +
@@ -498,27 +613,68 @@ public class BpaSwiModelRwTest extends TestCase {
                 ")";
         sqliteDb.initDb(initSql);
 
+        TABLE_DATA_NAME = "PSSExtraInfo";
+        initSql = "CREATE TABLE "  + TABLE_DATA_NAME + " (" +
+                " type     varchar(3) NOT NULL," +
+                " genName     varchar(8) NOT NULL," +
+                " baseKv              decimal(4,0) NOT NULL, " +
+                " id     varchar(1) DEFAULT NULL," +
+                " kp              decimal(5,3) NULL, " +
+                " t1           decimal(5,3)     NULL, " +
+                " t2           decimal(5,3)     NULL, " +
+                " t13              decimal(5,3) NULL, " +
+                " t14              decimal(5,3) NULL, " +
+                " t3              decimal(5,3) NULL, " +
+                " t4              decimal(5,3) NULL, " +
+                " maxVs              decimal(6,4) NULL, " +
+                " minVs              decimal(6,4) NULL, " +
+                " ib              INTEGER NULL, " +
+                " busName              varchar(8) NULL, " +
+                " busBaseKv              decimal(4,0) NULL, " +
+                " xq              decimal(4,3) NULL, " +
+                " kMVA              decimal(4,0) NULL " +
+                ")";
+        sqliteDb.initDb(initSql);
+
         TABLE_DATA_NAME = "Governor";
         initSql = "CREATE TABLE "  + TABLE_DATA_NAME + " (" +
                 " type     varchar(3) NOT NULL," +
                 " genName     varchar(8) NOT NULL," +
                 " baseKv              decimal(4,0) NOT NULL, " +
                 " generatorCode     varchar(1) DEFAULT NULL," +
-                " kw              decimal(4,3) NULL, " +
-                " tr           decimal(3,3)     NULL, " +
-                " minusDb1           decimal(4,3)     NULL, " +
-                " db1              decimal(3,3) NULL, " +
-                " kp              decimal(4,2) NULL, " +
-                " kd              decimal(4,3) NULL, " +
-                " ki              decimal(4,3) NULL, " +
-                " td              decimal(4,3) NULL, " +
-                " maxIntg              decimal(4,3) NULL, " +
-                " minIntg              decimal(4,3) NULL, " +
-                " maxPID              decimal(4,3) NULL, " +
-                " minPID              decimal(4,3) NULL, " +
-                " delt              decimal(4,3) NULL, " +
-                " maxDb              decimal(2,2) NULL, " +
-                " minDb              varchar(8) NULL " +
+                " kw              decimal(5,0) NULL, " +
+                " tr           decimal(4,4)     NULL, " +
+                " minusDb1           decimal(4,4)     NULL, " +
+                " db1              decimal(4,4) NULL, " +
+                " kp              decimal(5,0) NULL, " +
+                " kd              decimal(5,0) NULL, " +
+                " ki              decimal(5,0) NULL, " +
+                " td              decimal(4,4) NULL, " +
+                " maxIntg              decimal(4,4) NULL, " +
+                " minIntg              decimal(4,4) NULL, " +
+                " maxPID              decimal(4,4) NULL, " +
+                " minPID              decimal(4,4) NULL, " +
+                " delt              decimal(4,4) NULL, " +
+                " maxDb              decimal(4,4) NULL, " +
+                " minDb              decimal(4,4) NULL " +
+                ")";
+        sqliteDb.initDb(initSql);
+
+        TABLE_DATA_NAME = "GovernorExtraInfo";
+        initSql = "CREATE TABLE "  + TABLE_DATA_NAME + " (" +
+                " type     varchar(3) NOT NULL," +
+                " genName     varchar(8) NOT NULL," +
+                " baseKv              decimal(4,0) NOT NULL, " +
+                " generatorCode     varchar(1) DEFAULT NULL," +
+                " delt2              decimal(4,3) NULL, " +
+                " tr2           decimal(3,3)     NULL, " +
+                " ep           decimal(4,3)     NULL, " +
+                " minusDb2              decimal(3,3) NULL, " +
+                " db2              decimal(4,2) NULL, " +
+                " maxDb2              decimal(4,3) NULL, " +
+                " minDb2              decimal(4,3) NULL, " +
+                " ityp              INTEGER NULL, " +
+                " ityp2              INTEGER NULL " +
                 ")";
         sqliteDb.initDb(initSql);
 
@@ -578,6 +734,84 @@ public class BpaSwiModelRwTest extends TestCase {
                 " mva              decimal(5.0) NULL, " +
                 " kover              decimal(5.0) NULL, " +
                 " converterNum              INTEGER NULL " +
+                ")";
+        sqliteDb.initDb(initSql);
+
+        TABLE_DATA_NAME = "BCExtraInfo";
+        initSql = "CREATE TABLE "  + TABLE_DATA_NAME + " (" +
+                " type     varchar(3) NOT NULL," +
+                " busName     varchar(8) NOT NULL," +
+                " baseKv              decimal(4,0) NOT NULL, " +
+                " id     varchar(1) DEFAULT NULL," +
+                " qPercent              decimal(3,0) NULL, " +
+                " rpCon           INTEGER     NULL, " +
+                " tmb           decimal(5.0)     NULL, " +
+                " tb1              decimal(5.0) NULL, " +
+                " tb              decimal(5.0) NULL, " +
+                " kpb              decimal(5.0) NULL, " +
+                " kib              decimal(5.0) NULL, " +
+                " tsb              decimal(5.0) NULL, " +
+                " kd              decimal(5.3) NULL " +
+                ")";
+        sqliteDb.initDb(initSql);
+
+        TABLE_DATA_NAME = "Servo";
+        initSql = "CREATE TABLE "  + TABLE_DATA_NAME + " (" +
+                " type     varchar(3) NOT NULL," +
+                " genName     varchar(8) NOT NULL," +
+                " baseKv              decimal(4,0) NOT NULL, " +
+                " generatorCode     varchar(1) DEFAULT NULL," +
+                " pe              decimal(6,2) NULL, " +
+                " tc           decimal(4,2)     NULL, " +
+                " to           decimal(4,2)     NULL, " +
+                " closeVel              decimal(4,2) NULL, " +
+                " openVel              decimal(4,2) NULL, " +
+                " maxPower              decimal(4,2) NULL, " +
+                " minPower              decimal(4,2) NULL, " +
+                " t1              decimal(4,2) NULL, " +
+                " kp              decimal(4,2) NULL, " +
+                " kd              decimal(4,2) NULL, " +
+                " ki              decimal(4,2) NULL, " +
+                " maxIntg              decimal(4,2) NULL, " +
+                " minIntg              decimal(4,2) NULL, " +
+                " maxPID              decimal(4,2) NULL, " +
+                " minPID              decimal(4,2) NULL " +
+                ")";
+        sqliteDb.initDb(initSql);
+
+        TABLE_DATA_NAME = "Load";
+        initSql = "CREATE TABLE "  + TABLE_DATA_NAME + " (" +
+                " type     varchar(3) NOT NULL," +
+                " busName     varchar(8) NOT NULL," +
+                " baseKv              decimal(4,0) NOT NULL, " +
+                " zone              varchar(12) NULL, " +
+                " areaName           varchar(10)     NULL, " +
+                " p1           decimal(5,3)     NULL, " +
+                " q1              decimal(5,3) NULL, " +
+                " p2              decimal(5,3) NULL, " +
+                " q2              decimal(5,3) NULL, " +
+                " p3              decimal(5,3) NULL, " +
+                " q3              decimal(5,3) NULL, " +
+                " p4              decimal(5,3) NULL, " +
+                " q4              decimal(5,3) NULL, " +
+                " ldp              decimal(5,3) NULL, " +
+                " ldq              decimal(5,3) NULL, " +
+
+                " id           varchar(1)     NULL, " +
+                " tJ              decimal(6,4) NULL, " +
+                " powerPercent              decimal(3,3) NULL, " +
+                " loadRate              decimal(4,4) NULL, " +
+                " minPower              decimal(3,0) NULL, " +
+                " rs              decimal(5,4) NULL, " +
+                " xs              decimal(5,4) NULL, " +
+                " xm              decimal(5,4) NULL, " +
+                " rr              decimal(5,4) NULL, " +
+                " xr              decimal(5,4) NULL, " +
+                " vi              decimal(3,2) NULL, " +
+                " ti              decimal(4,2) NULL, " +
+                " a              decimal(5,4) NULL, " +
+                " b              decimal(5,4) NULL, " +
+                " im              INTEGER NULL " +
                 ")";
         sqliteDb.initDb(initSql);
     }

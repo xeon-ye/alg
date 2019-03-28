@@ -11,7 +11,7 @@ import java.io.UnsupportedEncodingException;
  * User: Xu Chengsi
  * Date: 19-3-23
  */
-public class PSSInfo implements Serializable {
+public class PSSExtraInfo implements Serializable {
     private String type;
     private String genName = "";
     private double baseKv;
@@ -32,10 +32,10 @@ public class PSSInfo implements Serializable {
     private double xq;
     private double kMVA;
 
-    public static PSSInfo createPSSInfo(String content) {
-        PSSInfo pssInfo = new PSSInfo();
-        pssInfo.parseString(content);
-        return pssInfo;
+    public static PSSExtraInfo createPSSExtraInfo(String content) {
+        PSSExtraInfo pssExtraInfo = new PSSExtraInfo();
+        pssExtraInfo.parseString(content);
+        return pssExtraInfo;
     }
 
     public void parseString(String content) {

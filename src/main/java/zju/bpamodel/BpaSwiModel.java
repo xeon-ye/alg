@@ -18,14 +18,14 @@ public class BpaSwiModel implements Serializable {
     List<Exciter> exciters;
     List<ExciterExtraInfo> exciterExtraInfos;
     List<PSS> pssList;
-    List<PSSInfo> pssInfos;
+    List<PSSExtraInfo> pssExtraInfos;
     List<PrimeMover> primeMovers;
     List<Servo> servos;
     List<Governor> governors;
-    List<GovernorInfo> governorInfos;
+    List<GovernorExtraInfo> governorExtraInfos;
     List<PV> pvs;
     List<BC> bcs;
-    List<BCInfo> bcInfos;
+    List<BCExtraInfo> bcExtraInfos;
     List<ShortCircuitFault> shortCircuitFaults;
     List<FLTCard> fltCards;
     List<Load> loads;
@@ -108,12 +108,12 @@ public class BpaSwiModel implements Serializable {
         this.pssList = pssList;
     }
 
-    public List<PSSInfo> getPssInfos() {
-        return pssInfos;
+    public List<PSSExtraInfo> getPssExtraInfos() {
+        return pssExtraInfos;
     }
 
-    public void setPssInfos(List<PSSInfo> pssInfos) {
-        this.pssInfos = pssInfos;
+    public void setPssExtraInfos(List<PSSExtraInfo> pssExtraInfos) {
+        this.pssExtraInfos = pssExtraInfos;
     }
 
     public List<PrimeMover> getPrimeMovers() {
@@ -140,12 +140,12 @@ public class BpaSwiModel implements Serializable {
         this.governors = governors;
     }
 
-    public List<GovernorInfo> getGovernorInfos() {
-        return governorInfos;
+    public List<GovernorExtraInfo> getGovernorExtraInfos() {
+        return governorExtraInfos;
     }
 
-    public void setGovernorInfos(List<GovernorInfo> governorInfos) {
-        this.governorInfos = governorInfos;
+    public void setGovernorExtraInfos(List<GovernorExtraInfo> governorExtraInfos) {
+        this.governorExtraInfos = governorExtraInfos;
     }
 
     public List<PV> getPvs() {
@@ -164,12 +164,12 @@ public class BpaSwiModel implements Serializable {
         this.bcs = bcs;
     }
 
-    public List<BCInfo> getBcInfos() {
-        return bcInfos;
+    public List<BCExtraInfo> getBcExtraInfos() {
+        return bcExtraInfos;
     }
 
-    public void setBcInfos(List<BCInfo> bcInfos) {
-        this.bcInfos = bcInfos;
+    public void setBcExtraInfos(List<BCExtraInfo> bcExtraInfos) {
+        this.bcExtraInfos = bcExtraInfos;
     }
 
     public List<ShortCircuitFault> getShortCircuitFaults() {

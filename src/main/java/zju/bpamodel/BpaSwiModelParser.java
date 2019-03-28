@@ -68,14 +68,14 @@ public class BpaSwiModelParser {
             List<Exciter> exciters = new ArrayList<Exciter>();
             List<ExciterExtraInfo> exciterExtraInfos = new ArrayList<ExciterExtraInfo>();
             List<PSS> pssList = new ArrayList<>();
-            List<PSSInfo> pssInfos = new ArrayList<>();
+            List<PSSExtraInfo> pssExtraInfos = new ArrayList<>();
             List<PrimeMover> primeMovers = new ArrayList<>();
             List<Servo> servos = new ArrayList<>();
             List<Governor> governors = new ArrayList<>();
-            List<GovernorInfo> governorInfos = new ArrayList<>();
+            List<GovernorExtraInfo> governorExtraInfos = new ArrayList<>();
             List<PV> pvs = new ArrayList<>();
             List<BC> bcs = new ArrayList<>();
-            List<BCInfo> bcInfos = new ArrayList<>();
+            List<BCExtraInfo> bcExtraInfos = new ArrayList<>();
             List<ShortCircuitFault> shortCircuitFaults = new ArrayList<>();
             List<FLTCard> fltCards = new ArrayList<>();
             List<Load> loads = new ArrayList<>();
@@ -118,7 +118,7 @@ public class BpaSwiModelParser {
                     } else if (strLine.startsWith("S")) {
                         if (strLine.charAt(1) == 'F' || strLine.charAt(1) == 'P' || strLine.charAt(1) == 'S' || strLine.charAt(1) == 'G' || strLine.charAt(1) == 'I')
                             if (strLine.charAt(2) == '+')
-                                pssInfos.add(PSSInfo.createPSSInfo(strLine));
+                                pssExtraInfos.add(PSSExtraInfo.createPSSExtraInfo(strLine));
                             else
                                 pssList.add(PSS.createPSS(strLine));
                     } else if (strLine.startsWith("G")) {
@@ -128,7 +128,7 @@ public class BpaSwiModelParser {
                             primeMovers.add(PrimeMover.createPrimeMover(strLine));
                         } else if (strLine.charAt(1) == 'M') {
                             if (strLine.charAt(1) == '+') {
-                                governorInfos.add(GovernorInfo.createGovernorInfo(strLine));
+                                governorExtraInfos.add(GovernorExtraInfo.createGovernorExtraInfo(strLine));
                             } else {
                                 governors.add(Governor.createGovernor(strLine));
                             }
@@ -140,7 +140,7 @@ public class BpaSwiModelParser {
                     } else if (strLine.startsWith("B")) {
                         if (strLine.charAt(1) == 'C') {
                             if (strLine.charAt(2) == '+') {
-                                bcInfos.add(BCInfo.createBCInfo(strLine));
+                                bcExtraInfos.add(BCExtraInfo.createBCExtraInfo(strLine));
                             } else {
                                 bcs.add(BC.createBC(strLine));
                             }
@@ -159,14 +159,14 @@ public class BpaSwiModelParser {
             model.setExciters(exciters);
             model.setExciterExtraInfos(exciterExtraInfos);
             model.setPssList(pssList);
-            model.setPssInfos(pssInfos);
+            model.setPssExtraInfos(pssExtraInfos);
             model.setPrimeMovers(primeMovers);
             model.setServos(servos);
             model.setGovernors(governors);
-            model.setGovernorInfos(governorInfos);
+            model.setGovernorExtraInfos(governorExtraInfos);
             model.setPvs(pvs);
             model.setBcs(bcs);
-            model.setBcInfos(bcInfos);
+            model.setBcExtraInfos(bcExtraInfos);
             model.setShortCircuitFaults(shortCircuitFaults);
             model.setFltCards(fltCards);
             model.setLoads(loads);

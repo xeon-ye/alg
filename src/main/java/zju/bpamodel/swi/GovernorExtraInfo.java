@@ -11,7 +11,7 @@ import java.io.UnsupportedEncodingException;
  * User: Xu Chengsi
  * Date: 19-3-24
  */
-public class GovernorInfo implements Serializable {
+public class GovernorExtraInfo implements Serializable {
     private String type;
     private String genName;
     private double baseKv;
@@ -26,10 +26,10 @@ public class GovernorInfo implements Serializable {
     private int ityp;
     private int ityp2;
 
-    public static GovernorInfo createGovernorInfo(String content) {
-        GovernorInfo governorInfo = new GovernorInfo();
-        governorInfo.parseString(content);
-        return governorInfo;
+    public static GovernorExtraInfo createGovernorExtraInfo(String content) {
+        GovernorExtraInfo governorExtraInfo = new GovernorExtraInfo();
+        governorExtraInfo.parseString(content);
+        return governorExtraInfo;
     }
 
     public void parseString(String content) {

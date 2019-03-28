@@ -11,7 +11,7 @@ import java.io.UnsupportedEncodingException;
  * User: Xu Chengsi
  * Date: 19-3-28
  */
-public class BCInfo implements Serializable {
+public class BCExtraInfo implements Serializable {
     private String type = "BC+";
     private String busName = "";
     private double baseKv;
@@ -26,10 +26,10 @@ public class BCInfo implements Serializable {
     private double tsb;
     private double kd;
 
-    public static BCInfo createBCInfo(String content) {
-        BCInfo bcInfo = new BCInfo();
-        bcInfo.parseString(content);
-        return bcInfo;
+    public static BCExtraInfo createBCExtraInfo(String content) {
+        BCExtraInfo bcExtraInfo = new BCExtraInfo();
+        bcExtraInfo.parseString(content);
+        return bcExtraInfo;
     }
 
     public void parseString(String content) {
