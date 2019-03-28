@@ -24,6 +24,8 @@ public class BpaSwiModel implements Serializable {
     List<Governor> governors;
     List<GovernorInfo> governorInfos;
     List<PV> pvs;
+    List<BC> bcs;
+    List<BCInfo> bcInfos;
     List<ShortCircuitFault> shortCircuitFaults;
     List<FLTCard> fltCards;
     List<Load> loads;
@@ -152,6 +154,22 @@ public class BpaSwiModel implements Serializable {
 
     public void setPvs(List<PV> pvs) {
         this.pvs = pvs;
+    }
+
+    public List<BC> getBcs() {
+        return bcs;
+    }
+
+    public void setBcs(List<BC> bcs) {
+        this.bcs = bcs;
+    }
+
+    public List<BCInfo> getBcInfos() {
+        return bcInfos;
+    }
+
+    public void setBcInfos(List<BCInfo> bcInfos) {
+        this.bcInfos = bcInfos;
     }
 
     public List<ShortCircuitFault> getShortCircuitFaults() {

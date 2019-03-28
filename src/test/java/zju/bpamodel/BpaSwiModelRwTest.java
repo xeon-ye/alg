@@ -228,6 +228,21 @@ public class BpaSwiModelRwTest extends TestCase {
         sqliteDb.executeSqls(sqls);
 
         sqls.clear();
+        TABLE_DATA_NAME = "GeneratorDW";
+        for (GeneratorDW generatorDW : model.generatorDws) {
+            String insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
+                    "'M'," + "'" + generatorDW.getBusName() + "'," +
+                    generatorDW.getBaseKv() + ",'" + generatorDW.getId() + "'," +
+                    generatorDW.getBaseMva() + "," + generatorDW.getPowerFactor() + "," +
+                    "'" + generatorDW.getType() + "','" + generatorDW.getOwner() + "'," +
+                    generatorDW.getXdpp() + "," + generatorDW.getXqpp() + "," +
+                    generatorDW.getXdopp() + "," + generatorDW.getXqopp() +
+                    ")";
+            sqls.add(insertSql);
+        }
+        sqliteDb.executeSqls(sqls);
+
+        sqls.clear();
         TABLE_DATA_NAME = "Exciter";
         for (Exciter exciter : model.exciters) {
             String insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
@@ -334,6 +349,24 @@ public class BpaSwiModelRwTest extends TestCase {
             sqls.add(insertSql);
         }
         sqliteDb.executeSqls(sqls);
+
+        sqls.clear();
+        TABLE_DATA_NAME = "BC";
+        for (BC bc : model.bcs) {
+            String insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
+                    "'" + bc.getType() + "'," + "'" + bc.getBusName() + "',"
+                    + bc.getBaseKv() + "," + "'" + bc.getId() + "'," +
+                    bc.getpPercent() + "," + bc.getIpCon() + "," +
+                    bc.getTma() + "," + bc.getTa1() + "," +
+                    bc.getTa() + "," + bc.getKpa() + "," +
+                    bc.getKia() + "," + bc.getTsa() + "," +
+                    bc.getC() + "," + bc.getDcBaseKv() + "," +
+                    bc.getK() + "," + bc.getMva() + "," +
+                    bc.getKover() + "," + bc.getConverterNum() +
+                    ")";
+            sqls.add(insertSql);
+        }
+        sqliteDb.executeSqls(sqls);
     }
 
     public void testCreateTables() {
@@ -359,6 +392,23 @@ public class BpaSwiModelRwTest extends TestCase {
                 " sg10              decimal(5,4) NULL, " +
                 " sg12              decimal(4,3) NULL, " +
                 " d              decimal(3,2) NULL " +
+                ")";
+        sqliteDb.initDb(initSql);
+
+        TABLE_DATA_NAME = "GeneratorDW";
+        initSql = "CREATE TABLE "  + TABLE_DATA_NAME + " (" +
+                " type     varchar(3) NOT NULL," +
+                " busName     varchar(8) NOT NULL," +
+                " baseKv              decimal(4,0) NOT NULL, " +
+                " id     varchar(1) DEFAULT NULL," +
+                " baseMva              decimal(5,1) NULL, " +
+                " powerFactor           decimal(3,2)     NULL, " +
+                " type           varchar(2)     NULL, " +
+                " owner              varchar(3) NULL, " +
+                " xdpp              decimal(5,4) NULL, " +
+                " xqpp              decimal(5,4) NULL, " +
+                " xdopp              decimal(4,4) NULL, " +
+                " xqopp              decimal(4,4) NULL " +
                 ")";
         sqliteDb.initDb(initSql);
 
@@ -505,6 +555,29 @@ public class BpaSwiModelRwTest extends TestCase {
                 " im              decimal(5.0) NULL, " +
                 " n1              INTEGER NULL, " +
                 " n2              INTEGER NULL " +
+                ")";
+        sqliteDb.initDb(initSql);
+
+        TABLE_DATA_NAME = "BC";
+        initSql = "CREATE TABLE "  + TABLE_DATA_NAME + " (" +
+                " type     varchar(3) NOT NULL," +
+                " busName     varchar(8) NOT NULL," +
+                " baseKv              decimal(4,0) NOT NULL, " +
+                " id     varchar(1) DEFAULT NULL," +
+                " pPercent              decimal(5,0) NULL, " +
+                " ipCon           INTEGER     NULL, " +
+                " tma           decimal(5.0)     NULL, " +
+                " ta1              decimal(5.0) NULL, " +
+                " ta              decimal(5.0) NULL, " +
+                " kpa              decimal(5.0) NULL, " +
+                " kia              decimal(5.0) NULL, " +
+                " tsa              decimal(5.0) NULL, " +
+                " c              decimal(5.0) NULL, " +
+                " dcBaseKv              decimal(5.0) NULL, " +
+                " k              decimal(5.0) NULL, " +
+                " mva              decimal(5.0) NULL, " +
+                " kover              decimal(5.0) NULL, " +
+                " converterNum              INTEGER NULL " +
                 ")";
         sqliteDb.initDb(initSql);
     }

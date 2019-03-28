@@ -316,35 +316,36 @@ public class AvailableCapOptNewTest extends TestCase {
         String supplyCapacityPath = this.getClass().getResource("/loadtransferfiles/testcase4/supplyCapacity.txt").getPath();
         readSupplyCapacity(supplyCapacityPath);
         readLoads(loadsPath);
-        model.setFeederCapacityConst(19334);
+        model.setFeederCapacityConst(8712);
         model.setLoads(loads);
         model.setSupplyCap(supplyCap);
         String[] impLoads = {"6", "19", "22"};
         model.setImpLoads(impLoads);
-        String[] ErrorSupply = new String[]{"24"};
+        String[] ErrorSupply = new String[]{"25"};
         model.setErrorSupply(ErrorSupply);
         model.buildLoops();
-//        model.buildImpPathes();
-//        long time = 0;
-//        for (int i = 0; i < 1; i++) {
-//            long startT = System.nanoTime();
+        model.buildImpPathes();
+        long time = 0;
+        for (int i = 0; i < 1; i++) {
+            long startT = System.nanoTime();
 //            model.doOptPathLimit();
+            model.doOpt();
 //            System.out.println(System.nanoTime() - startT);
-////            if (i >= 10) {
-////                time += System.nanoTime() - startT;
-////            }
-//        }
-//        System.out.println(time / 5);
-        model.allMinSwitch();
-        this.minSwitchResult = model.getOptResult();
-        for(int i = 0; i < minSwitchResult.getSupplyId().length; i++) {
-            System.out.println(minSwitchResult.getSupplyId()[i]);
-            System.out.println(minSwitchResult.getMinSwitch()[i]);
-            // if(minSwitchResult.getSupplyId()[i] != null) {
-            for (int j = 0; j < minSwitchResult.getMinSwitch()[i]; j++)
-                System.out.println(minSwitchResult.getSwitchChanged().get(i)[j]);
-            //   }
+//            if (i >= 10) {
+//                time += System.nanoTime() - startT;
+//            }
         }
+//        System.out.println(time / 5);
+//        model.allMinSwitch();
+//        this.minSwitchResult = model.getOptResult();
+//        for(int i = 0; i < minSwitchResult.getSupplyId().length; i++) {
+//            System.out.println(minSwitchResult.getSupplyId()[i]);
+//            System.out.println(minSwitchResult.getMinSwitch()[i]);
+//            // if(minSwitchResult.getSupplyId()[i] != null) {
+//            for (int j = 0; j < minSwitchResult.getMinSwitch()[i]; j++)
+//                System.out.println(minSwitchResult.getSwitchChanged().get(i)[j]);
+//            //   }
+//        }
 
 //        long startT = System.currentTimeMillis();
 //        model.loadMax("5");

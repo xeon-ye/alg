@@ -314,7 +314,7 @@ public class AvailableCapOptTreeTest extends TestCase {
         String supplyCapacityPath = this.getClass().getResource("/loadtransferfiles/testcase4/supplyCapacity.txt").getPath();
         readSupplyCapacity(supplyCapacityPath);
         readLoads(loadsPath);
-        model.setFeederCapacityConst(19334);
+        model.setFeederCapacityConst(8712);
         model.setLoads(loads);
         model.setSupplyCap(supplyCap);
         String[] impLoads = {"6", "19", "22"};
