@@ -228,6 +228,21 @@ public class BpaSwiModelRwTest extends TestCase {
         sqliteDb.executeSqls(sqls);
 
         sqls.clear();
+        TABLE_DATA_NAME = "GeneratorDW";
+        for (GeneratorDW generatorDW : model.generatorDws) {
+            String insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
+                    "'M'," + "'" + generatorDW.getBusName() + "'," +
+                    generatorDW.getBaseKv() + ",'" + generatorDW.getId() + "'," +
+                    generatorDW.getBaseMva() + "," + generatorDW.getPowerFactor() + "," +
+                    "'" + generatorDW.getType() + "','" + generatorDW.getOwner() + "'," +
+                    generatorDW.getXdpp() + "," + generatorDW.getXqpp() + "," +
+                    generatorDW.getXdopp() + "," + generatorDW.getXqopp() +
+                    ")";
+            sqls.add(insertSql);
+        }
+        sqliteDb.executeSqls(sqls);
+
+        sqls.clear();
         TABLE_DATA_NAME = "Exciter";
         for (Exciter exciter : model.exciters) {
             String insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
@@ -377,6 +392,23 @@ public class BpaSwiModelRwTest extends TestCase {
                 " sg10              decimal(5,4) NULL, " +
                 " sg12              decimal(4,3) NULL, " +
                 " d              decimal(3,2) NULL " +
+                ")";
+        sqliteDb.initDb(initSql);
+
+        TABLE_DATA_NAME = "GeneratorDW";
+        initSql = "CREATE TABLE "  + TABLE_DATA_NAME + " (" +
+                " type     varchar(3) NOT NULL," +
+                " busName     varchar(8) NOT NULL," +
+                " baseKv              decimal(4,0) NOT NULL, " +
+                " id     varchar(1) DEFAULT NULL," +
+                " baseMva              decimal(5,1) NULL, " +
+                " powerFactor           decimal(3,2)     NULL, " +
+                " type           varchar(2)     NULL, " +
+                " owner              varchar(3) NULL, " +
+                " xdpp              decimal(5,4) NULL, " +
+                " xqpp              decimal(5,4) NULL, " +
+                " xdopp              decimal(4,4) NULL, " +
+                " xqopp              decimal(4,4) NULL " +
                 ")";
         sqliteDb.initDb(initSql);
 
