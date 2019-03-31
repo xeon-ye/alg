@@ -146,6 +146,22 @@ public class SqliteDb {
                 obj.setD(rs.getDouble("d"));
             }
             return obj;
+        } else if (tableName.equals("GeneratorDW")) {
+            GeneratorDW obj = new GeneratorDW();
+            while (rs.next()) {
+                obj.setBusName(rs.getString("busName"));
+                obj.setBaseKv(rs.getDouble("baseKv"));
+                obj.setId(rs.getString("id").charAt(0));
+                obj.setBaseMva(rs.getDouble("baseMva"));
+                obj.setPowerFactor(rs.getDouble("powerFactor"));
+                obj.setType(rs.getString("motorType"));
+                obj.setOwner(rs.getString("owner"));
+                obj.setXdpp(rs.getDouble("xdpp"));
+                obj.setXqpp(rs.getDouble("xqpp"));
+                obj.setXdopp(rs.getDouble("xdopp"));
+                obj.setXqopp(rs.getDouble("xqopp"));
+            }
+            return obj;
         } else if (tableName.equals("Exciter")) {
             Exciter obj = new Exciter();
             while (rs.next()) {
@@ -194,6 +210,32 @@ public class SqliteDb {
                 obj.setTf1(rs.getDouble("tf1"));
             }
             return obj;
+        } else if (tableName.equals("ExciterExtraInfo")) {
+            ExciterExtraInfo obj = new ExciterExtraInfo();
+            while (rs.next()) {
+                obj.setType(rs.getString("type"));
+                obj.setBusName(rs.getString("busName"));
+                obj.setBaseKv(rs.getDouble("baseKv"));
+                obj.setGeneratorCode(rs.getString("generatorCode").charAt(0));
+                obj.setVamax(rs.getDouble("vamax"));
+                obj.setVamin(rs.getDouble("vamin"));
+                obj.setVaimax(rs.getDouble("vaimax"));
+                obj.setVaimin(rs.getDouble("vaimin"));
+                obj.setKb(rs.getDouble("kb"));
+                obj.setT5(rs.getDouble("t5"));
+                obj.setKe(rs.getDouble("ke"));
+                obj.setTe(rs.getDouble("te"));
+                obj.setSe1(rs.getDouble("se1"));
+                obj.setSe2(rs.getDouble("se2"));
+                obj.setVrmax(rs.getDouble("vrmax"));
+                obj.setVrmin(rs.getDouble("vrmin"));
+                obj.setKc(rs.getDouble("kc"));
+                obj.setKd(rs.getDouble("kd"));
+                obj.setKli(rs.getDouble("kli"));
+                obj.setVlir(rs.getDouble("vlir"));
+                obj.setEfdmax(rs.getDouble("efdmax"));
+            }
+            return obj;
         } else if (tableName.equals("PSS")) {
             PSS obj = new PSS();
             while (rs.next()) {
@@ -234,6 +276,29 @@ public class SqliteDb {
                 obj.setT10(rs.getDouble("t10"));
                 obj.setT12(rs.getDouble("t12"));
                 obj.setInp(rs.getInt("inp"));
+            }
+            return obj;
+        } else if (tableName.equals("PSSExtraInfo")) {
+            PSSExtraInfo obj = new PSSExtraInfo();
+            while (rs.next()) {
+                obj.setType(rs.getString("type"));
+                obj.setGenName(rs.getString("genName"));
+                obj.setBaseKv(rs.getDouble("baseKv"));
+                obj.setId(rs.getString("id").charAt(0));
+                obj.setKp(rs.getDouble("kp"));
+                obj.setT1(rs.getDouble("t1"));
+                obj.setT2(rs.getDouble("t2"));
+                obj.setT13(rs.getDouble("t13"));
+                obj.setT14(rs.getDouble("t14"));
+                obj.setT3(rs.getDouble("t3"));
+                obj.setT4(rs.getDouble("t4"));
+                obj.setMaxVs(rs.getDouble("maxVs"));
+                obj.setMinVs(rs.getDouble("minVs"));
+                obj.setIb(rs.getInt("ib"));
+                obj.setBusName(rs.getString("busName"));
+                obj.setBusBaseKv(rs.getDouble("busBaseKv"));
+                obj.setXq(rs.getDouble("xq"));
+                obj.setkMVA(rs.getDouble("kMVA"));
             }
             return obj;
         } else if (tableName.equals("PrimeMover")) {
@@ -283,6 +348,24 @@ public class SqliteDb {
                 obj.setMinDb(rs.getDouble("minDb"));
             }
             return obj;
+        } else if (tableName.equals("GovernorExtraInfo")) {
+            GovernorExtraInfo obj = new GovernorExtraInfo();
+            while (rs.next()) {
+                obj.setType(rs.getString("type"));
+                obj.setGenName(rs.getString("genName"));
+                obj.setBaseKv(rs.getDouble("baseKv"));
+                obj.setGeneratorCode(rs.getString("generatorCode").charAt(0));
+                obj.setDelt2(rs.getDouble("delt2"));
+                obj.setTr2(rs.getDouble("tr2"));
+                obj.setEp(rs.getDouble("ep"));
+                obj.setMinusDb2(rs.getDouble("minusDb2"));
+                obj.setDb2(rs.getDouble("db2"));
+                obj.setMaxDb2(rs.getDouble("maxDb2"));
+                obj.setMinDb2(rs.getDouble("minDb2"));
+                obj.setItyp(rs.getInt("ityp"));
+                obj.setItyp2(rs.getInt("ityp2"));
+            }
+            return obj;
         } else if (tableName.equals("PV")) {
             PV obj = new PV();
             while (rs.next()) {
@@ -321,6 +404,162 @@ public class SqliteDb {
                 obj.setMva(rs.getDouble("mva"));
                 obj.setKover(rs.getDouble("kover"));
                 obj.setConverterNum(rs.getInt("converterNum"));
+            }
+            return obj;
+        } else if (tableName.equals("BCExtraInfo")) {
+            BCExtraInfo obj = new BCExtraInfo();
+            while (rs.next()) {
+                obj.setType(rs.getString("type"));
+                obj.setBusName(rs.getString("busName"));
+                obj.setBaseKv(rs.getDouble("baseKv"));
+                obj.setId(rs.getString("Id").charAt(0));
+                obj.setqPercent(rs.getDouble("qPercent"));
+                obj.setRpCon(rs.getInt("rpCon"));
+                obj.setTmb(rs.getDouble("tmb"));
+                obj.setTb1(rs.getDouble("tb1"));
+                obj.setTb(rs.getDouble("tb"));
+                obj.setKpb(rs.getDouble("kpb"));
+                obj.setKib(rs.getDouble("kib"));
+                obj.setTsb(rs.getDouble("tsb"));
+                obj.setKd(rs.getDouble("kd"));
+            }
+            return obj;
+        } else if (tableName.equals("Servo")) {
+            Servo obj = new Servo();
+            while (rs.next()) {
+                String type = rs.getString("type");
+                obj.setType(type.charAt(0));
+                obj.setSubType(type.charAt(1));
+                obj.setGenName(rs.getString("genName"));
+                obj.setBaseKv(rs.getDouble("baseKv"));
+                obj.setGeneratorCode(rs.getString("generatorCode").charAt(0));
+                obj.setPe(rs.getDouble("Pe"));
+                obj.setTo(rs.getInt("tOpen"));
+                obj.setCloseVel(rs.getDouble("closeVel"));
+                obj.setOpenVel(rs.getDouble("openVel"));
+                obj.setMaxPower(rs.getDouble("maxPower"));
+                obj.setMinPower(rs.getDouble("minPower"));
+                obj.setT1(rs.getDouble("t1"));
+                obj.setKp(rs.getDouble("kp"));
+                obj.setKd(rs.getDouble("kd"));
+                obj.setKi(rs.getDouble("ki"));
+                obj.setMaxIntg(rs.getDouble("maxIntg"));
+                obj.setMinIntg(rs.getDouble("minIntg"));
+                obj.setMaxPID(rs.getDouble("maxPID"));
+                obj.setMinPID(rs.getDouble("minPID"));
+            }
+            return obj;
+        } else if (tableName.equals("Load")) {
+            Load obj = new Load();
+            while (rs.next()) {
+                String type = rs.getString("type");
+                obj.setType(type.charAt(0));
+                obj.setSubType(type.charAt(1));
+                obj.setChgCode(rs.getString("chgCode").charAt(0));
+                obj.setBusName(rs.getString("busName"));
+                obj.setBaseKv(rs.getDouble("baseKv"));
+                obj.setZone(rs.getString("zone"));
+                obj.setAreaName(rs.getString("areaName"));
+                obj.setP1(rs.getDouble("p1"));
+                obj.setQ1(rs.getDouble("q1"));
+                obj.setP2(rs.getDouble("p2"));
+                obj.setQ2(rs.getDouble("q2"));
+                obj.setP3(rs.getDouble("p3"));
+                obj.setQ3(rs.getDouble("q3"));
+                obj.setP4(rs.getDouble("p4"));
+                obj.setQ4(rs.getDouble("q4"));
+                obj.setLdp(rs.getDouble("ldp"));
+                obj.setLdq(rs.getDouble("ldq"));
+                obj.setId(rs.getString("Id").charAt(0));
+                obj.settJ(rs.getDouble("tJ"));
+                obj.setPowerPercent(rs.getDouble("powerPercent"));
+                obj.setLoadRate(rs.getDouble("loadRate"));
+                obj.setMinPower(rs.getDouble("minPower"));
+                obj.setRs(rs.getDouble("rs"));
+                obj.setXs(rs.getDouble("xs"));
+                obj.setXm(rs.getDouble("xm"));
+                obj.setRr(rs.getDouble("rr"));
+                obj.setXr(rs.getDouble("xr"));
+                obj.setVi(rs.getDouble("vi"));
+                obj.setTi(rs.getDouble("ti"));
+                obj.setA(rs.getDouble("a"));
+                obj.setB(rs.getDouble("b"));
+                obj.setIm(rs.getInt("im"));
+            }
+            return obj;
+        } else if (tableName.equals("ShortCircuitFault")) {
+            ShortCircuitFault obj = new ShortCircuitFault();
+            while (rs.next()) {
+                obj.setBusASign(rs.getString("busASign").charAt(0));
+                obj.setBusAName(rs.getString("busAName"));
+                obj.setBusABaseKv(rs.getDouble("busABaseKv"));
+                obj.setBusBSign(rs.getString("busBSign").charAt(0));
+                obj.setBusBName(rs.getString("busBName"));
+                obj.setBusBBaseKv(rs.getDouble("busBBaseKv"));
+                obj.setParallelBranchCode(rs.getString("parallelBranchCode").charAt(0));
+                obj.setMode(rs.getInt("mode"));
+                obj.setStartCycle(rs.getDouble("startCycle"));
+                obj.setFaultR(rs.getDouble("faultR"));
+                obj.setFaultX(rs.getDouble("faultX"));
+                obj.setPosPercent(rs.getDouble("posPercent"));
+            }
+            return obj;
+        } else if (tableName.equals("FLTCard")) {
+            FLTCard obj = new FLTCard();
+            while (rs.next()) {
+                obj.setType(rs.getString("type"));
+                obj.setBusAName(rs.getString("busAName"));
+                obj.setBusABaseKv(rs.getDouble("busABaseKv"));
+                obj.setBusBName(rs.getString("busBName"));
+                obj.setBusBBaseKv(rs.getDouble("busBBaseKv"));
+                obj.setCircuitId(rs.getString("circuitId").charAt(0));
+                obj.setFltType(rs.getInt("fltType"));
+                obj.setPhase(rs.getInt("phase"));
+                obj.setSide(rs.getInt("side"));
+                obj.setTcyc0(rs.getDouble("tcyc0"));
+                obj.setTcyc1(rs.getDouble("tcyc1"));
+                obj.setTcyc2(rs.getDouble("tcyc2"));
+                obj.setPosPercent(rs.getDouble("posPercent"));
+                obj.setFaultR(rs.getDouble("faultR"));
+                obj.setFaultX(rs.getDouble("faultX"));
+                obj.setTcyc11(rs.getDouble("tcyc11"));
+                obj.setTcyc21(rs.getDouble("tcyc21"));
+                obj.setTcyc12(rs.getDouble("tcyc12"));
+                obj.setTcyc22(rs.getDouble("tcyc22"));
+            }
+            return obj;
+        } else if (tableName.equals("FFCard")) {
+            FFCard obj = new FFCard();
+            while (rs.next()) {
+                obj.setType(rs.getString("type"));
+                obj.setT(rs.getDouble("t"));
+                obj.setDt(rs.getDouble("dt"));
+                obj.setEndT(rs.getInt("endT"));
+                obj.setDtc(rs.getInt("dtc"));
+                obj.setIstp(rs.getInt("istp"));
+                obj.setToli(rs.getDouble("toli"));
+                obj.setIlim(rs.getInt("ilim"));
+                obj.setDelAng(rs.getDouble("delAng"));
+                obj.setDc(rs.getInt("dc"));
+                obj.setDmp(rs.getDouble("dmp"));
+                obj.setFrqBse(rs.getDouble("frqBse"));
+                obj.setLovtex(rs.getInt("lovtex"));
+                obj.setImblok(rs.getInt("imblok"));
+                obj.setMfdep(rs.getInt("mfdep"));
+                obj.setIgslim(rs.getInt("igslim"));
+                obj.setLsolqit(rs.getInt("lsolqit"));
+                obj.setNoAngLim(rs.getInt("noAngLim"));
+                obj.setInfBus(rs.getInt("infBus"));
+                obj.setNoPp(rs.getInt("noPp"));
+                obj.setNoDq(rs.getInt("noDq"));
+                obj.setNoSat(rs.getInt("noSat"));
+                obj.setNoGv(rs.getInt("noGv"));
+                obj.setIeqpc(rs.getInt("ieqpc"));
+                obj.setNoEx(rs.getInt("noEx"));
+                obj.setMftomg(rs.getInt("mftomg"));
+                obj.setNoSc(rs.getInt("noSc"));
+                obj.setMgtomf(rs.getInt("mgtomf"));
+                obj.setNoLoad(rs.getInt("noLoad"));
             }
             return obj;
         }
