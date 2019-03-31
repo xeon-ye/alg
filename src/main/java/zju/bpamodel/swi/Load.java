@@ -31,7 +31,7 @@ public class Load implements Serializable {
     private double ldq;
 
     // InductionMotor
-    private char id;//ML
+    private char id;
     private double tJ;
     private double powerPercent;
     private double loadRate;

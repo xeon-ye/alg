@@ -456,6 +456,88 @@ public class BpaSwiModelRwTest extends TestCase {
             sqls.add(insertSql);
         }
         sqliteDb.executeSqls(sqls);
+
+        sqls.clear();
+        TABLE_DATA_NAME = "Load";
+        for (Load load : model.loads) {
+            String insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
+                    "'" + load.getType() + load.getSubType() + "','" + load.getChgCode() + "'," +
+                    "'" + load.getBusName() + "'," + load.getBaseKv() + "," +
+                    "'" + load.getZone() + "','" + load.getAreaName() + "'," +
+                    load.getP1() + "," + load.getQ1() + "," +
+                    load.getP2() + "," + load.getQ2() + "," +
+                    load.getP3() + "," + load.getQ3() + "," +
+                    load.getP4() + "," + load.getQ4() + "," +
+                    load.getLdp() + "," + load.getLdq() + "," +
+                    "'" + load.getId() + "'," + load.gettJ() + "," +
+                    load.getPowerPercent() + "," + load.getLoadRate() + "," +
+                    load.getMinPower() + "," + load.getRs() + "," +
+                    load.getXs() + "," + load.getXm() + "," +
+                    load.getRr() + "," + load.getXr() + "," +
+                    load.getVi() + "," + load.getTi() + "," +
+                    load.getA() + "," + load.getB() + "," + load.getIm() +
+                    ")";
+            sqls.add(insertSql);
+        }
+        sqliteDb.executeSqls(sqls);
+
+        sqls.clear();
+        TABLE_DATA_NAME = "ShortCircuitFault";
+        for (ShortCircuitFault shortCircuitFault : model.shortCircuitFaults) {
+            String insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
+                    "'LS','" + shortCircuitFault.getBusASign() + "'," +
+                    "'" + shortCircuitFault.getBusAName() + "'," + shortCircuitFault.getBusABaseKv() + "," +
+                    "'" + shortCircuitFault.getBusBSign() + "','" + shortCircuitFault.getBusBName() + "'," +
+                    shortCircuitFault.getBusBBaseKv() + ",'" + shortCircuitFault.getParallelBranchCode() + "'," +
+                    shortCircuitFault.getMode() + "," + shortCircuitFault.getStartCycle() + "," +
+                    shortCircuitFault.getFaultR() + "," + shortCircuitFault.getFaultX() + "," +
+                    shortCircuitFault.getPosPercent() +
+                    ")";
+            sqls.add(insertSql);
+        }
+        sqliteDb.executeSqls(sqls);
+
+        sqls.clear();
+        TABLE_DATA_NAME = "FLTCard";
+        for (FLTCard fltCard : model.fltCards) {
+            String insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
+                    "'" + fltCard.getType() + "','" + fltCard.getBusAName() + "'," +
+                    fltCard.getBusABaseKv() + ",'" + fltCard.getBusBName() + "'," +
+                    fltCard.getBusBBaseKv() + ",'" + fltCard.getCircuitId() + "'," +
+                    fltCard.getFltType() + "," + fltCard.getPhase() + "," +
+                    fltCard.getSide() + "," + fltCard.getTcyc0() + "," +
+                    fltCard.getTcyc1() + "," + fltCard.getTcyc2() + "," +
+                    fltCard.getPosPercent() + "," + fltCard.getFaultR() + "," +
+                    fltCard.getFaultX() + "," + fltCard.getTcyc11() + "," +
+                    fltCard.getTcyc21() + "," + fltCard.getTcyc12() + "," +
+                    fltCard.getTcyc22() +
+                    ")";
+            sqls.add(insertSql);
+        }
+        sqliteDb.executeSqls(sqls);
+
+        sqls.clear();
+        TABLE_DATA_NAME = "FFCard";
+        FFCard ffCard = model.ff;
+        String insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
+                "'" + ffCard.getType() + "'," + ffCard.getT() + "," +
+                ffCard.getDt() + "," + ffCard.getEndT() + "," +
+                ffCard.getDtc() + "," + ffCard.getIstp() + "," +
+                ffCard.getToli() + "," + ffCard.getIlim() + "," +
+                ffCard.getDelAng() + "," + ffCard.getDc() + "," +
+                ffCard.getDmp() + "," + ffCard.getFrqBse() + "," +
+                ffCard.getLovtex() + "," + ffCard.getImblok() + "," +
+                ffCard.getMfdep() + "," + ffCard.getIgslim() + "," +
+                ffCard.getLsolqit() + "," + ffCard.getNoAngLim() + "," +
+                ffCard.getInfBus() + "," + ffCard.getNoPp() + "," +
+                ffCard.getNoDq() + "," + ffCard.getNoSat() + "," +
+                ffCard.getNoGv() + "," + ffCard.getIeqpc() + "," +
+                ffCard.getNoEx() + "," + ffCard.getMftomg() + "," +
+                ffCard.getNoSc() + "," + ffCard.getMgtomf() + "," +
+                ffCard.getNoLoad() +
+                ")";
+        sqls.add(insertSql);
+        sqliteDb.executeSqls(sqls);
     }
 
     public void testCreateTables() {
@@ -492,7 +574,7 @@ public class BpaSwiModelRwTest extends TestCase {
                 " id     varchar(1) DEFAULT NULL," +
                 " baseMva              decimal(5,1) NULL, " +
                 " powerFactor           decimal(3,2)     NULL, " +
-                " type           varchar(2)     NULL, " +
+                " motorType           varchar(2)     NULL, " +
                 " owner              varchar(3) NULL, " +
                 " xdpp              decimal(5,4) NULL, " +
                 " xqpp              decimal(5,4) NULL, " +
@@ -685,14 +767,14 @@ public class BpaSwiModelRwTest extends TestCase {
                 " baseKv              decimal(4,0) NOT NULL, " +
                 " generatorCode     varchar(1) DEFAULT NULL," +
                 " maxPower              decimal(6,1) NULL, " +
-                " r           decimal(5.3)     NULL, " +
-                " tg           decimal(5.3)     NULL, " +
-                " tp              decimal(5.3) NULL, " +
-                " td              decimal(5.3) NULL, " +
-                " tw2              decimal(5.3) NULL, " +
-                " closeVel              decimal(5.3) NULL, " +
-                " openVel              decimal(5.3) NULL, " +
-                " dd              decimal(5.3) NULL, " +
+                " r           decimal(5,3)     NULL, " +
+                " tg           decimal(5,3)     NULL, " +
+                " tp              decimal(5,3) NULL, " +
+                " td              decimal(5,3) NULL, " +
+                " tw2              decimal(5,3) NULL, " +
+                " closeVel              decimal(5,3) NULL, " +
+                " openVel              decimal(5,3) NULL, " +
+                " dd              decimal(5,3) NULL, " +
                 " deadZone              decimal(6,5) NULL " +
                 ")";
         sqliteDb.initDb(initSql);
@@ -704,11 +786,11 @@ public class BpaSwiModelRwTest extends TestCase {
                 " baseKv              decimal(4,0) NOT NULL, " +
                 " id     varchar(1) DEFAULT NULL," +
                 " t              decimal(5,0) NULL, " +
-                " s           decimal(5.0)     NULL, " +
-                " uoc           decimal(5.0)     NULL, " +
-                " isc              decimal(5.0) NULL, " +
-                " um              decimal(5.0) NULL, " +
-                " im              decimal(5.0) NULL, " +
+                " s           decimal(5,0)     NULL, " +
+                " uoc           decimal(5,0)     NULL, " +
+                " isc              decimal(5,0) NULL, " +
+                " um              decimal(5,0) NULL, " +
+                " im              decimal(5,0) NULL, " +
                 " n1              INTEGER NULL, " +
                 " n2              INTEGER NULL " +
                 ")";
@@ -722,17 +804,17 @@ public class BpaSwiModelRwTest extends TestCase {
                 " id     varchar(1) DEFAULT NULL," +
                 " pPercent              decimal(5,0) NULL, " +
                 " ipCon           INTEGER     NULL, " +
-                " tma           decimal(5.0)     NULL, " +
-                " ta1              decimal(5.0) NULL, " +
-                " ta              decimal(5.0) NULL, " +
-                " kpa              decimal(5.0) NULL, " +
-                " kia              decimal(5.0) NULL, " +
-                " tsa              decimal(5.0) NULL, " +
-                " c              decimal(5.0) NULL, " +
-                " dcBaseKv              decimal(5.0) NULL, " +
-                " k              decimal(5.0) NULL, " +
-                " mva              decimal(5.0) NULL, " +
-                " kover              decimal(5.0) NULL, " +
+                " tma           decimal(5,0)     NULL, " +
+                " ta1              decimal(5,0) NULL, " +
+                " ta              decimal(5,0) NULL, " +
+                " kpa              decimal(5,0) NULL, " +
+                " kia              decimal(5,0) NULL, " +
+                " tsa              decimal(5,0) NULL, " +
+                " c              decimal(5,0) NULL, " +
+                " dcBaseKv              decimal(5,0) NULL, " +
+                " k              decimal(5,0) NULL, " +
+                " mva              decimal(5,0) NULL, " +
+                " kover              decimal(5,0) NULL, " +
                 " converterNum              INTEGER NULL " +
                 ")";
         sqliteDb.initDb(initSql);
@@ -745,13 +827,13 @@ public class BpaSwiModelRwTest extends TestCase {
                 " id     varchar(1) DEFAULT NULL," +
                 " qPercent              decimal(3,0) NULL, " +
                 " rpCon           INTEGER     NULL, " +
-                " tmb           decimal(5.0)     NULL, " +
-                " tb1              decimal(5.0) NULL, " +
-                " tb              decimal(5.0) NULL, " +
-                " kpb              decimal(5.0) NULL, " +
-                " kib              decimal(5.0) NULL, " +
-                " tsb              decimal(5.0) NULL, " +
-                " kd              decimal(5.3) NULL " +
+                " tmb           decimal(5,0)     NULL, " +
+                " tb1              decimal(5,0) NULL, " +
+                " tb              decimal(5,0) NULL, " +
+                " kpb              decimal(5,0) NULL, " +
+                " kib              decimal(5,0) NULL, " +
+                " tsb              decimal(5,0) NULL, " +
+                " kd              decimal(5,3) NULL " +
                 ")";
         sqliteDb.initDb(initSql);
 
@@ -763,7 +845,7 @@ public class BpaSwiModelRwTest extends TestCase {
                 " generatorCode     varchar(1) DEFAULT NULL," +
                 " pe              decimal(6,2) NULL, " +
                 " tc           decimal(4,2)     NULL, " +
-                " to           decimal(4,2)     NULL, " +
+                " tOpen           decimal(4,2)     NULL, " +
                 " closeVel              decimal(4,2) NULL, " +
                 " openVel              decimal(4,2) NULL, " +
                 " maxPower              decimal(4,2) NULL, " +
@@ -782,6 +864,7 @@ public class BpaSwiModelRwTest extends TestCase {
         TABLE_DATA_NAME = "Load";
         initSql = "CREATE TABLE "  + TABLE_DATA_NAME + " (" +
                 " type     varchar(3) NOT NULL," +
+                " chgCode     varchar(1) NULL," +
                 " busName     varchar(8) NOT NULL," +
                 " baseKv              decimal(4,0) NOT NULL, " +
                 " zone              varchar(12) NULL, " +
@@ -812,6 +895,82 @@ public class BpaSwiModelRwTest extends TestCase {
                 " a              decimal(5,4) NULL, " +
                 " b              decimal(5,4) NULL, " +
                 " im              INTEGER NULL " +
+                ")";
+        sqliteDb.initDb(initSql);
+
+        TABLE_DATA_NAME = "ShortCircuitFault";
+        initSql = "CREATE TABLE "  + TABLE_DATA_NAME + " (" +
+                " type     varchar(3) NOT NULL," +
+                " busASign     varchar(1) NULL," +
+                " busAName     varchar(8) NOT NULL," +
+                " busABaseKv              decimal(4,0) NOT NULL, " +
+                " busBSign     varchar(1) NULL," +
+                " busBName     varchar(8) NOT NULL," +
+                " busBBaseKv              decimal(4,0) NOT NULL, " +
+                " parallelBranchCode     varchar(1) DEFAULT NULL," +
+                " mode              INTEGER NULL, " +
+                " startCycle           decimal(6,0)     NULL, " +
+                " faultR           decimal(6,0)     NULL, " +
+                " faultX              decimal(6,0) NULL, " +
+                " posPercent              decimal(6,0) NULL " +
+                ")";
+        sqliteDb.initDb(initSql);
+
+        TABLE_DATA_NAME = "FFCard";
+        initSql = "CREATE TABLE "  + TABLE_DATA_NAME + " (" +
+                " type     varchar(2) NOT NULL," +
+                " t              decimal(3,0) NOT NULL, " +
+                " dt     decimal(3,0) NULL," +
+                " endT              decimal(5,0) NULL, " +
+                " dtc           decimal(3,1)     NULL, " +
+                " istp              INTEGER NULL, " +
+                " toli           decimal(5,5)     NULL, " +
+                " ilim              INTEGER NULL, " +
+                " delAng              decimal(4,4) NULL, " +
+                " dc              INTEGER NULL, " +
+                " dmp              decimal(3,3) NULL, " +
+                " frqBse              decimal(2,0) NULL, " +
+                " lovtex              INTEGER NULL, " +
+                " imblok              INTEGER NULL, " +
+                " mfdep              INTEGER NULL, " +
+                " igslim              INTEGER NULL, " +
+                " lsolqit              INTEGER NULL, " +
+                " noAngLim              INTEGER NULL, " +
+                " infBus              INTEGER NULL, " +
+                " noPp              INTEGER NULL, " +
+                " noDq              INTEGER NULL, " +
+                " noSat              INTEGER NULL, " +
+                " noGv              INTEGER NULL, " +
+                " ieqpc              INTEGER NULL, " +
+                " noEx              INTEGER NULL, " +
+                " mftomg              INTEGER NULL, " +
+                " noSc              INTEGER NULL, " +
+                " mgtomf              INTEGER NULL, " +
+                " noLoad              INTEGER NULL " +
+                ")";
+        sqliteDb.initDb(initSql);
+
+        TABLE_DATA_NAME = "FLTCard";
+        initSql = "CREATE TABLE "  + TABLE_DATA_NAME + " (" +
+                " type     varchar(3) NOT NULL," +
+                " busAName     varchar(8) NOT NULL," +
+                " busABaseKv              decimal(4,0) NOT NULL, " +
+                " busBName     varchar(8) NOT NULL," +
+                " busBBaseKv              decimal(4,0) NOT NULL, " +
+                " circuitId     varchar(1) DEFAULT NULL," +
+                " fltType              INTEGER NULL, " +
+                " phase              INTEGER NULL, " +
+                " side              INTEGER NULL, " +
+                " tcyc0           decimal(4,0)     NULL, " +
+                " tcyc1           decimal(4,0)     NULL, " +
+                " tcyc2              decimal(4,0) NULL, " +
+                " posPercent           decimal(2,0)     NULL, " +
+                " faultR           decimal(5,0)     NULL, " +
+                " faultX              decimal(5,0) NULL, " +
+                " tcyc11           decimal(4,0)     NULL, " +
+                " tcyc21           decimal(4,0)     NULL, " +
+                " tcyc12              decimal(4,0) NULL, " +
+                " tcyc22              decimal(4,0) NULL " +
                 ")";
         sqliteDb.initDb(initSql);
     }
