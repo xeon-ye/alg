@@ -632,7 +632,7 @@ public class BpaSwiModelRwTest extends TestCase {
         modifiedModel.ff = (FFCard) sqliteDb.queryData("FFCard").get(0);
 
         InputStream in = this.getClass().getResourceAsStream("/bpafiles/示范区BPA运行方式/XIAOJIN.SWI");
-        FileOutputStream out = new FileOutputStream("/bpafiles/示范区BPA运行方式/XIAOJIN_modify.SWI");
+        FileOutputStream out = new FileOutputStream("XIAOJIN_modify.SWI");
 //        ByteArrayOutputStream out = new ByteArrayOutputStream();
         boolean r = BpaSwiModelWriter.readAndWrite(in, "GBK", out, "GBK", modifiedModel);
         assertTrue(r);
