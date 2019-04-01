@@ -61,7 +61,6 @@ public class FLTCard implements Serializable {
         busBBaseKv = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 25, 29)).trim(), "4.0");
         circuitId = (char) src[29];
         fltType = BpaFileRwUtil.parseInt(new String(BpaFileRwUtil.getTarget(src, 31, 33)).trim());
-        phase = BpaFileRwUtil.parseInt(new String(BpaFileRwUtil.getTarget(src, 34, 35)).trim());
         side = BpaFileRwUtil.parseInt(new String(BpaFileRwUtil.getTarget(src, 36, 37)).trim());
         tcyc0 = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 38, 42)).trim(), "4.0");
         tcyc1 = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 42, 46)).trim(), "4.0");
@@ -69,33 +68,63 @@ public class FLTCard implements Serializable {
         posPercent = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 50, 52)).trim(), "2.0");
         faultR = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 52, 57)).trim(), "5.0");
         faultX = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 57, 62)).trim(), "5.0");
-        tcyc11 = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 62, 66)).trim(), "4.0");
-        tcyc21 = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 66, 70)).trim(), "4.0");
-        tcyc12 = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 70, 74)).trim(), "4.0");
-        tcyc22 = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 74, 78)).trim(), "4.0");
+        if (fltType == 2) {
+            phase = BpaFileRwUtil.parseInt(new String(BpaFileRwUtil.getTarget(src, 34, 35)).trim());
+            tcyc11 = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 62, 66)).trim(), "4.0");
+            tcyc21 = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 66, 70)).trim(), "4.0");
+        } else if (fltType == 3) {
+            phase = BpaFileRwUtil.parseInt(new String(BpaFileRwUtil.getTarget(src, 34, 35)).trim());
+            tcyc11 = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 62, 66)).trim(), "4.0");
+            tcyc21 = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 66, 70)).trim(), "4.0");
+            tcyc11 = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 62, 66)).trim(), "4.0");
+            tcyc21 = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 66, 70)).trim(), "4.0");
+            tcyc12 = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 70, 74)).trim(), "4.0");
+            tcyc22 = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 74, 78)).trim(), "4.0");
+        }
     }
 
     public String toString() {
         StringBuilder strLine = new StringBuilder();
         strLine.append("FLT").append(" ");
         strLine.append(DataOutputFormat.format.getFormatStr(getBusAName(), "8"));
-        strLine.append(BpaFileRwUtil.getFormatStr(getBusABaseKv(), "4.3")).append(" ");//the bpa manual is 4.0
+        strLine.append(BpaFileRwUtil.getFormatStr(getBusABaseKv(), "4.0")).append(" ");
         strLine.append(DataOutputFormat.format.getFormatStr(getBusBName(), "8"));
-        strLine.append(BpaFileRwUtil.getFormatStr(getBusBBaseKv(), "4.3"));//the bpa manual is 4.0
+        strLine.append(BpaFileRwUtil.getFormatStr(getBusBBaseKv(), "4.0"));
         strLine.append(circuitId).append(" ");
         strLine.append(fltType).append(" ");
-        strLine.append(phase).append(" ");
-        strLine.append(side).append(" ");
-        strLine.append(BpaFileRwUtil.getFormatStr(tcyc0, "4.0")).append("  ");
-        strLine.append(BpaFileRwUtil.getFormatStr(tcyc1, "4.0"));
-        strLine.append(BpaFileRwUtil.getFormatStr(tcyc2, "4.0"));
-        strLine.append(BpaFileRwUtil.getFormatStr(posPercent, "2.0"));
-        strLine.append(BpaFileRwUtil.getFormatStr(getFaultR(), "5.0"));
-        strLine.append(BpaFileRwUtil.getFormatStr(getFaultX(), "5.0"));
-        strLine.append(BpaFileRwUtil.getFormatStr(tcyc11, "4.0"));
-        strLine.append(BpaFileRwUtil.getFormatStr(tcyc21, "4.0"));
-        strLine.append(BpaFileRwUtil.getFormatStr(tcyc12, "4.0"));
-        strLine.append(BpaFileRwUtil.getFormatStr(tcyc22, "4.0"));
+        if (fltType == 1) {
+            strLine.append("  ").append(side).append(" ");
+            strLine.append(BpaFileRwUtil.getFormatStr(tcyc0, "4.0"));
+            strLine.append(BpaFileRwUtil.getFormatStr(tcyc1, "4.0"));
+            strLine.append(BpaFileRwUtil.getFormatStr(tcyc2, "4.0"));
+            strLine.append(BpaFileRwUtil.getFormatStr(posPercent, "2.0"));
+            strLine.append(BpaFileRwUtil.getFormatStr(getFaultR(), "5.0"));
+            strLine.append(BpaFileRwUtil.getFormatStr(getFaultX(), "5.0"));
+        } else if (fltType == 2) {
+            strLine.append(phase).append(" ");
+            strLine.append(side).append(" ");
+            strLine.append(BpaFileRwUtil.getFormatStr(tcyc0, "4.0"));
+            strLine.append(BpaFileRwUtil.getFormatStr(tcyc1, "4.0"));
+            strLine.append(BpaFileRwUtil.getFormatStr(tcyc2, "4.0"));
+            strLine.append(BpaFileRwUtil.getFormatStr(posPercent, "2.0"));
+            strLine.append(BpaFileRwUtil.getFormatStr(getFaultR(), "5.0"));
+            strLine.append(BpaFileRwUtil.getFormatStr(getFaultX(), "5.0"));
+            strLine.append(BpaFileRwUtil.getFormatStr(tcyc11, "4.0"));
+            strLine.append(BpaFileRwUtil.getFormatStr(tcyc21, "4.0"));
+        } else if (fltType == 3) {
+            strLine.append(phase).append(" ");
+            strLine.append(side).append(" ");
+            strLine.append(BpaFileRwUtil.getFormatStr(tcyc0, "4.0")).append("  ");
+            strLine.append(BpaFileRwUtil.getFormatStr(tcyc1, "4.0"));
+            strLine.append(BpaFileRwUtil.getFormatStr(tcyc2, "4.0"));
+            strLine.append(BpaFileRwUtil.getFormatStr(posPercent, "2.0"));
+            strLine.append(BpaFileRwUtil.getFormatStr(getFaultR(), "5.0"));
+            strLine.append(BpaFileRwUtil.getFormatStr(getFaultX(), "5.0"));
+            strLine.append(BpaFileRwUtil.getFormatStr(tcyc11, "4.0"));
+            strLine.append(BpaFileRwUtil.getFormatStr(tcyc21, "4.0"));
+            strLine.append(BpaFileRwUtil.getFormatStr(tcyc12, "4.0"));
+            strLine.append(BpaFileRwUtil.getFormatStr(tcyc22, "4.0"));
+        }
         return strLine.toString();
     }
 

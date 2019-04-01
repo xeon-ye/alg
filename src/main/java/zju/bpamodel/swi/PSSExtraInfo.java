@@ -93,11 +93,14 @@ public class PSSExtraInfo implements Serializable {
         str.append(BpaFileRwUtil.getFormatStr(maxVs, "6.4"));
         str.append(BpaFileRwUtil.getFormatStr(minVs, "6.4"));
         str.append(ib);
+        if (busName == null) {
+            busName = "";
+        }
         str.append(DataOutputFormat.format.getFormatStr(busName, "8"));
         if (ib == 1) {
             str.append(BpaFileRwUtil.getFormatStr(busBaseKv, "4.0"));
-        } else if (ib == 2) {
-            str.append(BpaFileRwUtil.getFormatStr(xq, "4.3"));
+        } else {
+            str.append(BpaFileRwUtil.getFormatStr(xq, "4.3"));  // ib == 2
         }
         str.append(BpaFileRwUtil.getFormatStr(kMVA, "4.0"));
         return str.toString();

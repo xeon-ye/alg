@@ -638,6 +638,11 @@ public class BpaSwiModelRwTest extends TestCase {
         assertTrue(r);
     }
 
+    public void testRead() {
+        BpaSwiModel model = BpaSwiModelParser.parse(this.getClass().getResourceAsStream("/bpafiles/示范区BPA运行方式/XIAOJIN_modify.SWI"), "GBK");
+        assertNotNull(model);
+    }
+
     public void testCreateTables() {
         SqliteDb sqliteDb = new SqliteDb();
         String TABLE_DATA_NAME = "Generator";
