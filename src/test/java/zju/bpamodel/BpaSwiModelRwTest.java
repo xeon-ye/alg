@@ -3,9 +3,7 @@ package zju.bpamodel;
 import junit.framework.TestCase;
 import zju.bpamodel.swi.*;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -199,14 +197,6 @@ public class BpaSwiModelRwTest extends TestCase {
     public void testXJ() throws IOException {
         BpaSwiModel model = BpaSwiModelParser.parse(this.getClass().getResourceAsStream("/bpafiles/示范区BPA运行方式/XIAOJIN.SWI"), "GBK");
         assertNotNull(model);
-//        BpaSwiModel modifiedModel = new BpaSwiModel();
-//        modifiedModel.setGenerators(new ArrayList<Generator>());
-//        modifiedModel.setExciters(exciters);
-//        InputStream in = this.getClass().getResourceAsStream("/bpafiles/示范区BPA运行方式/XIAOJIN.SWI");
-//        //FileOutputStream out = new FileOutputStream("162bpaswi-opted.swi");
-//        ByteArrayOutputStream out = new ByteArrayOutputStream();
-//        boolean r = BpaSwiModelWriter.readAndWrite(in, "GBK", out, "GBK", modifiedModel);
-//        assertTrue(r);
         SqliteDb sqliteDb = new SqliteDb();
         List<String> sqls = new LinkedList<>();
         String TABLE_DATA_NAME = "Generator";
@@ -538,6 +528,114 @@ public class BpaSwiModelRwTest extends TestCase {
                 ")";
         sqls.add(insertSql);
         sqliteDb.executeSqls(sqls);
+    }
+
+    public void testWrite() throws FileNotFoundException {
+        SqliteDb sqliteDb = new SqliteDb();
+        BpaSwiModel modifiedModel = new BpaSwiModel();
+        List<Object> objects = sqliteDb.queryData("Generator");
+        modifiedModel.generators = new ArrayList<>(objects.size());
+        for (Object object : objects) {
+            modifiedModel.generators.add((Generator) object);
+        }
+        objects.clear();
+        objects = sqliteDb.queryData("GeneratorDW");
+        modifiedModel.generatorDws = new ArrayList<>(objects.size());
+        for (Object object : objects) {
+            modifiedModel.generatorDws.add((GeneratorDW) object);
+        }
+        objects.clear();
+        objects = sqliteDb.queryData("Exciter");
+        modifiedModel.exciters = new ArrayList<>(objects.size());
+        for (Object object : objects) {
+            modifiedModel.exciters.add((Exciter) object);
+        }
+        objects.clear();
+        objects = sqliteDb.queryData("ExciterExtraInfo");
+        modifiedModel.exciterExtraInfos = new ArrayList<>(objects.size());
+        for (Object object : objects) {
+            modifiedModel.exciterExtraInfos.add((ExciterExtraInfo) object);
+        }
+        objects.clear();
+        objects = sqliteDb.queryData("PSS");
+        modifiedModel.pssList = new ArrayList<>(objects.size());
+        for (Object object : objects) {
+            modifiedModel.pssList.add((PSS) object);
+        }
+        objects.clear();
+        objects = sqliteDb.queryData("PSSExtraInfo");
+        modifiedModel.pssExtraInfos = new ArrayList<>(objects.size());
+        for (Object object : objects) {
+            modifiedModel.pssExtraInfos.add((PSSExtraInfo) object);
+        }
+        objects.clear();
+        objects = sqliteDb.queryData("PrimeMover");
+        modifiedModel.primeMovers = new ArrayList<>(objects.size());
+        for (Object object : objects) {
+            modifiedModel.primeMovers.add((PrimeMover) object);
+        }
+        objects.clear();
+        objects = sqliteDb.queryData("Governor");
+        modifiedModel.governors = new ArrayList<>(objects.size());
+        for (Object object : objects) {
+            modifiedModel.governors.add((Governor) object);
+        }
+        objects.clear();
+        objects = sqliteDb.queryData("GovernorExtraInfo");
+        modifiedModel.governorExtraInfos = new ArrayList<>(objects.size());
+        for (Object object : objects) {
+            modifiedModel.governorExtraInfos.add((GovernorExtraInfo) object);
+        }
+        objects.clear();
+        objects = sqliteDb.queryData("PV");
+        modifiedModel.pvs = new ArrayList<>(objects.size());
+        for (Object object : objects) {
+            modifiedModel.pvs.add((PV) object);
+        }
+        objects.clear();
+        objects = sqliteDb.queryData("BC");
+        modifiedModel.bcs = new ArrayList<>(objects.size());
+        for (Object object : objects) {
+            modifiedModel.bcs.add((BC) object);
+        }
+        objects.clear();
+        objects = sqliteDb.queryData("BCExtraInfo");
+        modifiedModel.bcExtraInfos = new ArrayList<>(objects.size());
+        for (Object object : objects) {
+            modifiedModel.bcExtraInfos.add((BCExtraInfo) object);
+        }
+        objects.clear();
+        objects = sqliteDb.queryData("Servo");
+        modifiedModel.servos = new ArrayList<>(objects.size());
+        for (Object object : objects) {
+            modifiedModel.servos.add((Servo) object);
+        }
+        objects.clear();
+        objects = sqliteDb.queryData("Load");
+        modifiedModel.loads = new ArrayList<>(objects.size());
+        for (Object object : objects) {
+            modifiedModel.loads.add((Load) object);
+        }
+        objects.clear();
+        objects = sqliteDb.queryData("ShortCircuitFault");
+        modifiedModel.shortCircuitFaults = new ArrayList<>(objects.size());
+        for (Object object : objects) {
+            modifiedModel.shortCircuitFaults.add((ShortCircuitFault) object);
+        }
+        objects.clear();
+        objects = sqliteDb.queryData("FLTCard");
+        modifiedModel.fltCards = new ArrayList<>(objects.size());
+        for (Object object : objects) {
+            modifiedModel.fltCards.add((FLTCard) object);
+        }
+        objects.clear();
+        modifiedModel.ff = (FFCard) sqliteDb.queryData("FFCard").get(0);
+
+        InputStream in = this.getClass().getResourceAsStream("/bpafiles/示范区BPA运行方式/XIAOJIN.SWI");
+        FileOutputStream out = new FileOutputStream("/bpafiles/示范区BPA运行方式/XIAOJIN_modify.SWI");
+//        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        boolean r = BpaSwiModelWriter.readAndWrite(in, "GBK", out, "GBK", modifiedModel);
+        assertTrue(r);
     }
 
     public void testCreateTables() {
