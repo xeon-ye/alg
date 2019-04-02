@@ -44,10 +44,10 @@ public class GeneratorDW implements Serializable {
             busName = new String(BpaFileRwUtil.getTarget(src, 3, 11), charset).trim();
         else
             busName = new String(BpaFileRwUtil.getTarget(src, 3, 11)).trim();
-        baseKv = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 11, 15)).trim());
+        baseKv = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 11, 15)).trim(), "4.3");
         id = (char) src[15];
 
-        baseMva = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 16, 21)).trim(), "5.1");
+        baseMva = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 16, 21)).trim(), "5.2");//the bpa manual is 5.1
         powerFactor = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 22, 25)).trim(), "3.2");
         if (charset != null)
             type = new String(BpaFileRwUtil.getTarget(src, 30, 32), charset).trim();
@@ -69,7 +69,7 @@ public class GeneratorDW implements Serializable {
         str.append(DataOutputFormat.format.getFormatStr(busName, "8"));
         str.append(BpaFileRwUtil.getFormatStr(baseKv, "4.3"));//the bpa manual is 4.0
         str.append(id);
-        str.append(BpaFileRwUtil.getFormatStr(baseMva, "5.1")).append(" ");
+        str.append(BpaFileRwUtil.getFormatStr(baseMva, "5.2")).append(" ");
         str.append(BpaFileRwUtil.getFormatStr(powerFactor, "3.2")).append("     ");
         str.append(DataOutputFormat.format.getFormatStr(type, "2")).append(" ");
         str.append(DataOutputFormat.format.getFormatStr(owner, "3")).append(" ");

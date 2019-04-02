@@ -46,14 +46,14 @@ public class PV implements Serializable {
             busName = new String(BpaFileRwUtil.getTarget(src, 3, 11), charset).trim();
         else
             busName = new String(BpaFileRwUtil.getTarget(src, 3, 11)).trim();
-        baseKv = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 11, 15)).trim(), "4.0");
+        baseKv = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 11, 15)).trim(), "4.3");
         id = (char) src[15];
-        t = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 20, 25)).trim(), "5.0");
-        s = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 22, 25)).trim(), "5.0");
-        uoc = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 30, 35)).trim(), "5.0");
-        isc = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 35, 40)).trim(), "5.0");
-        um = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 40, 45)).trim(),"5.0");
-        im = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 45, 50)).trim(), "5.0");
+        t = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 20, 25)).trim(), "5.2");//the bpa model is 5.0
+        s = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 25, 30)).trim(), "5.2");//the bpa model is 5.0
+        uoc = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 30, 35)).trim(), "5.2");//the bpa model is 5.0
+        isc = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 35, 40)).trim(), "5.2");//the bpa model is 5.0
+        um = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 40, 45)).trim(),"5.2");//the bpa model is 5.0
+        im = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 45, 50)).trim(), "5.2");//the bpa model is 5.0
         n1 = BpaFileRwUtil.parseInt(new String(BpaFileRwUtil.getTarget(src, 50, 55)).trim());
         n2 = BpaFileRwUtil.parseInt(new String(BpaFileRwUtil.getTarget(src, 55, 60)).trim());
     }
@@ -62,16 +62,16 @@ public class PV implements Serializable {
         StringBuilder str = new StringBuilder();
         str.append(type).append(" ");
         str.append(DataOutputFormat.format.getFormatStr(getBusName(), "8"));
-        str.append(BpaFileRwUtil.getFormatStr(getBaseKv(), "4.0"));
+        str.append(BpaFileRwUtil.getFormatStr(getBaseKv(), "4.3"));
         str.append(getId()).append("    ");
-        str.append(BpaFileRwUtil.getFormatStr(t, "5.0"));
-        str.append(BpaFileRwUtil.getFormatStr(s, "5.0"));
-        str.append(BpaFileRwUtil.getFormatStr(uoc, "5.0"));
-        str.append(BpaFileRwUtil.getFormatStr(isc, "5.0"));
-        str.append(BpaFileRwUtil.getFormatStr(um, "5.0"));
-        str.append(BpaFileRwUtil.getFormatStr(im, "5.0"));
-        str.append(n1);
-        str.append(n2);
+        str.append(BpaFileRwUtil.getFormatStr(t, "5.2"));
+        str.append(BpaFileRwUtil.getFormatStr(s, "5.2"));
+        str.append(BpaFileRwUtil.getFormatStr(uoc, "5.2"));
+        str.append(BpaFileRwUtil.getFormatStr(isc, "5.2"));
+        str.append(BpaFileRwUtil.getFormatStr(um, "5.2"));
+        str.append(BpaFileRwUtil.getFormatStr(im, "5.2"));
+        str.append(BpaFileRwUtil.getFormatStr(n1, "5"));
+        str.append(BpaFileRwUtil.getFormatStr(n2, "5"));
         return str.toString();
     }
 

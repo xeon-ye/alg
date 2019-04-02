@@ -55,7 +55,7 @@ public class Servo implements Serializable {
             genName = new String(BpaFileRwUtil.getTarget(src, 3, 11), charset).trim();
         else
             genName = new String(BpaFileRwUtil.getTarget(src, 3, 11)).trim();
-        baseKv = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 11, 15)).trim(), "4.0");
+        baseKv = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 11, 15)).trim(), "4.3");
         generatorCode = (char) src[15];
         pe = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 16, 22)).trim(), "6.2");
         tc = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 22, 26)).trim(), "4.2");
@@ -80,7 +80,7 @@ public class Servo implements Serializable {
         strLine += subType;
         strLine += " ";
         strLine += DataOutputFormat.format.getFormatStr(genName, "8");
-        strLine += BpaFileRwUtil.getFormatStr(getBaseKv(), "4.0");
+        strLine += BpaFileRwUtil.getFormatStr(getBaseKv(), "4.3");
         strLine += generatorCode;
         strLine += BpaFileRwUtil.getFormatStr(pe, "6.2");
         strLine += BpaFileRwUtil.getFormatStr(tc, "4.2");

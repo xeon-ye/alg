@@ -52,7 +52,7 @@ public class BC implements Serializable {
             busName = new String(BpaFileRwUtil.getTarget(src, 3, 11), charset).trim();
         else
             busName = new String(BpaFileRwUtil.getTarget(src, 3, 11)).trim();
-        baseKv = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 11, 15)).trim(), "4.0");
+        baseKv = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 11, 15)).trim(), "4.3");
         id = (char) src[15];
         pPercent = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 16, 19)).trim(), "3.0");
         ipCon = BpaFileRwUtil.parseInt(new String(BpaFileRwUtil.getTarget(src, 19, 20)).trim());
@@ -63,7 +63,7 @@ public class BC implements Serializable {
         kia = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 40, 45)).trim(), "5.0");
         tsa = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 45, 50)).trim(), "5.0");
         c = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 50, 55)).trim(), "5.0");
-        dcBaseKv = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 55, 60)).trim(), "5.0");
+        dcBaseKv = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 55, 60)).trim(), "5.3");// the bpa model is 5.0
         k = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 60, 65)).trim(), "5.0");
         mva = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 65, 70)).trim(), "5.0");
         kover = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 70, 75)).trim(), "5.0");
@@ -74,7 +74,7 @@ public class BC implements Serializable {
         StringBuilder str = new StringBuilder();
         str.append(type).append(" ");
         str.append(DataOutputFormat.format.getFormatStr(getBusName(), "8"));
-        str.append(BpaFileRwUtil.getFormatStr(getBaseKv(), "4.0"));
+        str.append(BpaFileRwUtil.getFormatStr(getBaseKv(), "4.3"));
         str.append(getId());
         str.append(BpaFileRwUtil.getFormatStr(pPercent, "3.0"));
         str.append(ipCon);
@@ -85,11 +85,11 @@ public class BC implements Serializable {
         str.append(BpaFileRwUtil.getFormatStr(kia, "5.0"));
         str.append(BpaFileRwUtil.getFormatStr(tsa, "5.0"));
         str.append(BpaFileRwUtil.getFormatStr(c, "5.0"));
-        str.append(BpaFileRwUtil.getFormatStr(dcBaseKv, "5.0"));
+        str.append(BpaFileRwUtil.getFormatStr(dcBaseKv, "5.3"));
         str.append(BpaFileRwUtil.getFormatStr(k, "5.0"));
         str.append(BpaFileRwUtil.getFormatStr(mva, "5.0"));
         str.append(BpaFileRwUtil.getFormatStr(kover, "5.0"));
-        str.append(converterNum);
+        str.append(BpaFileRwUtil.getFormatStr(converterNum, "5"));
         return str.toString();
     }
 

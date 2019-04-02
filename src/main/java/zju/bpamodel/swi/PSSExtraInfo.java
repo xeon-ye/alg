@@ -53,7 +53,7 @@ public class PSSExtraInfo implements Serializable {
             genName = new String(BpaFileRwUtil.getTarget(src, 3, 11), charset).trim();
         else
             genName = new String(BpaFileRwUtil.getTarget(src, 3, 11)).trim();
-        baseKv = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 11, 15)).trim(), "4.0");
+        baseKv = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 11, 15)).trim(), "4.3");
         id = (char) src[15];
         kp = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 16, 21)).trim(), "5.3");
         t1 = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 21, 26)).trim(), "5.3");
@@ -70,7 +70,7 @@ public class PSSExtraInfo implements Serializable {
         else
             busName = new String(BpaFileRwUtil.getTarget(src, 64, 72)).trim();
         if (ib == 1) {
-            busBaseKv = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 72, 76)).trim(), "4.0");
+            busBaseKv = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 72, 76)).trim(), "4.3");
         } else if (ib == 2) {
             xq = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 72, 76)).trim(), "4.3");
         }
@@ -81,7 +81,7 @@ public class PSSExtraInfo implements Serializable {
         StringBuilder str = new StringBuilder();
         str.append(type);
         str.append(DataOutputFormat.format.getFormatStr(genName, "8"));
-        str.append(BpaFileRwUtil.getFormatStr(baseKv, "4.0"));
+        str.append(BpaFileRwUtil.getFormatStr(baseKv, "4.3"));
         str.append(id);
         str.append(BpaFileRwUtil.getFormatStr(kp, "5.3"));
         str.append(BpaFileRwUtil.getFormatStr(t1, "5.3"));
@@ -98,7 +98,7 @@ public class PSSExtraInfo implements Serializable {
         }
         str.append(DataOutputFormat.format.getFormatStr(busName, "8"));
         if (ib == 1) {
-            str.append(BpaFileRwUtil.getFormatStr(busBaseKv, "4.0"));
+            str.append(BpaFileRwUtil.getFormatStr(busBaseKv, "4.3"));
         } else {
             str.append(BpaFileRwUtil.getFormatStr(xq, "4.3"));  // ib == 2
         }

@@ -47,7 +47,7 @@ public class GovernorExtraInfo implements Serializable {
             genName = new String(BpaFileRwUtil.getTarget(src, 3, 11), charset).trim();
         else
             genName = new String(BpaFileRwUtil.getTarget(src, 3, 11)).trim();
-        baseKv = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 11, 15)).trim(), "4.0");
+        baseKv = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 11, 15)).trim(), "4.3");
         generatorCode = (char) src[15];
         delt2 = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 16, 20)).trim(), "4.4");
         tr2 = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 20, 24)).trim(), "4.4");
@@ -65,7 +65,7 @@ public class GovernorExtraInfo implements Serializable {
         strLine += DataOutputFormat.format.getFormatStr(type, "3");
         strLine += " ";
         strLine += DataOutputFormat.format.getFormatStr(genName, "8");
-        strLine += BpaFileRwUtil.getFormatStr(getBaseKv(), "4.0");
+        strLine += BpaFileRwUtil.getFormatStr(getBaseKv(), "4.3");
         strLine += generatorCode;
         strLine += BpaFileRwUtil.getFormatStr(delt2, "4.4");
         strLine += BpaFileRwUtil.getFormatStr(tr2, "4.4");

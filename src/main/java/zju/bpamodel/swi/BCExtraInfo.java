@@ -47,7 +47,7 @@ public class BCExtraInfo implements Serializable {
             busName = new String(BpaFileRwUtil.getTarget(src, 3, 11), charset).trim();
         else
             busName = new String(BpaFileRwUtil.getTarget(src, 3, 11)).trim();
-        baseKv = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 11, 15)).trim(), "4.0");
+        baseKv = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 11, 15)).trim(), "4.3");
         id = (char) src[15];
         qPercent = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 16, 19)).trim(), "3.0");
         rpCon = BpaFileRwUtil.parseInt(new String(BpaFileRwUtil.getTarget(src, 19, 20)).trim());
@@ -64,7 +64,7 @@ public class BCExtraInfo implements Serializable {
         StringBuilder str = new StringBuilder();
         str.append(type);
         str.append(DataOutputFormat.format.getFormatStr(getBusName(), "8"));
-        str.append(BpaFileRwUtil.getFormatStr(getBaseKv(), "4.0"));
+        str.append(BpaFileRwUtil.getFormatStr(getBaseKv(), "4.3"));
         str.append(getId());
         str.append(BpaFileRwUtil.getFormatStr(qPercent, "3.0"));
         str.append(rpCon);

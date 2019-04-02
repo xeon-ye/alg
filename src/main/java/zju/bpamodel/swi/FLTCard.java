@@ -53,12 +53,12 @@ public class FLTCard implements Serializable {
             busAName = new String(BpaFileRwUtil.getTarget(src, 4, 12), charset).trim();
         else
             busAName = new String(BpaFileRwUtil.getTarget(src, 4, 12)).trim();
-        busABaseKv = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 12, 16)).trim(), "4.0");
+        busABaseKv = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 12, 16)).trim(), "4.3");
         if(charset != null)
             busBName = new String(BpaFileRwUtil.getTarget(src, 17, 25), charset).trim();
         else
             busBName = new String(BpaFileRwUtil.getTarget(src, 17, 25)).trim();
-        busBBaseKv = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 25, 29)).trim(), "4.0");
+        busBBaseKv = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 25, 29)).trim(), "4.3");
         circuitId = (char) src[29];
         fltType = BpaFileRwUtil.parseInt(new String(BpaFileRwUtil.getTarget(src, 31, 33)).trim());
         side = BpaFileRwUtil.parseInt(new String(BpaFileRwUtil.getTarget(src, 36, 37)).trim());
@@ -87,11 +87,11 @@ public class FLTCard implements Serializable {
         StringBuilder strLine = new StringBuilder();
         strLine.append("FLT").append(" ");
         strLine.append(DataOutputFormat.format.getFormatStr(getBusAName(), "8"));
-        strLine.append(BpaFileRwUtil.getFormatStr(getBusABaseKv(), "4.0")).append(" ");
+        strLine.append(BpaFileRwUtil.getFormatStr(getBusABaseKv(), "4.3")).append(" ");
         strLine.append(DataOutputFormat.format.getFormatStr(getBusBName(), "8"));
-        strLine.append(BpaFileRwUtil.getFormatStr(getBusBBaseKv(), "4.0"));
+        strLine.append(BpaFileRwUtil.getFormatStr(getBusBBaseKv(), "4.3"));
         strLine.append(circuitId).append(" ");
-        strLine.append(fltType).append(" ");
+        strLine.append(BpaFileRwUtil.getFormatStr(fltType, "2")).append(" ");
         if (fltType == 1) {
             strLine.append("  ").append(side).append(" ");
             strLine.append(BpaFileRwUtil.getFormatStr(tcyc0, "4.0"));

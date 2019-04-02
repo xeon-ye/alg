@@ -95,11 +95,11 @@ public class FFCard implements Serializable {
         str.append(BpaFileRwUtil.getFormatStr(dt, "3.0")).append(" ");
         str.append(BpaFileRwUtil.getFormatStr(endT, "5.0")).append(" ");
         str.append(BpaFileRwUtil.getFormatStr(dtc, "3.1")).append(" ");
-        str.append(istp).append(" ");
+        str.append(BpaFileRwUtil.getFormatStr(istp, "3")).append(" ");
         str.append(BpaFileRwUtil.getFormatStr(toli, "5.5")).append(" ");
-        str.append(ilim).append(" ");
+        str.append(BpaFileRwUtil.getFormatStr(ilim, "3")).append(" ");
         str.append(BpaFileRwUtil.getFormatStr(delAng, "4.4")).append(" ");
-        str.append(dc).append(" ");
+        str.append(BpaFileRwUtil.getFormatStr(dc, "2")).append(" ");
         str.append(BpaFileRwUtil.getFormatStr(dmp, "3.3")).append("       ");
         str.append(BpaFileRwUtil.getFormatStr(frqBse, "2.0")).append(" ");
         str.append(lovtex).append(" ");
