@@ -55,7 +55,7 @@ public class Governor implements Serializable {
             genName = new String(BpaFileRwUtil.getTarget(src, 3, 11), charset).trim();
         else
             genName = new String(BpaFileRwUtil.getTarget(src, 3, 11)).trim();
-        baseKv = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 11, 15)).trim(), "4.3");
+        baseKv = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 11, 15)).trim());
         generatorCode = (char) src[15];
         kw = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 16, 21)).trim(), "5.0");
         tr = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 21, 25)).trim(), "4.4");
@@ -80,7 +80,7 @@ public class Governor implements Serializable {
         strLine += subType;
         strLine += " ";
         strLine += DataOutputFormat.format.getFormatStr(genName, "8");
-        strLine += BpaFileRwUtil.getFormatStr(getBaseKv(), "4.3");
+        strLine += BpaFileRwUtil.getFormatStr(getBaseKv(), "4.1");// the bpa model is 4.0
         strLine += generatorCode;
         strLine += BpaFileRwUtil.getFormatStr(kw, "5.0");
         strLine += BpaFileRwUtil.getFormatStr(tr, "4.4");

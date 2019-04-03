@@ -50,7 +50,7 @@ public class PrimeMover implements Serializable {
             busName = new String(BpaFileRwUtil.getTarget(src, 3, 11), charset).trim();
         else
             busName = new String(BpaFileRwUtil.getTarget(src, 3, 11)).trim();
-        baseKv = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 11, 15)).trim(), "4.3");
+        baseKv = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 11, 15)).trim());
         generatorCode = (char) src[15];
         if (type == 'G') {
             maxPower = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 16, 22)).trim(), "6.1");
@@ -76,7 +76,7 @@ public class PrimeMover implements Serializable {
         strLine += subType;
         strLine += " ";
         strLine += DataOutputFormat.format.getFormatStr(getBusName(), "8");
-        strLine += BpaFileRwUtil.getFormatStr(getBaseKv(), "4.3");
+        strLine += BpaFileRwUtil.getFormatStr(getBaseKv(), "4.1");// the bpa model is 4.0
         strLine += generatorCode;
 
         strLine += BpaFileRwUtil.getFormatStr(maxPower, "6.1");

@@ -73,7 +73,7 @@ public class PSS implements Serializable {
             genName = new String(BpaFileRwUtil.getTarget(src, 3, 11), charset).trim();
         else
             genName = new String(BpaFileRwUtil.getTarget(src, 3, 11)).trim();
-        baseKv = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 11, 15)).trim(), "4.3");
+        baseKv = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 11, 15)).trim());
         id = (char) src[15];
         if (subType == 'F' || subType == 'P' || subType == 'S' || subType == 'G') {
             kqv = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 16, 20)).trim(), "4.3");
@@ -97,7 +97,7 @@ public class PSS implements Serializable {
             if (subType == 'P' || subType == 'G')
                 kqsBaseCap = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 76, 80)).trim(), "4.0");
             else
-                remoteBaseKv = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 76, 80)).trim(), "4.3");
+                remoteBaseKv = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 76, 80)).trim());
         } else if (subType == 'I') {
             trw = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 16, 20)).trim(), "4.4");
             t5 = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 20, 25)).trim(), "5.3");
@@ -120,7 +120,7 @@ public class PSS implements Serializable {
         StringBuilder str = new StringBuilder();
         str.append(type).append(subType).append(" ");
         str.append(DataOutputFormat.format.getFormatStr(genName, "8"));
-        str.append(BpaFileRwUtil.getFormatStr(baseKv, "4.3"));
+        str.append(BpaFileRwUtil.getFormatStr(baseKv, "4.1"));// the bpa model is 4.0
         str.append(id);
         if (subType == 'F' || subType == 'P' || subType == 'S' || subType == 'G') {
             str.append(BpaFileRwUtil.getFormatStr(kqv, "4.3"));
@@ -141,7 +141,7 @@ public class PSS implements Serializable {
             if (subType == 'P' || subType == 'G')
                 str.append(BpaFileRwUtil.getFormatStr(kqsBaseCap, "4.0"));
             else
-                str.append(BpaFileRwUtil.getFormatStr(remoteBaseKv, "4.3"));
+                str.append(BpaFileRwUtil.getFormatStr(remoteBaseKv, "4.1"));// the bpa model is 4.0
         } else if (subType == 'I') {
             str.append(BpaFileRwUtil.getFormatStr(trw, "4.4"));
             str.append(BpaFileRwUtil.getFormatStr(t5, "5.3"));

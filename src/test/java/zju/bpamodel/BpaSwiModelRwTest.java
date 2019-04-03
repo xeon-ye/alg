@@ -764,7 +764,7 @@ public class BpaSwiModelRwTest extends TestCase {
         initSql = "CREATE TABLE "  + TABLE_DATA_NAME + " (" +
                 " type     varchar(3) NOT NULL," +
                 " genName     varchar(8) NOT NULL," +
-                " baseKv              decimal(4,3) NOT NULL, " +
+                " baseKv              decimal(4,1) NOT NULL, " +
                 " id     varchar(1) DEFAULT NULL," +
                 " kqv              decimal(4,3) NULL, " +
                 " tqv           decimal(3,3)     NULL, " +
@@ -781,7 +781,7 @@ public class BpaSwiModelRwTest extends TestCase {
                 " cutoffV              decimal(4,3) NULL, " +
                 " slowV              decimal(2,2) NULL, " +
                 " remoteBusName              varchar(8) NULL, " +
-                " remoteBaseKv              decimal(4,3) NULL, " +
+                " remoteBaseKv              decimal(4,1) NULL, " +
                 " kqsBaseCap              decimal(4,0) NULL, " +
                 " trw              decimal(4,4) NULL, " +
                 " t5              decimal(5,3) NULL, " +
@@ -804,7 +804,7 @@ public class BpaSwiModelRwTest extends TestCase {
         initSql = "CREATE TABLE "  + TABLE_DATA_NAME + " (" +
                 " type     varchar(3) NOT NULL," +
                 " genName     varchar(8) NOT NULL," +
-                " baseKv              decimal(4,3) NOT NULL, " +
+                " baseKv              decimal(4,1) NOT NULL, " +
                 " id     varchar(1) DEFAULT NULL," +
                 " kp              decimal(5,3) NULL, " +
                 " t1           decimal(5,3)     NULL, " +
@@ -817,7 +817,7 @@ public class BpaSwiModelRwTest extends TestCase {
                 " minVs              decimal(6,4) NULL, " +
                 " ib              INTEGER NULL, " +
                 " busName              varchar(8) NULL, " +
-                " busBaseKv              decimal(4,3) NULL, " +
+                " busBaseKv              decimal(4,1) NULL, " +
                 " xq              decimal(4,3) NULL, " +
                 " kMVA              decimal(4,0) NULL " +
                 ")";
@@ -827,7 +827,7 @@ public class BpaSwiModelRwTest extends TestCase {
         initSql = "CREATE TABLE "  + TABLE_DATA_NAME + " (" +
                 " type     varchar(3) NOT NULL," +
                 " genName     varchar(8) NOT NULL," +
-                " baseKv              decimal(4,3) NOT NULL, " +
+                " baseKv              decimal(4,1) NOT NULL, " +
                 " generatorCode     varchar(1) DEFAULT NULL," +
                 " kw              decimal(5,0) NULL, " +
                 " tr           decimal(4,4)     NULL, " +
@@ -851,7 +851,7 @@ public class BpaSwiModelRwTest extends TestCase {
         initSql = "CREATE TABLE "  + TABLE_DATA_NAME + " (" +
                 " type     varchar(3) NOT NULL," +
                 " genName     varchar(8) NOT NULL," +
-                " baseKv              decimal(4,3) NOT NULL, " +
+                " baseKv              decimal(4,1) NOT NULL, " +
                 " generatorCode     varchar(1) DEFAULT NULL," +
                 " delt2              decimal(4,3) NULL, " +
                 " tr2           decimal(3,3)     NULL, " +
@@ -869,7 +869,7 @@ public class BpaSwiModelRwTest extends TestCase {
         initSql = "CREATE TABLE "  + TABLE_DATA_NAME + " (" +
                 " type     varchar(3) NOT NULL," +
                 " busName     varchar(8) NOT NULL," +
-                " baseKv              decimal(4,3) NOT NULL, " +
+                " baseKv              decimal(4,1) NOT NULL, " +
                 " generatorCode     varchar(1) DEFAULT NULL," +
                 " maxPower              decimal(6,1) NULL, " +
                 " r           decimal(5,3)     NULL, " +
@@ -888,7 +888,7 @@ public class BpaSwiModelRwTest extends TestCase {
         initSql = "CREATE TABLE "  + TABLE_DATA_NAME + " (" +
                 " type     varchar(3) NOT NULL," +
                 " busName     varchar(8) NOT NULL," +
-                " baseKv              decimal(4,3) NOT NULL, " +
+                " baseKv              decimal(4,1) NOT NULL, " +
                 " id     varchar(1) DEFAULT NULL," +
                 " t              decimal(5,2) NULL, " +
                 " s           decimal(5,2)     NULL, " +
@@ -905,21 +905,21 @@ public class BpaSwiModelRwTest extends TestCase {
         initSql = "CREATE TABLE "  + TABLE_DATA_NAME + " (" +
                 " type     varchar(3) NOT NULL," +
                 " busName     varchar(8) NOT NULL," +
-                " baseKv              decimal(4,3) NOT NULL, " +
+                " baseKv              decimal(4,1) NOT NULL, " +
                 " id     varchar(1) DEFAULT NULL," +
-                " pPercent              decimal(5,0) NULL, " +
+                " pPercent              decimal(3,1) NULL, " +
                 " ipCon           INTEGER     NULL, " +
-                " tma           decimal(5,0)     NULL, " +
-                " ta1              decimal(5,0) NULL, " +
-                " ta              decimal(5,0) NULL, " +
-                " kpa              decimal(5,0) NULL, " +
-                " kia              decimal(5,0) NULL, " +
-                " tsa              decimal(5,0) NULL, " +
-                " c              decimal(5,0) NULL, " +
-                " dcBaseKv              decimal(5,3) NULL, " +
-                " k              decimal(5,0) NULL, " +
-                " mva              decimal(5,0) NULL, " +
-                " kover              decimal(5,0) NULL, " +
+                " tma           decimal(5,2)     NULL, " +
+                " ta1              decimal(5,2) NULL, " +
+                " ta              decimal(5,2) NULL, " +
+                " kpa              decimal(5,2) NULL, " +
+                " kia              decimal(5,2) NULL, " +
+                " tsa              decimal(5,2) NULL, " +
+                " c              decimal(5,2) NULL, " +
+                " dcBaseKv              decimal(5,1) NULL, " +
+                " k              decimal(5,2) NULL, " +
+                " mva              decimal(5,2) NULL, " +
+                " kover              decimal(5,2) NULL, " +
                 " converterNum              INTEGER NULL " +
                 ")";
         sqliteDb.initDb(initSql);
@@ -928,16 +928,16 @@ public class BpaSwiModelRwTest extends TestCase {
         initSql = "CREATE TABLE "  + TABLE_DATA_NAME + " (" +
                 " type     varchar(3) NOT NULL," +
                 " busName     varchar(8) NOT NULL," +
-                " baseKv              decimal(4,3) NOT NULL, " +
+                " baseKv              decimal(4,1) NOT NULL, " +
                 " id     varchar(1) DEFAULT NULL," +
-                " qPercent              decimal(3,0) NULL, " +
+                " qPercent              decimal(3,1) NULL, " +
                 " rpCon           INTEGER     NULL, " +
-                " tmb           decimal(5,0)     NULL, " +
-                " tb1              decimal(5,0) NULL, " +
-                " tb              decimal(5,0) NULL, " +
-                " kpb              decimal(5,0) NULL, " +
-                " kib              decimal(5,0) NULL, " +
-                " tsb              decimal(5,0) NULL, " +
+                " tmb           decimal(5,2)     NULL, " +
+                " tb1              decimal(5,2) NULL, " +
+                " tb              decimal(5,2) NULL, " +
+                " kpb              decimal(5,2) NULL, " +
+                " kib              decimal(5,2) NULL, " +
+                " tsb              decimal(5,2) NULL, " +
                 " kd              decimal(5,3) NULL " +
                 ")";
         sqliteDb.initDb(initSql);
@@ -946,7 +946,7 @@ public class BpaSwiModelRwTest extends TestCase {
         initSql = "CREATE TABLE "  + TABLE_DATA_NAME + " (" +
                 " type     varchar(3) NOT NULL," +
                 " genName     varchar(8) NOT NULL," +
-                " baseKv              decimal(4,3) NOT NULL, " +
+                " baseKv              decimal(4,1) NOT NULL, " +
                 " generatorCode     varchar(1) DEFAULT NULL," +
                 " pe              decimal(6,2) NULL, " +
                 " tc           decimal(4,2)     NULL, " +
@@ -971,7 +971,7 @@ public class BpaSwiModelRwTest extends TestCase {
                 " type     varchar(3) NOT NULL," +
                 " chgCode     varchar(1) NULL," +
                 " busName     varchar(8) NOT NULL," +
-                " baseKv              decimal(4,3) NOT NULL, " +
+                " baseKv              decimal(4,1) NOT NULL, " +
                 " zone              varchar(12) NULL, " +
                 " areaName           varchar(10)     NULL, " +
                 " p1           decimal(5,3)     NULL, " +
@@ -1059,9 +1059,9 @@ public class BpaSwiModelRwTest extends TestCase {
         initSql = "CREATE TABLE "  + TABLE_DATA_NAME + " (" +
                 " type     varchar(3) NOT NULL," +
                 " busAName     varchar(8) NOT NULL," +
-                " busABaseKv              decimal(4,3) NOT NULL, " +
+                " busABaseKv              decimal(4,1) NOT NULL, " +
                 " busBName     varchar(8) NOT NULL," +
-                " busBBaseKv              decimal(4,3) NOT NULL, " +
+                " busBBaseKv              decimal(4,1) NOT NULL, " +
                 " circuitId     varchar(1) DEFAULT NULL," +
                 " fltType              INTEGER NULL, " +
                 " phase              INTEGER NULL, " +
