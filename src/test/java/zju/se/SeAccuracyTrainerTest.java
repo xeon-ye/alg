@@ -34,7 +34,8 @@ public class SeAccuracyTrainerTest {
     @Test
     public void testCase30ByFile() {
         trainer.trainModel(this.getClass().getResourceAsStream("/sefiles/train/case30.txt"));
-        List<Double> res = trainer.predict(this.getClass().getResourceAsStream("/sefiles/test/case30.txt"));
+        trainer.verifyModel(this.getClass().getResourceAsStream("/sefiles/test/case30.txt"))
+                .forEach(error -> logger.info("相对误差为：" + error));
     }
 
     private void doSeAccuracyPredict(final IEEEDataIsland oriIsland, int num) {
