@@ -11,8 +11,14 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class SqliteDb {
+
+    String dbFile;
+
+    public SqliteDb(String dbFile) {
+        this.dbFile = dbFile;
+    }
+
     private Connection createConn() {
-        String dbFile = "d:/bpa.db";
         File f = new File(dbFile);
         if(!f.exists()) {
             try {

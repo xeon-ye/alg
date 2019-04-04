@@ -197,7 +197,7 @@ public class BpaSwiModelRwTest extends TestCase {
     public void testXJ() throws IOException {
         BpaSwiModel model = BpaSwiModelParser.parse(this.getClass().getResourceAsStream("/bpafiles/示范区BPA运行方式/XIAOJIN.SWI"), "GBK");
         assertNotNull(model);
-        SqliteDb sqliteDb = new SqliteDb();
+        SqliteDb sqliteDb = new SqliteDb("d:/bpa.db");
         List<String> sqls = new LinkedList<>();
         String TABLE_DATA_NAME = "Generator";
         for (Generator generator : model.generators) {
@@ -531,7 +531,7 @@ public class BpaSwiModelRwTest extends TestCase {
     }
 
     public void testWrite() throws FileNotFoundException {
-        SqliteDb sqliteDb = new SqliteDb();
+        SqliteDb sqliteDb = new SqliteDb("d:/bpa.db");
         BpaSwiModel modifiedModel = new BpaSwiModel();
         List<Object> objects = sqliteDb.queryData("Generator");
         modifiedModel.generators = new ArrayList<>(objects.size());
@@ -646,7 +646,7 @@ public class BpaSwiModelRwTest extends TestCase {
     }
 
     public void testCreateTables() {
-        SqliteDb sqliteDb = new SqliteDb();
+        SqliteDb sqliteDb = new SqliteDb("d:/bpa.db");
         String TABLE_DATA_NAME = "Generator";
         String initSql = "CREATE TABLE "  + TABLE_DATA_NAME + " (" +
                 " type     varchar(3) NOT NULL," +
@@ -1078,5 +1078,18 @@ public class BpaSwiModelRwTest extends TestCase {
                 " tcyc22              decimal(4,0) NULL " +
                 ")";
         sqliteDb.initDb(initSql);
+    }
+
+    public void testBpaSwiModelRw() {
+        BpaSwiModelRw.CreateTables("d:/bpa.db");
+//        BpaSwiModelRw.parseAndSave(this.getClass().getResourceAsStream("/bpafiles/示范区BPA运行方式/XIAOJIN.SWI"), "d:/bpa.db");
+//        try {
+//            BpaSwiModelRw.write("d:/bpa.db", this.getClass().getResourceAsStream("/bpafiles/示范区BPA运行方式/XIAOJIN.SWI"), new FileOutputStream("XIAOJIN_modify.SWI"));
+//        } catch (FileNotFoundException e) {
+//            e.printStackTrace();
+//        }
+
+        BpaSwiModelRw.parseAndSave("C:/Users/bingtekeji/Desktop/写结果/XIAOJIN.SWI", "d:/bpa.db");
+        BpaSwiModelRw.write("d:/bpa.db", "C:/Users/bingtekeji/Desktop/写结果/XIAOJIN.SWI", "C:/Users/bingtekeji/Desktop/写结果/XIAOJIN_modify.SWI");
     }
 }
