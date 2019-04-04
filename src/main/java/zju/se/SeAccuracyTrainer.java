@@ -135,9 +135,11 @@ public class SeAccuracyTrainer {
         return list;
     }
 
-    public List<Double> predict(InputStream stream) {
+    public List<Double> verifyModel(InputStream stream) {
         BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
         List<double[]> attributes = new ArrayList<>();
+        List<Double> label = new ArrayList<>();
+        List<Double> ans;
 
         try {
             String line;
@@ -148,11 +150,15 @@ public class SeAccuracyTrainer {
                 for (int i = 0; i < attribute.length; i++)
                     attribute[i] = Double.parseDouble(ss[i]);
                 attributes.add(attribute);
+                label.add(Double.parseDouble(ss[ss.length - 1]));
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return predict(attributes);
+        ans = predict(attributes);
+        for (int i = 0; i < label.size(); i++)
+            label.set(i, Math.abs(label.get(i) - ans.get(i)) / label.get(i));
+        return label;
     }
 
     public void setModel(SeAccuracyTrainModel model) {
