@@ -71,7 +71,7 @@ public class Load implements Serializable {
                 busName = new String(BpaFileRwUtil.getTarget(src, 3, 11), charset).trim();
             else
                 busName = new String(BpaFileRwUtil.getTarget(src, 3, 11)).trim();
-            baseKv = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 11, 15)).trim(), "4.3");
+            baseKv = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 11, 15)).trim());
             if (charset != null)
                 zone = new String(BpaFileRwUtil.getTarget(src, 15, 17), charset).trim();
             else
@@ -106,7 +106,7 @@ public class Load implements Serializable {
                     busName = new String(BpaFileRwUtil.getTarget(src, 3, 11), charset).trim();
                 else
                     busName = new String(BpaFileRwUtil.getTarget(src, 3, 11)).trim();
-                baseKv = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 11, 15)).trim(), "4.3");
+                baseKv = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 11, 15)).trim());
                 id = (char) src[15];
             }
             tJ = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 16, 22)).trim(), "6.4");
@@ -132,7 +132,7 @@ public class Load implements Serializable {
         if (type == 'L') {
             str.append(chgCode);
             str.append(DataOutputFormat.format.getFormatStr(busName, "8"));
-            str.append(BpaFileRwUtil.getFormatStr(baseKv, "4.3"));//the bpa manual is 4.0
+            str.append(BpaFileRwUtil.getFormatStr(baseKv, "4.1"));//the bpa manual is 4.0
             str.append(DataOutputFormat.format.getFormatStr(zone, "2"));
             str.append(DataOutputFormat.format.getFormatStr(areaName, "10"));
             str.append(BpaFileRwUtil.getFormatStr(p1, "5.3"));
@@ -153,7 +153,7 @@ public class Load implements Serializable {
                 str.append(DataOutputFormat.format.getFormatStr(areaName, "10")).append("   ");
             } else if (subType == 'L') {
                 str.append(DataOutputFormat.format.getFormatStr(busName, "8"));
-                str.append(BpaFileRwUtil.getFormatStr(baseKv, "4.3"));//the bpa manual is 4.0
+                str.append(BpaFileRwUtil.getFormatStr(baseKv, "4.1"));//the bpa manual is 4.0
                 str.append(id);
             }
             str.append(BpaFileRwUtil.getFormatStr(tJ, "6.4"));

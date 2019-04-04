@@ -46,7 +46,7 @@ public class PV implements Serializable {
             busName = new String(BpaFileRwUtil.getTarget(src, 3, 11), charset).trim();
         else
             busName = new String(BpaFileRwUtil.getTarget(src, 3, 11)).trim();
-        baseKv = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 11, 15)).trim(), "4.3");
+        baseKv = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 11, 15)).trim());
         id = (char) src[15];
         t = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 20, 25)).trim(), "5.2");//the bpa model is 5.0
         s = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 25, 30)).trim(), "5.2");//the bpa model is 5.0
@@ -62,7 +62,7 @@ public class PV implements Serializable {
         StringBuilder str = new StringBuilder();
         str.append(type).append(" ");
         str.append(DataOutputFormat.format.getFormatStr(getBusName(), "8"));
-        str.append(BpaFileRwUtil.getFormatStr(getBaseKv(), "4.3"));
+        str.append(BpaFileRwUtil.getFormatStr(getBaseKv(), "4.1"));// the bpa model is 4.0
         str.append(getId()).append("    ");
         str.append(BpaFileRwUtil.getFormatStr(t, "5.2"));
         str.append(BpaFileRwUtil.getFormatStr(s, "5.2"));
