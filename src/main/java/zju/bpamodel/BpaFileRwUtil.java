@@ -46,7 +46,7 @@ public class BpaFileRwUtil {
         if(src.indexOf('.') != -1)
             return Double.parseDouble(src);
         int[] t = getDecimals(fd);
-        if(src.length() > t[1] && t[1] > 0) {
+        if(src.length() >= t[1] && t[1] >= 0) {
             String s = src.substring(0, src.length() - t[1]) + "." + src.substring(src.length() - t[1]);
             return Double.parseDouble(s);
         } else

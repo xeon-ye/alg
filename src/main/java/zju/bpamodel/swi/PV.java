@@ -61,7 +61,7 @@ public class PV implements Serializable {
     public String toString() {
         StringBuilder str = new StringBuilder();
         str.append(type).append(" ");
-        str.append(DataOutputFormat.format.getFormatStr(getBusName(), "8"));
+        str.append(DataOutputFormat.format.getFormatStr(getBusName(), "8L"));
         str.append(BpaFileRwUtil.getFormatStr(getBaseKv(), "4.1"));// the bpa model is 4.0
         str.append(getId()).append("    ");
         str.append(BpaFileRwUtil.getFormatStr(t, "5.2"));
