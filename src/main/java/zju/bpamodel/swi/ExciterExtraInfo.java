@@ -85,7 +85,7 @@ public class ExciterExtraInfo implements Serializable {
     public String toString() {
         StringBuilder str = new StringBuilder();
         str.append(type).append(" ");
-        str.append(DataOutputFormat.format.getFormatStr(getBusName(), "8"));
+        str.append(DataOutputFormat.format.getFormatStr(getBusName(), "8L"));
         str.append(BpaFileRwUtil.getFormatStr(getBaseKv(), "4.3"));//the bpa manual is 4.0
         str.append(generatorCode);
         if (type.equals("F+")) {

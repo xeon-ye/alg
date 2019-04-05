@@ -45,6 +45,7 @@ public class Load implements Serializable {
     private double ti;
     private double a;
     private double b;
+    private char s;
     private int im;
 
     public static Load createLoad(String content) {
@@ -122,6 +123,7 @@ public class Load implements Serializable {
             ti = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 60, 64)).trim(), "4.2");
             a = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 64, 69)).trim(), "5.4");
             b = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 69, 74)).trim(), "5.4");
+            s = (char) src[78];
             im = BpaFileRwUtil.parseInt(new String(BpaFileRwUtil.getTarget(src, 79, 80)).trim());
         }
     }
@@ -131,7 +133,7 @@ public class Load implements Serializable {
         str.append(type).append(subType);
         if (type == 'L') {
             str.append(chgCode);
-            str.append(DataOutputFormat.format.getFormatStr(busName, "8"));
+            str.append(DataOutputFormat.format.getFormatStr(busName, "8L"));
             str.append(BpaFileRwUtil.getFormatStr(baseKv, "4.1"));//the bpa manual is 4.0
             str.append(DataOutputFormat.format.getFormatStr(zone, "2"));
             str.append(DataOutputFormat.format.getFormatStr(areaName, "10"));
@@ -152,7 +154,7 @@ public class Load implements Serializable {
             } else if (subType == 'K') {
                 str.append(DataOutputFormat.format.getFormatStr(areaName, "10")).append("   ");
             } else if (subType == 'L') {
-                str.append(DataOutputFormat.format.getFormatStr(busName, "8"));
+                str.append(DataOutputFormat.format.getFormatStr(busName, "8L"));
                 str.append(BpaFileRwUtil.getFormatStr(baseKv, "4.1"));//the bpa manual is 4.0
                 str.append(id);
             }
@@ -168,7 +170,8 @@ public class Load implements Serializable {
             str.append(BpaFileRwUtil.getFormatStr(vi, "3.2"));
             str.append(BpaFileRwUtil.getFormatStr(ti, "4.2"));
             str.append(BpaFileRwUtil.getFormatStr(a, "5.4"));
-            str.append(BpaFileRwUtil.getFormatStr(b, "5.4")).append("     ");
+            str.append(BpaFileRwUtil.getFormatStr(b, "5.4")).append("    ");
+            str.append(s);
             str.append(im);
         }
         return str.toString();
@@ -420,6 +423,14 @@ public class Load implements Serializable {
 
     public void setB(double b) {
         this.b = b;
+    }
+
+    public char getS() {
+        return s;
+    }
+
+    public void setS(char s) {
+        this.s = s;
     }
 
     public int getIm() {

@@ -66,7 +66,7 @@ public class GeneratorDW implements Serializable {
     public String toString() {
         StringBuilder str = new StringBuilder();
         str.append("M  ");
-        str.append(DataOutputFormat.format.getFormatStr(busName, "8"));
+        str.append(DataOutputFormat.format.getFormatStr(busName, "8L"));
         str.append(BpaFileRwUtil.getFormatStr(baseKv, "4.3"));//the bpa manual is 4.0
         str.append(id);
         str.append(BpaFileRwUtil.getFormatStr(baseMva, "5.2")).append(" ");

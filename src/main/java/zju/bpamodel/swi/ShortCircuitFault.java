@@ -67,10 +67,10 @@ public class ShortCircuitFault implements Serializable {
         StringBuilder strLine = new StringBuilder();
         strLine.append("LS").append(" ");
         strLine.append(getBusASign());
-        strLine.append(DataOutputFormat.format.getFormatStr(getBusAName(), "8"));
+        strLine.append(DataOutputFormat.format.getFormatStr(getBusAName(), "8L"));
         strLine.append(BpaFileRwUtil.getFormatStr(getBusABaseKv(), "4.3"));//the bpa manual is 4.0
         strLine.append(" ").append(getBusBSign());
-        strLine.append(DataOutputFormat.format.getFormatStr(getBusBName(), "8"));
+        strLine.append(DataOutputFormat.format.getFormatStr(getBusBName(), "8L"));
         strLine.append(BpaFileRwUtil.getFormatStr(getBusBBaseKv(), "4.3"));//the bpa manual is 4.0
         strLine.append(" ").append(parallelBranchCode).append("   ");
         strLine.append(BpaFileRwUtil.getFormatStr(getMode(), "2")).append("  ");

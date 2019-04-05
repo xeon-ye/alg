@@ -200,7 +200,7 @@ public class BpaSwiModelRwTest extends TestCase {
         SqliteDb sqliteDb = new SqliteDb("d:/bpa.db");
         List<String> sqls = new LinkedList<>();
         String TABLE_DATA_NAME = "Generator";
-        for (Generator generator : model.generators) {
+        for (Generator generator : model.getGenerators()) {
             String insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
                     "'" + generator.getType() + generator.getSubType() + "'," +
                     "'" + generator.getBusName() + "'," + generator.getBaseKv() + "," +
@@ -219,7 +219,7 @@ public class BpaSwiModelRwTest extends TestCase {
 
         sqls.clear();
         TABLE_DATA_NAME = "GeneratorDW";
-        for (GeneratorDW generatorDW : model.generatorDws) {
+        for (GeneratorDW generatorDW : model.getGeneratorDws()) {
             String insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
                     "'M'," + "'" + generatorDW.getBusName() + "'," +
                     generatorDW.getBaseKv() + ",'" + generatorDW.getId() + "'," +
@@ -234,7 +234,7 @@ public class BpaSwiModelRwTest extends TestCase {
 
         sqls.clear();
         TABLE_DATA_NAME = "Exciter";
-        for (Exciter exciter : model.exciters) {
+        for (Exciter exciter : model.getExciters()) {
             String insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
                     "'" + exciter.getType() + exciter.getSubType() + "'," +
                     "'" + exciter.getBusName() + "'," + exciter.getBaseKv() + "," +
@@ -264,7 +264,7 @@ public class BpaSwiModelRwTest extends TestCase {
 
         sqls.clear();
         TABLE_DATA_NAME = "ExciterExtraInfo";
-        for (ExciterExtraInfo exciterExtraInfo : model.exciterExtraInfos) {
+        for (ExciterExtraInfo exciterExtraInfo : model.getExciterExtraInfos()) {
             String insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
                     "'" + exciterExtraInfo.getType() + "'," + "'" + exciterExtraInfo.getBusName() + "'," +
                     exciterExtraInfo.getBaseKv() + "," + "'" + exciterExtraInfo.getGeneratorCode() + "'," +
@@ -284,7 +284,7 @@ public class BpaSwiModelRwTest extends TestCase {
 
         sqls.clear();
         TABLE_DATA_NAME = "PSS";
-        for (PSS pss : model.pssList) {
+        for (PSS pss : model.getPssList()) {
             String insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
                     "'" + pss.getType() + pss.getSubType() + "'," +
                     "'" + pss.getGenName() + "'," + pss.getBaseKv() + "," +
@@ -311,7 +311,7 @@ public class BpaSwiModelRwTest extends TestCase {
 
         sqls.clear();
         TABLE_DATA_NAME = "PSSExtraInfo";
-        for (PSSExtraInfo pssExtraInfo : model.pssExtraInfos) {
+        for (PSSExtraInfo pssExtraInfo : model.getPssExtraInfos()) {
             String insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
                     "'" + pssExtraInfo.getType() + "'," + "'" + pssExtraInfo.getGenName() + "'," +
                     pssExtraInfo.getBaseKv() + ",'" + pssExtraInfo.getId() + "'," +
@@ -329,7 +329,7 @@ public class BpaSwiModelRwTest extends TestCase {
 
         sqls.clear();
         TABLE_DATA_NAME = "Governor";
-        for (Governor governor : model.governors) {
+        for (Governor governor : model.getGovernors()) {
             String insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
                     "'" + governor.getType() + governor.getSubType() + "'," +
                     "'" + governor.getGenName() + "'," + governor.getBaseKv() + "," +
@@ -348,7 +348,7 @@ public class BpaSwiModelRwTest extends TestCase {
 
         sqls.clear();
         TABLE_DATA_NAME = "GovernorExtraInfo";
-        for (GovernorExtraInfo governorExtraInfo : model.governorExtraInfos) {
+        for (GovernorExtraInfo governorExtraInfo : model.getGovernorExtraInfos()) {
             String insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
                     "'" + governorExtraInfo.getType() + "'," + "'" + governorExtraInfo.getGenName() + "'," +
                     governorExtraInfo.getBaseKv() + "," + "'" + governorExtraInfo.getGeneratorCode() + "'," +
@@ -364,7 +364,7 @@ public class BpaSwiModelRwTest extends TestCase {
 
         sqls.clear();
         TABLE_DATA_NAME = "PrimeMover";
-        for (PrimeMover primeMover : model.primeMovers) {
+        for (PrimeMover primeMover : model.getPrimeMovers()) {
             String insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
                     "'" + primeMover.getType() + primeMover.getSubType() + "'," +
                     "'" + primeMover.getBusName() + "'," + primeMover.getBaseKv() + "," +
@@ -381,7 +381,7 @@ public class BpaSwiModelRwTest extends TestCase {
 
         sqls.clear();
         TABLE_DATA_NAME = "PV";
-        for (PV pv : model.pvs) {
+        for (PV pv : model.getPvs()) {
             String insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
                     "'" + pv.getType() + "'," + "'" + pv.getBusName() + "',"
                     + pv.getBaseKv() + "," + "'" + pv.getId() + "'," +
@@ -396,7 +396,7 @@ public class BpaSwiModelRwTest extends TestCase {
 
         sqls.clear();
         TABLE_DATA_NAME = "BC";
-        for (BC bc : model.bcs) {
+        for (BC bc : model.getBcs()) {
             String insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
                     "'" + bc.getType() + "'," + "'" + bc.getBusName() + "',"
                     + bc.getBaseKv() + "," + "'" + bc.getId() + "'," +
@@ -414,7 +414,7 @@ public class BpaSwiModelRwTest extends TestCase {
 
         sqls.clear();
         TABLE_DATA_NAME = "BCExtraInfo";
-        for (BCExtraInfo bcExtraInfo : model.bcExtraInfos) {
+        for (BCExtraInfo bcExtraInfo : model.getBcExtraInfos()) {
             String insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
                     "'" + bcExtraInfo.getType() + "'," + "'" + bcExtraInfo.getBusName() + "',"
                     + bcExtraInfo.getBaseKv() + "," + "'" + bcExtraInfo.getId() + "'," +
@@ -430,7 +430,7 @@ public class BpaSwiModelRwTest extends TestCase {
 
         sqls.clear();
         TABLE_DATA_NAME = "Servo";
-        for (Servo servo : model.servos) {
+        for (Servo servo : model.getServos()) {
             String insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
                     "'" + servo.getType() + servo.getSubType() + "'," +
                     "'" + servo.getGenName() + "'," + servo.getBaseKv() + "," +
@@ -449,7 +449,7 @@ public class BpaSwiModelRwTest extends TestCase {
 
         sqls.clear();
         TABLE_DATA_NAME = "Load";
-        for (Load load : model.loads) {
+        for (Load load : model.getLoads()) {
             String insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
                     "'" + load.getType() + load.getSubType() + "','" + load.getChgCode() + "'," +
                     "'" + load.getBusName() + "'," + load.getBaseKv() + "," +
@@ -465,7 +465,8 @@ public class BpaSwiModelRwTest extends TestCase {
                     load.getXs() + "," + load.getXm() + "," +
                     load.getRr() + "," + load.getXr() + "," +
                     load.getVi() + "," + load.getTi() + "," +
-                    load.getA() + "," + load.getB() + "," + load.getIm() +
+                    load.getA() + "," + load.getB() + "," +
+                    "'" + load.getS() + "'," + load.getIm() +
                     ")";
             sqls.add(insertSql);
         }
@@ -473,7 +474,7 @@ public class BpaSwiModelRwTest extends TestCase {
 
         sqls.clear();
         TABLE_DATA_NAME = "ShortCircuitFault";
-        for (ShortCircuitFault shortCircuitFault : model.shortCircuitFaults) {
+        for (ShortCircuitFault shortCircuitFault : model.getShortCircuitFaults()) {
             String insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
                     "'LS','" + shortCircuitFault.getBusASign() + "'," +
                     "'" + shortCircuitFault.getBusAName() + "'," + shortCircuitFault.getBusABaseKv() + "," +
@@ -489,7 +490,7 @@ public class BpaSwiModelRwTest extends TestCase {
 
         sqls.clear();
         TABLE_DATA_NAME = "FLTCard";
-        for (FLTCard fltCard : model.fltCards) {
+        for (FLTCard fltCard : model.getFltCards()) {
             String insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
                     "'" + fltCard.getType() + "','" + fltCard.getBusAName() + "'," +
                     fltCard.getBusABaseKv() + ",'" + fltCard.getBusBName() + "'," +
@@ -508,7 +509,7 @@ public class BpaSwiModelRwTest extends TestCase {
 
         sqls.clear();
         TABLE_DATA_NAME = "FFCard";
-        FFCard ffCard = model.ff;
+        FFCard ffCard = model.getFf();
         String insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
                 "'" + ffCard.getType() + "'," + ffCard.getT() + "," +
                 ffCard.getDt() + "," + ffCard.getEndT() + "," +
@@ -872,14 +873,14 @@ public class BpaSwiModelRwTest extends TestCase {
                 " baseKv              decimal(4,1) NOT NULL, " +
                 " generatorCode     varchar(1) DEFAULT NULL," +
                 " maxPower              decimal(6,1) NULL, " +
-                " r           decimal(5,3)     NULL, " +
-                " tg           decimal(5,3)     NULL, " +
-                " tp              decimal(5,3) NULL, " +
+                " r           decimal(5,4)     NULL, " +
+                " tg           decimal(5,4)     NULL, " +
+                " tp              decimal(5,4) NULL, " +
                 " td              decimal(5,3) NULL, " +
                 " tw2              decimal(5,3) NULL, " +
                 " closeVel              decimal(5,3) NULL, " +
                 " openVel              decimal(5,3) NULL, " +
-                " dd              decimal(5,3) NULL, " +
+                " dd              decimal(5,4) NULL, " +
                 " deadZone              decimal(6,5) NULL " +
                 ")";
         sqliteDb.initDb(initSql);
@@ -999,6 +1000,7 @@ public class BpaSwiModelRwTest extends TestCase {
                 " ti              decimal(4,2) NULL, " +
                 " a              decimal(5,4) NULL, " +
                 " b              decimal(5,4) NULL, " +
+                " s     varchar(1) NULL," +
                 " im              INTEGER NULL " +
                 ")";
         sqliteDb.initDb(initSql);
@@ -1025,7 +1027,7 @@ public class BpaSwiModelRwTest extends TestCase {
         initSql = "CREATE TABLE "  + TABLE_DATA_NAME + " (" +
                 " type     varchar(2) NOT NULL," +
                 " t              decimal(3,0) NOT NULL, " +
-                " dt     decimal(3,0) NULL," +
+                " dt     decimal(3,1) NULL," +
                 " endT              decimal(5,0) NULL, " +
                 " dtc           decimal(3,1)     NULL, " +
                 " istp              INTEGER NULL, " +
@@ -1081,7 +1083,7 @@ public class BpaSwiModelRwTest extends TestCase {
     }
 
     public void testBpaSwiModelRw() {
-        BpaSwiModelRw.CreateTables("d:/bpa.db");
+        BpaSwiModelRw.CreateTables("C:/Users/bingtekeji/Desktop/写结果/bpa.db");
 //        BpaSwiModelRw.parseAndSave(this.getClass().getResourceAsStream("/bpafiles/示范区BPA运行方式/XIAOJIN.SWI"), "d:/bpa.db");
 //        try {
 //            BpaSwiModelRw.write("d:/bpa.db", this.getClass().getResourceAsStream("/bpafiles/示范区BPA运行方式/XIAOJIN.SWI"), new FileOutputStream("XIAOJIN_modify.SWI"));
@@ -1089,7 +1091,7 @@ public class BpaSwiModelRwTest extends TestCase {
 //            e.printStackTrace();
 //        }
 
-        BpaSwiModelRw.parseAndSave("C:/Users/bingtekeji/Desktop/写结果/XIAOJIN.SWI", "d:/bpa.db");
-        BpaSwiModelRw.write("d:/bpa.db", "C:/Users/bingtekeji/Desktop/写结果/XIAOJIN.SWI", "C:/Users/bingtekeji/Desktop/写结果/XIAOJIN_modify.SWI");
+        BpaSwiModelRw.parseAndSave("C:/Users/bingtekeji/Desktop/写结果/XIAOJIN.SWI", "C:/Users/bingtekeji/Desktop/写结果/bpa.db");
+        BpaSwiModelRw.write("C:/Users/bingtekeji/Desktop/写结果/bpa.db", "C:/Users/bingtekeji/Desktop/写结果/XIAOJIN.SWI", "C:/Users/bingtekeji/Desktop/写结果/XIAOJIN_modify.SWI");
     }
 }

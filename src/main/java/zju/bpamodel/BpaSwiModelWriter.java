@@ -104,11 +104,6 @@ public class BpaSwiModelWriter {
         try {
             BufferedReader reader = new BufferedReader(in);
             String strLine;
-            Map<String, Exciter> exciterMap = new HashMap<String, Exciter>(swiModel.getExciters().size());
-            for (Exciter exciter : swiModel.getExciters()) {
-                String id = exciter.getType() + exciter.getSubType() + "_" + exciter.getBusName() + "_" + exciter.getGeneratorCode();
-                exciterMap.put(id, exciter);
-            }
 
             while ((strLine = reader.readLine()) != null) {
                 if (strLine.startsWith("CASE")) {

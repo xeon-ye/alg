@@ -463,6 +463,7 @@ public class SqliteDb {
             obj.setTi(rs.getDouble("ti"));
             obj.setA(rs.getDouble("a"));
             obj.setB(rs.getDouble("b"));
+            obj.setS(rs.getString("s").charAt(0));
             obj.setIm(rs.getInt("im"));
             return obj;
         } else if (tableName.equals("ShortCircuitFault")) {
