@@ -46,9 +46,9 @@ public class WlsSeTest_IeeeCase extends TestCase implements MeasTypeCons {
     }
 
     public void testOneCase() {
-        InputStream ieeeFile = this.getClass().getResourceAsStream("/matpower/case3120sp.txt");
+        InputStream ieeeFile = this.getClass().getResourceAsStream("/matpower/case9241pegase.txt");
         IEEEDataIsland island = new DefaultIcfParser().parse(ieeeFile, "UTF-8");
-        SystemMeasure sm = SimuMeasMaker.createFullMeasure(island, 1, 0);
+        SystemMeasure sm = SimuMeasMaker.createFullMeasure(island, 1, 0.05);
         doPf(island);
         doSE(island, sm, null);
     }
@@ -110,7 +110,7 @@ public class WlsSeTest_IeeeCase extends TestCase implements MeasTypeCons {
 
         se.setOriIsland(island);
         se.setSm(sm);
-        se.setFlatStart(false);
+        se.setFlatStart(true);
 
         SeResultInfo r;
 

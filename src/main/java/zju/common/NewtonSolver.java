@@ -196,21 +196,23 @@ public class NewtonSolver {
                         k2 = jacStruc.getJA2()[col];
                         s = 0;
                         isExist = false;
-                        while (true) {
-                            i1 = jacStruc.getIA2().get(k1);
-                            i2 = jacStruc.getIA2().get(k2);
-                            if (i1 == i2) {
-                                s += weight.getValue(i1) * H.getQuick(i1, row) * H.getQuick(i2, col);
-                                k1 = jacStruc.getLINK2().get(k1);
-                                k2 = jacStruc.getLINK2().get(k2);
-                                isExist = true;
-                            } else if (i1 < i2) {
-                                k1 = jacStruc.getLINK2().get(k1);
-                            } else {
-                                k2 = jacStruc.getLINK2().get(k2);
+                        if (k1 != -1 && k2 != -1) {
+                            while (true) {
+                                i1 = jacStruc.getIA2().get(k1);
+                                i2 = jacStruc.getIA2().get(k2);
+                                if (i1 == i2) {
+                                    s += weight.getValue(i1) * H.getQuick(i1, row) * H.getQuick(i2, col);
+                                    k1 = jacStruc.getLINK2().get(k1);
+                                    k2 = jacStruc.getLINK2().get(k2);
+                                    isExist = true;
+                                } else if (i1 < i2) {
+                                    k1 = jacStruc.getLINK2().get(k1);
+                                } else {
+                                    k2 = jacStruc.getLINK2().get(k2);
+                                }
+                                if (k1 == -1 || k2 == -1)
+                                    break;
                             }
-                            if (k1 == -1 || k2 == -1)
-                                break;
                         }
                         if (!isExist)
                             continue;
