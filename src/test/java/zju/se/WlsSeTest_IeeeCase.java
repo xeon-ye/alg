@@ -1,11 +1,15 @@
 package zju.se;
 
 import junit.framework.TestCase;
+import zju.ieeeformat.DefaultIcfParser;
 import zju.ieeeformat.IEEEDataIsland;
 import zju.ieeeformat.IcfDataUtil;
 import zju.measure.MeasTypeCons;
 import zju.measure.SystemMeasure;
+import zju.pf.PolarPf;
 import zju.pf.SimuMeasMaker;
+
+import java.io.InputStream;
 
 /**
  * Created by IntelliJ IDEA.
@@ -24,7 +28,29 @@ public class WlsSeTest_IeeeCase extends TestCase implements MeasTypeCons {
         se.setAlg(alg);
     }
 
+    private void doPf(IEEEDataIsland island) {
+        //先算一遍潮流
+        PolarPf pf = new PolarPf();
+        pf.setTol_p(1e-5);
+        pf.setTol_q(1e-5);
+        pf.setTolerance(1e-5);
+        pf.setOriIsland(island);
+        pf.setDecoupledPqNum(0);
+        //计算潮流
+        pf.doPf();
+        assertTrue(pf.isConverged());
+        pf.fillOriIslandPfResult();
+    }
+
     public void setUp() throws Exception {
+    }
+
+    public void testOneCase() {
+        InputStream ieeeFile = this.getClass().getResourceAsStream("/matpower/case3120sp.txt");
+        IEEEDataIsland island = new DefaultIcfParser().parse(ieeeFile, "UTF-8");
+        SystemMeasure sm = SimuMeasMaker.createFullMeasure(island, 1, 0);
+        doPf(island);
+        doSE(island, sm, null);
     }
 
     public void testCaseTrue() {
@@ -84,7 +110,7 @@ public class WlsSeTest_IeeeCase extends TestCase implements MeasTypeCons {
 
         se.setOriIsland(island);
         se.setSm(sm);
-        se.setFlatStart(true);
+        se.setFlatStart(false);
 
         SeResultInfo r;
 
