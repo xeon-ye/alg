@@ -51,9 +51,9 @@ public class IesPlanTest extends TestCase {
             String[] newdata = data.split("\t", 4);
             String cnId = newdata[0];
             ArrayList<Double> cnLoads = new ArrayList<>(3);
-            cnLoads.set(0, Double.parseDouble(newdata[1]));
-            cnLoads.set(1, Double.parseDouble(newdata[2]));
-            cnLoads.set(2, Double.parseDouble(newdata[3]));
+            cnLoads.add(Double.parseDouble(newdata[1]));
+            cnLoads.add(Double.parseDouble(newdata[2]));
+            cnLoads.add(Double.parseDouble(newdata[3]));
             loads.put(cnId, cnLoads);
         }
     }
