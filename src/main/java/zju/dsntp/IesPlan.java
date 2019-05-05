@@ -246,6 +246,7 @@ public class IesPlan {
                 result = cplex.getValues(x);
             }
 
+            coef1 = r * pow(1 + r, A) / (pow(1 + r, A) - 1);
             System.out.println("Supplies:");
             for (int i = 0; i < supplies.length; i++) {
                 if (result[i] == 1) {
@@ -253,7 +254,7 @@ public class IesPlan {
                     double Ps = 0;
                     for (MapObject e : g.edgesOf(supplyNodes.get(i))) {
                         int j = edges.indexOf(e);
-                        if (g.getEdgeTarget(e).equals(loadNodes.get(i))) {
+                        if (g.getEdgeTarget(e).equals(supplyNodes.get(i))) {
                             Ps -= result[supplies.length + edges.size() + j];
                             Ps -= result[supplies.length + 3 * edges.size() + j];
                         } else {
@@ -261,14 +262,14 @@ public class IesPlan {
                             Ps += result[supplies.length + 3 * edges.size() + j];
                         }
                     }
-                    minCost += 2.118 * pow(Ps * cs / 1e7, 0.9198) * 1e3;
+                    minCost += 2.118 * pow(Ps * cs / 1e7, 0.9198) * 1e3 * coef1;
                 }
             }
             System.out.println("\nEdges:");
-            coef1 = r * pow(1 + r, A) / (pow(1 + r, A) - 1);
             for (int i = 0; i < edges.size(); i++) {
                 if (result[supplies.length + i] == 1) {
-                    System.out.println(edges.get(i).getProperty(KEY_CONNECTED_NODE));
+                    String[] nodeids = edges.get(i).getProperty(KEY_CONNECTED_NODE).split(";");
+                    System.out.println(nodeids[0] + "\t" + nodeids[1] + "\t" + edgesLen[i] + "\t" + "2");
                     minCost += (cle * abs(result[supplies.length + edges.size() + i]) +
                             clh * abs(result[supplies.length + 3 * edges.size() + i])) * edgesLen[i] * coef1 / 1e4;
                 }
