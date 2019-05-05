@@ -30,9 +30,9 @@ public class IesPlanTest extends TestCase {
         DistriSys testsys;
         String[] supplyID;
         InputStream ieeeFile = this.getClass().getResourceAsStream("/iesfiles/case1/graph.txt");
-        testsys = createDs(ieeeFile, "116", 10);
-        supplyID = new String[]{"116", "124", "165", "177", "187", "192", "196", "205"};
-        Double[] supplyBaseKv = new Double[]{10., 10., 10., 10., 10., 10., 10., 10.};
+        testsys = createDs(ieeeFile, "124", 10);
+        supplyID = new String[]{"124", "165", "187", "192", "196", "205"};
+        Double[] supplyBaseKv = new Double[]{10., 10., 10., 10., 10., 10.};
         testsys.setSupplyCns(supplyID);
         testsys.setSupplyCnBaseKv(supplyBaseKv);
 
