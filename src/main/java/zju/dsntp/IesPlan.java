@@ -151,18 +151,18 @@ public class IesPlan {
             for (int i = 0; i < supplies.length; i++) {
                 objValue[i] = coef1;
             }
-            coef1 = (1 + ul1 + ul2) * cp * r * pow(1 + r, A) / (pow(1 + r, A) - 1);
-            double coef2 = tmax * cep * Rb / 3 / Ub / Ub / 10;
-            double coef3 = 4 * PI * lamda * Tc * tp * cep / log((db + 2 * op + ot) / (db + 2 * op)) / cop / 1e4;
+            double coef2 = (1 + ul1 + ul2) * cp * r * pow(1 + r, A) / (pow(1 + r, A) - 1);
+            double coef3 = tmax * cep * Rb / 3 / Ub / Ub / 1e7;
+            double coef4 = 4 * PI * lamda * Tc * tp * cep / log((db + 2 * op + ot) / (db + 2 * op)) / cop / 1e4;
             for (int i = 0; i < edges.size(); i++) {
-                objValue[supplies.length + i] += (coef1 + coef3) * edgesLen[i];
+                objValue[supplies.length + i] += (coef2 + coef4) * edgesLen[i];
             }
 //            for (int i = 0; i < edges.size(); i++) {
-//                obj = cplex.sum(obj, cplex.prod(coef1 * edgesLen[i], x[supplies.length + i]));
+//                obj = cplex.sum(obj, cplex.prod(coef2 * edgesLen[i], x[supplies.length + i]));
 ////                IloNumExpr p2 = cplex.prod( x[supplies.length + edges.size() + i], x[supplies.length + edges.size() + i]);
 ////                IloNumExpr q2 = cplex.prod( x[supplies.length + 2 * edges.size() + i], x[supplies.length + 2 * edges.size() + i]);
-////                obj = cplex.sum(obj, cplex.prod(coef2 * edgesLen[i], cplex.sum(p2, q2)));
-//                obj = cplex.sum(obj, cplex.prod(coef3 * edgesLen[i], x[supplies.length + i]));
+////                obj = cplex.sum(obj, cplex.prod(coef3 * edgesLen[i], cplex.sum(p2, q2)));
+//                obj = cplex.sum(obj, cplex.prod(coef4 * edgesLen[i], x[supplies.length + i]));
 //            }
             cplex.addMinimize(cplex.scalProd(x, objValue));
 
@@ -246,35 +246,50 @@ public class IesPlan {
                 result = cplex.getValues(x);
             }
 
-            coef1 = r * pow(1 + r, A) / (pow(1 + r, A) - 1);
+            double coef5 = r * pow(1 + r, A) / (pow(1 + r, A) - 1);
             System.out.println("Supplies:");
+            double allSupplyCost = 0;
             for (int i = 0; i < supplies.length; i++) {
                 if (result[i] == 1) {
-                    System.out.printf("%s\t", supplies[i]);
-                    double Ps = 0;
+                    double p = 0;
+                    double q = 0;
+                    double h = 0;
                     for (MapObject e : g.edgesOf(supplyNodes.get(i))) {
                         int j = edges.indexOf(e);
                         if (g.getEdgeTarget(e).equals(supplyNodes.get(i))) {
-                            Ps -= result[supplies.length + edges.size() + j];
-                            Ps -= result[supplies.length + 3 * edges.size() + j];
+                            p -= result[supplies.length + edges.size() + j];
+                            q -= result[supplies.length + 2 * edges.size() + j];
+                            h -= result[supplies.length + 3 * edges.size() + j];
                         } else {
-                            Ps += result[supplies.length + edges.size() + j];
-                            Ps += result[supplies.length + 3 * edges.size() + j];
+                            p += result[supplies.length + edges.size() + j];
+                            q += result[supplies.length + 2 * edges.size() + j];
+                            h += result[supplies.length + 3 * edges.size() + j];
                         }
                     }
-                    minCost += 2.118 * pow(Ps * cs / 1e7, 0.9198) * 1e3 * coef1;
+                    double supplyCost = (1 + us1 + us2) * coef5 * (2.118 * pow((p + h) * cs / 1e7, 0.9198) + 27.54) * 1e3 + Cwp;
+                    allSupplyCost += supplyCost;
+                    System.out.printf("%s\t%.1f\t%.1f\t%.1f\t%.1f\n", supplies[i], p, q, h, supplyCost);
+                    minCost += (1 + us1 + us2) * coef5 * 2.118 * pow((p + h) * cs / 1e7, 0.9198) * 1e3;
                 }
             }
-            System.out.println("\nEdges:");
+            System.out.println("Edges:");
+            double allLineCost = 0;
             for (int i = 0; i < edges.size(); i++) {
                 if (result[supplies.length + i] == 1) {
                     String[] nodeids = edges.get(i).getProperty(KEY_CONNECTED_NODE).split(";");
-                    System.out.println(nodeids[0] + "\t" + nodeids[1] + "\t" + edgesLen[i] + "\t" + "2");
-                    minCost += (cle * abs(result[supplies.length + edges.size() + i]) +
-                            clh * abs(result[supplies.length + 3 * edges.size() + i])) * edgesLen[i] * coef1 / 1e4;
+                    double p = abs(result[supplies.length + edges.size() + i]);
+                    double q = abs(result[supplies.length + 2 * edges.size() + i]);
+                    double h = abs(result[supplies.length + 3 * edges.size() + i]);
+                    double s = sqrt(p * p + q * q);
+                    double lineCost = (coef2 + coef4 + coef3 * s * s + (cle * p + clh * q) * coef5 / 1e4) * edgesLen[i];
+                    allLineCost += lineCost;
+                    System.out.printf("%s-%s\t%.0f\t%.0f\t%.1f\n", nodeids[0], nodeids[1], s, h, lineCost);
+                    minCost += (coef3 * s * s + (cle * p + clh * q) * coef5 / 1e4) * edgesLen[i];
                 }
             }
-            System.out.println("\nTotal cost:\t" + minCost);
+            System.out.println("Total cost:\t" + minCost);
+            System.out.println("Supply cost:\t" + allSupplyCost);
+            System.out.println("Line cost:\t" + allLineCost);
 
             cplex.end();
         } catch (IloException e) {
