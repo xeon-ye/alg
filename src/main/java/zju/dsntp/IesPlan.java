@@ -266,14 +266,23 @@ public class IesPlan {
                             h += result[supplies.length + 3 * edges.size() + j];
                         }
                     }
-                    double supplyCost = (1 + us1 + us2) * coef5 * (2.118 * pow((p + h) * cs / 1e7, 0.9198) + 27.54) * 1e3 + Cwp;
+                    // 简化模型结果
+                    double y = (p + h) / 6500;
+                    double exp = 0.5209 + 0.9845 * (y - 0.5) - 0.0999 * (y * y - y + 1.0 / 6);
+                    double supplyCost = (1 + us1 + us2) * coef5 * (2.118 * pow(6500 * cs / 1e7, 0.9198) * exp + 27.54) * 1e3 + Cwp;
                     allSupplyCost += supplyCost;
                     System.out.printf("%s\t%.1f\t%.1f\t%.1f\t%.1f\n", supplies[i], p, q, h, supplyCost);
-                    minCost += (1 + us1 + us2) * coef5 * 2.118 * pow((p + h) * cs / 1e7, 0.9198) * 1e3;
+                    minCost += (1 + us1 + us2) * coef5 * 2.118 * pow(6500 * cs / 1e7, 0.9198) * exp * 1e3;
+                    // 未简化模型结果
+//                    double supplyCost = (1 + us1 + us2) * coef5 * (2.118 * pow((p + h) * cs / 1e7, 0.9198) + 27.54) * 1e3 + Cwp;
+//                    allSupplyCost += supplyCost;
+//                    System.out.printf("%s\t%.1f\t%.1f\t%.1f\t%.1f\n", supplies[i], p, q, h, supplyCost);
+//                    minCost += (1 + us1 + us2) * coef5 * 2.118 * pow((p + h) * cs / 1e7, 0.9198) * 1e3;
                 }
             }
             System.out.println("Edges:");
             double allLineCost = 0;
+            double allLineLen = 0;
             for (int i = 0; i < edges.size(); i++) {
                 if (result[supplies.length + i] == 1) {
                     String[] nodeids = edges.get(i).getProperty(KEY_CONNECTED_NODE).split(";");
@@ -283,6 +292,7 @@ public class IesPlan {
                     double s = sqrt(p * p + q * q);
                     double lineCost = (coef2 + coef4 + coef3 * s * s + (cle * p + clh * q) * coef5 / 1e4) * edgesLen[i];
                     allLineCost += lineCost;
+                    allLineLen += edgesLen[i];
                     System.out.printf("%s-%s\t%.0f\t%.0f\t%.1f\n", nodeids[0], nodeids[1], s, h, lineCost);
                     minCost += (coef3 * s * s + (cle * p + clh * q) * coef5 / 1e4) * edgesLen[i];
                 }
@@ -290,6 +300,7 @@ public class IesPlan {
             System.out.println("Total cost:\t" + minCost);
             System.out.println("Supply cost:\t" + allSupplyCost);
             System.out.println("Line cost:\t" + allLineCost);
+            System.out.println("Line length:\t" + allLineLen);
 
             cplex.end();
         } catch (IloException e) {
