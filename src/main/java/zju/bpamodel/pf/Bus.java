@@ -130,7 +130,7 @@ public class Bus implements Serializable {
             strLine.append(BpaFileRwUtil.getFormatStr(getvAmplMin(), "4.3"));
         if (subType == 'G' || subType == 'X') {
             strLine.append(DataOutputFormat.format.getFormatStr(getRemoteCtrlBusName(), "8"));
-            strLine.append(BpaFileRwUtil.getFormatStr(getvAmplMin(), "4.3"));//the bpa manual is 4.0;
+            strLine.append(BpaFileRwUtil.getFormatStr(getRemoteCtrlBusBaseKv(), "4.3"));//the bpa manual is 4.0;
             strLine.append(BpaFileRwUtil.getFormatStr(getGenMvarPercent(), "3.2"));//the bpa manual is 3.0;
         }
         return strLine.toString();

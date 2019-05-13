@@ -113,8 +113,12 @@ public class Transformer implements Serializable {
         str.append(BpaFileRwUtil.getFormatStr(x, "6.5"));
         str.append(BpaFileRwUtil.getFormatStr(g, "6.5"));
         str.append(BpaFileRwUtil.getFormatStr(b, "6.5"));
-        str.append(BpaFileRwUtil.getFormatStr(tapKv1, "5.2"));
-        str.append(BpaFileRwUtil.getFormatStr(tapKv2, "5.2")).append("  ");
+        if (subType == 'P') {
+            str.append(BpaFileRwUtil.getFormatStr(phaseAngle, "5.2")).append("       ");
+        } else {
+            str.append(BpaFileRwUtil.getFormatStr(tapKv1, "5.2"));
+            str.append(BpaFileRwUtil.getFormatStr(tapKv2, "5.2")).append("  ");
+        }
         str.append(DataOutputFormat.format.getFormatStr(onlineDate, "3"));
         str.append(DataOutputFormat.format.getFormatStr(offlineDate, "3"));
         return str.toString();

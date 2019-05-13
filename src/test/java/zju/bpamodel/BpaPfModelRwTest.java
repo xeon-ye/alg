@@ -7,6 +7,7 @@ import zju.bpamodel.pf.ElectricIsland;
 import zju.bpamodel.pf.Transformer;
 import zju.bpamodel.pfr.PfResult;
 
+import java.io.File;
 import java.util.List;
 
 /**
@@ -270,15 +271,18 @@ public class BpaPfModelRwTest extends TestCase {
 
     public void testXJ() {
         ElectricIsland island = BpaPfModelParser.parse(this.getClass().getResourceAsStream("/bpafiles/示范区BPA运行方式/XIAOJIN.dat"), "GBK");
-        assertNotNull(island);
-        Bus slackBus = island.getNameToBus().get("小南海11110");
-        assertNotNull(slackBus);
-        assertEquals(0.0, slackBus.getSlackBusVAngle());
-        List<Transformer> transformers = island.getBusToTransformers().get("猛固110110");
-        assertNotNull(transformers);
-        assertEquals(2, transformers.size());
-        List<AcLine> acLines = island.getBusToAclines().get("小金11110");
-        assertNotNull(acLines);
-        assertEquals(3, acLines.size());
+//        assertNotNull(island);
+//        Bus slackBus = island.getNameToBus().get("小南海11110");
+//        assertNotNull(slackBus);
+//        assertEquals(0.0, slackBus.getSlackBusVAngle());
+//        List<Transformer> transformers = island.getBusToTransformers().get("猛固110110");
+//        assertNotNull(transformers);
+//        assertEquals(2, transformers.size());
+//        List<AcLine> acLines = island.getBusToAclines().get("小金11110");
+//        assertNotNull(acLines);
+//        assertEquals(3, acLines.size());
+        String in = "C:/Users/bingtekeji/Desktop/写结果/XIAOJIN.dat";
+        String out = "C:/Users/bingtekeji/Desktop/写结果/XIAOJIN_modify.dat";
+        BpaPfModelWriter.readAndWrite(new File(in), "GBK", new File(out), "GBK", island);
     }
 }

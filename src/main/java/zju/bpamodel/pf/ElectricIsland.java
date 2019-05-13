@@ -19,6 +19,7 @@ import java.util.Map;
  */
 public class ElectricIsland implements Serializable {
     PfCtrlInfo pfCtrlInfo = new PfCtrlInfo();
+    private List<PowerExchange> powerExchanges;
     private List<Bus> buses;
     private List<Transformer> transformers;
     private List<AcLine> aclines;
@@ -77,6 +78,14 @@ public class ElectricIsland implements Serializable {
 
     public void setPfCtrlInfo(PfCtrlInfo pfCtrlInfo) {
         this.pfCtrlInfo = pfCtrlInfo;
+    }
+
+    public List<PowerExchange> getPowerExchanges() {
+        return powerExchanges;
+    }
+
+    public void setPowerExchanges(List<PowerExchange> powerExchanges) {
+        this.powerExchanges = powerExchanges;
     }
 
     public List<Bus> getBuses() {
