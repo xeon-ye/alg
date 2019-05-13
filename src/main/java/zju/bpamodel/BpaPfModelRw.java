@@ -1,8 +1,6 @@
 package zju.bpamodel;
 
-import zju.bpamodel.pf.Bus;
-import zju.bpamodel.pf.ElectricIsland;
-import zju.bpamodel.pf.PowerExchange;
+import zju.bpamodel.pf.*;
 import zju.bpamodel.swi.*;
 
 import java.io.*;
@@ -61,8 +59,8 @@ public class BpaPfModelRw {
                 " chgCode     varchar(1) NULL," +
                 " owner     varchar(3) NULL," +
                 " linkMeterCode              INTEGER NULL, " +
-                " bus1Name     varchar(8) NOT NULL," +
-                " bus2Name     varchar(8) NOT NULL," +
+                " bus1Name1     varchar(8) NOT NULL," +
+                " busName2     varchar(8) NOT NULL," +
                 " baseKv1              decimal(4,3) NULL, " +
                 " baseKv2              decimal(4,3) NULL, " +
                 " circuit     varchar(1) DEFAULT NULL," +
@@ -84,8 +82,8 @@ public class BpaPfModelRw {
                 " type     varchar(3) NOT NULL," +
                 " chgCode     varchar(1) NULL," +
                 " owner     varchar(3) NULL," +
-                " bus1Name     varchar(8) NOT NULL," +
-                " bus2Name     varchar(8) NOT NULL," +
+                " busName1     varchar(8) NOT NULL," +
+                " busName2     varchar(8) NOT NULL," +
                 " baseKv1              decimal(4,3) NULL, " +
                 " baseKv2              decimal(4,3) NULL, " +
                 " circuit     varchar(1) DEFAULT NULL," +
@@ -155,23 +153,39 @@ public class BpaPfModelRw {
         }
         sqliteDb.executeSqls(sqls);
 
-        //todo:
         sqls.clear();
         TABLE_DATA_NAME = "AcLine";
-        for (Bus bus : model.getBuses()) {
+        for (AcLine acLine : model.getAclines()) {
             String insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
-                    "'B" + bus.getSubType() + "'," +
-                    "'" + bus.getChgCode() + "','" + bus.getOwner() + "'," +
-                    "'" + bus.getName() + "'," + bus.getBaseKv() + "," +
-                    "'" + bus.getZoneName() + "'," + bus.getLoadMw() + "," +
-                    bus.getLoadMvar() + "," + bus.getShuntMw() + "," +
-                    bus.getShuntMvar() + "," + bus.getGenMwMax() + "," +
-                    bus.getGenMw() + "," + bus.getGenMvarShed() + "," +
-                    bus.getGenMvarMax() + "," + bus.getGenMvarMin() + "," +
-                    bus.getvAmplMax() + "," + bus.getvAmplDesired() + "," +
-                    bus.getvAmplMin() + "," + bus.getSlackBusVAngle() + "," +
-                    "'" + bus.getRemoteCtrlBusName() + "'," + bus.getRemoteCtrlBusBaseKv() + "," +
-                    bus.getGenMvarPercent() +
+                    "'L','" + acLine.getChgCode() + "','" + acLine.getOwner() + "'," +
+                    acLine.getLinkMeterCode() + ",'" + acLine.getBusName1() + "'," +
+                    "'" + acLine.getBusName2() + "'," + acLine.getBaseKv1() + "," +
+                    acLine.getBaseKv2() + ",'" + acLine.getCircuit() + "'," +
+                    acLine.getBaseI() + "," + acLine.getShuntLineNum() + "," +
+                    acLine.getR() + "," + acLine.getX() + "," +
+                    acLine.getHalfG() + "," + acLine.getHalfB() + "," +
+                    acLine.getLength() + ",'" + acLine.getDesc() + "'," +
+                    "'" + acLine.getOnlineDate() + "','" + acLine.getOfflineDate() + "'" +
+                    ")";
+            sqls.add(insertSql);
+        }
+        sqliteDb.executeSqls(sqls);
+
+        sqls.clear();
+        TABLE_DATA_NAME = "Transformer";
+        for (Transformer transformer : model.getTransformers()) {
+            String insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
+                    "'T" + transformer.getSubType() + "'," +
+                    "'" + transformer.getChgCode() + "','" + transformer.getOwner() + "'," +
+                    "'" + transformer.getBusName1() + "','" + transformer.getBusName2() + "'," +
+                    transformer.getBaseKv1() + "," + transformer.getBaseKv2() + ",'" +
+                    "'" + transformer.getCircuit() + "'," + transformer.getBaseMva() + "," +
+                    transformer.getLinkMeterCode() + "," + transformer.getShuntTransformerNum() + "," +
+                    transformer.getR() + "," + transformer.getX() + "," +
+                    transformer.getG() + "," + transformer.getB() + "," +
+                    transformer.getTapKv1() + "," + transformer.getTapKv2() + "," +
+                    transformer.getPhaseAngle() + ",'" + transformer.getOnlineDate() + "'," +
+                    "'" + transformer.getOfflineDate() + "','" + transformer.getDesc() + "'," +
                     ")";
             sqls.add(insertSql);
         }
