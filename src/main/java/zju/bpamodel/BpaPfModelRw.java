@@ -1,7 +1,6 @@
 package zju.bpamodel;
 
 import zju.bpamodel.pf.*;
-import zju.bpamodel.swi.*;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -59,7 +58,7 @@ public class BpaPfModelRw {
                 " chgCode     varchar(1) NULL," +
                 " owner     varchar(3) NULL," +
                 " linkMeterCode              INTEGER NULL, " +
-                " bus1Name1     varchar(8) NOT NULL," +
+                " busName1     varchar(8) NOT NULL," +
                 " busName2     varchar(8) NOT NULL," +
                 " baseKv1              decimal(4,3) NULL, " +
                 " baseKv2              decimal(4,3) NULL, " +
@@ -126,7 +125,8 @@ public class BpaPfModelRw {
                     "'" + powerExchange.getType() + powerExchange.getSubType() + "'," +
                     "'" + powerExchange.getChgCode() + "','" + powerExchange.getAreaName() + "'," +
                     "'" + powerExchange.getAreaBusName() + "'," + powerExchange.getAreaBusBaseKv() + "," +
-                    powerExchange.getExchangePower() + ",'" + powerExchange.getZoneName() + "'" +
+                    powerExchange.getExchangePower() + ",'" + powerExchange.getZoneName() + "'," +
+                    "'" + powerExchange.getArea1Name() + "','" + powerExchange.getArea2Name() + "'" +
                     ")";
             sqls.add(insertSql);
         }
@@ -178,14 +178,14 @@ public class BpaPfModelRw {
                     "'T" + transformer.getSubType() + "'," +
                     "'" + transformer.getChgCode() + "','" + transformer.getOwner() + "'," +
                     "'" + transformer.getBusName1() + "','" + transformer.getBusName2() + "'," +
-                    transformer.getBaseKv1() + "," + transformer.getBaseKv2() + ",'" +
+                    transformer.getBaseKv1() + "," + transformer.getBaseKv2() + "," +
                     "'" + transformer.getCircuit() + "'," + transformer.getBaseMva() + "," +
                     transformer.getLinkMeterCode() + "," + transformer.getShuntTransformerNum() + "," +
                     transformer.getR() + "," + transformer.getX() + "," +
                     transformer.getG() + "," + transformer.getB() + "," +
                     transformer.getTapKv1() + "," + transformer.getTapKv2() + "," +
                     transformer.getPhaseAngle() + ",'" + transformer.getOnlineDate() + "'," +
-                    "'" + transformer.getOfflineDate() + "','" + transformer.getDesc() + "'," +
+                    "'" + transformer.getOfflineDate() + "','" + transformer.getDesc() + "'" +
                     ")";
             sqls.add(insertSql);
         }
@@ -206,105 +206,36 @@ public class BpaPfModelRw {
 
     public static void write(String dbFile, InputStream in, OutputStream out) {
         SqliteDb sqliteDb = new SqliteDb(dbFile);
-        BpaSwiModel modifiedModel = new BpaSwiModel();
-        List<Object> objects = sqliteDb.queryData("Generator");
-        modifiedModel.generators = new ArrayList<>(objects.size());
+        ElectricIsland modifiedModel = new ElectricIsland();
+        List<Object> objects = sqliteDb.queryData("PowerExchange");
+        List<PowerExchange> powerExchanges = new ArrayList<>(objects.size());
         for (Object object : objects) {
-            modifiedModel.generators.add((Generator) object);
+            powerExchanges.add((PowerExchange) object);
         }
+        modifiedModel.setPowerExchanges(powerExchanges);
         objects.clear();
-        objects = sqliteDb.queryData("GeneratorDW");
-        modifiedModel.generatorDws = new ArrayList<>(objects.size());
+        objects = sqliteDb.queryData("Bus");
+        List<Bus> buses = new ArrayList<>(objects.size());
         for (Object object : objects) {
-            modifiedModel.generatorDws.add((GeneratorDW) object);
+            buses.add((Bus) object);
         }
+        modifiedModel.setBuses(buses);
         objects.clear();
-        objects = sqliteDb.queryData("Exciter");
-        modifiedModel.exciters = new ArrayList<>(objects.size());
+        objects = sqliteDb.queryData("AcLine");
+        List<AcLine> acLines = new ArrayList<>(objects.size());
         for (Object object : objects) {
-            modifiedModel.exciters.add((Exciter) object);
+            acLines.add((AcLine) object);
         }
+        modifiedModel.setAclines(acLines);
         objects.clear();
-        objects = sqliteDb.queryData("ExciterExtraInfo");
-        modifiedModel.exciterExtraInfos = new ArrayList<>(objects.size());
+        objects = sqliteDb.queryData("Transformer");
+        List<Transformer> transformers = new ArrayList<>(objects.size());
         for (Object object : objects) {
-            modifiedModel.exciterExtraInfos.add((ExciterExtraInfo) object);
+            transformers.add((Transformer) object);
         }
+        modifiedModel.setTransformers(transformers);
         objects.clear();
-        objects = sqliteDb.queryData("PSS");
-        modifiedModel.pssList = new ArrayList<>(objects.size());
-        for (Object object : objects) {
-            modifiedModel.pssList.add((PSS) object);
-        }
-        objects.clear();
-        objects = sqliteDb.queryData("PSSExtraInfo");
-        modifiedModel.pssExtraInfos = new ArrayList<>(objects.size());
-        for (Object object : objects) {
-            modifiedModel.pssExtraInfos.add((PSSExtraInfo) object);
-        }
-        objects.clear();
-        objects = sqliteDb.queryData("PrimeMover");
-        modifiedModel.primeMovers = new ArrayList<>(objects.size());
-        for (Object object : objects) {
-            modifiedModel.primeMovers.add((PrimeMover) object);
-        }
-        objects.clear();
-        objects = sqliteDb.queryData("Governor");
-        modifiedModel.governors = new ArrayList<>(objects.size());
-        for (Object object : objects) {
-            modifiedModel.governors.add((Governor) object);
-        }
-        objects.clear();
-        objects = sqliteDb.queryData("GovernorExtraInfo");
-        modifiedModel.governorExtraInfos = new ArrayList<>(objects.size());
-        for (Object object : objects) {
-            modifiedModel.governorExtraInfos.add((GovernorExtraInfo) object);
-        }
-        objects.clear();
-        objects = sqliteDb.queryData("PV");
-        modifiedModel.pvs = new ArrayList<>(objects.size());
-        for (Object object : objects) {
-            modifiedModel.pvs.add((PV) object);
-        }
-        objects.clear();
-        objects = sqliteDb.queryData("BC");
-        modifiedModel.bcs = new ArrayList<>(objects.size());
-        for (Object object : objects) {
-            modifiedModel.bcs.add((BC) object);
-        }
-        objects.clear();
-        objects = sqliteDb.queryData("BCExtraInfo");
-        modifiedModel.bcExtraInfos = new ArrayList<>(objects.size());
-        for (Object object : objects) {
-            modifiedModel.bcExtraInfos.add((BCExtraInfo) object);
-        }
-        objects.clear();
-        objects = sqliteDb.queryData("Servo");
-        modifiedModel.servos = new ArrayList<>(objects.size());
-        for (Object object : objects) {
-            modifiedModel.servos.add((Servo) object);
-        }
-        objects.clear();
-        objects = sqliteDb.queryData("Load");
-        modifiedModel.loads = new ArrayList<>(objects.size());
-        for (Object object : objects) {
-            modifiedModel.loads.add((Load) object);
-        }
-        objects.clear();
-        objects = sqliteDb.queryData("ShortCircuitFault");
-        modifiedModel.shortCircuitFaults = new ArrayList<>(objects.size());
-        for (Object object : objects) {
-            modifiedModel.shortCircuitFaults.add((ShortCircuitFault) object);
-        }
-        objects.clear();
-        objects = sqliteDb.queryData("FLTCard");
-        modifiedModel.fltCards = new ArrayList<>(objects.size());
-        for (Object object : objects) {
-            modifiedModel.fltCards.add((FLTCard) object);
-        }
-        objects.clear();
-        modifiedModel.ff = (FFCard) sqliteDb.queryData("FFCard").get(0);
 
-        boolean r = BpaSwiModelWriter.readAndWrite(in, "GBK", out, "GBK", modifiedModel);
+        BpaPfModelWriter.readAndWrite(in, "GBK", out, "GBK", modifiedModel);
     }
 }

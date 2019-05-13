@@ -100,8 +100,8 @@ public class Transformer implements Serializable {
     public String toString() {
         StringBuilder str = new StringBuilder();
         str.append("T").append(subType).append(chgCode);
-        str.append(DataOutputFormat.format.getFormatStr(owner, "3"));
-        str.append(DataOutputFormat.format.getFormatStr(busName1, "8"));
+        str.append(DataOutputFormat.format.getFormatStr(owner, "3L"));
+        str.append(DataOutputFormat.format.getFormatStr(busName1, "8L"));
         str.append(BpaFileRwUtil.getFormatStr(baseKv1, "4.3")); //the bpa manual is 4.0;
         str.append(linkMeterCode);
         str.append(DataOutputFormat.format.getFormatStr(busName2, "8"));
