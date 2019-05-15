@@ -271,8 +271,8 @@ public class BpaPfModelRwTest extends TestCase {
     public void testXJ() {
         BpaPfModelRw.CreateTables("D:/rsa.db");
         BpaPfModelRw.parseAndSave(this.getClass().getResourceAsStream("/bpafiles/示范区BPA运行方式/XIAOJIN.DAT"), "d:/rsa.db");
-        BpaPfModelRw.write("d:/rsa.db", "C:/Users/Administrator.2013-20160810IY/IdeaProjects/alg/src/test/resources/bpafiles/示范区BPA运行方式/XIAOJIN.DAT",
-                "C:/Users/Administrator.2013-20160810IY/IdeaProjects/alg/src/test/resources/bpafiles/示范区BPA运行方式/XIAOJIN_modify.DAT");
+        BpaPfModelRw.write("d:/rsa.db", "D:/IdeaProjects/alg/src/test/resources/bpafiles/示范区BPA运行方式/XIAOJIN.DAT",
+                "D:/IdeaProjects/alg/src/test/resources/bpafiles/示范区BPA运行方式/XIAOJIN_modify.DAT");
     }
 
     public void testRead() {
