@@ -290,11 +290,11 @@ public class IesPlan {
                     double q = abs(result[supplies.length + 2 * edges.size() + i]);
                     double h = abs(result[supplies.length + 3 * edges.size() + i]);
                     double s = sqrt(p * p + q * q);
-                    double lineCost = (coef2 + coef4 + coef3 * s * s + (cle * p + clh * q) * coef5 / 1e4) * edgesLen[i];
+                    double lineCost = (coef2 + coef4 + coef3 * s * s + (cle * p + clh * h) * coef5 / 1e4) * edgesLen[i];
                     allLineCost += lineCost;
                     allLineLen += edgesLen[i];
                     System.out.printf("%s-%s\t%.0f\t%.0f\t%.1f\n", nodeids[0], nodeids[1], s, h, lineCost);
-                    minCost += (coef3 * s * s + (cle * p + clh * q) * coef5 / 1e4) * edgesLen[i];
+                    minCost += (coef3 * s * s + (cle * p + clh * h) * coef5 / 1e4) * edgesLen[i];
                 }
             }
             System.out.println("Total cost:\t" + minCost);
