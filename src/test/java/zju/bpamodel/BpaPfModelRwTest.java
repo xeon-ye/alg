@@ -283,6 +283,7 @@ public class BpaPfModelRwTest extends TestCase {
     }
 
     public void testParsePfResult() {
-        PfResult r = BpaPfResultParser.parseFile("C:/Users/bingtekeji/Desktop/写结果/XIAOJIN.pfo", "GBK");
+        BpaPfResultRw.CreateTables("D:/rsa.db");
+        BpaPfResultRw.parseAndSave("C:/Users/bingtekeji/Desktop/写结果/XIAOJIN.pfo", "d:/rsa.db");
     }
 }
