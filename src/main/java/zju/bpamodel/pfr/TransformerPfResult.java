@@ -7,7 +7,7 @@ import java.io.Serializable;
  * User: Dong Shufeng
  * Date: 12-7-14
  */
-public class BranchPfResult implements Serializable {
+public class TransformerPfResult implements Serializable {
     private String branchName;
     private double branchP;
     private double branchQ;

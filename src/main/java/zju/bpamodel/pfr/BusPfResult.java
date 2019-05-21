@@ -18,6 +18,7 @@ public class BusPfResult {
     private double genQ;
     private double loadP;
     private double loadQ;
+    private boolean isVoltageLimit = false;
 
     public BusPfResult() {
     }
@@ -120,5 +121,13 @@ public class BusPfResult {
 
     public void setLoadQ(double loadQ) {
         this.loadQ = loadQ;
+    }
+
+    public boolean isVoltageLimit() {
+        return isVoltageLimit;
+    }
+
+    public void setVoltageLimit(boolean voltageLimit) {
+        isVoltageLimit = voltageLimit;
     }
 }
