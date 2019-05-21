@@ -281,4 +281,8 @@ public class BpaPfModelRwTest extends TestCase {
         ElectricIsland modifiedModel = BpaPfModelParser.parse(this.getClass().getResourceAsStream("/bpafiles/示范区BPA运行方式/XIAOJIN_modify.DAT"), "GBK");
         assertNotNull(modifiedModel);
     }
+
+    public void testParsePfResult() {
+        PfResult r = BpaPfResultParser.parseFile("C:/Users/bingtekeji/Desktop/写结果/XIAOJIN.pfo", "GBK");
+    }
 }

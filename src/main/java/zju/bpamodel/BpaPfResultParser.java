@@ -2,11 +2,15 @@ package zju.bpamodel;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import zju.bpamodel.pfr.BranchPfResult;
 import zju.bpamodel.pfr.BusPfResult;
 import zju.bpamodel.pfr.PfResult;
+import zju.bpamodel.pfr.TransformerPfResult;
 
 import java.io.*;
 import java.util.HashMap;
+
+import static java.lang.Math.abs;
 
 /**
  * Created by IntelliJ IDEA.
@@ -70,10 +74,14 @@ public class BpaPfResultParser {
             }
             if (!r.isConverged())
                 return r;
-            r.setBusData(new HashMap<String, BusPfResult>());
+            r.setBusData(new HashMap<>());
+            r.setBranchData(new HashMap<>());
+            r.setTransformerData(new HashMap<>());
             double dToAFactor = Math.PI / 180.0;
             while ((strLine = reader.readLine()) != null) {
                 strLine = strLine.trim();
+                if (strLine.startsWith("整个系统的数据总结"))
+                    break;
                 //its not a bus, but not sure the condition judgement is perfect
                 if (!(strLine.endsWith(" B") || strLine.endsWith(" BQ")))
                     continue;
@@ -125,9 +133,98 @@ public class BpaPfResultParser {
                     }
                 }
                 r.getBusData().put(busR.getName(), busR);
+
+                while ((strLine = reader.readLine()) != null) {
+                    String charset = "GBK";
+                    byte[] src = strLine.getBytes("GBK");
+                    if (! new String(BpaFileRwUtil.getTarget(src, 46, 50)).trim().equals("PNET")) {
+                        double baseKv = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 16, 21)).trim());
+                        if (abs(baseKv - busR.getBaseKv()) < 1e-3) {
+                            BranchPfResult branchR = new BranchPfResult();
+                            branchR.setBranchName(busR.getName() + ";" + new String(BpaFileRwUtil.getTarget(src, 7, 15), charset).trim());
+                            branchR.setBusName1(busR.getName());
+                            branchR.setBusName2(new String(BpaFileRwUtil.getTarget(src, 7, 15), charset).trim());
+                            branchR.setBaseKv1(busR.getBaseKv());
+                            branchR.setBaseKv2(baseKv);
+                            branchR.setCircuit((char) src[24]);
+                            branchR.setZoneName(new String(BpaFileRwUtil.getTarget(src, 34, 36)).trim());
+                            branchR.setBranchP(BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 37, 44)).trim()));
+                            branchR.setBranchQ(BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 53, 60)).trim()));
+                            branchR.setBranchPLoss(BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 69, 76)).trim()));
+                            branchR.setBranchQLoss(BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 85, 92)).trim()));
+                            branchR.setChargeP(BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 106, 112)).trim()));
+                            r.getBranchData().put(branchR.getBranchName(), branchR);
+                        } else {
+                            TransformerPfResult transformerR = new TransformerPfResult();
+                            transformerR.setTransformerName(busR.getName() + ";" + new String(BpaFileRwUtil.getTarget(src, 7, 15), charset).trim());
+                            transformerR.setBusName1(busR.getName());
+                            transformerR.setBusName2(new String(BpaFileRwUtil.getTarget(src, 7, 15), charset).trim());
+                            transformerR.setBaseKv1(busR.getBaseKv());
+                            transformerR.setBaseKv2(baseKv);
+                            transformerR.setCircuit((char) src[24]);
+                            transformerR.setZoneName(new String(BpaFileRwUtil.getTarget(src, 34, 36)).trim());
+                            transformerR.setTransformerP(BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 37, 44)).trim()));
+                            transformerR.setTransformerQ(BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 53, 60)).trim()));
+                            transformerR.setTransformerPLoss(BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 69, 76)).trim()));
+                            transformerR.setTransformerQLoss(BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 85, 92)).trim()));
+                            r.getTransformerData().put(transformerR.getTransformerName(), transformerR);
+                        }
+                    } else {
+                        break;
+                    }
+                }
                 //log.debug(strLine);
             }
-
+            while ((strLine = reader.readLine()) != null) {
+                if (strLine.startsWith("*  低电压和过电压节点数据列表")) {
+                    for (int i = 0; i < 3; i++) {
+                        reader.readLine();
+                    }
+                    while ((strLine = reader.readLine()) != null) {
+                        if (!strLine.isEmpty()) {
+                            String charset = "GBK";
+                            byte[] src = strLine.getBytes("GBK");
+                            r.getBusData().get(new String(BpaFileRwUtil.getTarget(src, 17, 25), charset).trim()).setVoltageLimit(true);
+                        } else {
+                            break;
+                        }
+                    }
+                }
+                if (strLine.startsWith("*  线路负载超过额定值")) {
+                    for (int i = 0; i < 3; i++) {
+                        reader.readLine();
+                    }
+                    while ((strLine = reader.readLine()) != null) {
+                        if (!strLine.isEmpty()) {
+                            String charset = "GBK";
+                            byte[] src = strLine.getBytes("GBK");
+                            r.getBranchData().get(new String(BpaFileRwUtil.getTarget(src, 3, 11), charset).trim()
+                                    + ";" + new String(BpaFileRwUtil.getTarget(src, 18, 26), charset).trim()).setOverLoad(true);
+                            r.getBranchData().get(new String(BpaFileRwUtil.getTarget(src, 18, 26), charset).trim()
+                                    + ";" + new String(BpaFileRwUtil.getTarget(src, 3, 11), charset).trim()).setOverLoad(true);
+                        } else {
+                            break;
+                        }
+                    }
+                }
+                if (strLine.startsWith("*  变压器负载超过额定值")) {
+                    for (int i = 0; i < 3; i++) {
+                        reader.readLine();
+                    }
+                    while ((strLine = reader.readLine()) != null) {
+                        if (!strLine.isEmpty()) {
+                            String charset = "GBK";
+                            byte[] src = strLine.getBytes("GBK");
+                            r.getTransformerData().get(new String(BpaFileRwUtil.getTarget(src, 3, 11), charset).trim()
+                                    + ";" + new String(BpaFileRwUtil.getTarget(src, 18, 26), charset).trim()).setOverLoad(true);
+                            r.getTransformerData().get(new String(BpaFileRwUtil.getTarget(src, 18, 26), charset).trim()
+                                    + ";" + new String(BpaFileRwUtil.getTarget(src, 3, 11), charset).trim()).setOverLoad(true);
+                        } else {
+                            break;
+                        }
+                    }
+                }
+            }
             return r;
         } catch (IOException e) {
             e.printStackTrace();
