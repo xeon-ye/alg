@@ -10,6 +10,7 @@ import java.util.List;
  */
 public class SwiResult implements Serializable {
     List<MonitorData> monitorDataList;
+    List<Damping> dampings;
 
     public List<MonitorData> getMonitorDataList() {
         return monitorDataList;
@@ -17,5 +18,13 @@ public class SwiResult implements Serializable {
 
     public void setMonitorDataList(List<MonitorData> monitorDataList) {
         this.monitorDataList = monitorDataList;
+    }
+
+    public List<Damping> getDampings() {
+        return dampings;
+    }
+
+    public void setDampings(List<Damping> dampings) {
+        this.dampings = dampings;
     }
 }

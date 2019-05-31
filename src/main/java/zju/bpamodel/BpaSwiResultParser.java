@@ -70,6 +70,7 @@ public class BpaSwiResultParser {
                 }
             }
             r.setMonitorDataList(new LinkedList<>());
+            r.setDampings(new LinkedList<>());
             while ((strLine = reader.readLine()) != null) {
                 if (!strLine.trim().isEmpty()) {
                     String charset = "GBK";
@@ -98,6 +99,38 @@ public class BpaSwiResultParser {
                     maxBusFreq.setBaseKv(BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 146, 151)).trim()));
                     maxBusFreq.setFreq(BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 155, 161)).trim()));
                     r.getMonitorDataList().add(new MonitorData(time, relativeAngle, minBusVoltage, maxBusVoltage, minBusFreq, maxBusFreq));
+                } else {
+                    break;
+                }
+            }
+            while ((strLine = reader.readLine()) != null) {
+                strLine = strLine.trim();
+                if (strLine.startsWith("* 发电机、节点、线路相关变量曲线的振荡频率、阻尼比输出数据列表")) {
+                    for (int i = 0; i < 2; i++) {
+                        reader.readLine();
+                    }
+                    break;
+                }
+            }
+            while ((strLine = reader.readLine()) != null) {
+                if (!strLine.trim().isEmpty()) {
+                    String charset = "GBK";
+                    byte[] src = strLine.getBytes("GBK");
+                    Damping damping = new Damping();
+                    damping.setBusName1(new String(BpaFileRwUtil.getTarget(src, 2, 10), charset).trim());
+                    damping.setBaseKv1(BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 11, 16)).trim()));
+                    damping.setBusName2(new String(BpaFileRwUtil.getTarget(src, 17, 26), charset).trim());
+                    damping.setBaseKv2(BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 27, 32)).trim()));
+                    damping.setVariableName(new String(BpaFileRwUtil.getTarget(src, 35, 45), charset).trim());
+                    damping.setOscillationAmp1(BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 47, 57)).trim()));
+                    damping.setOscillationFreq1(BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 58, 67)).trim()));
+                    damping.setAttenuationCoef1(BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 68, 77)).trim()));
+                    damping.setDampingRatio1(BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 79, 87)).trim()));
+                    damping.setOscillationAmp2(BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 88, 97)).trim()));
+                    damping.setOscillationFreq2(BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 98, 107)).trim()));
+                    damping.setAttenuationCoef2(BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 108, 117)).trim()));
+                    damping.setDampingRatio2(BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 119, 127)).trim()));
+                    r.getDampings().add(damping);
                 } else {
                     break;
                 }
