@@ -8,9 +8,9 @@ import java.util.List;
  * User: Xu Chengsi
  * Date: 19-5-21
  */
-public class SwiResult implements Serializable {
-    List<MonitorData> monitorDataList;
-    List<Damping> dampings;
+public class SwiOutResult implements Serializable {
+    private List<MonitorData> monitorDataList;
+    private List<Damping> dampings;
 
     public List<MonitorData> getMonitorDataList() {
         return monitorDataList;

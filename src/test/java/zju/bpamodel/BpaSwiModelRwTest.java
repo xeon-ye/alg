@@ -1096,7 +1096,7 @@ public class BpaSwiModelRwTest extends TestCase {
     }
 
     public void testParseSwiResult() {
-        BpaSwiResultRw.CreateTables("D:/rsa.db");
-        BpaSwiResultRw.parseAndSave(this.getClass().getResourceAsStream("/bpafiles/示范区BPA运行方式/XIAOJIN.OUT"), "d:/rsa.db");
+        BpaSwiOutResultRw.CreateTables("D:/rsa.db");
+        BpaSwiOutResultRw.parseAndSave(this.getClass().getResourceAsStream("/bpafiles/示范区BPA运行方式/XIAOJIN.OUT"), "d:/rsa.db");
     }
 }

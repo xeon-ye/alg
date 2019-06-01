@@ -2,7 +2,7 @@ package zju.bpamodel;
 
 import zju.bpamodel.swir.Damping;
 import zju.bpamodel.swir.MonitorData;
-import zju.bpamodel.swir.SwiResult;
+import zju.bpamodel.swir.SwiOutResult;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -11,7 +11,7 @@ import java.io.InputStream;
 import java.util.LinkedList;
 import java.util.List;
 
-public class BpaSwiResultRw {
+public class BpaSwiOutResultRw {
 
     public static void CreateTables(String dbFile) {
         SqliteDb sqliteDb = new SqliteDb(dbFile);
@@ -64,7 +64,7 @@ public class BpaSwiResultRw {
     }
 
     public static void parseAndSave(InputStream in, String dbFile) {
-        SwiResult r = BpaSwiResultParser.parse(in, "GBK");
+        SwiOutResult r = BpaSwiOutResultParser.parse(in, "GBK");
         SqliteDb sqliteDb = new SqliteDb(dbFile);
         List<String> sqls = new LinkedList<>();
         String TABLE_DATA_NAME = "MonitorData";

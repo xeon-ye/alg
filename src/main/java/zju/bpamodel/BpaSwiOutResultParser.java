@@ -12,18 +12,18 @@ import java.util.LinkedList;
  * User: Xu Chengsi
  * Date: 19-5-21
  */
-public class BpaSwiResultParser {
-    private static Logger log = LogManager.getLogger(BpaSwiResultParser.class);
+public class BpaSwiOutResultParser {
+    private static Logger log = LogManager.getLogger(BpaSwiOutResultParser.class);
 
-    public static SwiResult parseFile(String file) {
+    public static SwiOutResult parseFile(String file) {
         return parseFile(new File(file));
     }
 
-    public static SwiResult parseFile(String file, String charset) {
+    public static SwiOutResult parseFile(String file, String charset) {
         return parseFile(new File(file), charset);
     }
 
-    public static SwiResult parseFile(File file, String charset) {
+    public static SwiOutResult parseFile(File file, String charset) {
         try {
             return parse(new FileInputStream(file), charset);
         } catch (FileNotFoundException e) {
@@ -32,7 +32,7 @@ public class BpaSwiResultParser {
         }
     }
 
-    public static SwiResult parseFile(File file) {
+    public static SwiOutResult parseFile(File file) {
         try {
             return parse(new FileInputStream(file));
         } catch (FileNotFoundException e) {
@@ -41,7 +41,7 @@ public class BpaSwiResultParser {
         }
     }
 
-    public static SwiResult parse(InputStream in, String charset) {
+    public static SwiOutResult parse(InputStream in, String charset) {
         try {
             return parse(new InputStreamReader(in, charset));
         } catch (UnsupportedEncodingException e) {
@@ -51,14 +51,14 @@ public class BpaSwiResultParser {
         return null;
     }
 
-    public static SwiResult parse(InputStream in) {
+    public static SwiOutResult parse(InputStream in) {
         return parse(new InputStreamReader(in));
     }
 
-    public static SwiResult parse(Reader in) {
+    public static SwiOutResult parse(Reader in) {
         try {
             BufferedReader reader = new BufferedReader(in);
-            SwiResult r = new SwiResult();
+            SwiOutResult r = new SwiOutResult();
             String strLine;
             while ((strLine = reader.readLine()) != null) {
                 strLine = strLine.trim();
