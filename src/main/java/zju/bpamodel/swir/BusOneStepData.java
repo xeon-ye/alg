@@ -2,7 +2,7 @@ package zju.bpamodel.swir;
 
 public class BusOneStepData {
     private double time;
-    private double PosSeqVol;
+    private double posSeqVol;
     private double freqDeviation;
 
     public double getTime() {
@@ -14,11 +14,11 @@ public class BusOneStepData {
     }
 
     public double getPosSeqVol() {
-        return PosSeqVol;
+        return posSeqVol;
     }
 
     public void setPosSeqVol(double posSeqVol) {
-        PosSeqVol = posSeqVol;
+        this.posSeqVol = posSeqVol;
     }
 
     public double getFreqDeviation() {

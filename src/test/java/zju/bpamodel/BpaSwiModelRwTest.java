@@ -1095,8 +1095,13 @@ public class BpaSwiModelRwTest extends TestCase {
         BpaSwiModelRw.write("C:/Users/bingtekeji/Desktop/写结果/bpa.db", "C:/Users/bingtekeji/Desktop/写结果/XIAOJIN.SWI", "C:/Users/bingtekeji/Desktop/写结果/XIAOJIN_modify.SWI");
     }
 
-    public void testParseSwiResult() {
+    public void testParseSwiOutResult() {
         BpaSwiOutResultRw.CreateTables("D:/rsa.db");
         BpaSwiOutResultRw.parseAndSave(this.getClass().getResourceAsStream("/bpafiles/示范区BPA运行方式/XIAOJIN.OUT"), "d:/rsa.db");
+    }
+
+    public void testParseSwiSwxResult() {
+        BpaSwiSwxResultRw.CreateTables("D:/rsa.db");
+        BpaSwiSwxResultRw.parseAndSave(this.getClass().getResourceAsStream("/bpafiles/示范区BPA运行方式/XIAOJIN.SWX"), "d:/rsa.db");
     }
 }

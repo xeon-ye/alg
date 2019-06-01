@@ -3,7 +3,7 @@ package zju.bpamodel.swir;
 public class LineOneStepData {
     private double time;
     private double activePower;
-    private double ReactivePower;
+    private double reactivePower;
 
     public double getTime() {
         return time;
@@ -22,10 +22,10 @@ public class LineOneStepData {
     }
 
     public double getReactivePower() {
-        return ReactivePower;
+        return reactivePower;
     }
 
     public void setReactivePower(double reactivePower) {
-        ReactivePower = reactivePower;
+        this.reactivePower = reactivePower;
     }
 }

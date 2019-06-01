@@ -8,7 +8,7 @@ public class GenOneStepData {
     private double mechPower;
     private double elecPower;
     private double regulatorOutput;
-    private double ReactivePower;
+    private double reactivePower;
     private double fieldCurrent;
 
     public double getTime() {
@@ -68,11 +68,11 @@ public class GenOneStepData {
     }
 
     public double getReactivePower() {
-        return ReactivePower;
+        return reactivePower;
     }
 
     public void setReactivePower(double reactivePower) {
-        ReactivePower = reactivePower;
+        this.reactivePower = reactivePower;
     }
 
     public double getFieldCurrent() {
