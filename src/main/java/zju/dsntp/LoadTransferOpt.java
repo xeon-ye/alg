@@ -147,18 +147,16 @@ public class LoadTransferOpt extends PathBasedModel {
         for (i = 0; i < columnLower.length; i++) {
             columnLower[i] = 0;
             columnUpper[i] = 1;
-            //todo:=0是否有问题
             whichInt[i] = i;
         }
         //初始化所有支路为通
         for (i = 0; i < edges.size(); i++)
             edgesStatues[i] = 1;
         //得到当前所有支路的通断，1通，0断
-        int count = 0;
+
         for (i = 0; i < edges.size(); i++) {
             if (edges.get(i).getProperty(KEY_SWITCH_STATUS).equals(SWITCH_OFF)) {
                 edgesStatues[i] = 0;
-                count++;
             }
         }
         //设置状态变量的系数值
@@ -342,14 +340,6 @@ public class LoadTransferOpt extends PathBasedModel {
             log.info("计算结果.");
         }
 
-
-        int temp = 0;
-        for(i =0;i<objValue.length;i++){
-            temp = (int) (temp + objValue[i]*result[i]);
-        }
-
-        System.out.println("=="+(temp+edges.size()-count)+"==");
-
 //        for(i = 0; i < edges.size(); i++) {
 //            System.out.printf("%s  %s  %d\n", g.getEdgeSource(edges.get(i)).getId(), g.getEdgeTarget(edges.get(i)).getId(), edgesStatues[i]);
 //        }
@@ -359,7 +349,7 @@ public class LoadTransferOpt extends PathBasedModel {
         int[] newedgesStatues = new int[edges.size()];
         //得到新的支路通断状态
         for (i = 0; i < pathes.size(); i++) {
-            if (result[i] == 1) {
+            if (Math.abs(result[i]-1)<1e-5) {
                 for (j = 0; j < edges.size(); j++) {
                     if (pathes.get(i)[pathes.get(i).length - 1].equals(edges.get(j))) {
                         newedgesStatues[j] = 1;
