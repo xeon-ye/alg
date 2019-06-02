@@ -269,16 +269,21 @@ public class BpaPfModelRwTest extends TestCase {
     }
 
     public void testXJ() {
-        ElectricIsland island = BpaPfModelParser.parse(this.getClass().getResourceAsStream("/bpafiles/示范区BPA运行方式/XIAOJIN.dat"), "GBK");
-        assertNotNull(island);
-        Bus slackBus = island.getNameToBus().get("小南海11110");
-        assertNotNull(slackBus);
-        assertEquals(0.0, slackBus.getSlackBusVAngle());
-        List<Transformer> transformers = island.getBusToTransformers().get("猛固110110");
-        assertNotNull(transformers);
-        assertEquals(2, transformers.size());
-        List<AcLine> acLines = island.getBusToAclines().get("小金11110");
-        assertNotNull(acLines);
-        assertEquals(3, acLines.size());
+        BpaPfModelRw.CreateTables("D:/rsa.db");
+        BpaPfModelRw.parseAndSave(this.getClass().getResourceAsStream("/bpafiles/示范区BPA运行方式/XIAOJIN.DAT"), "d:/rsa.db");
+        BpaPfModelRw.write("d:/rsa.db", "D:/IdeaProjects/alg/src/test/resources/bpafiles/示范区BPA运行方式/XIAOJIN.DAT",
+                "D:/IdeaProjects/alg/src/test/resources/bpafiles/示范区BPA运行方式/XIAOJIN_modify.DAT");
+    }
+
+    public void testRead() {
+        ElectricIsland model = BpaPfModelParser.parse(this.getClass().getResourceAsStream("/bpafiles/示范区BPA运行方式/XIAOJIN.DAT"), "GBK");
+        assertNotNull(model);
+        ElectricIsland modifiedModel = BpaPfModelParser.parse(this.getClass().getResourceAsStream("/bpafiles/示范区BPA运行方式/XIAOJIN_modify.DAT"), "GBK");
+        assertNotNull(modifiedModel);
+    }
+
+    public void testParsePfResult() {
+        BpaPfResultRw.CreateTables("D:/rsa.db");
+        BpaPfResultRw.parseAndSave("C:/Users/bingtekeji/Desktop/写结果/XIAOJIN.pfo", "d:/rsa.db");
     }
 }

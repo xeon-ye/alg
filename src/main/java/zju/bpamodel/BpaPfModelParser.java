@@ -64,10 +64,11 @@ public class BpaPfModelParser {
             BufferedReader reader = new BufferedReader(in);
             ElectricIsland model = new ElectricIsland();
             String strLine;
-            List<Bus> buses = new ArrayList<Bus>();
-            List<AcLine> aclines = new ArrayList<AcLine>();
-            List<Transformer> transformers = new ArrayList<Transformer>();
-            HashMap<String, DataModifyInfo> zone2dataModifyInfoMap = new HashMap<String, DataModifyInfo>();
+            List<PowerExchange> powerExchanges = new ArrayList<>();
+            List<Bus> buses = new ArrayList<>();
+            List<AcLine> aclines = new ArrayList<>();
+            List<Transformer> transformers = new ArrayList<>();
+            HashMap<String, DataModifyInfo> zone2dataModifyInfoMap = new HashMap<>();
 
             while ((strLine = reader.readLine()) != null) {
                 try {
@@ -102,6 +103,8 @@ public class BpaPfModelParser {
                         } else if (strLine.charAt(1) == 'B') {
                             //todo: not finished.
                         }
+                    } else if (strLine.startsWith("A") || strLine.startsWith("I")) {
+                        powerExchanges.add(PowerExchange.createPowerExchange(strLine));
                     }
                 } catch (NumberFormatException ex) {
                     //ex.printStackTrace();
@@ -113,6 +116,7 @@ public class BpaPfModelParser {
                     log.warn(strLine);
                 }
             }
+            model.setPowerExchanges(powerExchanges);
             model.setBuses(buses);
             model.setAclines(aclines);
             model.setTransformers(transformers);

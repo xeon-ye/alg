@@ -80,7 +80,7 @@ public class PSSExtraInfo implements Serializable {
     public String toString() {
         StringBuilder str = new StringBuilder();
         str.append(type);
-        str.append(DataOutputFormat.format.getFormatStr(genName, "8"));
+        str.append(DataOutputFormat.format.getFormatStr(genName, "8L"));
         str.append(BpaFileRwUtil.getFormatStr(baseKv, "4.1"));// the bpa model is 4.0
         str.append(id);
         str.append(BpaFileRwUtil.getFormatStr(kp, "5.3"));
@@ -96,7 +96,7 @@ public class PSSExtraInfo implements Serializable {
         if (busName == null) {
             busName = "";
         }
-        str.append(DataOutputFormat.format.getFormatStr(busName, "8"));
+        str.append(DataOutputFormat.format.getFormatStr(busName, "8L"));
         if (ib == 1) {
             str.append(BpaFileRwUtil.getFormatStr(busBaseKv, "4.1"));// the bpa model is 4.0
         } else {

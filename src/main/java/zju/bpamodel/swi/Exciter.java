@@ -198,7 +198,7 @@ public class Exciter implements Serializable {
         strLine += type;
         strLine += subType;
         strLine += " ";
-        strLine += DataOutputFormat.format.getFormatStr(getBusName(), "8");
+        strLine += DataOutputFormat.format.getFormatStr(getBusName(), "8L");
         strLine += BpaFileRwUtil.getFormatStr(getBaseKv(), "4.3");//the bpa manual is 4.0
         strLine += generatorCode;
         if (type == 'E') {

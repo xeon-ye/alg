@@ -1,5 +1,9 @@
 package zju.bpamodel;
 
+import zju.bpamodel.pf.AcLine;
+import zju.bpamodel.pf.Bus;
+import zju.bpamodel.pf.PowerExchange;
+import zju.bpamodel.pf.Transformer;
 import zju.bpamodel.swi.*;
 
 import java.io.File;
@@ -11,8 +15,14 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class SqliteDb {
+
+    String dbFile;
+
+    public SqliteDb(String dbFile) {
+        this.dbFile = dbFile;
+    }
+
     private Connection createConn() {
-        String dbFile = "d:/bpa.db";
         File f = new File(dbFile);
         if(!f.exists()) {
             try {
@@ -457,6 +467,7 @@ public class SqliteDb {
             obj.setTi(rs.getDouble("ti"));
             obj.setA(rs.getDouble("a"));
             obj.setB(rs.getDouble("b"));
+            obj.setS(rs.getString("s").charAt(0));
             obj.setIm(rs.getInt("im"));
             return obj;
         } else if (tableName.equals("ShortCircuitFault")) {
@@ -527,6 +538,90 @@ public class SqliteDb {
             obj.setNoSc(rs.getInt("noSc"));
             obj.setMgtomf(rs.getInt("mgtomf"));
             obj.setNoLoad(rs.getInt("noLoad"));
+            return obj;
+        } else if (tableName.equals("PowerExchange")) {
+            PowerExchange obj = new PowerExchange();
+            String type = rs.getString("type");
+            obj.setType(type.charAt(0));
+            obj.setSubType(type.charAt(1));
+            obj.setChgCode(rs.getString("chgCode").charAt(0));
+            obj.setAreaName(rs.getString("areaName"));
+            obj.setAreaBusName(rs.getString("areaBusName"));
+            obj.setAreaBusBaseKv(rs.getDouble("areaBusBaseKv"));
+            obj.setExchangePower(rs.getDouble("exchangePower"));
+            obj.setZoneName(rs.getString("zoneName"));
+            obj.setArea1Name(rs.getString("area1Name"));
+            obj.setArea2Name(rs.getString("area2Name"));
+            return obj;
+        } else if (tableName.equals("Bus")) {
+            Bus obj = new Bus();
+            obj.setSubType(rs.getString("type").charAt(1));
+            obj.setChgCode(rs.getString("chgCode").charAt(0));
+            obj.setOwner(rs.getString("owner"));
+            obj.setName(rs.getString("name"));
+            obj.setBaseKv(rs.getDouble("baseKv"));
+            obj.setZoneName(rs.getString("zoneName"));
+            obj.setLoadMw(rs.getDouble("loadMw"));
+            obj.setLoadMvar(rs.getDouble("loadMvar"));
+            obj.setShuntMw(rs.getDouble("shuntMw"));
+            obj.setShuntMvar(rs.getDouble("shuntMvar"));
+            obj.setGenMwMax(rs.getDouble("genMwMax"));
+            obj.setGenMw(rs.getDouble("genMw"));
+            obj.setGenMvarShed(rs.getDouble("genMvarShed"));
+            obj.setGenMvarMax(rs.getDouble("genMvarMax"));
+            obj.setGenMvarMin(rs.getDouble("genMvarMin"));
+            obj.setvAmplMax(rs.getDouble("vAmplMax"));
+            obj.setvAmplDesired(rs.getDouble("vAmplDesired"));
+            obj.setvAmplMin(rs.getDouble("vAmplMin"));
+            obj.setSlackBusVAngle(rs.getDouble("slackBusVAngle"));
+            obj.setRemoteCtrlBusName(rs.getString("remoteCtrlBusName"));
+            obj.setRemoteCtrlBusBaseKv(rs.getDouble("remoteCtrlBusBaseKv"));
+            obj.setGenMvarPercent(rs.getDouble("genMvarPercent"));
+            return obj;
+        } else if (tableName.equals("AcLine")) {
+            AcLine obj = new AcLine();
+            obj.setChgCode(rs.getString("chgCode").charAt(0));
+            obj.setOwner(rs.getString("owner"));
+            obj.setLinkMeterCode(rs.getInt("linkMeterCode"));
+            obj.setBusName1(rs.getString("busName1"));
+            obj.setBusName2(rs.getString("busName2"));
+            obj.setBaseKv1(rs.getDouble("baseKv1"));
+            obj.setBaseKv2(rs.getDouble("baseKv2"));
+            obj.setCircuit(rs.getString("circuit").charAt(0));
+            obj.setBaseI(rs.getDouble("baseI"));
+            obj.setShuntLineNum(rs.getInt("shuntLineNum"));
+            obj.setR(rs.getDouble("r"));
+            obj.setX(rs.getDouble("x"));
+            obj.setHalfG(rs.getDouble("halfG"));
+            obj.setHalfB(rs.getDouble("halfB"));
+            obj.setLength(rs.getDouble("length"));
+            obj.setDesc(rs.getString("desc"));
+            obj.setOnlineDate(rs.getString("onlineDate"));
+            obj.setOfflineDate(rs.getString("offlineDate"));
+            return obj;
+        } else if (tableName.equals("Transformer")) {
+            Transformer obj = new Transformer();
+            obj.setSubType(rs.getString("type").charAt(1));
+            obj.setChgCode(rs.getString("chgCode").charAt(0));
+            obj.setOwner(rs.getString("owner"));
+            obj.setBusName1(rs.getString("busName1"));
+            obj.setBusName2(rs.getString("busName2"));
+            obj.setBaseKv1(rs.getDouble("baseKv1"));
+            obj.setBaseKv2(rs.getDouble("baseKv2"));
+            obj.setCircuit(rs.getString("circuit").charAt(0));
+            obj.setBaseMva(rs.getDouble("baseMva"));
+            obj.setLinkMeterCode(rs.getInt("linkMeterCode"));
+            obj.setShuntTransformerNum(rs.getInt("shuntTransformerNum"));
+            obj.setR(rs.getDouble("r"));
+            obj.setX(rs.getDouble("x"));
+            obj.setG(rs.getDouble("g"));
+            obj.setB(rs.getDouble("b"));
+            obj.setTapKv1(rs.getDouble("tapKv1"));
+            obj.setTapKv2(rs.getDouble("tapKv2"));
+            obj.setPhaseAngle(rs.getDouble("phaseAngle"));
+            obj.setOnlineDate(rs.getString("onlineDate"));
+            obj.setOfflineDate(rs.getString("offlineDate"));
+            obj.setDesc(rs.getString("desc"));
             return obj;
         }
         return null;

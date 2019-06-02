@@ -102,8 +102,8 @@ public class Bus implements Serializable {
     public String toString() {
         StringBuilder strLine = new StringBuilder();
         strLine.append("B").append(subType).append(chgCode);
-        strLine.append(DataOutputFormat.format.getFormatStr(owner, "3"));
-        strLine.append(DataOutputFormat.format.getFormatStr(name, "8"));
+        strLine.append(DataOutputFormat.format.getFormatStr(owner, "3L"));
+        strLine.append(DataOutputFormat.format.getFormatStr(name, "8L"));
         strLine.append(BpaFileRwUtil.getFormatStr(getBaseKv(), "4.3"));//the bpa manual is 4.0
         strLine.append(DataOutputFormat.format.getFormatStr(getZoneName(), "2"));
         strLine.append(BpaFileRwUtil.getFormatStr(getLoadMw(), "5.4"));//the bpa manual is 5.0
@@ -130,7 +130,7 @@ public class Bus implements Serializable {
             strLine.append(BpaFileRwUtil.getFormatStr(getvAmplMin(), "4.3"));
         if (subType == 'G' || subType == 'X') {
             strLine.append(DataOutputFormat.format.getFormatStr(getRemoteCtrlBusName(), "8"));
-            strLine.append(BpaFileRwUtil.getFormatStr(getvAmplMin(), "4.3"));//the bpa manual is 4.0;
+            strLine.append(BpaFileRwUtil.getFormatStr(getRemoteCtrlBusBaseKv(), "4.3"));//the bpa manual is 4.0;
             strLine.append(BpaFileRwUtil.getFormatStr(getGenMvarPercent(), "3.2"));//the bpa manual is 3.0;
         }
         return strLine.toString();

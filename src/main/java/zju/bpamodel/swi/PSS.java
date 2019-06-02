@@ -119,7 +119,7 @@ public class PSS implements Serializable {
     public String toString() {
         StringBuilder str = new StringBuilder();
         str.append(type).append(subType).append(" ");
-        str.append(DataOutputFormat.format.getFormatStr(genName, "8"));
+        str.append(DataOutputFormat.format.getFormatStr(genName, "8L"));
         str.append(BpaFileRwUtil.getFormatStr(baseKv, "4.1"));// the bpa model is 4.0
         str.append(id);
         if (subType == 'F' || subType == 'P' || subType == 'S' || subType == 'G') {
@@ -137,7 +137,7 @@ public class PSS implements Serializable {
             str.append(BpaFileRwUtil.getFormatStr(maxVs, "4.3"));
             str.append(BpaFileRwUtil.getFormatStr(cutoffV, "4.3"));
             str.append(BpaFileRwUtil.getFormatStr(slowV, "2.2"));
-            str.append(DataOutputFormat.format.getFormatStr(remoteBusName, "8"));
+            str.append(DataOutputFormat.format.getFormatStr(remoteBusName, "8L"));
             if (subType == 'P' || subType == 'G')
                 str.append(BpaFileRwUtil.getFormatStr(kqsBaseCap, "4.0"));
             else

@@ -38,6 +38,14 @@ public class SeTest_RealCase extends TestCase implements MeasTypeCons {
         pf.fillOriIslandPfResult();
     }
 
+    public void testOneCase() {
+        InputStream ieeeFile = this.getClass().getResourceAsStream("/matpower/case3120sp.txt");
+        IEEEDataIsland island = new DefaultIcfParser().parse(ieeeFile, "UTF-8");
+        SystemMeasure sm = SimuMeasMaker.createFullMeasure(island, 1, 0);
+        doPf(island);
+        doTrueSe(island);
+    }
+
     public void testCaseDb_true() {
         InputStream ieeeFile = this.getClass().getResourceAsStream("/ieeefiles/ieee_orginal.txt");
         IEEEDataIsland island = new DefaultIcfParser().parse(ieeeFile, "GBK");

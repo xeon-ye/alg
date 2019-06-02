@@ -86,9 +86,9 @@ public class FLTCard implements Serializable {
     public String toString() {
         StringBuilder strLine = new StringBuilder();
         strLine.append("FLT").append(" ");
-        strLine.append(DataOutputFormat.format.getFormatStr(getBusAName(), "8"));
+        strLine.append(DataOutputFormat.format.getFormatStr(getBusAName(), "8L"));
         strLine.append(BpaFileRwUtil.getFormatStr(getBusABaseKv(), "4.1")).append(" ");// the bpa model is 4.0
-        strLine.append(DataOutputFormat.format.getFormatStr(getBusBName(), "8"));
+        strLine.append(DataOutputFormat.format.getFormatStr(getBusBName(), "8L"));
         strLine.append(BpaFileRwUtil.getFormatStr(getBusBBaseKv(), "4.1"));// the bpa model is 4.0
         strLine.append(circuitId).append(" ");
         strLine.append(BpaFileRwUtil.getFormatStr(fltType, "2")).append(" ");

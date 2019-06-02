@@ -77,7 +77,7 @@ public class Generator implements Serializable {
     public String toString() {
         StringBuilder str = new StringBuilder();
         str.append(type).append(subType).append(" ");
-        str.append(DataOutputFormat.format.getFormatStr(getBusName(), "8"));
+        str.append(DataOutputFormat.format.getFormatStr(getBusName(), "8L"));
         str.append(BpaFileRwUtil.getFormatStr(getBaseKv(), "4.3"));//the bpa manual is 4.0
         str.append(getId());
         str.append(BpaFileRwUtil.getFormatStr(geteMWS(), "6.5"));//the bpa manual is 6.0

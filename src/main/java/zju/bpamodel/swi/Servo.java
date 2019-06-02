@@ -79,7 +79,7 @@ public class Servo implements Serializable {
         strLine += type;
         strLine += subType;
         strLine += " ";
-        strLine += DataOutputFormat.format.getFormatStr(genName, "8");
+        strLine += DataOutputFormat.format.getFormatStr(genName, "8L");
         strLine += BpaFileRwUtil.getFormatStr(getBaseKv(), "4.1");// the bpa model is 4.0
         strLine += generatorCode;
         strLine += BpaFileRwUtil.getFormatStr(pe, "6.2");

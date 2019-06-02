@@ -100,8 +100,8 @@ public class Transformer implements Serializable {
     public String toString() {
         StringBuilder str = new StringBuilder();
         str.append("T").append(subType).append(chgCode);
-        str.append(DataOutputFormat.format.getFormatStr(owner, "3"));
-        str.append(DataOutputFormat.format.getFormatStr(busName1, "8"));
+        str.append(DataOutputFormat.format.getFormatStr(owner, "3L"));
+        str.append(DataOutputFormat.format.getFormatStr(busName1, "8L"));
         str.append(BpaFileRwUtil.getFormatStr(baseKv1, "4.3")); //the bpa manual is 4.0;
         str.append(linkMeterCode);
         str.append(DataOutputFormat.format.getFormatStr(busName2, "8"));
@@ -113,8 +113,12 @@ public class Transformer implements Serializable {
         str.append(BpaFileRwUtil.getFormatStr(x, "6.5"));
         str.append(BpaFileRwUtil.getFormatStr(g, "6.5"));
         str.append(BpaFileRwUtil.getFormatStr(b, "6.5"));
-        str.append(BpaFileRwUtil.getFormatStr(tapKv1, "5.2"));
-        str.append(BpaFileRwUtil.getFormatStr(tapKv2, "5.2")).append("  ");
+        if (subType == 'P') {
+            str.append(BpaFileRwUtil.getFormatStr(phaseAngle, "5.2")).append("       ");
+        } else {
+            str.append(BpaFileRwUtil.getFormatStr(tapKv1, "5.2"));
+            str.append(BpaFileRwUtil.getFormatStr(tapKv2, "5.2")).append("  ");
+        }
         str.append(DataOutputFormat.format.getFormatStr(onlineDate, "3"));
         str.append(DataOutputFormat.format.getFormatStr(offlineDate, "3"));
         return str.toString();

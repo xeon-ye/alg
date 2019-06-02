@@ -59,7 +59,7 @@ public class FFCard implements Serializable {
         byte[] src = charset != null ? content.getBytes(charset) : content.getBytes();
         type = new String(BpaFileRwUtil.getTarget(src, 0, 2)).trim();
         t = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 4, 7)).trim(), "3.0");
-        dt = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 8, 11)).trim(), "3.0");
+        dt = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 8, 11)).trim());
         endT = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 12, 17)).trim(), "5.0");
         dtc = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 18, 21)).trim(), "3.1");
         istp = BpaFileRwUtil.parseInt(new String(BpaFileRwUtil.getTarget(src, 22, 25)).trim());
@@ -92,7 +92,7 @@ public class FFCard implements Serializable {
         StringBuilder str = new StringBuilder();
         str.append(type).append("  ");
         str.append(BpaFileRwUtil.getFormatStr(t, "3.0")).append(" ");
-        str.append(BpaFileRwUtil.getFormatStr(dt, "3.0")).append(" ");
+        str.append(BpaFileRwUtil.getFormatStr(dt, "3.1")).append(" ");//the bpa manual is 3.0
         str.append(BpaFileRwUtil.getFormatStr(endT, "5.0")).append(" ");
         str.append(BpaFileRwUtil.getFormatStr(dtc, "3.1")).append(" ");
         str.append(BpaFileRwUtil.getFormatStr(istp, "3")).append(" ");
