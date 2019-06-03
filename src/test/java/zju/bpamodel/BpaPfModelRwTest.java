@@ -286,4 +286,17 @@ public class BpaPfModelRwTest extends TestCase {
         BpaPfResultRw.CreateTables("D:/rsa.db");
         BpaPfResultRw.parseAndSave("C:/Users/bingtekeji/Desktop/写结果/XIAOJIN.pfo", "d:/rsa.db");
     }
+
+    public void testDeleteTable() {
+        ChangeDbData.truncateTable("d:/rsa.db", "Bc");
+    }
+
+    public void testUpdataGenPlan() {
+        ChangeDbData.updataGenPlan("d:/rsa.db", "木坡101", 15);
+    }
+
+    public void testSetFault() {
+        ChangeDbData.setShortCircuitFault("d:/rsa.db", 'A', "name1" ,
+                10, 'B', "name2", 10, '1', 0, 10, 1, 1, 5);
+    }
 }
