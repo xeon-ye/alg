@@ -288,7 +288,9 @@ public class BpaPfModelRwTest extends TestCase {
     }
 
     public void testDeleteTable() {
-        ChangeDbData.truncateTable("d:/rsa.db", "Bc");
+        ChangeDbData.createTables("d:/rsa.db");
+//        ChangeDbData.truncateTable("d:/rsa.db", "Bc");
+//        ChangeDbData.truncateTables("d:/rsa.db");
     }
 
     public void testUpdataGenPlan() {
@@ -297,6 +299,11 @@ public class BpaPfModelRwTest extends TestCase {
 
     public void testSetFault() {
         ChangeDbData.setShortCircuitFault("d:/rsa.db", 'A', "name1" ,
-                10, 'B', "name2", 10, '1', 0, 10, 1, 1, 5);
+                10, 'B', "name2", 10, '1',
+                0, 10, 1, 1, 5);
+
+        ChangeDbData.setFLTCard("d:/rsa.db", "name1" , 10, "name2",
+                10, '1', 0, 3, 1, 1.1, 1.1, 1.1,
+                15, 1.5, 1.5, 1.1, 1.1, 1.1, 1.1);
     }
 }

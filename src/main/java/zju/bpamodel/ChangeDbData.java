@@ -1,6 +1,5 @@
 package zju.bpamodel;
 
-import java.util.LinkedList;
 import java.util.List;
 
 public class ChangeDbData {
@@ -14,30 +13,29 @@ public class ChangeDbData {
 
     public static void truncateTable(String dbFile, String tableName) {
         SqliteDb sqliteDb = new SqliteDb(dbFile);
-        List<String> sqls = new LinkedList<>();
         String sql = "delete from " + tableName;
-        sqls.add(sql);
-        sqliteDb.executeSqls(sqls);
+        sqliteDb.executeSql(sql);
     }
 
     public static void truncateTables(String dbFile) {
-        truncateTable(dbFile, "");
+        SqliteDb sqliteDb = new SqliteDb(dbFile);
+        List<String> tableNames = sqliteDb.getTableNames();
+        for (String tableName : tableNames) {
+            truncateTable(dbFile, tableName);
+        }
     }
 
     public static void updataGenPlan(String dbFile, String busName, double genMw) {
         SqliteDb sqliteDb = new SqliteDb(dbFile);
-        List<String> sqls = new LinkedList<>();
         String sql = "update Bus set genMw=" + genMw + " where name='" + busName +"'";
-        sqls.add(sql);
-        sqliteDb.executeSqls(sqls);
+        sqliteDb.executeSql(sql);
     }
 
     public static void setShortCircuitFault(String dbFile, char busASign, String busAName, double busABaseKv,
                                             char busBSign, String busBName, double busBBaseKv, char parallelBranchCode,
                                             int mode, double startCycle, double faultR, double faultX, double posPercent) {
         SqliteDb sqliteDb = new SqliteDb(dbFile);
-        List<String> sqls = new LinkedList<>();
-        String insertSql = "insert into ShortCircuitFault values(" +
+        String sql = "insert into ShortCircuitFault values(" +
                 "'LS','" + busASign + "'," +
                 "'" + busAName + "'," + busABaseKv + "," +
                 "'" + busBSign + "','" + busBName + "'," +
@@ -46,15 +44,25 @@ public class ChangeDbData {
                 faultR + "," + faultX + "," +
                 posPercent +
                 ")";
-        sqls.add(insertSql);
-        sqliteDb.executeSqls(sqls);
+        sqliteDb.executeSql(sql);
     }
 
-//    public static void setFLTCard(String dbFile, String busAName, String name2, double genMw) {
-//        SqliteDb sqliteDb = new SqliteDb(dbFile);
-//        List<String> sqls = new LinkedList<>();
-//        String sql = "updata Bus set genMw=" + genMw + " where name='" + busName +"'";
-//        sqls.add(sql);
-//        sqliteDb.executeSqls(sqls);
-//    }
+    public static void setFLTCard(String dbFile, String busAName, double busABaseKv, String busBName, double busBBaseKv,
+                                  char circuitId, int fltType, int phase, int side, double tcyc0, double tcyc1,
+                                  double tcyc2, double posPercent, double faultR, double faultX, double tcyc11,
+                                  double tcyc21, double tcyc12, double tcyc22) {
+        SqliteDb sqliteDb = new SqliteDb(dbFile);
+        String sql = "insert into FLTCard values(" +
+                "'FLT','" + busAName + "'," + busABaseKv + "," +
+                "'" + busBName + "'," + busBBaseKv + "," +
+                "'" + circuitId + "'," + fltType + "," +
+                phase + "," + side + "," +
+                tcyc0 + "," + tcyc1 + "," +
+                tcyc2 + "," + posPercent + "," +
+                faultR + "," + faultX + "," +
+                tcyc11 + "," + tcyc21 + "," +
+                tcyc12 + "," + tcyc22 +
+                ")";
+        sqliteDb.executeSql(sql);
+    }
 }

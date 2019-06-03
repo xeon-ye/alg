@@ -44,6 +44,37 @@ public class SqliteDb {
         return conn;
     }
 
+    public Boolean executeSql(String sql) {
+        Connection conn = createConn();
+        if(conn == null) return false;
+        Statement stmt =  null;
+        try {
+            conn.setAutoCommit(false);
+            stmt = conn.createStatement();
+            stmt.addBatch(sql);
+            stmt.executeBatch();
+            conn.commit();
+        } catch (SQLException e) {
+            try {
+                conn.rollback();
+            } catch (SQLException e1) {
+                System.out.println(e1.getMessage());
+            }
+            StringWriter w =new StringWriter();
+            e.printStackTrace(new PrintWriter(w, true));
+            System.out.println(e.getMessage());
+            return false;
+        } finally {
+            try {
+                stmt.close();
+                conn.setAutoCommit(true);
+                conn.close();
+            } catch (SQLException e) {
+            }
+        }
+        return true;
+    }
+
     public Boolean executeSqls(List<String> sqls) {
         Connection conn = createConn();
         if(conn == null) return false;
@@ -101,6 +132,31 @@ public class SqliteDb {
             } catch (SQLException e) {
             }
         }
+    }
+
+    public List<String> getTableNames() {
+        Connection conn = createConn();
+        String sql = "select name from sqlite_master  where type='table'";
+        Statement stmt = null;
+        ResultSet rs = null;
+        List<String> tableNames = new LinkedList<>();
+        try {
+            stmt = conn.createStatement();
+            rs = stmt.executeQuery(sql);
+            while (rs.next()) {
+                tableNames.add(rs.getString("name"));
+            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+            e.printStackTrace();
+        } finally {
+            try {
+                rs.close();
+                stmt.close();
+            } catch (SQLException e) {
+            }
+        }
+        return tableNames;
     }
 
     public List<Object> queryData(String tableName) {
