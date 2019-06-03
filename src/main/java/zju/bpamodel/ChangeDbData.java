@@ -8,7 +8,8 @@ public class ChangeDbData {
         BpaPfModelRw.CreateTables(dbFile);
         BpaSwiModelRw.CreateTables(dbFile);
         BpaPfResultRw.CreateTables(dbFile);
-        BpaSwiResultRw.CreateTables(dbFile);
+        BpaSwiOutResultRw.CreateTables(dbFile);
+        BpaSwiSwxResultRw.CreateTables(dbFile);
     }
 
     public static void truncateTable(String dbFile, String tableName) {
