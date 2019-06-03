@@ -7,11 +7,11 @@ package zju.bpamodel.swir;
  */
 public class MonitorData {
     private double time;
-    RelativeAngle relativeAngle;
-    BusVoltage minBusVoltage;
-    BusVoltage maxBusVoltage;
-    BusFreq minBusFreq;
-    BusFreq maxBusFreq;
+    private RelativeAngle relativeAngle;
+    private BusVoltage minBusVoltage;
+    private BusVoltage maxBusVoltage;
+    private BusFreq minBusFreq;
+    private BusFreq maxBusFreq;
 
     public MonitorData(double time, RelativeAngle relativeAngle, BusVoltage minBusVoltage, BusVoltage maxBusVoltage,
                        BusFreq minBusFreq, BusFreq maxBusFreq) {

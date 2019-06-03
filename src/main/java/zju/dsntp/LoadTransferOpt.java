@@ -153,6 +153,7 @@ public class LoadTransferOpt extends PathBasedModel {
         for (i = 0; i < edges.size(); i++)
             edgesStatues[i] = 1;
         //得到当前所有支路的通断，1通，0断
+
         for (i = 0; i < edges.size(); i++) {
             if (edges.get(i).getProperty(KEY_SWITCH_STATUS).equals(SWITCH_OFF)) {
                 edgesStatues[i] = 0;
@@ -348,7 +349,7 @@ public class LoadTransferOpt extends PathBasedModel {
         int[] newedgesStatues = new int[edges.size()];
         //得到新的支路通断状态
         for (i = 0; i < pathes.size(); i++) {
-            if (result[i] == 1) {
+            if (Math.abs(result[i]-1)<1e-5) {
                 for (j = 0; j < edges.size(); j++) {
                     if (pathes.get(i)[pathes.get(i).length - 1].equals(edges.get(j))) {
                         newedgesStatues[j] = 1;
