@@ -45,7 +45,7 @@ public class SeTest_case15 implements SeConstants, MeasTypeCons {
         reader.readHeaders();
 
         int cnt = 0;
-        double rate = 0, mse = 0;
+        double rate = 0, mseRate = 0;
         List<String[]> injections = new ArrayList<>(15);
         while (reader.readRecord()) {
             injections.add(reader.getValues());
@@ -66,18 +66,16 @@ public class SeTest_case15 implements SeConstants, MeasTypeCons {
                     }
                     SeResultInfo res = doSE(island.clone(), sm);
                     rate += res.getEligibleRate();
-                    for (int i = 0; i < alg.getMeas().getZ_estimate().getN(); i++)
-                        mse += Math.pow(alg.getMeas().getZ_estimate().getValue(i) - alg.getMeas().getZ_true().getValue(i), 2);
+                    mseRate += getMse();
                     ++cnt;
                 }
                 injections.clear();
             }
         }
         rate /= cnt;
-        mse = Math.sqrt(mse / cnt);
+        mseRate /= cnt;
         System.out.println("平均合格率为：" + rate);
-        System.out.println("MSE为：" + mse);
-
+        System.out.println("MSE为：" + mseRate);
     }
 
     @Test
@@ -116,6 +114,7 @@ public class SeTest_case15 implements SeConstants, MeasTypeCons {
             SeResultInfo res = doSE(island.clone(), sm);
             if (res.getEligibleRate() < 0.8 || !alg.isConverged())
                 ans.add("测点位置：" + i);
+            System.out.println("MSE为：" + getMse());
             restoreMeas(id, sm, infos);
         }
         for (int i = 2; i <= 15; i++) {
@@ -127,6 +126,7 @@ public class SeTest_case15 implements SeConstants, MeasTypeCons {
                 SeResultInfo res = doSE(island.clone(), sm);
                 if (res.getEligibleRate() < 0.8 || !alg.isConverged())
                     ans.add("测点位置：" + i + ";" + j);
+                System.out.println("MSE为：" + getMse());
                 restoreMeas(id2, sm, infos2);
             }
             restoreMeas(id1, sm, infos1);
@@ -143,6 +143,7 @@ public class SeTest_case15 implements SeConstants, MeasTypeCons {
                     SeResultInfo res = doSE(island.clone(), sm);
                     if (res.getEligibleRate() < 0.8 || !alg.isConverged())
                         ans.add("测点位置：" + i + ";" + j + ";" + k);
+                    System.out.println("MSE为：" + getMse());
                     restoreMeas(id3, sm, infos3);
                 }
                 restoreMeas(id2, sm, infos2);
@@ -283,5 +284,13 @@ public class SeTest_case15 implements SeConstants, MeasTypeCons {
             }
             measure.setMeasureType(measType);
         }
+    }
+
+    private double getMse() {
+        int n = alg.getMeas().getZ_estimate().getN();
+        double mse = 0;
+        for (int i = 0; i < n; i++)
+            mse += Math.pow(alg.getMeas().getZ_estimate().getValue(i) - alg.getMeas().getZ_true().getValue(i), 2);
+        return Math.sqrt(mse / n);
     }
 }
