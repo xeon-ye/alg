@@ -15,6 +15,7 @@ public class BpaSwiSwxResultRw {
         SqliteDb sqliteDb = new SqliteDb(dbFile);
         String TABLE_DATA_NAME = "GeneratorData";
         String initSql = "CREATE TABLE "  + TABLE_DATA_NAME + " (" +
+                " calendar     varchar(8) NOT NULL," +
                 " busName1     varchar(8) NOT NULL," +
                 " baseKv1          decimal(6,3)     NULL, " +
                 " busName2     varchar(8) NOT NULL," +
@@ -33,6 +34,7 @@ public class BpaSwiSwxResultRw {
 
         TABLE_DATA_NAME = "BusData";
         initSql = "CREATE TABLE "  + TABLE_DATA_NAME + " (" +
+                " calendar     varchar(8) NOT NULL," +
                 " busName     varchar(8) NOT NULL," +
                 " baseKv          decimal(6,3)     NULL, " +
                 " time              decimal(7,3) NULL, " +
@@ -43,6 +45,7 @@ public class BpaSwiSwxResultRw {
 
         TABLE_DATA_NAME = "LineData";
         initSql = "CREATE TABLE "  + TABLE_DATA_NAME + " (" +
+                " calendar     varchar(8) NOT NULL," +
                 " busName1     varchar(8) NOT NULL," +
                 " baseKv1          decimal(6,3)     NULL, " +
                 " busName2     varchar(8) NOT NULL," +
@@ -54,19 +57,19 @@ public class BpaSwiSwxResultRw {
         sqliteDb.initDb(initSql);
     }
 
-    public static void parseAndSave(String filePath, String dbFile) {
-        parseAndSave(new File(filePath), dbFile);
+    public static void parseAndSave(String filePath, String dbFile, String calendar) {
+        parseAndSave(new File(filePath), dbFile, calendar);
     }
 
-    public static void parseAndSave(File file, String dbFile) {
+    public static void parseAndSave(File file, String dbFile, String calendar) {
         try {
-            parseAndSave(new FileInputStream(file), dbFile);
+            parseAndSave(new FileInputStream(file), dbFile, calendar);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
     }
 
-    public static void parseAndSave(InputStream in, String dbFile) {
+    public static void parseAndSave(InputStream in, String dbFile, String calendar) {
         SwiSwxResult r = BpaSwiSwxResultParser.parse(in, "GBK");
         SqliteDb sqliteDb = new SqliteDb(dbFile);
         List<String> sqls = new LinkedList<>();
@@ -74,6 +77,7 @@ public class BpaSwiSwxResultRw {
         for (GeneratorData generatorData : r.getGeneratorDataList()) {
             for (GenOneStepData genOneStepData : generatorData.getGenOneStepDataList()) {
                 String insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
+                        "'" + calendar + "'," +
                         "'" + generatorData.getBusName1() + "'," + generatorData.getBaseKv1() + "," +
                         "'" + generatorData.getBusName2() + "'," + generatorData.getBaseKv2() + "," +
                         genOneStepData.getTime() + "," + genOneStepData.getRelativeAngle() + "," +
@@ -91,6 +95,7 @@ public class BpaSwiSwxResultRw {
         for (BusData busData : r.getBusDataList()) {
             for (BusOneStepData busOneStepData : busData.getBusOneStepDataList()) {
                 String insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
+                        "'" + calendar + "'," +
                         "'" + busData.getBusName() + "'," + busData.getBaseKv() + "," +
                         busOneStepData.getTime() + "," + busOneStepData.getPosSeqVol() + "," +
                         busOneStepData.getFreqDeviation() +
@@ -104,6 +109,7 @@ public class BpaSwiSwxResultRw {
         for (LineData lineData : r.getLineDataList()) {
             for (LineOneStepData lineOneStepData : lineData.getLineOneStepDataList()) {
                 String insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
+                        "'" + calendar + "'," +
                         "'" + lineData.getBusName1() + "'," + lineData.getBaseKv1() + "," +
                         "'" + lineData.getBusName2() + "'," + lineData.getBaseKv2() + "," +
                         lineOneStepData.getTime() + "," + lineOneStepData.getActivePower() + "," +

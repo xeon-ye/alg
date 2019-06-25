@@ -17,6 +17,7 @@ public class BpaSwiOutResultRw {
         SqliteDb sqliteDb = new SqliteDb(dbFile);
         String TABLE_DATA_NAME = "MonitorData";
         String initSql = "CREATE TABLE "  + TABLE_DATA_NAME + " (" +
+                " calendar     varchar(8) NOT NULL," +
                 " time              decimal(7,3) NULL, " +
                 " busName1     varchar(8) NOT NULL," +
                 " busName2     varchar(8) NOT NULL," +
@@ -34,6 +35,7 @@ public class BpaSwiOutResultRw {
 
         TABLE_DATA_NAME = "Damping";
         initSql = "CREATE TABLE "  + TABLE_DATA_NAME + " (" +
+                " calendar     varchar(8) NOT NULL," +
                 " busName1     varchar(8) NOT NULL," +
                 " baseKv1          decimal(6,3)     NULL, " +
                 " busName2     varchar(8) NOT NULL," +
@@ -51,25 +53,26 @@ public class BpaSwiOutResultRw {
         sqliteDb.initDb(initSql);
     }
 
-    public static void parseAndSave(String filePath, String dbFile) {
-        parseAndSave(new File(filePath), dbFile);
+    public static void parseAndSave(String filePath, String dbFile, String calendar) {
+        parseAndSave(new File(filePath), dbFile, calendar);
     }
 
-    public static void parseAndSave(File file, String dbFile) {
+    public static void parseAndSave(File file, String dbFile, String calendar) {
         try {
-            parseAndSave(new FileInputStream(file), dbFile);
+            parseAndSave(new FileInputStream(file), dbFile, calendar);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
     }
 
-    public static void parseAndSave(InputStream in, String dbFile) {
+    public static void parseAndSave(InputStream in, String dbFile, String calendar) {
         SwiOutResult r = BpaSwiOutResultParser.parse(in, "GBK");
         SqliteDb sqliteDb = new SqliteDb(dbFile);
         List<String> sqls = new LinkedList<>();
         String TABLE_DATA_NAME = "MonitorData";
         for (MonitorData monitorData : r.getMonitorDataList()) {
             String insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
+                    "'" + calendar + "'," +
                     monitorData.getTime() + "," +
                     "'" + monitorData.getRelativeAngle().getBusName1() + "'," +
                     "'" + monitorData.getRelativeAngle().getBusName2() + "'," +
@@ -90,6 +93,7 @@ public class BpaSwiOutResultRw {
         TABLE_DATA_NAME = "Damping";
         for (Damping damping : r.getDampings()) {
             String insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
+                    "'" + calendar + "'," +
                     "'" + damping.getBusName1() + "'," + damping.getBaseKv1() + "," +
                     "'" + damping.getBusName2() + "'," + damping.getBaseKv2() + "," +
                     "'" + damping.getVariableName() + "'," + damping.getOscillationAmp1() + "," +

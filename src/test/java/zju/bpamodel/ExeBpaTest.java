@@ -9,7 +9,7 @@ public class ExeBpaTest extends TestCase {
     }
 
     public void testExePf() {
-        ExeBpa.exePf("C:/Users/Administrator/Desktop/PSDEditCEPRI20180409-01/PFNT/PFNT.exe", "C:/Users/Administrator/Desktop/BPA用户手册（PDF）/XIAOJIN.DAT");
+        ExeBpa.exePf("C:/Users/Administrator/Desktop/PSDEditCEPRI20180409-01/PFNT/PFNT.exe", "d:/XIAOJIN.DAT");
     }
 
     public void testExeSw() {

@@ -17,7 +17,7 @@ public class BpaPfResultRw {
         SqliteDb sqliteDb = new SqliteDb(dbFile);
         String TABLE_DATA_NAME = "BusPfResult";
         String initSql = "CREATE TABLE "  + TABLE_DATA_NAME + " (" +
-                " time     varchar(8) NOT NULL," +
+                " calendar     varchar(8) NOT NULL," +
                 " name     varchar(8) NOT NULL," +
                 " vInKv              decimal(7,4) NULL, " +
                 " angleInDegree           decimal(6,3)     NULL, " +
@@ -31,7 +31,7 @@ public class BpaPfResultRw {
 
         TABLE_DATA_NAME = "BranchPfResult";
         initSql = "CREATE TABLE "  + TABLE_DATA_NAME + " (" +
-                " time     varchar(8) NOT NULL," +
+                " calendar     varchar(8) NOT NULL," +
                 " busName1     varchar(8) NOT NULL," +
                 " busName2     varchar(8) NULL," +
                 " branchP              decimal(7,4) NULL, " +
@@ -44,7 +44,7 @@ public class BpaPfResultRw {
 
         TABLE_DATA_NAME = "TransformerPfResult";
         initSql = "CREATE TABLE "  + TABLE_DATA_NAME + " (" +
-                " time     varchar(8) NOT NULL," +
+                " calendar     varchar(8) NOT NULL," +
                 " busName1     varchar(8) NOT NULL," +
                 " busName2     varchar(8) NULL," +
                 " baseKv1              decimal(4,3) NULL, " +
@@ -58,19 +58,19 @@ public class BpaPfResultRw {
         sqliteDb.initDb(initSql);
     }
 
-    public static void parseAndSave(String filePath, String dbFile, String time) {
-        parseAndSave(new File(filePath), dbFile, time);
+    public static void parseAndSave(String filePath, String dbFile, String calendar) {
+        parseAndSave(new File(filePath), dbFile, calendar);
     }
 
-    public static void parseAndSave(File file, String dbFile, String time) {
+    public static void parseAndSave(File file, String dbFile, String calendar) {
         try {
-            parseAndSave(new FileInputStream(file), dbFile, time);
+            parseAndSave(new FileInputStream(file), dbFile, calendar);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
     }
 
-    public static void parseAndSave(InputStream in, String dbFile, String time) {
+    public static void parseAndSave(InputStream in, String dbFile, String calendar) {
         PfResult r = BpaPfResultParser.parse(in, "GBK");
         SqliteDb sqliteDb = new SqliteDb(dbFile);
         List<String> sqls = new LinkedList<>();
@@ -82,7 +82,7 @@ public class BpaPfResultRw {
                     isVoltageLimit = 1;
                 }
                 String insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
-                        "'" + time + "'," +
+                        "'" + calendar + "'," +
                         "'" + bus.getName() + "'," + bus.getvInKv() + "," +
                         bus.getAngleInDegree() + "," + bus.getGenP() + "," +
                         bus.getGenQ() + "," + bus.getLoadP() + "," +
@@ -102,7 +102,7 @@ public class BpaPfResultRw {
                     isOverLoad = 1;
                 }
                 String insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
-                        "'" + time + "'," +
+                        "'" + calendar + "'," +
                         "'" + acLine.getBusName1() + "','" + acLine.getBusName2() + "'," +
                         acLine.getBranchP() + "," + acLine.getBranchQ() + "," +
                         acLine.getBranchPLoss() + "," + acLine.getBranchQLoss() + "," +
@@ -122,7 +122,7 @@ public class BpaPfResultRw {
                     isOverLoad = 1;
                 }
                 String insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
-                        "'" + time + "'," +
+                        "'" + calendar + "'," +
                         "'" + transformer.getBusName1() + "','" + transformer.getBusName2() + "'," +
                         transformer.getBaseKv1() + "," + transformer.getBaseKv2() + "," +
                         transformer.getTransformerP() + "," + transformer.getTransformerQ() + "," +

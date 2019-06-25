@@ -3,7 +3,7 @@ package zju.bpamodel;
 import java.util.HashMap;
 import java.util.List;
 
-public class ExePlanPf {
+public class ExePlan {
 
     private static HashMap<String, double[]> getPlan(String dbFile) {
         SqliteDb sqliteDb = new SqliteDb(dbFile);
@@ -35,6 +35,21 @@ public class ExePlanPf {
             BpaPfModelRw.write(dbFile, inputPath, outputPath);
             ExeBpa.exePf(pfntPath, outputPath);
             BpaPfResultRw.parseAndSave(pfoFilePath, dbFile, "v" + i);
+        }
+    }
+
+    public static void doSw(String dbFile, String inputPfPath, String outputPfPath, String pfntPath, String swntPath,
+                            String bseFilePath, String swiFilePath, String outFilePath, String swxFilePath) {
+        HashMap<String, double[]> plans = getPlan(dbFile);
+        for (int i = 0; i < 96; i++) {
+            for (String key : plans.keySet()) {
+                updataGenPlan(dbFile, key, plans.get(key)[i]);
+            }
+            BpaPfModelRw.write(dbFile, inputPfPath, outputPfPath);
+            ExeBpa.exePf(pfntPath, outputPfPath);
+            ExeBpa.exeSw(swntPath, bseFilePath, swiFilePath);
+            BpaSwiOutResultRw.parseAndSave(outFilePath, dbFile, "v" + i);
+            BpaSwiSwxResultRw.parseAndSave(swxFilePath, dbFile, "v" + i);
         }
     }
 }
