@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.sql.*;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -679,6 +680,13 @@ public class SqliteDb {
             obj.setOfflineDate(rs.getString("offlineDate"));
             obj.setDesc(rs.getString("desc"));
             return obj;
+        } else if (tableName.equals("Plan")) {
+            String[] genPlan = new String[97];
+            genPlan[0] = rs.getString("busName");
+            for (int i = 0; i < 96; i++) {
+                genPlan[i + 1] = String.valueOf(rs.getDouble(i + 2));
+            }
+            return genPlan;
         }
         return null;
     }

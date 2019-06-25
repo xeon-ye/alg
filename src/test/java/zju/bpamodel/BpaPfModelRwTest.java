@@ -283,8 +283,8 @@ public class BpaPfModelRwTest extends TestCase {
     }
 
     public void testParsePfResult() {
-        BpaPfResultRw.CreateTables("D:/rsa.db");
-        BpaPfResultRw.parseAndSave("C:/Users/bingtekeji/Desktop/写结果/XIAOJIN.pfo", "d:/rsa.db");
+//        BpaPfResultRw.CreateTables("D:/rsa.db");
+        BpaPfResultRw.parseAndSave("d:/XIAOJIN1.pfo", "d:/rsa.db", "v0");
     }
 
     public void testDeleteTable() {

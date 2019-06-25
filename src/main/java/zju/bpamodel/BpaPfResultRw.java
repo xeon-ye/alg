@@ -17,6 +17,7 @@ public class BpaPfResultRw {
         SqliteDb sqliteDb = new SqliteDb(dbFile);
         String TABLE_DATA_NAME = "BusPfResult";
         String initSql = "CREATE TABLE "  + TABLE_DATA_NAME + " (" +
+                " time     varchar(8) NOT NULL," +
                 " name     varchar(8) NOT NULL," +
                 " vInKv              decimal(7,4) NULL, " +
                 " angleInDegree           decimal(6,3)     NULL, " +
@@ -30,6 +31,7 @@ public class BpaPfResultRw {
 
         TABLE_DATA_NAME = "BranchPfResult";
         initSql = "CREATE TABLE "  + TABLE_DATA_NAME + " (" +
+                " time     varchar(8) NOT NULL," +
                 " busName1     varchar(8) NOT NULL," +
                 " busName2     varchar(8) NULL," +
                 " branchP              decimal(7,4) NULL, " +
@@ -42,6 +44,7 @@ public class BpaPfResultRw {
 
         TABLE_DATA_NAME = "TransformerPfResult";
         initSql = "CREATE TABLE "  + TABLE_DATA_NAME + " (" +
+                " time     varchar(8) NOT NULL," +
                 " busName1     varchar(8) NOT NULL," +
                 " busName2     varchar(8) NULL," +
                 " baseKv1              decimal(4,3) NULL, " +
@@ -55,71 +58,80 @@ public class BpaPfResultRw {
         sqliteDb.initDb(initSql);
     }
 
-    public static void parseAndSave(String filePath, String dbFile) {
-        parseAndSave(new File(filePath), dbFile);
+    public static void parseAndSave(String filePath, String dbFile, String time) {
+        parseAndSave(new File(filePath), dbFile, time);
     }
 
-    public static void parseAndSave(File file, String dbFile) {
+    public static void parseAndSave(File file, String dbFile, String time) {
         try {
-            parseAndSave(new FileInputStream(file), dbFile);
+            parseAndSave(new FileInputStream(file), dbFile, time);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
     }
 
-    public static void parseAndSave(InputStream in, String dbFile) {
+    public static void parseAndSave(InputStream in, String dbFile, String time) {
         PfResult r = BpaPfResultParser.parse(in, "GBK");
         SqliteDb sqliteDb = new SqliteDb(dbFile);
         List<String> sqls = new LinkedList<>();
         String TABLE_DATA_NAME = "BusPfResult";
-        for (BusPfResult bus : r.getBusData().values()) {
-            int isVoltageLimit = 0;
-            if (bus.isVoltageLimit()) {
-                isVoltageLimit = 1;
+        if (r.getBusData() != null) {
+            for (BusPfResult bus : r.getBusData().values()) {
+                int isVoltageLimit = 0;
+                if (bus.isVoltageLimit()) {
+                    isVoltageLimit = 1;
+                }
+                String insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
+                        "'" + time + "'," +
+                        "'" + bus.getName() + "'," + bus.getvInKv() + "," +
+                        bus.getAngleInDegree() + "," + bus.getGenP() + "," +
+                        bus.getGenQ() + "," + bus.getLoadP() + "," +
+                        bus.getLoadQ() + "," + isVoltageLimit +
+                        ")";
+                sqls.add(insertSql);
             }
-            String insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
-                    "'" + bus.getName() + "'," + bus.getvInKv() + "," +
-                    bus.getAngleInDegree() + "," + bus.getGenP() + "," +
-                    bus.getGenQ() + "," + bus.getLoadP() + "," +
-                    bus.getLoadQ() + "," + isVoltageLimit +
-                    ")";
-            sqls.add(insertSql);
+            sqliteDb.executeSqls(sqls);
         }
-        sqliteDb.executeSqls(sqls);
 
         sqls.clear();
         TABLE_DATA_NAME = "BranchPfResult";
-        for (BranchPfResult acLine : r.getBranchData().values()) {
-            int isOverLoad = 0;
-            if (acLine.isOverLoad()) {
-                isOverLoad = 1;
+        if (r.getBranchData() != null) {
+            for (BranchPfResult acLine : r.getBranchData().values()) {
+                int isOverLoad = 0;
+                if (acLine.isOverLoad()) {
+                    isOverLoad = 1;
+                }
+                String insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
+                        "'" + time + "'," +
+                        "'" + acLine.getBusName1() + "','" + acLine.getBusName2() + "'," +
+                        acLine.getBranchP() + "," + acLine.getBranchQ() + "," +
+                        acLine.getBranchPLoss() + "," + acLine.getBranchQLoss() + "," +
+                        isOverLoad +
+                        ")";
+                sqls.add(insertSql);
             }
-            String insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
-                    "'" + acLine.getBusName1() + "','" + acLine.getBusName2() + "'," +
-                    acLine.getBranchP() + "," + acLine.getBranchQ() + "," +
-                    acLine.getBranchPLoss() + "," + acLine.getBranchQLoss() + "," +
-                    isOverLoad +
-                    ")";
-            sqls.add(insertSql);
+            sqliteDb.executeSqls(sqls);
         }
-        sqliteDb.executeSqls(sqls);
 
         sqls.clear();
         TABLE_DATA_NAME = "TransformerPfResult";
-        for (TransformerPfResult transformer : r.getTransformerData().values()) {
-            int isOverLoad = 0;
-            if (transformer.isOverLoad()) {
-                isOverLoad = 1;
+        if (r.getTransformerData() != null) {
+            for (TransformerPfResult transformer : r.getTransformerData().values()) {
+                int isOverLoad = 0;
+                if (transformer.isOverLoad()) {
+                    isOverLoad = 1;
+                }
+                String insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
+                        "'" + time + "'," +
+                        "'" + transformer.getBusName1() + "','" + transformer.getBusName2() + "'," +
+                        transformer.getBaseKv1() + "," + transformer.getBaseKv2() + "," +
+                        transformer.getTransformerP() + "," + transformer.getTransformerQ() + "," +
+                        transformer.getTransformerPLoss() + "," + transformer.getTransformerQLoss() + "," +
+                        isOverLoad +
+                        ")";
+                sqls.add(insertSql);
             }
-            String insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
-                    "'" + transformer.getBusName1() + "','" + transformer.getBusName2() + "'," +
-                    transformer.getBaseKv1() + "," + transformer.getBaseKv2() + "," +
-                    transformer.getTransformerP() + "," + transformer.getTransformerQ() + "," +
-                    transformer.getTransformerPLoss() + "," + transformer.getTransformerQLoss() + "," +
-                    isOverLoad +
-                    ")";
-            sqls.add(insertSql);
+            sqliteDb.executeSqls(sqls);
         }
-        sqliteDb.executeSqls(sqls);
     }
 }
