@@ -10,7 +10,7 @@ import org.w3c.dom.NodeList;
 /**
  * @author BinLuo@EIRI
  * @version v1.0
- * @time 2019-6-20 下午6:26:15
+ * @time 2019-6-20 涓嬪崍6:26:15
  */
 public class XMLparse {
 
@@ -37,7 +37,7 @@ public class XMLparse {
     		}
             return resHash;
         } catch (Exception e) {
-            System.err.println("读取该NARI发电计划失败");
+            System.err.println("璇诲彇璇ARI鍙戠數璁″垝澶辫触");
             e.printStackTrace();
             return null;
         }
