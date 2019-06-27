@@ -1,6 +1,7 @@
 package zju.bpamodel;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 
@@ -40,10 +41,10 @@ public class ExeBpa {
         }
     }
 
-    public static void exePf(String pfntPath, String pfFilePath) {
+    public static void exePf(String cmdPath, String pfntPath, String pfFilePath) {
         try{
             Runtime runtime = Runtime.getRuntime();
-            Process process = runtime.exec("cmd /c " + pfntPath + " " + pfFilePath);
+            Process process = runtime.exec("cmd /c " + pfntPath + " " + pfFilePath, null, new File(cmdPath));
             Thread.sleep(2000);
             BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8));
             String line;
@@ -56,10 +57,10 @@ public class ExeBpa {
         }
     }
 
-    public static void exeSw(String swntPath, String bseFilePath, String swiFilePath) {
+    public static void exeSw(String cmdPath, String swntPath, String bseFilePath, String swiFilePath) {
         try{
             Runtime runtime = Runtime.getRuntime();
-            Process process = runtime.exec("cmd /c " + swntPath + " " + bseFilePath + " " + swiFilePath);
+            Process process = runtime.exec("cmd /c " + swntPath + " " + bseFilePath + " " + swiFilePath, null, new File(cmdPath));
             Thread.sleep(5000);
             BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8));
             String line;
