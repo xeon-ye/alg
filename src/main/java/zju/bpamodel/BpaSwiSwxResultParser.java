@@ -147,6 +147,8 @@ public class BpaSwiSwxResultParser {
                     }
                 }
             }
+            reader.close();
+            in.close();
             return r;
         } catch (IOException e) {
             e.printStackTrace();

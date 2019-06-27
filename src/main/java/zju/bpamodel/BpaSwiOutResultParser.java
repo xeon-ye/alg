@@ -135,6 +135,8 @@ public class BpaSwiOutResultParser {
                     break;
                 }
             }
+            reader.close();
+            in.close();
             return r;
         } catch (IOException e) {
             e.printStackTrace();

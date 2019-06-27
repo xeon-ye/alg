@@ -50,6 +50,7 @@ public class ExeBpa {
             while ((line = br.readLine()) != null) {
                 System.out.println(line);
             }
+            runtime.exec("cmd /c taskkill /f /im PFNT.exe");
         } catch(Exception e) {
             System.out.println(e);
         }
@@ -65,6 +66,7 @@ public class ExeBpa {
             while ((line = br.readLine()) != null) {
                 System.out.println(line);
             }
+            runtime.exec("cmd /c taskkill /f /im swnt.exe");
         } catch(Exception e) {
             System.out.println(e);
         }

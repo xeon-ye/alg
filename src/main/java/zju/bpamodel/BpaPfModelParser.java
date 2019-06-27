@@ -122,6 +122,8 @@ public class BpaPfModelParser {
             model.setTransformers(transformers);
             model.modifyData(zone2dataModifyInfoMap);
             model.buildTopo();
+            reader.close();
+            in.close();
             return model;
         } catch (IOException e) {
             e.printStackTrace();

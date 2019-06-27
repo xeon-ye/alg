@@ -172,6 +172,8 @@ public class BpaSwiModelParser {
             model.setLoads(loads);
             model.setFf(ffCard);
             model.buildMaps();
+            reader.close();
+            in.close();
             return model;
         } catch (IOException e) {
             e.printStackTrace();
