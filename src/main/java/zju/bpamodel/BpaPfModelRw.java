@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import static java.lang.Math.abs;
+
 public class BpaPfModelRw {
 
     public static void CreateTables(String dbFile) {
@@ -192,19 +194,31 @@ public class BpaPfModelRw {
         sqliteDb.executeSqls(sqls);
     }
 
-    public static void write(String dbFile, String inputPath, String outputPath) {
-       write(dbFile, new File(inputPath), new File(outputPath));
+    public static void write(String dbFile, String caseID, String inputPath, String outputPath) {
+       write(dbFile, caseID, new File(inputPath), new File(outputPath));
     }
 
-    public static void write(String dbFile, File inputFile, File outputFile) {
+    public static void write(String dbFile, String[] busNames, double[] baseKvs, double[] genMws, String caseID, String inputPath, String outputPath) {
+        write(dbFile, busNames, baseKvs, genMws, caseID, new File(inputPath), new File(outputPath));
+    }
+
+    public static void write(String dbFile, String caseID, File inputFile, File outputFile) {
         try {
-            write(dbFile, new FileInputStream(inputFile), new FileOutputStream(outputFile));
+            write(dbFile, caseID, new FileInputStream(inputFile), new FileOutputStream(outputFile));
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
     }
 
-    public static void write(String dbFile, InputStream in, OutputStream out) {
+    public static void write(String dbFile, String[] busNames, double[] baseKvs, double[] genMws, String caseID, File inputFile, File outputFile) {
+        try {
+            write(dbFile, busNames, baseKvs, genMws, caseID, new FileInputStream(inputFile), new FileOutputStream(outputFile));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void write(String dbFile, String caseID,InputStream in, OutputStream out) {
         SqliteDb sqliteDb = new SqliteDb(dbFile);
         ElectricIsland modifiedModel = new ElectricIsland();
         List<Object> objects = sqliteDb.queryData("PowerExchange");
@@ -236,6 +250,48 @@ public class BpaPfModelRw {
         modifiedModel.setTransformers(transformers);
         objects.clear();
 
-        BpaPfModelWriter.readAndWrite(in, "GBK", out, "GBK", modifiedModel);
+        BpaPfModelWriter.readAndWrite(in, "GBK", out, "GBK", caseID, modifiedModel);
+    }
+
+    public static void write(String dbFile, String[] busNames, double[] baseKvs, double[] genMws, String caseID,InputStream in, OutputStream out) {
+        SqliteDb sqliteDb = new SqliteDb(dbFile);
+        ElectricIsland modifiedModel = new ElectricIsland();
+        List<Object> objects = sqliteDb.queryData("PowerExchange");
+        List<PowerExchange> powerExchanges = new ArrayList<>(objects.size());
+        for (Object object : objects) {
+            powerExchanges.add((PowerExchange) object);
+        }
+        modifiedModel.setPowerExchanges(powerExchanges);
+        objects.clear();
+        objects = sqliteDb.queryData("Bus");
+        List<Bus> buses = new ArrayList<>(objects.size());
+        for (Object object : objects) {
+            Bus bus = (Bus) object;
+            for (int i = 0; i < busNames.length; i++) {
+                if (bus.getName().equals(busNames[i]) && abs(bus.getBaseKv() - baseKvs[i]) < 1e-5) {
+                    bus.setGenMw(genMws[i]);
+                    break;
+                }
+            }
+            buses.add(bus);
+        }
+        modifiedModel.setBuses(buses);
+        objects.clear();
+        objects = sqliteDb.queryData("AcLine");
+        List<AcLine> acLines = new ArrayList<>(objects.size());
+        for (Object object : objects) {
+            acLines.add((AcLine) object);
+        }
+        modifiedModel.setAclines(acLines);
+        objects.clear();
+        objects = sqliteDb.queryData("Transformer");
+        List<Transformer> transformers = new ArrayList<>(objects.size());
+        for (Object object : objects) {
+            transformers.add((Transformer) object);
+        }
+        modifiedModel.setTransformers(transformers);
+        objects.clear();
+
+        BpaPfModelWriter.readAndWrite(in, "GBK", out, "GBK", caseID, modifiedModel);
     }
 }

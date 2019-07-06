@@ -19,8 +19,10 @@ public class BpaPfResultRw {
         String initSql = "CREATE TABLE "  + TABLE_DATA_NAME + " (" +
                 " calendar     varchar(8) NOT NULL," +
                 " name     varchar(8) NOT NULL," +
+                " baseKv              decimal(4,3) NULL, " +
                 " vInKv              decimal(7,4) NULL, " +
                 " angleInDegree           decimal(6,3)     NULL, " +
+                " area     varchar(3) NULL," +
                 " genP           decimal(7,4)     NULL, " +
                 " genQ              decimal(7,4) NULL, " +
                 " loadP              decimal(7,4) NULL, " +
@@ -33,7 +35,9 @@ public class BpaPfResultRw {
         initSql = "CREATE TABLE "  + TABLE_DATA_NAME + " (" +
                 " calendar     varchar(8) NOT NULL," +
                 " busName1     varchar(8) NOT NULL," +
+                " baseKv1              decimal(4,3) NULL, " +
                 " busName2     varchar(8) NULL," +
+                " baseKv2              decimal(4,3) NULL, " +
                 " branchP              decimal(7,4) NULL, " +
                 " branchQ          decimal(7,4)     NULL, " +
                 " branchPLoss           decimal(7,4)     NULL, " +
@@ -46,8 +50,8 @@ public class BpaPfResultRw {
         initSql = "CREATE TABLE "  + TABLE_DATA_NAME + " (" +
                 " calendar     varchar(8) NOT NULL," +
                 " busName1     varchar(8) NOT NULL," +
-                " busName2     varchar(8) NULL," +
                 " baseKv1              decimal(4,3) NULL, " +
+                " busName2     varchar(8) NULL," +
                 " baseKv2              decimal(4,3) NULL, " +
                 " transformerP              decimal(7,4) NULL, " +
                 " transformerQ          decimal(7,4)     NULL, " +
@@ -82,11 +86,12 @@ public class BpaPfResultRw {
                     isVoltageLimit = 1;
                 }
                 String insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
-                        "'" + calendar + "'," +
-                        "'" + bus.getName() + "'," + bus.getvInKv() + "," +
-                        bus.getAngleInDegree() + "," + bus.getGenP() + "," +
-                        bus.getGenQ() + "," + bus.getLoadP() + "," +
-                        bus.getLoadQ() + "," + isVoltageLimit +
+                        "'" + calendar + "','" + bus.getName() + "'," +
+                        bus.getBaseKv() + "," + bus.getvInKv() + "," +
+                        bus.getAngleInDegree() + ",'" + bus.getArea() + "'," +
+                        bus.getGenP() + "," + bus.getGenQ() + "," +
+                        bus.getLoadP() + "," + bus.getLoadQ() + "," +
+                        isVoltageLimit +
                         ")";
                 sqls.add(insertSql);
             }
@@ -103,7 +108,8 @@ public class BpaPfResultRw {
                 }
                 String insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
                         "'" + calendar + "'," +
-                        "'" + acLine.getBusName1() + "','" + acLine.getBusName2() + "'," +
+                        "'" + acLine.getBusName1() + "'," + acLine.getBaseKv1() + "," +
+                        "'" + acLine.getBusName2() + "'," + acLine.getBaseKv2() + "," +
                         acLine.getBranchP() + "," + acLine.getBranchQ() + "," +
                         acLine.getBranchPLoss() + "," + acLine.getBranchQLoss() + "," +
                         isOverLoad +
@@ -123,8 +129,8 @@ public class BpaPfResultRw {
                 }
                 String insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
                         "'" + calendar + "'," +
-                        "'" + transformer.getBusName1() + "','" + transformer.getBusName2() + "'," +
-                        transformer.getBaseKv1() + "," + transformer.getBaseKv2() + "," +
+                        "'" + transformer.getBusName1() + "'," + transformer.getBaseKv1() + "," +
+                        "'" + transformer.getBusName2() + "'," + transformer.getBaseKv2() + "," +
                         transformer.getTransformerP() + "," + transformer.getTransformerQ() + "," +
                         transformer.getTransformerPLoss() + "," + transformer.getTransformerQLoss() + "," +
                         isOverLoad +

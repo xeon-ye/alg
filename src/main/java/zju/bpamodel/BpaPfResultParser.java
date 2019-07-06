@@ -103,14 +103,17 @@ public class BpaPfResultParser {
 
                 index = s.indexOf("度");
                 currentData = s.substring(0, index);
-                s = s.substring(index).trim();
+                s = s.substring(index + 1).trim();
                 busR.setAngleInDegree(Double.parseDouble(currentData));
                 busR.setAngleInArc(busR.getAngleInDegree() * dToAFactor);
 
                 index = s.indexOf(" ");
                 currentData = s.substring(0, index);
-                s = s.substring(index).trim();
-                busR.setArea(currentData);
+                if (!(currentData.contains("有功出力") || currentData.contains("无功出力") ||
+                        currentData.contains("有功负荷") || currentData.contains("无功负荷") || currentData.contains("电压pu"))) {
+                    s = s.substring(index).trim();
+                    busR.setArea(currentData);
+                }
 
                 while ((index = s.indexOf(" ")) != -1) {
                     currentData = s.substring(0, index);

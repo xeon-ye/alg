@@ -26,12 +26,6 @@ public class ChangeDbData {
         }
     }
 
-    public static void updataGenPlan(String dbFile, String busName, double genMw) {
-        SqliteDb sqliteDb = new SqliteDb(dbFile);
-        String sql = "update Bus set genMw=" + genMw + " where name='" + busName +"'";
-        sqliteDb.executeSql(sql);
-    }
-
     public static void setShortCircuitFault(String dbFile, char busASign, String busAName, double busABaseKv,
                                             char busBSign, String busBName, double busBBaseKv, char parallelBranchCode,
                                             int mode, double startCycle, double faultR, double faultX, double posPercent) {

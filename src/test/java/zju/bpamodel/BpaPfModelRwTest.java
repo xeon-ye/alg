@@ -269,9 +269,12 @@ public class BpaPfModelRwTest extends TestCase {
     }
 
     public void testXJ() {
-        BpaPfModelRw.CreateTables("D:/rsa.db");
-        BpaPfModelRw.parseAndSave(this.getClass().getResourceAsStream("/bpafiles/示范区BPA运行方式/XIAOJIN.DAT"), "d:/rsa.db");
-        BpaPfModelRw.write("d:/rsa.db", "D:/IdeaProjects/alg/src/test/resources/bpafiles/示范区BPA运行方式/XIAOJIN.DAT",
+//        BpaPfModelRw.CreateTables("D:/rsa.db");
+//        BpaPfModelRw.parseAndSave(this.getClass().getResourceAsStream("/bpafiles/示范区BPA运行方式/XIAOJIN.DAT"), "d:/rsa.db");
+//        BpaPfModelRw.write("d:/rsa.db", "XIAOJIN_modify", "D:/IdeaProjects/alg/src/test/resources/bpafiles/示范区BPA运行方式/XIAOJIN.DAT",
+//                "D:/IdeaProjects/alg/src/test/resources/bpafiles/示范区BPA运行方式/XIAOJIN_modify.DAT");
+        BpaPfModelRw.write("d:/rsa.db", new String[]{"木坡101"}, new double[]{10.0}, new double[]{15},
+                "XIAOJIN_modify", "D:/IdeaProjects/alg/src/test/resources/bpafiles/示范区BPA运行方式/XIAOJIN.DAT",
                 "D:/IdeaProjects/alg/src/test/resources/bpafiles/示范区BPA运行方式/XIAOJIN_modify.DAT");
     }
 
@@ -284,17 +287,13 @@ public class BpaPfModelRwTest extends TestCase {
 
     public void testParsePfResult() {
         BpaPfResultRw.CreateTables("D:/rsa.db");
-        BpaPfResultRw.parseAndSave("d:/XIAOJIN.pfo", "d:/rsa.db", "v0");
+        BpaPfResultRw.parseAndSave("C:/Users/bingtekeji/Desktop/写结果/XIAOJIN.pfo", "d:/rsa.db", "v0");
     }
 
     public void testDeleteTable() {
         ChangeDbData.createTables("d:/rsa.db");
 //        ChangeDbData.truncateTable("d:/rsa.db", "Bc");
 //        ChangeDbData.truncateTables("d:/rsa.db");
-    }
-
-    public void testUpdataGenPlan() {
-        ChangeDbData.updataGenPlan("d:/rsa.db", "木坡101", 15);
     }
 
     public void testSetFault() {

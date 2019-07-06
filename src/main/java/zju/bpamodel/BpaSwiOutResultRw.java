@@ -20,15 +20,21 @@ public class BpaSwiOutResultRw {
                 " calendar     varchar(8) NOT NULL," +
                 " time              decimal(7,3) NULL, " +
                 " busName1     varchar(8) NOT NULL," +
+                " baseKv1              decimal(4,3) NULL, " +
                 " busName2     varchar(8) NOT NULL," +
+                " baseKv2              decimal(4,3) NULL, " +
                 " relativeAngle              decimal(7,3) NULL, " +
                 " minVBusName     varchar(8) NOT NULL," +
+                " minVBusBaseKv              decimal(4,3) NULL, " +
                 " minVInPu          decimal(6,4)     NULL, " +
                 " maxVBusName     varchar(8) NOT NULL," +
+                " maxVBusBaseKv              decimal(4,3) NULL, " +
                 " maxVInPu          decimal(6,4)     NULL, " +
                 " minFreqBusName     varchar(8) NOT NULL," +
+                " minFreqBusBaseKv              decimal(4,3) NULL, " +
                 " minFreq          decimal(6,3)     NULL, " +
                 " maxFreqBusName     varchar(8) NOT NULL," +
+                " maxFreqBusBaseKv              decimal(4,3) NULL, " +
                 " maxFreq          decimal(6,3)     NULL " +
                 ")";
         sqliteDb.initDb(initSql);
@@ -75,15 +81,21 @@ public class BpaSwiOutResultRw {
                     "'" + calendar + "'," +
                     monitorData.getTime() + "," +
                     "'" + monitorData.getRelativeAngle().getBusName1() + "'," +
+                    monitorData.getRelativeAngle().getBaseKv1() + "," +
                     "'" + monitorData.getRelativeAngle().getBusName2() + "'," +
+                    monitorData.getRelativeAngle().getBaseKv2() + "," +
                     monitorData.getRelativeAngle().getRelativeAngle() + "," +
                     "'" + monitorData.getMinBusVoltage().getName() + "'," +
+                    monitorData.getMinBusVoltage().getBaseKv() + "," +
                     monitorData.getMinBusVoltage().getvInPu() + "," +
                     "'" + monitorData.getMaxBusVoltage().getName() + "'," +
+                    monitorData.getMaxBusVoltage().getBaseKv() + "," +
                     monitorData.getMaxBusVoltage().getvInPu() + "," +
                     "'" + monitorData.getMinBusFreq().getName() + "'," +
+                    monitorData.getMinBusFreq().getBaseKv() + "," +
                     monitorData.getMinBusFreq().getFreq() + "," +
                     "'" + monitorData.getMaxBusFreq().getName() + "'," +
+                    monitorData.getMaxBusFreq().getBaseKv() + "," +
                     monitorData.getMaxBusFreq().getFreq() +
                     ")";
             sqls.add(insertSql);

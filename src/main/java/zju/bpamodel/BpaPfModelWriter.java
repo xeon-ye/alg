@@ -68,9 +68,9 @@ public class BpaPfModelWriter {
         }
     }
 
-    public static boolean readAndWrite(File srcFile, String inputCharset, File targetFile, String outputCharset, ElectricIsland electricIsland) {
+    public static boolean readAndWrite(File srcFile, String inputCharset, File targetFile, String outputCharset, String caseID, ElectricIsland electricIsland) {
         try {
-            return readAndWrite(new FileInputStream(srcFile), inputCharset, new FileOutputStream(targetFile), outputCharset, electricIsland);
+            return readAndWrite(new FileInputStream(srcFile), inputCharset, new FileOutputStream(targetFile), outputCharset, caseID, electricIsland);
         } catch (IOException e) {
             log.warn(e);
             e.printStackTrace();
@@ -78,41 +78,53 @@ public class BpaPfModelWriter {
         }
     }
 
-    public static boolean readAndWrite(File srcFile, File targetFile, ElectricIsland electricIsland) {
+    public static boolean readAndWrite(File srcFile, File targetFile, String caseID, ElectricIsland electricIsland) {
         try {
-            return readAndWrite(new FileReader(srcFile), new FileWriter(targetFile), electricIsland);
+            return readAndWrite(new FileReader(srcFile), new FileWriter(targetFile), caseID, electricIsland);
         } catch (IOException e) {
             e.printStackTrace();
             return false;
         }
     }
 
-    public static boolean readAndWrite(InputStream in, String inputCharset, OutputStream out, String outputCharset, ElectricIsland electricIsland) {
+    public static boolean readAndWrite(InputStream in, String inputCharset, OutputStream out, String outputCharset, String caseID, ElectricIsland electricIsland) {
         try {
-            return readAndWrite(new InputStreamReader(in, inputCharset), new OutputStreamWriter(out, outputCharset), electricIsland);
+            return readAndWrite(new InputStreamReader(in, inputCharset), new OutputStreamWriter(out, outputCharset), caseID, electricIsland);
         } catch (UnsupportedEncodingException e) {
             log.warn("读写BPA潮流数据时发生[不支持的编码]错误:" + e.getMessage());
             return false;
         }
     }
 
-    public static boolean readAndWrite(InputStream in, OutputStream out, ElectricIsland electricIsland) {
-        return readAndWrite(new InputStreamReader(in), new OutputStreamWriter(out), electricIsland);
+    public static boolean readAndWrite(InputStream in, OutputStream out, String caseID, ElectricIsland electricIsland) {
+        return readAndWrite(new InputStreamReader(in), new OutputStreamWriter(out), caseID, electricIsland);
     }
 
 
-    public static boolean readAndWrite(Reader in, Writer out, ElectricIsland electricIsland) {
+    public static boolean readAndWrite(Reader in, Writer out, String caseID, ElectricIsland electricIsland) {
         try {
             BufferedReader reader = new BufferedReader(in);
             String strLine;
 
             while ((strLine = reader.readLine()) != null) {
                 if (strLine.startsWith("(POWERFLOW")) {
-                    out.write(strLine);
+                    out.write("(POWERFLOW,CASEID=" + caseID + "," + strLine.split(",")[2]);
                     out.write("\n");
                     break;
                 }
             }
+
+            while ((strLine = reader.readLine()) != null) {
+                if (!strLine.startsWith("/NEW_BASE,FILE=")) {
+                    out.write(strLine);
+                    out.write("\n");
+                } else {
+                    out.write("/NEW_BASE,FILE=" + caseID + "." + strLine.split("\\.")[1]);
+                    out.write("\n");
+                    break;
+                }
+            }
+
             while ((strLine = reader.readLine()) != null) {
                 out.write(strLine);
                 out.write("\n");
