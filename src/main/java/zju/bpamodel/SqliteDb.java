@@ -687,6 +687,22 @@ public class SqliteDb {
                 genPlan[i + 1] = String.valueOf(rs.getDouble(i + 2));
             }
             return genPlan;
+        } else if (tableName.equals("CaseCard")) {
+            CaseCard obj = new CaseCard();
+            obj.setType(rs.getString("type"));
+            obj.setCaseId(rs.getString("caseId"));
+            obj.setiNoPersist(rs.getInt("iNoPersist"));
+            obj.setIxo(rs.getInt("ixo"));
+            obj.setDsw(rs.getInt("dsw"));
+            obj.setIwscc(rs.getInt("iwscc"));
+            obj.setX2fac(rs.getDouble("x2fac"));
+            obj.setXfact(rs.getDouble("xfact"));
+            obj.setTdodps(rs.getDouble("tdodps"));
+            obj.setTqodps(rs.getDouble("tqodps"));
+            obj.setTdodph(rs.getDouble("tdodph"));
+            obj.setTqodph(rs.getDouble("tqodph"));
+            obj.setCfacl2(rs.getDouble("cfacl2"));
+            return obj;
         }
         return null;
     }

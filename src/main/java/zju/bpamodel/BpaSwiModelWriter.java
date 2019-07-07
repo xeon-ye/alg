@@ -107,7 +107,7 @@ public class BpaSwiModelWriter {
 
             while ((strLine = reader.readLine()) != null) {
                 if (strLine.startsWith("CASE")) {
-                    out.write(strLine);
+                    out.write(swiModel.getCaseCard().toString());
                     out.write("\n");
                     for (Generator generator : swiModel.getGenerators()) {
                         out.write(generator.toString());

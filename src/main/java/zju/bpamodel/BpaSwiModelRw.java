@@ -443,6 +443,24 @@ public class BpaSwiModelRw {
                 " tcyc22              decimal(4,0) NULL " +
                 ")";
         sqliteDb.initDb(initSql);
+
+        TABLE_DATA_NAME = "CaseCard";
+        initSql = "CREATE TABLE "  + TABLE_DATA_NAME + " (" +
+                " type     varchar(4) NOT NULL," +
+                " caseId     varchar(10) NOT NULL," +
+                " iNoPersist              INTEGER NULL, " +
+                " ixo              INTEGER NULL, " +
+                " dsw              INTEGER NULL, " +
+                " iwscc              INTEGER NULL, " +
+                " x2fac              decimal(5.5) NOT NULL, " +
+                " xfact     decimal(5.5) NULL," +
+                " tdodps              decimal(5.5) NULL, " +
+                " tqodps           decimal(5.5)     NULL, " +
+                " tdodph           decimal(5,5)     NULL, " +
+                " tqodph           decimal(5,5)     NULL, " +
+                " cfacl2              decimal(6,5) NULL " +
+                ")";
+        sqliteDb.initDb(initSql);
     }
 
     public static void parseAndSave(String filePath, String dbFile) {
@@ -791,21 +809,36 @@ public class BpaSwiModelRw {
                 ")";
         sqls.add(insertSql);
         sqliteDb.executeSqls(sqls);
+
+        sqls.clear();
+        TABLE_DATA_NAME = "CaseCard";
+        CaseCard caseCard = model.getCaseCard();
+        insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
+                "'" + caseCard.getType() + "','" + caseCard.getCaseId() + "'," +
+                caseCard.getiNoPersist() + "," + caseCard.getIxo() + "," +
+                caseCard.getDsw() + "," + caseCard.getIwscc() + "," +
+                caseCard.getX2fac() + "," + caseCard.getXfact() + "," +
+                caseCard.getTdodps() + "," + caseCard.getTqodps() + "," +
+                caseCard.getTdodph() + "," + caseCard.getTqodph() + "," +
+                caseCard.getCfacl2() +
+                ")";
+        sqls.add(insertSql);
+        sqliteDb.executeSqls(sqls);
     }
 
-    public static void write(String dbFile, String inputPath, String outputPath) {
-       write(dbFile, new File(inputPath), new File(outputPath));
+    public static void write(String dbFile, String caseID, String inputPath, String outputPath) {
+       write(dbFile, caseID, new File(inputPath), new File(outputPath));
     }
 
-    public static void write(String dbFile, File inputFile, File outputFile) {
+    public static void write(String dbFile, String caseID, File inputFile, File outputFile) {
         try {
-            write(dbFile, new FileInputStream(inputFile), new FileOutputStream(outputFile));
+            write(dbFile, caseID, new FileInputStream(inputFile), new FileOutputStream(outputFile));
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
     }
 
-    public static void write(String dbFile, InputStream in, OutputStream out) {
+    public static void write(String dbFile, String caseID, InputStream in, OutputStream out) {
         SqliteDb sqliteDb = new SqliteDb(dbFile);
         BpaSwiModel modifiedModel = new BpaSwiModel();
         List<Object> objects = sqliteDb.queryData("Generator");
@@ -905,6 +938,9 @@ public class BpaSwiModelRw {
         }
         objects.clear();
         modifiedModel.ff = (FFCard) sqliteDb.queryData("FFCard").get(0);
+        CaseCard caseCard = (CaseCard) sqliteDb.queryData("CaseCard").get(0);
+        caseCard.setCaseId(caseID);
+        modifiedModel.caseCard = caseCard;
 
         boolean r = BpaSwiModelWriter.readAndWrite(in, "GBK", out, "GBK", modifiedModel);
     }

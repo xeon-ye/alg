@@ -9,12 +9,12 @@ public class ExeBpaTest extends TestCase {
     }
 
     public void testExePf() {
-        ExeBpa.exePf("d:", "C:/Users/Administrator/Desktop/PSDEditCEPRI20180409-01/PFNT/PFNT.exe", "d:/XIAOJIN.DAT");
+        ExeBpa.exePf("d:/", "C:/Users/bingtekeji/Desktop/BPA/PSDEditCEPRI20180409-01/PFNT/PFNT.exe", "d:/XIAOJIN1.DAT");
     }
 
     public void testExeSw() {
-        ExeBpa.exeSw("d:", "C:/Users/Administrator/Desktop/PSDEditCEPRI20180409-01/SWNT/SWNT.exe",
-                "d:/88000007.BSE", "C:/Users/Administrator/Desktop/BPA用户手册（PDF）/XIAOJIN.SWI");
+        ExeBpa.exeSw("d:/", "C:/Users/bingtekeji/Desktop/BPA/PSDEditCEPRI20180409-01/SWNT/swnt.exe",
+                "d:/XIAOJIN1.BSE", "d:/XIAOJIN1.SWI");
     }
 
     public void testClosePSDEdit() {

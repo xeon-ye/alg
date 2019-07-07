@@ -1083,16 +1083,45 @@ public class BpaSwiModelRwTest extends TestCase {
     }
 
     public void testBpaSwiModelRw() {
-        BpaSwiModelRw.CreateTables("C:/Users/bingtekeji/Desktop/写结果/bpa.db");
-//        BpaSwiModelRw.parseAndSave(this.getClass().getResourceAsStream("/bpafiles/示范区BPA运行方式/XIAOJIN.SWI"), "d:/bpa.db");
-//        try {
-//            BpaSwiModelRw.write("d:/bpa.db", this.getClass().getResourceAsStream("/bpafiles/示范区BPA运行方式/XIAOJIN.SWI"), new FileOutputStream("XIAOJIN_modify.SWI"));
-//        } catch (FileNotFoundException e) {
-//            e.printStackTrace();
-//        }
+//        BpaSwiModelRw.CreateTables("d:/rsa.db");
+//        BpaSwiModelRw.parseAndSave("C:/Users/bingtekeji/Desktop/写结果/XIAOJIN.SWI", "d:/rsa.db");
+//        BpaSwiModelRw.write("d:/rsa.db", "XIAOJIN1",
+//                "C:/Users/bingtekeji/Desktop/写结果/XIAOJIN.SWI", "d:/XIAOJIN1.SWI");
 
-        BpaSwiModelRw.parseAndSave("C:/Users/bingtekeji/Desktop/写结果/XIAOJIN.SWI", "C:/Users/bingtekeji/Desktop/写结果/bpa.db");
-        BpaSwiModelRw.write("C:/Users/bingtekeji/Desktop/写结果/bpa.db", "C:/Users/bingtekeji/Desktop/写结果/XIAOJIN.SWI", "C:/Users/bingtekeji/Desktop/写结果/XIAOJIN_modify.SWI");
+        // 创建表格
+        String dbFile = "d:/rsa.db";
+        ChangeDbData.createTables(dbFile);
+
+        // 存储基础方式
+        String inputPfPath = "D:/IdeaProjects/alg/src/test/resources/bpafiles/示范区BPA运行方式/XIAOJIN.DAT";
+        String inputSwiPath = "C:/Users/bingtekeji/Desktop/写结果/XIAOJIN.SWI";
+        BpaPfModelRw.parseAndSave(inputPfPath, dbFile);
+        BpaSwiModelRw.parseAndSave(inputSwiPath, dbFile);
+
+        // 修改发电机出力并输出文件
+        String[] busNames = new String[]{"中环A04"};
+        double[] baseKvs = new double[]{0.4};
+        double[] genMws = new double[]{20};
+        String caseID = "XIAOJIN1";
+        String outputPfPath = "D:/XIAOJIN1.DAT";
+        String outputSwiPath = "D:/XIAOJIN1.SWI";
+        ChangeDbData.writePfAndSwi(dbFile, busNames, baseKvs, genMws, caseID, inputPfPath, outputPfPath, inputSwiPath, outputSwiPath);
+
+        // 计算潮流和暂态稳定
+        String cmdPath = "d:/";
+        String pfntPath = "C:/Users/bingtekeji/Desktop/BPA/PSDEditCEPRI20180409-01/PFNT/PFNT.exe";
+        String swntPath = "C:/Users/bingtekeji/Desktop/BPA/PSDEditCEPRI20180409-01/SWNT/swnt.exe";
+        String bsePath = "D:/XIAOJIN1.BSE";
+        ExeBpa.exePf(cmdPath, pfntPath, outputPfPath);
+        ExeBpa.exeSw(swntPath, bsePath, outputSwiPath);
+
+        // 存储计算结果
+        String pfoFilePath = "D:/XIAOJIN1.pfo";
+        String outFilePath = "D:/XIAOJIN1.OUT";
+        String swxFilePath = "D:/XIAOJIN1.SWX";
+        BpaPfResultRw.parseAndSave(pfoFilePath, dbFile, caseID);
+        BpaSwiOutResultRw.parseAndSave(outFilePath, dbFile, caseID);
+        BpaSwiSwxResultRw.parseAndSave(swxFilePath, dbFile, caseID);
     }
 
     public void testParseSwiOutResult() {

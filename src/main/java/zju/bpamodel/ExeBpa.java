@@ -41,22 +41,6 @@ public class ExeBpa {
         }
     }
 
-    public static void exePf(String pfntPath, String pfFilePath) {
-        try{
-            Runtime runtime = Runtime.getRuntime();
-            Process process = runtime.exec("cmd /c " + pfntPath + " " + pfFilePath);
-            Thread.sleep(2000);
-            BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8));
-            String line;
-            while ((line = br.readLine()) != null) {
-                System.out.println(line);
-            }
-            runtime.exec("cmd /c taskkill /f /im PFNT.exe");
-        } catch(Exception e) {
-            System.out.println(e);
-        }
-    }
-
     public static void exePf(String cmdPath, String pfntPath, String pfFilePath) {
         try{
             Runtime runtime = Runtime.getRuntime();

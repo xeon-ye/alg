@@ -80,6 +80,7 @@ public class BpaSwiModelParser {
             List<FLTCard> fltCards = new ArrayList<>();
             List<Load> loads = new ArrayList<>();
             FFCard ffCard = null;
+            CaseCard caseCard = null;
             while ((strLine = reader.readLine()) != null) {
                 try {
                     if (strLine.startsWith("M")) {
@@ -145,6 +146,8 @@ public class BpaSwiModelParser {
                                 bcs.add(BC.createBC(strLine));
                             }
                         }
+                    } else if (strLine.startsWith("CASE")) {
+                        caseCard = CaseCard.createCase(strLine);
                     }
                 } catch (NumberFormatException ex) {
                     log.warn("Failed to parse because NumberFormatException is found:");
@@ -171,6 +174,7 @@ public class BpaSwiModelParser {
             model.setFltCards(fltCards);
             model.setLoads(loads);
             model.setFf(ffCard);
+            model.setCaseCard(caseCard);
             model.buildMaps();
             reader.close();
             in.close();

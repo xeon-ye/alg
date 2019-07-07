@@ -26,6 +26,12 @@ public class ChangeDbData {
         }
     }
 
+    public static void writePfAndSwi(String dbFile, String[] busNames, double[] baseKvs, double[] genMws, String caseID,
+                                     String inputPfPath, String outputPfPath, String inputSwiPath, String outputSwiPath) {
+        BpaPfModelRw.write(dbFile, busNames, baseKvs, genMws, caseID, inputPfPath, outputPfPath);
+        BpaSwiModelRw.write(dbFile, caseID, inputSwiPath, outputSwiPath);
+    }
+
     public static void setShortCircuitFault(String dbFile, char busASign, String busAName, double busABaseKv,
                                             char busBSign, String busBName, double busBBaseKv, char parallelBranchCode,
                                             int mode, double startCycle, double faultR, double faultX, double posPercent) {

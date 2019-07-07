@@ -13,6 +13,7 @@ import java.util.Map;
  * Date: 12-7-11
  */
 public class BpaSwiModel implements Serializable {
+    CaseCard caseCard;
     List<GeneratorDW> generatorDws;
     List<Generator> generators;
     List<Exciter> exciters;
@@ -68,6 +69,15 @@ public class BpaSwiModel implements Serializable {
                 exciterExtraInfoMap.put(exciter, idToExciterExtra.get(key));
         }
     }
+
+    public CaseCard getCaseCard() {
+        return caseCard;
+    }
+
+    public void setCaseCard(CaseCard caseCard) {
+        this.caseCard = caseCard;
+    }
+
     public List<Generator> getGenerators() {
         return generators;
     }
