@@ -104,6 +104,7 @@ public class BpaSwiOutResultRw {
         }
         sqliteDb.executeSqls(sqls);
 
+        sqls.clear();
         TABLE_DATA_NAME = "Damping";
         sql = "delete from " + TABLE_DATA_NAME + " where calendar='" + calendar + "'";
         sqliteDb.executeSql(sql);

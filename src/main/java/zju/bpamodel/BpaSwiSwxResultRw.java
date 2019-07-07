@@ -93,6 +93,7 @@ public class BpaSwiSwxResultRw {
         }
         sqliteDb.executeSqls(sqls);
 
+        sqls.clear();
         TABLE_DATA_NAME = "BusData";
         sql = "delete from " + TABLE_DATA_NAME + " where calendar='" + calendar + "'";
         sqliteDb.executeSql(sql);
@@ -109,6 +110,7 @@ public class BpaSwiSwxResultRw {
         }
         sqliteDb.executeSqls(sqls);
 
+        sqls.clear();
         TABLE_DATA_NAME = "LineData";
         sql = "delete from " + TABLE_DATA_NAME + " where calendar='" + calendar + "'";
         sqliteDb.executeSql(sql);
