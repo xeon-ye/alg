@@ -79,6 +79,8 @@ public class BpaPfResultRw {
         SqliteDb sqliteDb = new SqliteDb(dbFile);
         List<String> sqls = new LinkedList<>();
         String TABLE_DATA_NAME = "BusPfResult";
+        String sql = "delete from " + TABLE_DATA_NAME + " where calendar='" + calendar + "'";
+        sqliteDb.executeSql(sql);
         if (r.getBusData() != null) {
             for (BusPfResult bus : r.getBusData().values()) {
                 int isVoltageLimit = 0;
@@ -100,6 +102,8 @@ public class BpaPfResultRw {
 
         sqls.clear();
         TABLE_DATA_NAME = "BranchPfResult";
+        sql = "delete from " + TABLE_DATA_NAME + " where calendar='" + calendar + "'";
+        sqliteDb.executeSql(sql);
         if (r.getBranchData() != null) {
             for (BranchPfResult acLine : r.getBranchData().values()) {
                 int isOverLoad = 0;
@@ -121,6 +125,8 @@ public class BpaPfResultRw {
 
         sqls.clear();
         TABLE_DATA_NAME = "TransformerPfResult";
+        sql = "delete from " + TABLE_DATA_NAME + " where calendar='" + calendar + "'";
+        sqliteDb.executeSql(sql);
         if (r.getTransformerData() != null) {
             for (TransformerPfResult transformer : r.getTransformerData().values()) {
                 int isOverLoad = 0;
