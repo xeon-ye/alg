@@ -74,6 +74,8 @@ public class BpaSwiSwxResultRw {
         SqliteDb sqliteDb = new SqliteDb(dbFile);
         List<String> sqls = new LinkedList<>();
         String TABLE_DATA_NAME = "GeneratorData";
+        String sql = "delete from " + TABLE_DATA_NAME + " where calendar='" + calendar + "'";
+        sqliteDb.executeSql(sql);
         for (GeneratorData generatorData : r.getGeneratorDataList()) {
             for (GenOneStepData genOneStepData : generatorData.getGenOneStepDataList()) {
                 String insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
@@ -91,7 +93,10 @@ public class BpaSwiSwxResultRw {
         }
         sqliteDb.executeSqls(sqls);
 
+        sqls.clear();
         TABLE_DATA_NAME = "BusData";
+        sql = "delete from " + TABLE_DATA_NAME + " where calendar='" + calendar + "'";
+        sqliteDb.executeSql(sql);
         for (BusData busData : r.getBusDataList()) {
             for (BusOneStepData busOneStepData : busData.getBusOneStepDataList()) {
                 String insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
@@ -105,7 +110,10 @@ public class BpaSwiSwxResultRw {
         }
         sqliteDb.executeSqls(sqls);
 
+        sqls.clear();
         TABLE_DATA_NAME = "LineData";
+        sql = "delete from " + TABLE_DATA_NAME + " where calendar='" + calendar + "'";
+        sqliteDb.executeSql(sql);
         for (LineData lineData : r.getLineDataList()) {
             for (LineOneStepData lineOneStepData : lineData.getLineOneStepDataList()) {
                 String insertSql = "insert into " + TABLE_DATA_NAME + " values(" +

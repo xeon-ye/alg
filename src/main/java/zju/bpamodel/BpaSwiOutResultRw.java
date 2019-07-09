@@ -76,6 +76,8 @@ public class BpaSwiOutResultRw {
         SqliteDb sqliteDb = new SqliteDb(dbFile);
         List<String> sqls = new LinkedList<>();
         String TABLE_DATA_NAME = "MonitorData";
+        String sql = "delete from " + TABLE_DATA_NAME + " where calendar='" + calendar + "'";
+        sqliteDb.executeSql(sql);
         for (MonitorData monitorData : r.getMonitorDataList()) {
             String insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
                     "'" + calendar + "'," +
@@ -102,7 +104,10 @@ public class BpaSwiOutResultRw {
         }
         sqliteDb.executeSqls(sqls);
 
+        sqls.clear();
         TABLE_DATA_NAME = "Damping";
+        sql = "delete from " + TABLE_DATA_NAME + " where calendar='" + calendar + "'";
+        sqliteDb.executeSql(sql);
         for (Damping damping : r.getDampings()) {
             String insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
                     "'" + calendar + "'," +
