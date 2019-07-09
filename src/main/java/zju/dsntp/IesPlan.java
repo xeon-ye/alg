@@ -10,9 +10,7 @@ import zju.devmodel.MapObject;
 import zju.dsmodel.DistriSys;
 import zju.dsmodel.DsConnectNode;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static java.lang.Math.*;
 import static zju.dsmodel.DsModelCons.KEY_CONNECTED_NODE;
@@ -246,6 +244,47 @@ public class IesPlan {
                 result = cplex.getValues(x);
             }
 
+            // 添加热能损耗
+            for (int i = 0; i < edges.size(); i++) {
+                boolean[] isVisit = new boolean[edges.size()];
+                if (result[supplies.length + i] == 1) {
+                    Deque<MapObject> stack = new ArrayDeque<>();
+                    stack.push(edges.get(i));
+                    isVisit[i] = true;
+                    while (!stack.isEmpty()) {
+                        MapObject curEdge = stack.peek();
+                        int curEdgeIndex = edges.indexOf(curEdge);
+                        DsConnectNode tNode;
+                        if (result[supplies.length + 3 * edges.size() + curEdgeIndex] >= 0) {
+                            tNode = g.getEdgeTarget(edges.get(curEdgeIndex));
+                        } else {
+                            tNode = g.getEdgeSource(edges.get(curEdgeIndex));
+                        }
+                        boolean isPush = false;
+                        for(MapObject nextEdge : g.edgesOf(tNode)) {
+                            int nextEdgeIndex = edges.indexOf(nextEdge);
+                            if (!isVisit[nextEdgeIndex] && result[supplies.length + nextEdgeIndex] == 1) {
+                                stack.push(nextEdge);
+                                isVisit[nextEdgeIndex] = true;
+                                isPush = true;
+                                break;
+                            }
+                        }
+                        if (!isPush) {
+                            for (MapObject edge : stack) {
+                                int edgeIndex = edges.indexOf(edge);
+                                if (result[supplies.length + 3 * edges.size() + edgeIndex] > 0) {
+                                    result[supplies.length + 3 * edges.size() + edgeIndex] += lamda * edgesLen[curEdgeIndex] * Tc;
+                                } else {
+                                    result[supplies.length + 3 * edges.size() + edgeIndex] -= lamda * edgesLen[curEdgeIndex] * Tc;
+                                }
+                            }
+                            stack.pop();
+                        }
+                    }
+                }
+            }
+
             double coef5 = r * pow(1 + r, A) / (pow(1 + r, A) - 1);
             System.out.println("Supplies:");
             double allSupplyCost = 0;
@@ -290,14 +329,14 @@ public class IesPlan {
                     double q = abs(result[supplies.length + 2 * edges.size() + i]);
                     double h = abs(result[supplies.length + 3 * edges.size() + i]);
                     double s = sqrt(p * p + q * q);
-                    double lineCost = (coef2 + coef4 + coef3 * s * s + (cle * p + clh * h) * coef5 / 1e4) * edgesLen[i];
+                    double lineCost = (coef2 + coef4 + coef3 * s * s + (cle * s + clh * h) * coef5 / 1e4) * edgesLen[i];
                     allLineCost += lineCost;
                     allLineLen += edgesLen[i];
-                    System.out.printf("%s-%s\t%.0f\t%.0f\t%.1f\n", nodeids[0], nodeids[1], s, h, lineCost);
+                    System.out.printf("%s-%s\t%.0f\t%.1f\t%.1f\n", nodeids[0], nodeids[1], s, h, lineCost);
                     minCost += (coef3 * s * s + (cle * p + clh * h) * coef5 / 1e4) * edgesLen[i];
                 }
             }
-            System.out.println("Total cost:\t" + minCost);
+            System.out.println("Total cost:\t" + (allSupplyCost + allLineCost));
             System.out.println("Supply cost:\t" + allSupplyCost);
             System.out.println("Line cost:\t" + allLineCost);
             System.out.println("Line length:\t" + allLineLen);
