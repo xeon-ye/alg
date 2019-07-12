@@ -111,7 +111,7 @@ public class BpaSwiModelParser {
                                 || (strLine.charAt(1) >= 'J' && strLine.charAt(1) <= 'K'))
                             exciters.add(Exciter.createExciter(strLine));
                     } else if (strLine.startsWith("L")) {
-                        if (strLine.charAt(1) == 'A' || strLine.charAt(1) == 'B') {
+                        if (strLine.charAt(1) == 'A' || strLine.charAt(1) == 'B' || strLine.charAt(1) == 'I') {
                             loads.add(Load.createLoad(strLine));
                         } else if (strLine.charAt(1) == 'S') {
                             shortCircuitFaults.add(ShortCircuitFault.createFault(strLine));

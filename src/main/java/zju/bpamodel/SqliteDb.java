@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.sql.*;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -526,6 +525,12 @@ public class SqliteDb {
             obj.setB(rs.getDouble("b"));
             obj.setS(rs.getString("s").charAt(0));
             obj.setIm(rs.getInt("im"));
+            obj.setTotal(rs.getString("total"));
+            obj.setDp(rs.getDouble("dp"));
+            obj.setDq(rs.getDouble("dq"));
+            obj.setDt(rs.getDouble("dt"));
+            obj.setTend(rs.getDouble("tend"));
+            obj.setSpecCode(rs.getString("specCode").charAt(0));
             return obj;
         } else if (tableName.equals("ShortCircuitFault")) {
             ShortCircuitFault obj = new ShortCircuitFault();

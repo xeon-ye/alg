@@ -334,8 +334,8 @@ public class BpaSwiModelRw {
         initSql = "CREATE TABLE "  + TABLE_DATA_NAME + " (" +
                 " type     varchar(3) NOT NULL," +
                 " chgCode     varchar(1) NULL," +
-                " busName     varchar(8) NOT NULL," +
-                " baseKv              decimal(4,1) NOT NULL, " +
+                " busName     varchar(8) NULL," +
+                " baseKv              decimal(4,3) NULL, " +
                 " zone              varchar(12) NULL, " +
                 " areaName           varchar(10)     NULL, " +
                 " p1           decimal(5,3)     NULL, " +
@@ -364,7 +364,14 @@ public class BpaSwiModelRw {
                 " a              decimal(5,4) NULL, " +
                 " b              decimal(5,4) NULL, " +
                 " s     varchar(1) NULL," +
-                " im              INTEGER NULL " +
+                " im              INTEGER NULL, " +
+
+                " total           varchar(5)     NULL, " +
+                " dp              decimal(6,2) NULL, " +
+                " dq              decimal(6,2) NULL, " +
+                " dt              decimal(5,1) NULL, " +
+                " tend              decimal(5,1) NULL, " +
+                " specCode           varchar(1)     NULL " +
                 ")";
         sqliteDb.initDb(initSql);
 
@@ -746,7 +753,10 @@ public class BpaSwiModelRw {
                     load.getRr() + "," + load.getXr() + "," +
                     load.getVi() + "," + load.getTi() + "," +
                     load.getA() + "," + load.getB() + "," +
-                    "'" + load.getS() + "'," + load.getIm() +
+                    "'" + load.getS() + "'," + load.getIm() + "," +
+                    "'" + load.getTotal() + "'," + load.getDp() + "," +
+                    load.getDq() + "," + load.getDt() + "," +
+                    load.getTend() + ",'" + load.getSpecCode() + "'" +
                     ")";
             sqls.add(insertSql);
         }
