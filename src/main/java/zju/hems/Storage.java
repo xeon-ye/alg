@@ -1,5 +1,8 @@
 package zju.hems;
 
+/**
+ * 电池储能
+ */
 public class Storage {
 
     // 原始参数
@@ -23,8 +26,9 @@ public class Storage {
     double minS;    // 电池最低电量
     double maxS;    // 电池最高电量
 
-    public Storage(double crep, double Qlife, double maxPIn, double maxPOut, double R, double minSOC, double maxSOC,
+    public Storage(double coper, double crep, double Qlife, double maxPIn, double maxPOut, double R, double minSOC, double maxSOC,
                    double intSOC, double yin, double yout, double lossCoef, double effIn, double effOut) {
+        this.coper = coper;
         this.crep = crep;
         this.Qlife = Qlife;
         this.maxPIn = maxPIn;
@@ -42,6 +46,14 @@ public class Storage {
         cbw = crep / Qlife;
         minS = minSOC * R;
         maxS = maxSOC * R;
+    }
+
+    public double getCoper() {
+        return coper;
+    }
+
+    public void setCoper(double coper) {
+        this.coper = coper;
     }
 
     public double getCrep() {

@@ -13,8 +13,8 @@ public class ExeBpaTest extends TestCase {
     }
 
     public void testExeSw() {
-        ExeBpa.exeSw("d:/", "C:/Users/bingtekeji/Desktop/BPA/PSDEditCEPRI20180409-01/SWNT/swnt.exe",
-                "d:/XIAOJIN1.BSE", "d:/XIAOJIN1.SWI");
+        ExeBpa.exeSw("d:/", "C:/Users/Administrator/Desktop/PSDEditCEPRI20180409-01/SWNT/swnt.exe",
+                "d:/88000007.BSE", "d:/XIAOJIN.SWI");
     }
 
     public void testClosePSDEdit() {
