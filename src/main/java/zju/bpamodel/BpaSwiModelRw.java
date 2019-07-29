@@ -924,105 +924,121 @@ public class BpaSwiModelRw {
         SqliteDb sqliteDb = new SqliteDb(dbFile);
         BpaSwiModel modifiedModel = new BpaSwiModel();
         List<Object> objects = sqliteDb.queryData("Generator", psId);
-        modifiedModel.generators = new ArrayList<>(objects.size());
+        List<Generator> generators = new ArrayList<>(objects.size());
         for (Object object : objects) {
-            modifiedModel.generators.add((Generator) object);
+            generators.add((Generator) object);
         }
+        modifiedModel.setGenerators(generators);
         objects.clear();
         objects = sqliteDb.queryData("GeneratorDW", psId);
-        modifiedModel.generatorDws = new ArrayList<>(objects.size());
+        List<GeneratorDW> generatorDWS = new ArrayList<>(objects.size());
         for (Object object : objects) {
-            modifiedModel.generatorDws.add((GeneratorDW) object);
+            generatorDWS.add((GeneratorDW) object);
         }
+        modifiedModel.setGeneratorDws(generatorDWS);
         objects.clear();
         objects = sqliteDb.queryData("Exciter", psId);
-        modifiedModel.exciters = new ArrayList<>(objects.size());
+        List<Exciter> exciters = new ArrayList<>(objects.size());
         for (Object object : objects) {
-            modifiedModel.exciters.add((Exciter) object);
+            exciters.add((Exciter) object);
         }
+        modifiedModel.setExciters(exciters);
         objects.clear();
         objects = sqliteDb.queryData("ExciterExtraInfo", psId);
-        modifiedModel.exciterExtraInfos = new ArrayList<>(objects.size());
+        List<ExciterExtraInfo> exciterExtraInfos = new ArrayList<>(objects.size());
         for (Object object : objects) {
-            modifiedModel.exciterExtraInfos.add((ExciterExtraInfo) object);
+            exciterExtraInfos.add((ExciterExtraInfo) object);
         }
+        modifiedModel.setExciterExtraInfos(exciterExtraInfos);
         objects.clear();
         objects = sqliteDb.queryData("PSS", psId);
-        modifiedModel.pssList = new ArrayList<>(objects.size());
+        List<PSS> psses = new ArrayList<>(objects.size());
         for (Object object : objects) {
-            modifiedModel.pssList.add((PSS) object);
+            psses.add((PSS) object);
         }
+        modifiedModel.setPssList(psses);
         objects.clear();
         objects = sqliteDb.queryData("PSSExtraInfo", psId);
-        modifiedModel.pssExtraInfos = new ArrayList<>(objects.size());
+        List<PSSExtraInfo> pssExtraInfos = new ArrayList<>(objects.size());
         for (Object object : objects) {
-            modifiedModel.pssExtraInfos.add((PSSExtraInfo) object);
+            pssExtraInfos.add((PSSExtraInfo) object);
         }
+        modifiedModel.setPssExtraInfos(pssExtraInfos);
         objects.clear();
         objects = sqliteDb.queryData("PrimeMover", psId);
-        modifiedModel.primeMovers = new ArrayList<>(objects.size());
+        List<PrimeMover> primeMovers = new ArrayList<>(objects.size());
         for (Object object : objects) {
-            modifiedModel.primeMovers.add((PrimeMover) object);
+            primeMovers.add((PrimeMover) object);
         }
+        modifiedModel.setPrimeMovers(primeMovers);
         objects.clear();
         objects = sqliteDb.queryData("Governor", psId);
-        modifiedModel.governors = new ArrayList<>(objects.size());
+        List<Governor> governors = new ArrayList<>(objects.size());
         for (Object object : objects) {
-            modifiedModel.governors.add((Governor) object);
+            governors.add((Governor) object);
         }
+        modifiedModel.setGovernors(governors);
         objects.clear();
         objects = sqliteDb.queryData("GovernorExtraInfo", psId);
-        modifiedModel.governorExtraInfos = new ArrayList<>(objects.size());
+        List<GovernorExtraInfo> governorExtraInfos = new ArrayList<>(objects.size());
         for (Object object : objects) {
-            modifiedModel.governorExtraInfos.add((GovernorExtraInfo) object);
+            governorExtraInfos.add((GovernorExtraInfo) object);
         }
+        modifiedModel.setGovernorExtraInfos(governorExtraInfos);
         objects.clear();
         objects = sqliteDb.queryData("PV", psId);
-        modifiedModel.pvs = new ArrayList<>(objects.size());
+        List<PV> pvs = new ArrayList<>(objects.size());
         for (Object object : objects) {
-            modifiedModel.pvs.add((PV) object);
+            pvs.add((PV) object);
         }
+        modifiedModel.setPvs(pvs);
         objects.clear();
         objects = sqliteDb.queryData("BC", psId);
-        modifiedModel.bcs = new ArrayList<>(objects.size());
+        List<BC> bcs= new ArrayList<>(objects.size());
         for (Object object : objects) {
-            modifiedModel.bcs.add((BC) object);
+            bcs.add((BC) object);
         }
+        modifiedModel.setBcs(bcs);
         objects.clear();
         objects = sqliteDb.queryData("BCExtraInfo", psId);
-        modifiedModel.bcExtraInfos = new ArrayList<>(objects.size());
+        List<BCExtraInfo> bcExtraInfos = new ArrayList<>(objects.size());
         for (Object object : objects) {
-            modifiedModel.bcExtraInfos.add((BCExtraInfo) object);
+            bcExtraInfos.add((BCExtraInfo) object);
         }
+        modifiedModel.setBcExtraInfos(bcExtraInfos);
         objects.clear();
         objects = sqliteDb.queryData("Servo", psId);
-        modifiedModel.servos = new ArrayList<>(objects.size());
+        List<Servo> servos = new ArrayList<>(objects.size());
         for (Object object : objects) {
-            modifiedModel.servos.add((Servo) object);
+            servos.add((Servo) object);
         }
+        modifiedModel.setServos(servos);
         objects.clear();
         objects = sqliteDb.queryData("Load", psId);
-        modifiedModel.loads = new ArrayList<>(objects.size());
+        List<Load> loads = new ArrayList<>(objects.size());
         for (Object object : objects) {
-            modifiedModel.loads.add((Load) object);
+            loads.add((Load) object);
         }
+        modifiedModel.setLoads(loads);
         objects.clear();
         objects = sqliteDb.queryData("ShortCircuitFault", psId);
-        modifiedModel.shortCircuitFaults = new ArrayList<>(objects.size());
+        List<ShortCircuitFault> shortCircuitFaults = new ArrayList<>(objects.size());
         for (Object object : objects) {
-            modifiedModel.shortCircuitFaults.add((ShortCircuitFault) object);
+            shortCircuitFaults.add((ShortCircuitFault) object);
         }
+        modifiedModel.setShortCircuitFaults(shortCircuitFaults);
         objects.clear();
         objects = sqliteDb.queryData("FLTCard", psId);
-        modifiedModel.fltCards = new ArrayList<>(objects.size());
+        List<FLTCard> fltCards = new ArrayList<>(objects.size());
         for (Object object : objects) {
-            modifiedModel.fltCards.add((FLTCard) object);
+            fltCards.add((FLTCard) object);
         }
+        modifiedModel.setFltCards(fltCards);
         objects.clear();
-        modifiedModel.ff = (FFCard) sqliteDb.queryData("FFCard", psId).get(0);
+        modifiedModel.setFf((FFCard) sqliteDb.queryData("FFCard", psId).get(0));
         CaseCard caseCard = (CaseCard) sqliteDb.queryData("CaseCard", psId).get(0);
         caseCard.setCaseId(caseID);
-        modifiedModel.caseCard = caseCard;
+        modifiedModel.setCaseCard(caseCard);
 
         boolean r = BpaSwiModelWriter.readAndWrite(in, "GBK", out, "GBK", modifiedModel);
     }
