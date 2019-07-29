@@ -4,7 +4,7 @@ import java.util.List;
 
 public class User {
 
-    List<AbsorptionChiller> absorptionChillerList;
+    List<AbsorptionChiller> absorptionChillers;
     List<AirCon> airCons;
     List<Converter> converters;
     List<GasBoiler> gasBoilers;
@@ -17,7 +17,7 @@ public class User {
     public User(List<AbsorptionChiller> absorptionChillerList, List<AirCon> airCons, List<Converter> converters,
                  List<GasBoiler> gasBoilers, List<GasTurbine> gasTurbines, List<IceStorageAc> iceStorageAcs,
                  List<Photovoltaic> photovoltaics, List<SteamLoad> steamLoads, List<Storage> storages) {
-        this.absorptionChillerList = absorptionChillerList;
+        this.absorptionChillers = absorptionChillerList;
         this.airCons = airCons;
         this.converters = converters;
         this.gasBoilers = gasBoilers;
@@ -28,12 +28,12 @@ public class User {
         this.storages = storages;
     }
 
-    public List<AbsorptionChiller> getAbsorptionChillerList() {
-        return absorptionChillerList;
+    public List<AbsorptionChiller> getAbsorptionChillers() {
+        return absorptionChillers;
     }
 
-    public void setAbsorptionChillerList(List<AbsorptionChiller> absorptionChillerList) {
-        this.absorptionChillerList = absorptionChillerList;
+    public void setAbsorptionChillers(List<AbsorptionChiller> absorptionChillers) {
+        this.absorptionChillers = absorptionChillers;
     }
 
     public List<AirCon> getAirCons() {
