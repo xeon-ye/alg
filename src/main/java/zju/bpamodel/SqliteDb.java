@@ -159,10 +159,10 @@ public class SqliteDb {
         return tableNames;
     }
 
-    public List<Object> queryData(String tableName) {
+    public List<Object> queryData(String tableName, String psId) {
         List<Object> objs = new LinkedList<>();
         Connection conn = createConn();
-        String sql = "select * from " + tableName;
+        String sql = "select * from " + tableName + " where psId='" + psId + "'";
         Statement stmt = null;
         ResultSet rs = null;
         try {

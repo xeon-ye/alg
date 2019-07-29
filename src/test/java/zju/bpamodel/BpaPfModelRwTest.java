@@ -273,7 +273,7 @@ public class BpaPfModelRwTest extends TestCase {
 //        BpaPfModelRw.parseAndSave(this.getClass().getResourceAsStream("/bpafiles/示范区BPA运行方式/XIAOJIN.DAT"), "d:/rsa.db");
 //        BpaPfModelRw.write("d:/rsa.db", "XIAOJIN1", "D:/IdeaProjects/alg/src/test/resources/bpafiles/示范区BPA运行方式/XIAOJIN.DAT",
 //                "D:/XIAOJIN1.DAT");
-        BpaPfModelRw.write("d:/rsa.db", new String[]{"木坡101"}, new double[]{10.0}, new double[]{10},
+        BpaPfModelRw.write("d:/rsa.db", "XJ1", new String[]{"木坡101"}, new double[]{10.0}, new double[]{10},
                 "XIAOJIN1", "D:/IdeaProjects/alg/src/test/resources/bpafiles/示范区BPA运行方式/XIAOJIN.DAT", "D:/XIAOJIN1.DAT");
         ExeBpa.exePf("d:/", "C:/Users/bingtekeji/Desktop/BPA/PSDEditCEPRI20180409-01/PFNT/PFNT.exe", "D:/XIAOJIN1.DAT");
     }

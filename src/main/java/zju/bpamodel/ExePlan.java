@@ -5,9 +5,9 @@ import java.util.List;
 
 public class ExePlan {
 
-    private static HashMap<String, double[]> getPlan(String dbFile) {
+    private static HashMap<String, double[]> getPlan(String dbFile, String psId) {
         SqliteDb sqliteDb = new SqliteDb(dbFile);
-        List<Object> genPlans = sqliteDb.queryData("Plan");
+        List<Object> genPlans = sqliteDb.queryData("Plan", psId);
         HashMap<String, double[]> plans = new HashMap<>();
         for (int i = 0; i < genPlans.size(); i++) {
             String[] genPlan = (String[]) genPlans.get(i);
@@ -26,26 +26,26 @@ public class ExePlan {
         sqliteDb.executeSql(sql);
     }
 
-    public static void doPf(String dbFile, String caseId, String inputPath, String outputPath, String cmdPath, String pfntPath, String pfoFilePath) {
-        HashMap<String, double[]> plans = getPlan(dbFile);
+    public static void doPf(String dbFile, String psId, String caseId, String inputPath, String outputPath, String cmdPath, String pfntPath, String pfoFilePath) {
+        HashMap<String, double[]> plans = getPlan(dbFile, psId);
         for (int i = 0; i < 96; i++) {
             for (String key : plans.keySet()) {
                 updataGenPlan(dbFile, key, plans.get(key)[i]);
             }
-            BpaPfModelRw.write(dbFile, caseId, inputPath, outputPath);
+            BpaPfModelRw.write(dbFile, psId, caseId, inputPath, outputPath);
             ExeBpa.exePf(cmdPath, pfntPath, outputPath);
             BpaPfResultRw.parseAndSave(pfoFilePath, dbFile, "v" + i);
         }
     }
 
-    public static void doSw(String dbFile, String caseId, String inputPfPath, String outputPfPath, String cmdPath, String pfntPath, String swntPath,
+    public static void doSw(String dbFile, String psId, String caseId, String inputPfPath, String outputPfPath, String cmdPath, String pfntPath, String swntPath,
                             String bseFilePath, String swiFilePath, String outFilePath, String swxFilePath) {
-        HashMap<String, double[]> plans = getPlan(dbFile);
+        HashMap<String, double[]> plans = getPlan(dbFile, psId);
         for (int i = 0; i < 96; i++) {
             for (String key : plans.keySet()) {
                 updataGenPlan(dbFile, key, plans.get(key)[i]);
             }
-            BpaPfModelRw.write(dbFile, caseId, inputPfPath, outputPfPath);
+            BpaPfModelRw.write(dbFile, psId, caseId, inputPfPath, outputPfPath);
             ExeBpa.exePf(cmdPath, pfntPath, outputPfPath);
             ExeBpa.exeSw(cmdPath, swntPath, bseFilePath, swiFilePath);
             BpaSwiOutResultRw.parseAndSave(outFilePath, dbFile, "v" + i);

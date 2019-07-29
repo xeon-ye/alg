@@ -531,114 +531,6 @@ public class BpaSwiModelRwTest extends TestCase {
         sqliteDb.executeSqls(sqls);
     }
 
-    public void testWrite() throws FileNotFoundException {
-        SqliteDb sqliteDb = new SqliteDb("d:/bpa.db");
-        BpaSwiModel modifiedModel = new BpaSwiModel();
-        List<Object> objects = sqliteDb.queryData("Generator");
-        modifiedModel.generators = new ArrayList<>(objects.size());
-        for (Object object : objects) {
-            modifiedModel.generators.add((Generator) object);
-        }
-        objects.clear();
-        objects = sqliteDb.queryData("GeneratorDW");
-        modifiedModel.generatorDws = new ArrayList<>(objects.size());
-        for (Object object : objects) {
-            modifiedModel.generatorDws.add((GeneratorDW) object);
-        }
-        objects.clear();
-        objects = sqliteDb.queryData("Exciter");
-        modifiedModel.exciters = new ArrayList<>(objects.size());
-        for (Object object : objects) {
-            modifiedModel.exciters.add((Exciter) object);
-        }
-        objects.clear();
-        objects = sqliteDb.queryData("ExciterExtraInfo");
-        modifiedModel.exciterExtraInfos = new ArrayList<>(objects.size());
-        for (Object object : objects) {
-            modifiedModel.exciterExtraInfos.add((ExciterExtraInfo) object);
-        }
-        objects.clear();
-        objects = sqliteDb.queryData("PSS");
-        modifiedModel.pssList = new ArrayList<>(objects.size());
-        for (Object object : objects) {
-            modifiedModel.pssList.add((PSS) object);
-        }
-        objects.clear();
-        objects = sqliteDb.queryData("PSSExtraInfo");
-        modifiedModel.pssExtraInfos = new ArrayList<>(objects.size());
-        for (Object object : objects) {
-            modifiedModel.pssExtraInfos.add((PSSExtraInfo) object);
-        }
-        objects.clear();
-        objects = sqliteDb.queryData("PrimeMover");
-        modifiedModel.primeMovers = new ArrayList<>(objects.size());
-        for (Object object : objects) {
-            modifiedModel.primeMovers.add((PrimeMover) object);
-        }
-        objects.clear();
-        objects = sqliteDb.queryData("Governor");
-        modifiedModel.governors = new ArrayList<>(objects.size());
-        for (Object object : objects) {
-            modifiedModel.governors.add((Governor) object);
-        }
-        objects.clear();
-        objects = sqliteDb.queryData("GovernorExtraInfo");
-        modifiedModel.governorExtraInfos = new ArrayList<>(objects.size());
-        for (Object object : objects) {
-            modifiedModel.governorExtraInfos.add((GovernorExtraInfo) object);
-        }
-        objects.clear();
-        objects = sqliteDb.queryData("PV");
-        modifiedModel.pvs = new ArrayList<>(objects.size());
-        for (Object object : objects) {
-            modifiedModel.pvs.add((PV) object);
-        }
-        objects.clear();
-        objects = sqliteDb.queryData("BC");
-        modifiedModel.bcs = new ArrayList<>(objects.size());
-        for (Object object : objects) {
-            modifiedModel.bcs.add((BC) object);
-        }
-        objects.clear();
-        objects = sqliteDb.queryData("BCExtraInfo");
-        modifiedModel.bcExtraInfos = new ArrayList<>(objects.size());
-        for (Object object : objects) {
-            modifiedModel.bcExtraInfos.add((BCExtraInfo) object);
-        }
-        objects.clear();
-        objects = sqliteDb.queryData("Servo");
-        modifiedModel.servos = new ArrayList<>(objects.size());
-        for (Object object : objects) {
-            modifiedModel.servos.add((Servo) object);
-        }
-        objects.clear();
-        objects = sqliteDb.queryData("Load");
-        modifiedModel.loads = new ArrayList<>(objects.size());
-        for (Object object : objects) {
-            modifiedModel.loads.add((Load) object);
-        }
-        objects.clear();
-        objects = sqliteDb.queryData("ShortCircuitFault");
-        modifiedModel.shortCircuitFaults = new ArrayList<>(objects.size());
-        for (Object object : objects) {
-            modifiedModel.shortCircuitFaults.add((ShortCircuitFault) object);
-        }
-        objects.clear();
-        objects = sqliteDb.queryData("FLTCard");
-        modifiedModel.fltCards = new ArrayList<>(objects.size());
-        for (Object object : objects) {
-            modifiedModel.fltCards.add((FLTCard) object);
-        }
-        objects.clear();
-        modifiedModel.ff = (FFCard) sqliteDb.queryData("FFCard").get(0);
-
-        InputStream in = this.getClass().getResourceAsStream("/bpafiles/示范区BPA运行方式/XIAOJIN.SWI");
-        FileOutputStream out = new FileOutputStream("XIAOJIN_modify.SWI");
-//        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        boolean r = BpaSwiModelWriter.readAndWrite(in, "GBK", out, "GBK", modifiedModel);
-        assertTrue(r);
-    }
-
     public void testRead() {
         BpaSwiModel model = BpaSwiModelParser.parse(this.getClass().getResourceAsStream("/bpafiles/示范区BPA运行方式/XIAOJIN.SWI"), "GBK");
         assertNotNull(model);
@@ -1090,13 +982,14 @@ public class BpaSwiModelRwTest extends TestCase {
 
         // 创建表格
         String dbFile = "d:/rsa.db";
-        ChangeDbData.createTables(dbFile);
+//        ChangeDbData.createTables(dbFile);
 
         // 存储基础方式
-        String inputPfPath = "D:/IdeaProjects/alg/src/test/resources/bpafiles/示范区BPA运行方式/XIAOJIN.DAT";
-        String inputSwiPath = "C:/Users/bingtekeji/Desktop/写结果/XIAOJIN.SWI";
-        BpaPfModelRw.parseAndSave(inputPfPath, dbFile);
-        BpaSwiModelRw.parseAndSave(inputSwiPath, dbFile);
+        String psId = "XJ1";
+        String inputPfPath = "C:/Users/Administrator/IdeaProjects/alg/src/test/resources/bpafiles/示范区BPA运行方式/XIAOJIN.DAT";
+        String inputSwiPath = "d:/XIAOJIN.SWI";
+//        BpaPfModelRw.parseAndSave(psId, inputPfPath, dbFile);
+//        BpaSwiModelRw.parseAndSave(psId, inputSwiPath, dbFile);
 
         // 修改发电机出力并输出文件
         String[] busNames = new String[]{"中环A04"};
@@ -1105,12 +998,12 @@ public class BpaSwiModelRwTest extends TestCase {
         String caseID = "XIAOJIN1";
         String outputPfPath = "D:/XIAOJIN1.DAT";
         String outputSwiPath = "D:/XIAOJIN1.SWI";
-        ChangeDbData.writePfAndSwi(dbFile, busNames, baseKvs, genMws, caseID, inputPfPath, outputPfPath, inputSwiPath, outputSwiPath);
+//        ChangeDbData.writePfAndSwi(dbFile, psId, busNames, baseKvs, genMws, caseID, inputPfPath, outputPfPath, inputSwiPath, outputSwiPath);
 
         // 计算潮流和暂态稳定
         String cmdPath = "d:/";
-        String pfntPath = "C:/Users/bingtekeji/Desktop/BPA/PSDEditCEPRI20180409-01/PFNT/PFNT.exe";
-        String swntPath = "C:/Users/bingtekeji/Desktop/BPA/PSDEditCEPRI20180409-01/SWNT/swnt.exe";
+        String pfntPath = "C:/Users/Administrator/Desktop/PSDEditCEPRI20180409-01/PFNT/PFNT.exe";
+        String swntPath = "C:/Users/Administrator/Desktop/PSDEditCEPRI20180409-01/SWNT/swnt.exe";
         String bsePath = "D:/XIAOJIN1.BSE";
         ExeBpa.exePf(cmdPath, pfntPath, outputPfPath);
         ExeBpa.exeSw(swntPath, bsePath, outputSwiPath);
