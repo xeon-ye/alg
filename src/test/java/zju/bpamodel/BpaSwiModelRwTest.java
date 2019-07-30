@@ -213,7 +213,7 @@ public class BpaSwiModelRwTest extends TestCase {
 
         // 存储基础方式
         String psId = "XJ1";
-        String inputPfPath = "C:/Users/Administrator/IdeaProjects/alg/src/test/resources/bpafiles/示范区BPA运行方式/XIAOJIN.DAT";
+        String inputPfPath = "D:/XIAOJIN.DAT";
         String inputSwiPath = "d:/XIAOJIN.SWI";
         BpaPfModelRw.parseAndSave(psId, inputPfPath, dbFile);
         BpaSwiModelRw.parseAndSave(psId, inputSwiPath, dbFile);
@@ -229,8 +229,8 @@ public class BpaSwiModelRwTest extends TestCase {
 
         // 计算潮流和暂态稳定
         String cmdPath = "d:/";
-        String pfntPath = "C:/Users/Administrator/Desktop/PSDEditCEPRI20180409-01/PFNT/PFNT.exe";
-        String swntPath = "C:/Users/Administrator/Desktop/PSDEditCEPRI20180409-01/SWNT/swnt.exe";
+        String pfntPath = "C:/Users/bingtekeji/Desktop/BPA/PSDEditCEPRI20180409-01/PFNT/PFNT.exe";
+        String swntPath = "C:/Users/bingtekeji/Desktop/BPA/PSDEditCEPRI20180409-01/SWNT/swnt.exe";
         String bsePath = "D:/XIAOJIN1.BSE";
         ExeBpa.exePf(cmdPath, pfntPath, outputPfPath);
         ExeBpa.exeSw(swntPath, bsePath, outputSwiPath);

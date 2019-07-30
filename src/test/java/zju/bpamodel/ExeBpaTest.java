@@ -12,12 +12,16 @@ public class ExeBpaTest extends TestCase {
     }
 
     public void testExePf() {
+        long currentTime = System.currentTimeMillis();
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+        Date date = new Date(currentTime);
+        System.out.println(formatter.format(date));
         ExeBpa.exePf("d:/", "C:/Users/bingtekeji/Desktop/BPA/PSDEditCEPRI20180409-01/PFNT/PFNT.exe", "d:/XIAOJIN1.DAT");
     }
 
     public void testExeSw() {
         long currentTime = System.currentTimeMillis();
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy年-MM月dd日-HH时mm分ss秒");
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
         Date date = new Date(currentTime);
         System.out.println(formatter.format(date));
         ExeBpa.exeSw("d:/", "C:/Users/Administrator/Desktop/PSDEditCEPRI20180409-01/SWNT/swnt.exe",

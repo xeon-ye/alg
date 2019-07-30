@@ -1,6 +1,7 @@
 package zju.bpamodel.swi;
 
 import zju.bpamodel.BpaFileRwUtil;
+import zju.ieeeformat.DataOutputFormat;
 
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
@@ -12,34 +13,22 @@ import java.io.UnsupportedEncodingException;
  */
 public class F0Card implements Serializable {
     private String type = "F0";
-    private double t;
-    private double dt;
-    private double endT;
-    private double dtc;
-    private int istp;
-    private double toli;
-    private int ilim;
-    private double delAng;
-    private int dc;
-    private double dmp;
-    private double frqBse;
-    private int lovtex;
-    private int imblok;
-    private int mfdep;
-    private int igslim;
-    private int lsolqit;
-    private int noAngLim;
-    private int infBus;
-    private int noPp;
-    private int noDq;
-    private int noSat;
-    private int noGv;
-    private int ieqpc;
-    private int noEx;
-    private int mftomg;
-    private int noSc;
-    private int mgtomf;
-    private int noLoad;
+    private int ig;
+    private int ia;
+    private String genName1;
+    private double genBaseKv1;
+    private char id1;
+    private String genName2;
+    private double genBaseKv2;
+    private char id2;
+    private double amax;
+    private double amin;
+    private int iv;
+    private String busName1;
+    private double busBaseKv1;
+    private int iF;
+    private String busName2;
+    private double busBaseKv2;
 
     public static F0Card createF0(String content) {
         F0Card f0Card = new F0Card();
@@ -58,67 +47,55 @@ public class F0Card implements Serializable {
     public void parseString(String content, String charset) throws UnsupportedEncodingException {
         byte[] src = charset != null ? content.getBytes(charset) : content.getBytes();
         type = new String(BpaFileRwUtil.getTarget(src, 0, 2)).trim();
-        t = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 4, 7)).trim(), "3.0");
-        dt = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 8, 11)).trim());
-        endT = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 12, 17)).trim(), "5.0");
-        dtc = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 18, 21)).trim(), "3.1");
-        istp = BpaFileRwUtil.parseInt(new String(BpaFileRwUtil.getTarget(src, 22, 25)).trim());
-        toli = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 26, 31)).trim(), "5.5");
-        ilim = BpaFileRwUtil.parseInt(new String(BpaFileRwUtil.getTarget(src, 32, 35)).trim());
-        delAng = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 36, 40)).trim(), "4.4");
-        dc = BpaFileRwUtil.parseInt(new String(BpaFileRwUtil.getTarget(src, 41, 43)).trim());
-        dmp = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 44, 47)).trim(), "3.3");
-        frqBse = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 54, 56)).trim(), "2.0");
-        lovtex = BpaFileRwUtil.parseInt(new String(BpaFileRwUtil.getTarget(src, 57, 58)).trim());
-        imblok = BpaFileRwUtil.parseInt(new String(BpaFileRwUtil.getTarget(src, 59, 60)).trim());
-        mfdep = BpaFileRwUtil.parseInt(new String(BpaFileRwUtil.getTarget(src, 63, 64)).trim());
-        igslim = BpaFileRwUtil.parseInt(new String(BpaFileRwUtil.getTarget(src, 64, 65)).trim());
-        lsolqit = BpaFileRwUtil.parseInt(new String(BpaFileRwUtil.getTarget(src, 65, 66)).trim());
-        noAngLim = BpaFileRwUtil.parseInt(new String(BpaFileRwUtil.getTarget(src, 67, 68)).trim());
-        infBus = BpaFileRwUtil.parseInt(new String(BpaFileRwUtil.getTarget(src, 69, 70)).trim());
-        noPp = BpaFileRwUtil.parseInt(new String(BpaFileRwUtil.getTarget(src, 70, 71)).trim());
-        noDq = BpaFileRwUtil.parseInt(new String(BpaFileRwUtil.getTarget(src, 71, 72)).trim());
-        noSat = BpaFileRwUtil.parseInt(new String(BpaFileRwUtil.getTarget(src, 72, 73)).trim());
-        noGv = BpaFileRwUtil.parseInt(new String(BpaFileRwUtil.getTarget(src, 73, 74)).trim());
-        ieqpc = BpaFileRwUtil.parseInt(new String(BpaFileRwUtil.getTarget(src, 74, 75)).trim());
-        noEx = BpaFileRwUtil.parseInt(new String(BpaFileRwUtil.getTarget(src, 75, 76)).trim());
-        mftomg = BpaFileRwUtil.parseInt(new String(BpaFileRwUtil.getTarget(src, 76, 77)).trim());
-        noSc = BpaFileRwUtil.parseInt(new String(BpaFileRwUtil.getTarget(src, 77, 78)).trim());
-        mgtomf = BpaFileRwUtil.parseInt(new String(BpaFileRwUtil.getTarget(src, 78, 79)).trim());
-        noLoad = BpaFileRwUtil.parseInt(new String(BpaFileRwUtil.getTarget(src, 79, 80)).trim());
+        ig = BpaFileRwUtil.parseInt(new String(BpaFileRwUtil.getTarget(src, 4, 5)).trim());
+        ia = BpaFileRwUtil.parseInt(new String(BpaFileRwUtil.getTarget(src, 7, 8)).trim());
+        if (charset != null)
+            genName1 = new String(BpaFileRwUtil.getTarget(src, 9, 17), charset).trim();
+        else
+            genName1 = new String(BpaFileRwUtil.getTarget(src, 9, 17)).trim();
+        genBaseKv1 = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 17, 21)).trim());
+        id1 = (char) src[21];
+        if (charset != null)
+            genName2 = new String(BpaFileRwUtil.getTarget(src, 23, 31), charset).trim();
+        else
+            genName2 = new String(BpaFileRwUtil.getTarget(src, 23, 31)).trim();
+        genBaseKv2 = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 31, 35)).trim());
+        id2 = (char) src[35];
+        amax = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 37, 42)).trim(), "3.0");
+        amin = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 42, 47)).trim());
+        iv = BpaFileRwUtil.parseInt(new String(BpaFileRwUtil.getTarget(src, 49, 50)).trim());
+        if (charset != null)
+            busName1 = new String(BpaFileRwUtil.getTarget(src, 51, 59), charset).trim();
+        else
+            busName1 = new String(BpaFileRwUtil.getTarget(src, 51, 59)).trim();
+        busBaseKv1 = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 59, 63)).trim());
+        iF = BpaFileRwUtil.parseInt(new String(BpaFileRwUtil.getTarget(src, 65, 66)).trim());
+        if (charset != null)
+            busName2 = new String(BpaFileRwUtil.getTarget(src, 67, 75), charset).trim();
+        else
+            busName2 = new String(BpaFileRwUtil.getTarget(src, 67, 75)).trim();
+        busBaseKv2 = BpaFileRwUtil.parseDouble(new String(BpaFileRwUtil.getTarget(src, 75, 80)).trim());
     }
 
     public String toString() {
         StringBuilder str = new StringBuilder();
         str.append(type).append("  ");
-        str.append(BpaFileRwUtil.getFormatStr(t, "3.0")).append(" ");
-        str.append(BpaFileRwUtil.getFormatStr(dt, "3.1")).append(" ");//the bpa manual is 3.0
-        str.append(BpaFileRwUtil.getFormatStr(endT, "5.0")).append(" ");
-        str.append(BpaFileRwUtil.getFormatStr(dtc, "3.1")).append(" ");
-        str.append(BpaFileRwUtil.getFormatStr(istp, "3")).append(" ");
-        str.append(BpaFileRwUtil.getFormatStr(toli, "5.5")).append(" ");
-        str.append(BpaFileRwUtil.getFormatStr(ilim, "3")).append(" ");
-        str.append(BpaFileRwUtil.getFormatStr(delAng, "4.4")).append(" ");
-        str.append(BpaFileRwUtil.getFormatStr(dc, "2")).append(" ");
-        str.append(BpaFileRwUtil.getFormatStr(dmp, "3.3")).append("       ");
-        str.append(BpaFileRwUtil.getFormatStr(frqBse, "2.0")).append(" ");
-        str.append(lovtex).append(" ");
-        str.append(imblok).append("   ");
-        str.append(mfdep);
-        str.append(igslim);
-        str.append(lsolqit).append(" ");
-        str.append(noAngLim).append(" ");
-        str.append(infBus);
-        str.append(noPp);
-        str.append(noDq);
-        str.append(noSat);
-        str.append(noGv);
-        str.append(ieqpc);
-        str.append(noEx);
-        str.append(mftomg);
-        str.append(noSc);
-        str.append(mgtomf);
-        str.append(noLoad);
+        str.append(ig).append("  ");
+        str.append(ia).append(" ");
+        str.append(DataOutputFormat.format.getFormatStr(genName1, "8L"));
+        str.append(BpaFileRwUtil.getFormatStr(genBaseKv1, "4.1"));// the bpa model is 4.0
+        str.append(id1).append(" ");
+        str.append(DataOutputFormat.format.getFormatStr(genName2, "8L"));
+        str.append(BpaFileRwUtil.getFormatStr(genBaseKv2, "4.1"));// the bpa model is 4.0
+        str.append(id2).append(" ");
+        str.append(BpaFileRwUtil.getFormatStr(amax, "5.0"));
+        str.append(BpaFileRwUtil.getFormatStr(amin, "5.0")).append("  ");
+        str.append(iv).append(" ");
+        str.append(DataOutputFormat.format.getFormatStr(busName1, "8L"));
+        str.append(BpaFileRwUtil.getFormatStr(busBaseKv1, "4.1")).append("  ");// the bpa model is 4.0
+        str.append(iF).append(" ");
+        str.append(DataOutputFormat.format.getFormatStr(busName2, "8L"));
+        str.append(BpaFileRwUtil.getFormatStr(busBaseKv2, "4.1")).append(" ");// the bpa model is 4.0
         return str.toString();
     }
 
@@ -130,227 +107,131 @@ public class F0Card implements Serializable {
         this.type = type;
     }
 
-    public double getT() {
-        return t;
+    public int getIg() {
+        return ig;
     }
 
-    public void setT(double t) {
-        this.t = t;
+    public void setIg(int ig) {
+        this.ig = ig;
     }
 
-    public double getDt() {
-        return dt;
+    public int getIa() {
+        return ia;
     }
 
-    public void setDt(double dt) {
-        this.dt = dt;
+    public void setIa(int ia) {
+        this.ia = ia;
     }
 
-    public double getEndT() {
-        return endT;
+    public String getGenName1() {
+        return genName1;
     }
 
-    public void setEndT(double endT) {
-        this.endT = endT;
+    public void setGenName1(String genName1) {
+        this.genName1 = genName1;
     }
 
-    public double getDtc() {
-        return dtc;
+    public double getGenBaseKv1() {
+        return genBaseKv1;
     }
 
-    public void setDtc(double dtc) {
-        this.dtc = dtc;
+    public void setGenBaseKv1(double genBaseKv1) {
+        this.genBaseKv1 = genBaseKv1;
     }
 
-    public int getIstp() {
-        return istp;
+    public char getId1() {
+        return id1;
     }
 
-    public void setIstp(int istp) {
-        this.istp = istp;
+    public void setId1(char id1) {
+        this.id1 = id1;
     }
 
-    public double getToli() {
-        return toli;
+    public String getGenName2() {
+        return genName2;
     }
 
-    public void setToli(double toli) {
-        this.toli = toli;
+    public void setGenName2(String genName2) {
+        this.genName2 = genName2;
     }
 
-    public int getIlim() {
-        return ilim;
+    public double getGenBaseKv2() {
+        return genBaseKv2;
     }
 
-    public void setIlim(int ilim) {
-        this.ilim = ilim;
+    public void setGenBaseKv2(double genBaseKv2) {
+        this.genBaseKv2 = genBaseKv2;
     }
 
-    public double getDelAng() {
-        return delAng;
+    public char getId2() {
+        return id2;
     }
 
-    public void setDelAng(double delAng) {
-        this.delAng = delAng;
+    public void setId2(char id2) {
+        this.id2 = id2;
     }
 
-    public int getDc() {
-        return dc;
+    public double getAmax() {
+        return amax;
     }
 
-    public void setDc(int dc) {
-        this.dc = dc;
+    public void setAmax(double amax) {
+        this.amax = amax;
     }
 
-    public double getDmp() {
-        return dmp;
+    public double getAmin() {
+        return amin;
     }
 
-    public void setDmp(double dmp) {
-        this.dmp = dmp;
+    public void setAmin(double amin) {
+        this.amin = amin;
     }
 
-    public double getFrqBse() {
-        return frqBse;
+    public int getIv() {
+        return iv;
     }
 
-    public void setFrqBse(double frqBse) {
-        this.frqBse = frqBse;
+    public void setIv(int iv) {
+        this.iv = iv;
     }
 
-    public int getLovtex() {
-        return lovtex;
+    public String getBusName1() {
+        return busName1;
     }
 
-    public void setLovtex(int lovtex) {
-        this.lovtex = lovtex;
+    public void setBusName1(String busName1) {
+        this.busName1 = busName1;
     }
 
-    public int getImblok() {
-        return imblok;
+    public double getBusBaseKv1() {
+        return busBaseKv1;
     }
 
-    public void setImblok(int imblok) {
-        this.imblok = imblok;
+    public void setBusBaseKv1(double busBaseKv1) {
+        this.busBaseKv1 = busBaseKv1;
     }
 
-    public int getMfdep() {
-        return mfdep;
+    public int getiF() {
+        return iF;
     }
 
-    public void setMfdep(int mfdep) {
-        this.mfdep = mfdep;
+    public void setiF(int iF) {
+        this.iF = iF;
     }
 
-    public int getIgslim() {
-        return igslim;
+    public String getBusName2() {
+        return busName2;
     }
 
-    public void setIgslim(int igslim) {
-        this.igslim = igslim;
+    public void setBusName2(String busName2) {
+        this.busName2 = busName2;
     }
 
-    public int getLsolqit() {
-        return lsolqit;
+    public double getBusBaseKv2() {
+        return busBaseKv2;
     }
 
-    public void setLsolqit(int lsolqit) {
-        this.lsolqit = lsolqit;
-    }
-
-    public int getNoAngLim() {
-        return noAngLim;
-    }
-
-    public void setNoAngLim(int noAngLim) {
-        this.noAngLim = noAngLim;
-    }
-
-    public int getInfBus() {
-        return infBus;
-    }
-
-    public void setInfBus(int infBus) {
-        this.infBus = infBus;
-    }
-
-    public int getNoPp() {
-        return noPp;
-    }
-
-    public void setNoPp(int noPp) {
-        this.noPp = noPp;
-    }
-
-    public int getNoDq() {
-        return noDq;
-    }
-
-    public void setNoDq(int noDq) {
-        this.noDq = noDq;
-    }
-
-    public int getNoSat() {
-        return noSat;
-    }
-
-    public void setNoSat(int noSat) {
-        this.noSat = noSat;
-    }
-
-    public int getNoGv() {
-        return noGv;
-    }
-
-    public void setNoGv(int noGv) {
-        this.noGv = noGv;
-    }
-
-    public int getIeqpc() {
-        return ieqpc;
-    }
-
-    public void setIeqpc(int ieqpc) {
-        this.ieqpc = ieqpc;
-    }
-
-    public int getNoEx() {
-        return noEx;
-    }
-
-    public void setNoEx(int noEx) {
-        this.noEx = noEx;
-    }
-
-    public int getMftomg() {
-        return mftomg;
-    }
-
-    public void setMftomg(int mftomg) {
-        this.mftomg = mftomg;
-    }
-
-    public int getNoSc() {
-        return noSc;
-    }
-
-    public void setNoSc(int noSc) {
-        this.noSc = noSc;
-    }
-
-    public int getMgtomf() {
-        return mgtomf;
-    }
-
-    public void setMgtomf(int mgtomf) {
-        this.mgtomf = mgtomf;
-    }
-
-    public int getNoLoad() {
-        return noLoad;
-    }
-
-    public void setNoLoad(int noLoad) {
-        this.noLoad = noLoad;
+    public void setBusBaseKv2(double busBaseKv2) {
+        this.busBaseKv2 = busBaseKv2;
     }
 }

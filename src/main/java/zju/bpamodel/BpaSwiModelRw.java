@@ -443,6 +443,29 @@ public class BpaSwiModelRw {
                 ")";
         sqliteDb.initDb(initSql);
 
+        TABLE_DATA_NAME = "F0Card";
+        initSql = "CREATE TABLE "  + TABLE_DATA_NAME + " (" +
+                " psId     varchar(10) NOT NULL," +
+                " type     varchar(2) NOT NULL," +
+                " ig              INTEGER NULL, " +
+                " ia              INTEGER NULL, " +
+                " genName1     varchar(8) NOT NULL," +
+                " genBaseKv1              decimal(4,1) NOT NULL, " +
+                " id1     varchar(1) NOT NULL," +
+                " genName2     varchar(8) NOT NULL," +
+                " genBaseKv2              decimal(4,1) NOT NULL, " +
+                " id2     varchar(1) NOT NULL," +
+                " amax     decimal(5,0) NULL," +
+                " amin              decimal(5,0) NULL, " +
+                " iv              INTEGER NULL, " +
+                " busName1     varchar(8) NOT NULL," +
+                " busBaseKv1              decimal(4,1) NOT NULL, " +
+                " iF              INTEGER NULL, " +
+                " busName2     varchar(8) NOT NULL," +
+                " busBaseKv2              decimal(4,1) NOT NULL " +
+                ")";
+        sqliteDb.initDb(initSql);
+
         TABLE_DATA_NAME = "FLTCard";
         initSql = "CREATE TABLE "  + TABLE_DATA_NAME + " (" +
                 " psId     varchar(10) NOT NULL," +
@@ -890,6 +913,25 @@ public class BpaSwiModelRw {
         sqliteDb.executeSqls(sqls);
 
         sqls.clear();
+        TABLE_DATA_NAME = "F0Card";
+        sql = "delete from " + TABLE_DATA_NAME + " where psId='" + psId + "'";
+        sqliteDb.executeSql(sql);
+        F0Card f0Card = model.getF0();
+        insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
+                "'" + psId + "','" + f0Card.getType() + "'," +
+                f0Card.getIg() + "," + f0Card.getIa() + "," +
+                "'" + f0Card.getGenName1() + "'," + f0Card.getGenBaseKv1() + "," +
+                "'" + f0Card.getId1() + "','" + f0Card.getGenName2() + "'," +
+                f0Card.getGenBaseKv2() + ",'" + f0Card.getId2() + "'," +
+                f0Card.getAmax() + "," + f0Card.getAmin() + "," +
+                f0Card.getIv()+ ",'" + f0Card.getBusName1() + "'," +
+                f0Card.getBusBaseKv1() + "," + f0Card.getiF() + "," +
+                "'" + f0Card.getBusName2() + "'," + f0Card.getBusBaseKv2() +
+                ")";
+        sqls.add(insertSql);
+        sqliteDb.executeSqls(sqls);
+
+        sqls.clear();
         TABLE_DATA_NAME = "CaseCard";
         sql = "delete from " + TABLE_DATA_NAME + " where psId='" + psId + "'";
         sqliteDb.executeSql(sql);
@@ -1036,6 +1078,7 @@ public class BpaSwiModelRw {
         modifiedModel.setFltCards(fltCards);
         objects.clear();
         modifiedModel.setFf((FFCard) sqliteDb.queryData("FFCard", psId).get(0));
+        modifiedModel.setF0((F0Card) sqliteDb.queryData("F0Card", psId).get(0));
         CaseCard caseCard = (CaseCard) sqliteDb.queryData("CaseCard", psId).get(0);
         caseCard.setCaseId(caseID);
         modifiedModel.setCaseCard(caseCard);
