@@ -8,7 +8,7 @@ public class PlanRw {
 
     public static void CreateTables(String dbFile) {
         SqliteDb sqliteDb = new SqliteDb(dbFile);
-        String TABLE_DATA_NAME = "Plan";
+        String TABLE_DATA_NAME = "gensPlan";
         StringBuilder initSql = new StringBuilder("CREATE TABLE " + TABLE_DATA_NAME + " (" +
                 " psId     varchar(10) NOT NULL," +
                 " data     varchar(12) NOT NULL," +
@@ -26,7 +26,7 @@ public class PlanRw {
         Object[] keys = hash.keySet().toArray();
         SqliteDb sqliteDb = new SqliteDb(dbFile);
         List<String> sqls = new LinkedList<>();
-        String TABLE_DATA_NAME = "Plan";
+        String TABLE_DATA_NAME = "gensPlan";
         String sql = "delete from " + TABLE_DATA_NAME + " where psId='" + psId + "' and data='" + data + "'";
         sqliteDb.executeSql(sql);
         for (int i = 0; i < keys.length; i++) {

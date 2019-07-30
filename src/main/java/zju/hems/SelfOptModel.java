@@ -7,8 +7,6 @@ import ilog.cplex.IloCplex;
 
 import java.util.List;
 
-import static java.lang.Math.*;
-
 public class SelfOptModel {
 
     Microgrid microgrid;
@@ -30,12 +28,14 @@ public class SelfOptModel {
             List<GasBoiler> gasBoilers = user.getGasBoilers();
             List<GasTurbine> gasTurbines = user.getGasTurbines();
             List<IceStorageAc> iceStorageAcs = user.getIceStorageAcs();
+            List<Storage> storages = user.getStorages();
             List<Photovoltaic> photovoltaics = user.getPhotovoltaics();
             List<SteamLoad> steamLoads = user.getSteamLoads();
-            List<Storage> storages = user.getStorages();
             try {
-                // 变量：吸收式制冷机耗热功率，中央空调
-                int varNum = absorptionChillers.size() + airCons.size() + periodNum;
+                // 变量：制冷机耗电功率，蓄冰槽耗电功率，蓄冰槽制冷功率，燃气轮机产电功率，储能充电功率，
+                // 变流器交流侧消耗功率，向电网购电功率，中央空调耗电功率，燃气锅炉产热功率，吸收式制冷机耗热功率
+                int varNum = 3 * iceStorageAcs.size() + gasTurbines.size() + storages.size() + converters.size()
+                        + periodNum + airCons.size() + gasBoilers.size() + absorptionChillers.size();
                 // 状态变量下限, column里元素的个数等于矩阵C里系数的个数
                 double columnLower[] = new double[varNum];
                 // 状态变量上限
@@ -47,9 +47,15 @@ public class SelfOptModel {
                 //记录数组中存储元素的个数
                 int coeffNum = 0;
 
+                for (int i = 0; i < iceStorageAcs.size(); i++) {
+                    columnLower[i] = 0;
+                    columnUpper[i] = 1;
+                    xt[i] = IloNumVarType.Bool;
+                }
+
                 IloCplex cplex = new IloCplex(); // creat a model
                 // 变量
-                IloNumVar[] x = cplex.numVarArray(columnLower.length, columnLower, columnUpper, xt);
+                IloNumVar[] x = cplex.numVarArray(varNum, columnLower, columnUpper, xt);
                 // 目标函数
 //            IloNumExpr obj = cplex.numExpr();
                 double[] objValue = new double[varNum];

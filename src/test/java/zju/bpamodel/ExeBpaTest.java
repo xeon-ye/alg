@@ -2,6 +2,9 @@ package zju.bpamodel;
 
 import junit.framework.TestCase;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 public class ExeBpaTest extends TestCase {
 
     public void testOpenPSDEdit() {
@@ -13,8 +16,12 @@ public class ExeBpaTest extends TestCase {
     }
 
     public void testExeSw() {
+        long currentTime = System.currentTimeMillis();
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy年-MM月dd日-HH时mm分ss秒");
+        Date date = new Date(currentTime);
+        System.out.println(formatter.format(date));
         ExeBpa.exeSw("d:/", "C:/Users/Administrator/Desktop/PSDEditCEPRI20180409-01/SWNT/swnt.exe",
-                "d:/88000007.BSE", "d:/XIAOJIN.SWI");
+                "d:/XIAOJIN1.BSE", "d:/XIAOJIN1.SWI");
     }
 
     public void testClosePSDEdit() {

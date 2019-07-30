@@ -7,7 +7,7 @@ public class ExePlan {
 
     private static HashMap<String, double[]> getPlan(String dbFile, String psId) {
         SqliteDb sqliteDb = new SqliteDb(dbFile);
-        List<Object> genPlans = sqliteDb.queryData("Plan", psId);
+        List<Object> genPlans = sqliteDb.queryData("gensPlan", psId);
         HashMap<String, double[]> plans = new HashMap<>();
         for (int i = 0; i < genPlans.size(); i++) {
             String[] genPlan = (String[]) genPlans.get(i);
