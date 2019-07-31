@@ -11,7 +11,8 @@ public class IceStorageAc {
     double density; // 乙二醇溶液的密度
     double dTice;  // 蓄冰工况时经过蓄冰槽的乙二醇溶液回水和供水温度差
     double Effice;  // 制冰效率
-    double EER; // 能效比
+    double EERc; // 制冷能效比
+    double EERice; // 制冰能效比
     double dTmelt;  // 融冰工况时经过蓄冰槽的乙二醇溶液回水和供水温度差
     double Effmelt; // 融冰效率
     double dTref;  // 制冷工况时经过制冷机的乙二醇溶液回水和供水温度差
@@ -30,15 +31,17 @@ public class IceStorageAc {
     double minS;    // 电池最低电量
     double maxS;    // 电池最高电量
 
-    public IceStorageAc(double coper, double Cgly, double density, double dTice, double Effice, double EER,
-                        double dTmelt, double Effmelt, double dTref, double Effref, double lossCoef, double maxP,
-                        double S, double minT, double maxT, double intT, double consumCoef, double maxPice, double maxPmelt) {
+    public IceStorageAc(double coper, double Cgly, double density, double dTice, double Effice, double EERc,
+                        double EERice, double dTmelt, double Effmelt, double dTref, double Effref, double lossCoef,
+                        double maxP, double S, double minT, double maxT, double intT, double consumCoef, double maxPice,
+                        double maxPmelt) {
         this.coper = coper;
         this.Cgly = Cgly;
         this.density = density;
         this.dTice = dTice;
         this.Effice = Effice;
-        this.EER = EER;
+        this.EERc = EERc;
+        this.EERice = EERice;
         this.dTmelt = dTmelt;
         this.Effmelt = Effmelt;
         this.dTref = dTref;
@@ -97,12 +100,20 @@ public class IceStorageAc {
         Effice = effice;
     }
 
-    public double getEER() {
-        return EER;
+    public double getEERc() {
+        return EERc;
     }
 
-    public void setEER(double EER) {
-        this.EER = EER;
+    public void setEERc(double EERc) {
+        this.EERc = EERc;
+    }
+
+    public double getEERice() {
+        return EERice;
+    }
+
+    public void setEERice(double EERice) {
+        this.EERice = EERice;
     }
 
     public double getdTmelt() {
@@ -197,8 +208,16 @@ public class IceStorageAc {
         return minS;
     }
 
+    public void setMinS(double minS) {
+        this.minS = minS;
+    }
+
     public double getMaxS() {
         return maxS;
+    }
+
+    public void setMaxS(double maxS) {
+        this.maxS = maxS;
     }
 
     public double getMaxPice() {

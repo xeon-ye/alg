@@ -14,9 +14,10 @@ public class GasTurbine {
     double maxP;    // 最大产电功率
     double minRampRate;    // 爬坡率下限
     double maxRampRate;    // 爬坡率上限
+    int initState;   // 初始启停状态
 
     public GasTurbine(double coper, double calorificValue, double Effe, double Effh, double css, double minP,
-                      double maxP, double minRampRate, double maxRampRate) {
+                      double maxP, double minRampRate, double maxRampRate, int initState) {
         this.coper = coper;
         this.calorificValue = calorificValue;
         this.Effe = Effe;
@@ -26,6 +27,7 @@ public class GasTurbine {
         this.minP = minP;
         this.minRampRate = minRampRate;
         this.maxRampRate = maxRampRate;
+        this.initState = initState;
     }
 
     public double getCoper() {
@@ -98,5 +100,13 @@ public class GasTurbine {
 
     public void setMaxRampRate(double maxRampRate) {
         this.maxRampRate = maxRampRate;
+    }
+
+    public int getInitState() {
+        return initState;
+    }
+
+    public void setInitState(int initState) {
+        this.initState = initState;
     }
 }
