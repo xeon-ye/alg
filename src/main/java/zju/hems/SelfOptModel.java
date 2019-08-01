@@ -346,12 +346,23 @@ public class SelfOptModel {
 
                 // 关口功率约束
                 for (int j = 0; j < periodNum; j++) {
-                    coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + 2 * storages.size() + 2 * converters.size()] = 1;
+                    coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + 2 * storages.size() + 2 * converters.size()] = 1;    // 购电功率
                     cplex.addLe(cplex.scalProd(x, coeff[coeffNum]), gatePower.get(user.getUserId())[j]);
                     coeffNum += 1;
                 }
 
-                // 热功率约束（空调不考虑制热）
+                //todo 热功率约束（空调不考虑制热）
+                for (int j = 0; j < periodNum; j++) {
+                    for (int i = 0; i < gasTurbines.size(); i++) {
+                        coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 2 * gasTurbines.size() + i] = (1 - gasTurbines.get(i).getEffe()) / gasTurbines.get(i).getEffe() * gasTurbines.get(i).getEffh();   // 燃气轮机中品味热
+                    }
+                    for (int i = 0; i < gasBoilers.size(); i++) {
+                        coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + 2 * storages.size() + 2 * converters.size() + 1 + airCons.size() + 2 * gasBoilers.size() + i] = 1;   // 燃气锅炉产热功率
+                    }
+                    coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + 2 * storages.size() + 2 * converters.size() + 1 + airCons.size() + 3 * gasBoilers.size() + absorptionChillers.size()] = 1;   // 购热功率
+                    cplex.addGe(cplex.scalProd(x, coeff[coeffNum]), gatePower.get(user.getUserId())[j]);
+                    coeffNum += 1;
+                }
 
                 cplex.end();
             } catch (IloException e) {
