@@ -22,18 +22,19 @@ public class IceStorageAc {
     double S;   // 蓄冰槽容量
     double minT;  // 最小蓄冰状态
     double maxT;  // 最大蓄冰状态
-    double intT;  // 初始蓄冰状态
+    double initT;  // 初始蓄冰状态
     double consumCoef;  // 能耗比例系数
     double maxPice;    // 最大制冰功率
     double maxPmelt;    // 最大融冰功率
 
     // 计算参数
-    double minS;    // 电池最低电量
-    double maxS;    // 电池最高电量
+    double minS;    // 蓄冰槽最小蓄冰量
+    double maxS;    // 蓄冰槽最大蓄冰量
+    double initS;   // 蓄冰槽初始蓄冰量
 
     public IceStorageAc(double coper, double Cgly, double density, double dTice, double Effice, double EERc,
                         double EERice, double dTmelt, double Effmelt, double dTref, double Effref, double lossCoef,
-                        double maxP, double S, double minT, double maxT, double intT, double consumCoef, double maxPice,
+                        double maxP, double S, double minT, double maxT, double initT, double consumCoef, double maxPice,
                         double maxPmelt) {
         this.coper = coper;
         this.Cgly = Cgly;
@@ -51,13 +52,14 @@ public class IceStorageAc {
         this.S = S;
         this.minT = minT;
         this.maxT = maxT;
-        this.intT = intT;
+        this.initT = initT;
         this.consumCoef = consumCoef;
         this.maxPice = maxPice;
         this.maxPmelt = maxPmelt;
 
         minS = minT * S;
         maxS = maxT * S;
+        initS = initT * S;
     }
 
     public double getCoper() {
@@ -188,12 +190,12 @@ public class IceStorageAc {
         this.maxT = maxT;
     }
 
-    public double getIntT() {
-        return intT;
+    public double getInitT() {
+        return initT;
     }
 
-    public void setIntT(double intT) {
-        this.intT = intT;
+    public void setInitT(double intT) {
+        this.initT = initT;
     }
 
     public double getConsumCoef() {
@@ -218,6 +220,14 @@ public class IceStorageAc {
 
     public void setMaxS(double maxS) {
         this.maxS = maxS;
+    }
+
+    public double getInitS() {
+        return initS;
+    }
+
+    public void setInitS(double initS) {
+        this.initS = initS;
     }
 
     public double getMaxPice() {

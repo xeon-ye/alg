@@ -4,6 +4,7 @@ import java.util.List;
 
 public class User {
 
+    String userId;
     List<AbsorptionChiller> absorptionChillers;
     List<AirCon> airCons;
     List<Converter> converters;
@@ -14,9 +15,10 @@ public class User {
     List<SteamLoad> steamLoads;
     List<Storage> storages;
 
-    public User(List<AbsorptionChiller> absorptionChillerList, List<AirCon> airCons, List<Converter> converters,
+    public User(String userId, List<AbsorptionChiller> absorptionChillerList, List<AirCon> airCons, List<Converter> converters,
                  List<GasBoiler> gasBoilers, List<GasTurbine> gasTurbines, List<IceStorageAc> iceStorageAcs,
                  List<Photovoltaic> photovoltaics, List<SteamLoad> steamLoads, List<Storage> storages) {
+        this.userId = userId;
         this.absorptionChillers = absorptionChillerList;
         this.airCons = airCons;
         this.converters = converters;
@@ -26,6 +28,14 @@ public class User {
         this.photovoltaics = photovoltaics;
         this.steamLoads = steamLoads;
         this.storages = storages;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     public List<AbsorptionChiller> getAbsorptionChillers() {

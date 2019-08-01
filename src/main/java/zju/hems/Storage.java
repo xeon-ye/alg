@@ -14,7 +14,7 @@ public class Storage {
     double R;   // 电池容量
     double minSOC;  // 最小SOC
     double maxSOC;  // 最大SOC
-    double intSOC;  // 初始SOC
+    double initSOC;  // 初始SOC
     double yin = 1; // 充电爬坡率约束系数
     double yout = 1; // 放电爬坡率约束系数
     double lossCoef;    // 自损耗系数
@@ -25,9 +25,10 @@ public class Storage {
     double cbw; // 蓄电池累计充电1kWh的折旧成本
     double minS;    // 电池最低电量
     double maxS;    // 电池最高电量
+    double initS;   // 电池初始电量
 
     public Storage(double coper, double crep, double Qlife, double maxPIn, double maxPOut, double R, double minSOC, double maxSOC,
-                   double intSOC, double yin, double yout, double lossCoef, double effIn, double effOut) {
+                   double initSOC, double yin, double yout, double lossCoef, double effIn, double effOut) {
         this.coper = coper;
         this.crep = crep;
         this.Qlife = Qlife;
@@ -36,7 +37,7 @@ public class Storage {
         this.R = R;
         this.minSOC = minSOC;
         this.maxSOC = maxSOC;
-        this.intSOC = intSOC;
+        this.initSOC = initSOC;
         this.yin = yin;
         this.yout = yout;
         this.lossCoef = lossCoef;
@@ -46,6 +47,7 @@ public class Storage {
         cbw = crep / Qlife;
         minS = minSOC * R;
         maxS = maxSOC * R;
+        initS = initSOC * R;
     }
 
     public double getCoper() {
@@ -112,12 +114,12 @@ public class Storage {
         this.maxSOC = maxSOC;
     }
 
-    public double getIntSOC() {
-        return intSOC;
+    public double getInitSOC() {
+        return initSOC;
     }
 
-    public void setIntSOC(double intSOC) {
-        this.intSOC = intSOC;
+    public void setInitSOC(double initSOC) {
+        this.initSOC = initSOC;
     }
 
     public double getYin() {
@@ -170,5 +172,9 @@ public class Storage {
 
     public double getMaxS() {
         return maxS;
+    }
+
+    public double getInitS() {
+        return initS;
     }
 }

@@ -1,20 +1,20 @@
 package zju.hems;
 
-import java.util.List;
+import java.util.Map;
 
 public class Microgrid {
 
-    List<User> users;
+    Map<String, User> users;
 
-    public Microgrid(List<User> users) {
+    public Microgrid(Map<String, User> users) {
         this.users = users;
     }
 
-    public List<User> getUsers() {
+    public Map<String, User> getUsers() {
         return users;
     }
 
-    public void setUsers(List<User> users) {
+    public void setUsers(Map<String, User> users) {
         this.users = users;
     }
 }
