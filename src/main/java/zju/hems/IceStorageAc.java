@@ -32,20 +32,15 @@ public class IceStorageAc {
     double maxS;    // 蓄冰槽最大蓄冰量
     double initS;   // 蓄冰槽初始蓄冰量
 
-    public IceStorageAc(double coper, double Cgly, double density, double dTice, double Effice, double EERc,
-                        double EERice, double dTmelt, double Effmelt, double dTref, double Effref, double lossCoef,
+    public IceStorageAc(double coper, double Effice, double EERc,
+                        double EERice, double Effmelt, double Effref, double lossCoef,
                         double maxP, double S, double minT, double maxT, double initT, double consumCoef, double maxPice,
                         double maxPmelt) {
         this.coper = coper;
-        this.Cgly = Cgly;
-        this.density = density;
-        this.dTice = dTice;
         this.Effice = Effice;
         this.EERc = EERc;
         this.EERice = EERice;
-        this.dTmelt = dTmelt;
         this.Effmelt = Effmelt;
-        this.dTref = dTref;
         this.Effref = Effref;
         this.lossCoef = lossCoef;
         this.maxP = maxP;

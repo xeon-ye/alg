@@ -3,11 +3,11 @@ package zju.hems;
 public class SteamLoad {
 
     double[] demand;  // 负荷需求
-    double EER; // 热回收效率
+    double Effh; // 热回收效率
 
-    public SteamLoad(double[] demand, double EER) {
+    public SteamLoad(double[] demand, double Effh) {
         this.demand = demand;
-        this.EER = EER;
+        this.Effh = Effh;
     }
 
     public double[] getDemand() {
@@ -18,11 +18,11 @@ public class SteamLoad {
         this.demand = demand;
     }
 
-    public double getEER() {
-        return EER;
+    public double getEffh() {
+        return Effh;
     }
 
-    public void setEER(double EER) {
-        this.EER = EER;
+    public void setEffh(double effh) {
+        Effh = effh;
     }
 }

@@ -13,9 +13,8 @@ public class GasBoiler {
     double maxH;    // 最大产热功率
     double rampRate;    // 爬坡率约束
 
-    public GasBoiler(double coper, double calorificValue, double css, double Effgb, double minH, double maxH, double rampRate) {
+    public GasBoiler(double coper, double css, double Effgb, double minH, double maxH, double rampRate) {
         this.coper = coper;
-        this.calorificValue = calorificValue;
         this.css = css;
         this.Effgb = Effgb;
         this.maxH = maxH;

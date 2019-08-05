@@ -16,18 +16,13 @@ public class AirCon {
     double EERc;    // 制冷能效比
     double EERh;    // 制热能效比
 
-    public AirCon(double coper, double Cwater, double density, double dTac, double Effac, double consumCoef, double minP,
-                  double maxP, double EERc, double EERh) {
+    public AirCon(double coper, double Effac, double consumCoef, double minP, double maxP, double EERc) {
         this.coper = coper;
-        this.Cwater = Cwater;
-        this.density = density;
-        this.dTac = dTac;
         this.Effac = Effac;
         this.consumCoef = consumCoef;
         this.minP = minP;
         this.maxP = maxP;
         this.EERc = EERc;
-        this.EERh = EERh;
     }
 
     public double getCoper() {

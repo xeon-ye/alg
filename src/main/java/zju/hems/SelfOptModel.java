@@ -15,18 +15,22 @@ public class SelfOptModel {
     double t;   // 单位时段长度
     double[] acLoad;    // 交流负荷
     double[] dcLoad;    // 直流负荷
+    double[] coolingLoad;   // 冷负荷
     double[] elecPrices;    // 电价
     double[] gasPrices;    // 天然气价格
     double[] steamPrices;    // 园区CHP蒸汽价格
     Map<String, double[]> gatePower;   // 用户关口功率
 
-    public SelfOptModel(Microgrid microgrid, int periodNum, double[] acLoad, double[] dcLoad, double[] elecPrices,
-                        double[] gasPrices, double[] steamPrices, Map<String, double[]> gatePower) {
+    double minCost;
+
+    public SelfOptModel(Microgrid microgrid, int periodNum, double[] acLoad, double[] dcLoad, double[] coolingLoad,
+                        double[] elecPrices, double[] gasPrices, double[] steamPrices, Map<String, double[]> gatePower) {
         this.microgrid = microgrid;
         this.periodNum = periodNum;
         t = 24 / periodNum;
         this.acLoad = acLoad;
         this.dcLoad = dcLoad;
+        this.coolingLoad = coolingLoad;
         this.elecPrices = elecPrices;
         this.gasPrices = gasPrices;
         this.steamPrices = steamPrices;
@@ -59,7 +63,7 @@ public class SelfOptModel {
                 // 指明变量类型
                 IloNumVarType[] xt = new IloNumVarType[varNum];
                 // 约束方程系数
-                double[][] coeff = new double[(1 + 1) * periodNum][varNum];
+                double[][] coeff = new double[(1 + 1) * periodNum + 4 * (periodVarNum - 1) + 2 * (periodVarNum - 1) + 1 + periodVarNum + 2 * (periodVarNum - 1) + 1 + periodVarNum + 3 * periodVarNum][varNum];
 
                 // 设置变量上下限
                 for (int j = 0; j < periodNum; j++) {
@@ -235,10 +239,10 @@ public class SelfOptModel {
                         coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + storages.size() + i] = 1;   // 储能放电功率
                     }
                     double periodDcLoad = dcLoad[j];
-                    for (int i = 0; i < photovoltaics.size(); i++) {
-                        periodDcLoad -= photovoltaics.get(i).getPower()[j];
+                    for (Photovoltaic photovoltaic : photovoltaics) {
+                        periodDcLoad -= photovoltaic.getPower()[j];
                     }
-                    cplex.addEq(cplex.scalProd(x, coeff[coeffNum]), periodVarNum);
+                    cplex.addEq(cplex.scalProd(x, coeff[coeffNum]), periodDcLoad);
                     coeffNum += 1;
 
                     // 电池储能爬坡率约束
@@ -351,8 +355,9 @@ public class SelfOptModel {
                     coeffNum += 1;
                 }
 
-                //todo 热功率约束（空调不考虑制热）
+                // 热功率约束（不考虑空间热负荷）
                 for (int j = 0; j < periodNum; j++) {
+                    // 总热量约束
                     for (int i = 0; i < gasTurbines.size(); i++) {
                         coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 2 * gasTurbines.size() + i] = (1 - gasTurbines.get(i).getEffe()) / gasTurbines.get(i).getEffe() * gasTurbines.get(i).getEffh();   // 燃气轮机中品味热
                     }
@@ -360,8 +365,54 @@ public class SelfOptModel {
                         coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + 2 * storages.size() + 2 * converters.size() + 1 + airCons.size() + 2 * gasBoilers.size() + i] = 1;   // 燃气锅炉产热功率
                     }
                     coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + 2 * storages.size() + 2 * converters.size() + 1 + airCons.size() + 3 * gasBoilers.size() + absorptionChillers.size()] = 1;   // 购热功率
-                    cplex.addGe(cplex.scalProd(x, coeff[coeffNum]), gatePower.get(user.getUserId())[j]);
+                    for (int i = 0; i < absorptionChillers.size(); i++) {
+                        coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + 2 * storages.size() + 2 * converters.size() + 1 + airCons.size() + 3 * gasBoilers.size()] = - 1;   // 吸收式制冷机耗热功率
+                    }
+                    double steamLoadVal = 0;
+                    for (SteamLoad steamLoad : steamLoads) {
+                        steamLoadVal += steamLoad.getDemand()[j];
+                    }
+                    cplex.addGe(cplex.scalProd(x, coeff[coeffNum]), steamLoadVal);
                     coeffNum += 1;
+
+                    // 中品味热约束
+                    for (int i = 0; i < gasTurbines.size(); i++) {
+                        coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 2 * gasTurbines.size() + i] = (1 - gasTurbines.get(i).getEffe()) / gasTurbines.get(i).getEffe() * gasTurbines.get(i).getEffh();   // 燃气轮机中品味热
+                    }
+                    for (int i = 0; i < gasBoilers.size(); i++) {
+                        coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + 2 * storages.size() + 2 * converters.size() + 1 + airCons.size() + 2 * gasBoilers.size() + i] = 1;   // 燃气锅炉产热功率
+                    }
+                    coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + 2 * storages.size() + 2 * converters.size() + 1 + airCons.size() + 3 * gasBoilers.size() + absorptionChillers.size()] = 1;   // 购热功率
+                    double Hdr = 0;
+                    for (SteamLoad steamLoad : steamLoads) {
+                        Hdr += steamLoad.getDemand()[j] / steamLoad.getEffh();
+                    }
+                    cplex.addGe(cplex.scalProd(x, coeff[coeffNum]), Hdr);
+                    coeffNum += 1;
+                }
+
+                // 冷功率约束
+                for (int j = 0; j < periodNum; j++) {
+                    for (int i = 0; i < iceStorageAcs.size(); i++) {
+                        coeff[coeffNum][j * periodVarNum + i] = iceStorageAcs.get(i).getEffref() * iceStorageAcs.get(i).getEERc();   // 制冷机制冷功率
+                        coeff[coeffNum][j * periodVarNum + 2 * iceStorageAcs.size() + i] = 1;   // 蓄冰槽制冷功率
+                    }
+                    for (int i = 0; i < airCons.size(); i++) {
+                        coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + 2 * storages.size() + 2 * converters.size() + 1 + i] = airCons.get(i).getEffac() * airCons.get(i).getEERc();   // 空调制冷功率
+                    }
+                    for (AbsorptionChiller absorptionChiller : absorptionChillers) {
+                        coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + 2 * storages.size() + 2 * converters.size() + 1 + airCons.size() + 3 * gasBoilers.size()] = absorptionChiller.getIc();   // 吸收式制冷机供冷功率
+                    }
+                    cplex.addEq(cplex.scalProd(x, coeff[coeffNum]), coolingLoad[j]);
+                    coeffNum += 1;
+                }
+
+                double[] result = new double[varNum];
+                if (cplex.solve()) {
+                    cplex.output().println("Solution status = " + cplex.getStatus());
+                    cplex.output().println("Solution value = " + cplex.getObjValue());
+                    minCost = cplex.getObjValue();
+                    result = cplex.getValues(x);
                 }
 
                 cplex.end();

@@ -12,13 +12,11 @@ public class AbsorptionChiller {
     double Ic;  // 制冷能效比
     double Ih;  // 制热能效比
 
-    public AbsorptionChiller(double coper, double calorificValue, double minH, double maxH, double Ic, double Ih) {
+    public AbsorptionChiller(double coper, double minH, double maxH, double Ic) {
         this.coper = coper;
-        this.calorificValue = calorificValue;
         this.minH = minH;
         this.maxH = maxH;
         this.Ic = Ic;
-        this.Ih = Ih;
     }
 
     public double getCoper() {
