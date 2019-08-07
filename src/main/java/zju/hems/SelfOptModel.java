@@ -63,8 +63,9 @@ public class SelfOptModel {
                 // 指明变量类型
                 IloNumVarType[] xt = new IloNumVarType[varNum];
                 // 约束方程系数
-                double[][] coeff = new double[(1 + 1) * periodNum + (2 * gasTurbines.size() +
-                        2 * gasBoilers.size() + 4 * storages.size()) * (periodNum - 1) +
+                double[][] coeff = new double[(1 + 1) * periodNum + 2 * gasTurbines.size() * periodNum +
+                        2 * gasTurbines.size() * (periodNum - 1) + 2 * gasBoilers.size() * periodNum +
+                        2 * gasBoilers.size() * (periodNum - 1) + 4 * storages.size() * (periodNum - 1) +
                         2 * storages.size() * (periodNum - 1) + storages.size() +
                         iceStorageAcs.size() * periodNum +
                         2 * iceStorageAcs.size() * (periodNum - 1) +
@@ -94,7 +95,7 @@ public class SelfOptModel {
                         columnLower[j * periodVarNum + handledVarNum + gasTurbines.size() + i] = 0;
                         columnUpper[j * periodVarNum + handledVarNum + gasTurbines.size() + i] = 1;
                         xt[j * periodVarNum + handledVarNum + gasTurbines.size() + i] = IloNumVarType.Bool;
-                        columnLower[j * periodVarNum + handledVarNum + 2 * gasTurbines.size() + i] = gasTurbines.get(i).getMinP();
+                        columnLower[j * periodVarNum + handledVarNum + 2 * gasTurbines.size() + i] = 0;
                         columnUpper[j * periodVarNum + handledVarNum + 2 * gasTurbines.size() + i] = gasTurbines.get(i).getMaxP();
                         xt[j * periodVarNum + handledVarNum + 2 * gasTurbines.size() + i] = IloNumVarType.Float;
                     }
@@ -139,7 +140,7 @@ public class SelfOptModel {
                         columnLower[j * periodVarNum + handledVarNum + gasBoilers.size() + i] = 0;
                         columnUpper[j * periodVarNum + handledVarNum + gasBoilers.size() + i] = 1;
                         xt[j * periodVarNum + handledVarNum + gasBoilers.size() + i] = IloNumVarType.Bool;
-                        columnLower[j * periodVarNum + handledVarNum + 2 * gasBoilers.size() + i] = gasBoilers.get(i).getMinH();
+                        columnLower[j * periodVarNum + handledVarNum + 2 * gasBoilers.size() + i] = 0;
                         columnUpper[j * periodVarNum + handledVarNum + 2 * gasBoilers.size() + i] = gasBoilers.get(i).getMaxH();
                         xt[j * periodVarNum + handledVarNum + 2 * gasBoilers.size() + i] = IloNumVarType.Float;
                     }
@@ -251,7 +252,17 @@ public class SelfOptModel {
                     cplex.addEq(cplex.scalProd(x, coeff[coeffNum]), periodDcLoad);
                     coeffNum += 1;
 
-                    //todo 燃气轮机功率约束
+                    // 燃气轮机启停功率约束
+                    for (int i = 0; i < gasTurbines.size(); i++) {
+                        coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 2 * gasTurbines.size() + i] = 1; // 燃气轮机产电功率
+                        coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + i] = - gasTurbines.get(i).getMaxP();
+                        cplex.addLe(cplex.scalProd(x, coeff[coeffNum]), 0);
+                        coeffNum += 1;
+                        coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 2 * gasTurbines.size() + i] = 1; // 燃气轮机产电功率
+                        coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + i] = - gasTurbines.get(i).getMinP();
+                        cplex.addGe(cplex.scalProd(x, coeff[coeffNum]), 0);
+                        coeffNum += 1;
+                    }
 
                     // 燃气轮机爬坡率约束
                     if (j > 0) {
@@ -267,7 +278,21 @@ public class SelfOptModel {
                         }
                     }
 
-                    //todo 燃气锅炉功率约束
+                    // 燃气锅炉启停功率约束
+                    for (int i = 0; i < gasBoilers.size(); i++) {
+                        coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + 2 * storages.size() +
+                                2 * converters.size() + 1 + airCons.size() + 2 * gasBoilers.size() + i] = 1; // 燃气锅炉产电功率
+                        coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + 2 * storages.size() +
+                                2 * converters.size() + 1 + airCons.size() + i] = - gasBoilers.get(i).getMaxH();
+                        cplex.addLe(cplex.scalProd(x, coeff[coeffNum]), 0);
+                        coeffNum += 1;
+                        coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + 2 * storages.size() +
+                                2 * converters.size() + 1 + airCons.size() + 2 * gasBoilers.size() + i] = 1; // 燃气锅炉产电功率
+                        coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + 2 * storages.size() +
+                                2 * converters.size() + 1 + airCons.size() + i] = - gasBoilers.get(i).getMinH();
+                        cplex.addGe(cplex.scalProd(x, coeff[coeffNum]), 0);
+                        coeffNum += 1;
+                    }
 
                     // 燃气锅炉爬坡率约束
                     if (j > 0) {

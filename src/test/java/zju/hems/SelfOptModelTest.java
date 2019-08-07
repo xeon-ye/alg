@@ -64,8 +64,11 @@ public class SelfOptModelTest  extends TestCase {
         selfOptModel.doSelfOpt();
         Map<String, UserResult> microgridResult = selfOptModel.getMicrogridResult();
         for (UserResult userResult : microgridResult.values()) {
-            System.out.println(userResult.getMinCost());
-            writeResult("D:\\user" + userResult.getUserId() + "Result.csv", userResult);
+            System.out.println(userResult.getUserId() + "\t" + userResult.getStatus());
+            if (userResult.getStatus().equals("Optimal")) {
+                System.out.println(userResult.getMinCost());
+                writeResult("D:\\user" + userResult.getUserId() + "Result.csv", userResult);
+            }
         }
     }
 
