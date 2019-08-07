@@ -27,11 +27,10 @@ public class Storage {
     double maxS;    // 电池最高电量
     double initS;   // 电池初始电量
 
-    public Storage(double coper, double crep, double Qlife, double maxPIn, double maxPOut, double R, double minSOC, double maxSOC,
+    public Storage(double coper, double cbw, double maxPIn, double maxPOut, double R, double minSOC, double maxSOC,
                    double initSOC, double yin, double yout, double lossCoef, double effIn, double effOut) {
         this.coper = coper;
-        this.crep = crep;
-        this.Qlife = Qlife;
+        this.cbw = cbw;
         this.maxPIn = maxPIn;
         this.maxPOut = maxPOut;
         this.R = R;
@@ -44,7 +43,6 @@ public class Storage {
         this.effIn = effIn;
         this.effOut = effOut;
 
-        cbw = crep / Qlife;
         minS = minSOC * R;
         maxS = maxSOC * R;
         initS = initSOC * R;

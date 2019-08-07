@@ -8,8 +8,9 @@ public class Photovoltaic {
     double coper;   // 单位输出功率的运维成本
     double[] power; // 光伏出力预测
 
-    public Photovoltaic(double coper) {
+    public Photovoltaic(double coper, double[] power) {
         this.coper = coper;
+        this.power = power;
     }
 
     public double getCoper() {
