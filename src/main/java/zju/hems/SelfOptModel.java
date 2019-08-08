@@ -336,8 +336,6 @@ public class SelfOptModel {
                         }
                     }
 
-                    //todo 燃气锅炉不出力
-
                     // 燃气锅炉启停功率约束
                     for (int i = 0; i < gasBoilers.size(); i++) {
                         coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + 2 * storages.size() +
@@ -384,7 +382,7 @@ public class SelfOptModel {
                                     2 * converters.size() + 2 + airCons.size() + gasBoilers.size() + i] = 1; // 燃气锅炉状态变化
                             coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() +
                                     2 * storages.size() + 2 * converters.size() + 2 + airCons.size() + i] = 1; // 燃气锅炉状态
-                            coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() +
+                            coeff[coeffNum][(j - 1) * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() +
                                     2 * storages.size() + 2 * converters.size() + 2 + airCons.size() + i] = - 1; // 燃气锅炉上一时刻状态
                             cplex.addGe(cplex.scalProd(x, coeff[coeffNum]), 0);
                             coeffNum += 1;
