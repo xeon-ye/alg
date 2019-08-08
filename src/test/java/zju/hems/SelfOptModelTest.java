@@ -18,7 +18,7 @@ public class SelfOptModelTest  extends TestCase {
     double[] Lsteams = new double[periodNum];   // 蒸汽负荷
 
     public void testCase1() throws IOException {
-        InputStream inputStream = this.getClass().getResourceAsStream("/iesfiles/selfopt/input.csv");
+        InputStream inputStream = this.getClass().getResourceAsStream("/iesfiles/selfopt/input_with_cold.csv");
         readData(inputStream);
         List<AbsorptionChiller> absorptionChillers = new ArrayList<>(1);
         AbsorptionChiller absorptionChiller = new AbsorptionChiller(0.00008, 0, 1000, 0.8);
@@ -67,7 +67,7 @@ public class SelfOptModelTest  extends TestCase {
             System.out.println(userResult.getUserId() + "\t" + userResult.getStatus());
             if (userResult.getStatus().equals("Optimal")) {
                 System.out.println(userResult.getMinCost());
-                writeResult("D:\\user" + userResult.getUserId() + "Result.csv", userResult);
+                writeResult("D:\\user" + userResult.getUserId() + "Result_with_cold.csv", userResult);
             }
         }
     }

@@ -2,6 +2,8 @@ package zju.hems;
 
 /**
  * 燃气轮机和余热锅炉
+ * @author Xu Chengsi
+ * @date 2019/7/25
  */
 public class GasTurbine {
 

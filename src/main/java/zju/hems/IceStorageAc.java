@@ -2,6 +2,8 @@ package zju.hems;
 
 /**
  * 冰蓄冷空调
+ * @author Xu Chengsi
+ * @date 2019/6/20
  */
 public class IceStorageAc {
 

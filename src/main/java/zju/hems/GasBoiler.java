@@ -2,6 +2,8 @@ package zju.hems;
 
 /**
  * 燃气锅炉
+ * @author Xu Chengsi
+ * @date 2019/7/25
  */
 public class GasBoiler {
 

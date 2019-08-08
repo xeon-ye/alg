@@ -2,6 +2,8 @@ package zju.hems;
 
 /**
  * 吸收式制冷机
+ * @author Xu Chengsi
+ * @date 2019/7/25
  */
 public class AbsorptionChiller {
 

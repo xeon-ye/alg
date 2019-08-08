@@ -1,5 +1,10 @@
 package zju.hems;
 
+/**
+ * 蒸汽驱动负荷
+ * @author Xu Chengsi
+ * @date 2019/7/25
+ */
 public class SteamLoad {
 
     double[] demand;  // 负荷需求

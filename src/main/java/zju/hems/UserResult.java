@@ -2,6 +2,11 @@ package zju.hems;
 
 import java.util.List;
 
+/**
+ * 用户自趋优计算结果.
+ * @author Xu Chengsi
+ * @date 2019/8/7
+ */
 public class UserResult {
 
     String userId;

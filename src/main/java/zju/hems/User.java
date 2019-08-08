@@ -2,6 +2,11 @@ package zju.hems;
 
 import java.util.List;
 
+/**
+ * 用户.
+ * @author Xu Chengsi
+ * @date 2019/7/29
+ */
 public class User {
 
     String userId;

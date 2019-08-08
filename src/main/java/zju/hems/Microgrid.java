@@ -2,6 +2,11 @@ package zju.hems;
 
 import java.util.Map;
 
+/**
+ * 微网.
+ * @author Xu Chengsi
+ * @date 2019/7/29
+ */
 public class Microgrid {
 
     Map<String, User> users;
