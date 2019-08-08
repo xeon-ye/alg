@@ -12,14 +12,16 @@ public class GasBoiler {
     double minH;    // 最小产热功率
     double maxH;    // 最大产热功率
     double rampRate;    // 爬坡率约束
+    int initState;   // 初始启停状态
 
-    public GasBoiler(double coper, double css, double Effgb, double minH, double maxH, double rampRate) {
+    public GasBoiler(double coper, double css, double Effgb, double minH, double maxH, double rampRate, int initState) {
         this.coper = coper;
         this.css = css;
         this.Effgb = Effgb;
         this.maxH = maxH;
         this.minH = minH;
         this.rampRate = rampRate;
+        this.initState = initState;
     }
 
     public double getCoper() {
@@ -76,5 +78,13 @@ public class GasBoiler {
 
     public void setRampRate(double rampRate) {
         this.rampRate = rampRate;
+    }
+
+    public int getInitState() {
+        return initState;
+    }
+
+    public void setInitState(int initState) {
+        this.initState = initState;
     }
 }

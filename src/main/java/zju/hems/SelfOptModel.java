@@ -63,8 +63,8 @@ public class SelfOptModel {
                 // 指明变量类型
                 IloNumVarType[] xt = new IloNumVarType[varNum];
                 // 约束方程系数
-                double[][] coeff = new double[(1 + 1) * periodNum + 2 * gasTurbines.size() * periodNum +
-                        2 * gasTurbines.size() * (periodNum - 1) + 2 * gasBoilers.size() * periodNum +
+                double[][] coeff = new double[(1 + 1) * periodNum + (2 + 2) * gasTurbines.size() * periodNum +
+                        2 * gasTurbines.size() * (periodNum - 1) + (2 + 2) * gasBoilers.size() * periodNum +
                         2 * gasBoilers.size() * (periodNum - 1) + 4 * storages.size() * (periodNum - 1) +
                         2 * storages.size() * (periodNum - 1) + storages.size() +
                         iceStorageAcs.size() * periodNum +
@@ -241,7 +241,7 @@ public class SelfOptModel {
                         coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + 2 * storages.size() + i] = 1 / converters.get(i).getEffad(); // 变流器AC-DC直流侧功率
                         coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + 2 * storages.size() + converters.size() + i] = - 1 / converters.get(i).getEffda();   // 变流器DC-AC直流侧功率
                     }
-                    for (int i = 0; i < converters.size(); i++) {
+                    for (int i = 0; i < storages.size(); i++) {
                         coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + i] = - 1; // 储能充电功率
                         coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + storages.size() + i] = 1;   // 储能放电功率
                     }
@@ -262,6 +262,33 @@ public class SelfOptModel {
                         coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + i] = - gasTurbines.get(i).getMinP();
                         cplex.addGe(cplex.scalProd(x, coeff[coeffNum]), 0);
                         coeffNum += 1;
+                    }
+
+                    // 表示燃气轮机状态变化的变量与燃气轮机启停状态关系约束
+                    if (j == 0) {
+                        for (int i = 0; i < gasTurbines.size(); i++) {
+                            coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + gasTurbines.size() + i] = 1; // 燃气轮机状态变化
+                            coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + i] = - 1; // 燃气轮机状态
+                            cplex.addGe(cplex.scalProd(x, coeff[coeffNum]), - gasTurbines.get(i).getInitState());
+                            coeffNum += 1;
+                            coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + gasTurbines.size() + i] = 1; // 燃气轮机状态变化
+                            coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + i] = 1; // 燃气轮机状态
+                            cplex.addGe(cplex.scalProd(x, coeff[coeffNum]), gasTurbines.get(i).getInitState());
+                            coeffNum += 1;
+                        }
+                    } else {
+                        for (int i = 0; i < gasTurbines.size(); i++) {
+                            coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + gasTurbines.size() + i] = 1; // 燃气轮机状态变化
+                            coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + i] = - 1; // 燃气轮机状态
+                            coeff[coeffNum][(j - 1) * periodVarNum + 3 * iceStorageAcs.size() + i] = 1; // 燃气轮机上一时刻状态
+                            cplex.addGe(cplex.scalProd(x, coeff[coeffNum]), 0);
+                            coeffNum += 1;
+                            coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + gasTurbines.size() + i] = 1; // 燃气轮机状态变化
+                            coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + i] = 1; // 燃气轮机状态
+                            coeff[coeffNum][(j - 1) * periodVarNum + 3 * iceStorageAcs.size() + i] = - 1; // 燃气轮机上一时刻状态
+                            cplex.addGe(cplex.scalProd(x, coeff[coeffNum]), 0);
+                            coeffNum += 1;
+                        }
                     }
 
                     // 燃气轮机爬坡率约束
@@ -292,6 +319,43 @@ public class SelfOptModel {
                                 2 * converters.size() + 1 + airCons.size() + i] = - gasBoilers.get(i).getMinH();
                         cplex.addGe(cplex.scalProd(x, coeff[coeffNum]), 0);
                         coeffNum += 1;
+                    }
+
+                    // 表示燃气锅炉状态变化的变量与燃气锅炉启停状态关系约束
+                    if (j == 0) {
+                        for (int i = 0; i < gasBoilers.size(); i++) {
+                            coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + 2 * storages.size() +
+                                    2 * converters.size() + 1 + airCons.size() + gasBoilers.size() + i] = 1; // 燃气锅炉状态变化
+                            coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() +
+                                    2 * storages.size() + 2 * converters.size() + 1 + airCons.size() + i] = - 1; // 燃气锅炉状态
+                            cplex.addGe(cplex.scalProd(x, coeff[coeffNum]), - gasBoilers.get(i).getInitState());
+                            coeffNum += 1;
+                            coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + 2 * storages.size() +
+                                    2 * converters.size() + 1 + airCons.size() + gasBoilers.size() + i] = 1; // 燃气锅炉状态变化
+                            coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() +
+                                    2 * storages.size() + 2 * converters.size() + 1 + airCons.size() + i] = 1; // 燃气锅炉状态
+                            cplex.addGe(cplex.scalProd(x, coeff[coeffNum]), gasBoilers.get(i).getInitState());
+                            coeffNum += 1;
+                        }
+                    } else {
+                        for (int i = 0; i < gasBoilers.size(); i++) {
+                            coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + 2 * storages.size() +
+                                    2 * converters.size() + 1 + airCons.size() + gasBoilers.size() + i] = 1; // 燃气锅炉状态变化
+                            coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() +
+                                    2 * storages.size() + 2 * converters.size() + 1 + airCons.size() + i] = - 1; // 燃气锅炉状态
+                            coeff[coeffNum][(j - 1) * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() +
+                                    2 * storages.size() + 2 * converters.size() + 1 + airCons.size() + i] = 1; // 燃气锅炉上一时刻状态
+                            cplex.addGe(cplex.scalProd(x, coeff[coeffNum]), 0);
+                            coeffNum += 1;
+                            coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + 2 * storages.size() +
+                                    2 * converters.size() + 1 + airCons.size() + gasBoilers.size() + i] = 1; // 燃气锅炉状态变化
+                            coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() +
+                                    2 * storages.size() + 2 * converters.size() + 1 + airCons.size() + i] = 1; // 燃气锅炉状态
+                            coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() +
+                                    2 * storages.size() + 2 * converters.size() + 1 + airCons.size() + i] = - 1; // 燃气锅炉上一时刻状态
+                            cplex.addGe(cplex.scalProd(x, coeff[coeffNum]), 0);
+                            coeffNum += 1;
+                        }
                     }
 
                     // 燃气锅炉爬坡率约束
@@ -426,7 +490,7 @@ public class SelfOptModel {
                 for (int j = 0; j < periodNum; j++) {
                     // 总热量约束
                     for (int i = 0; i < gasTurbines.size(); i++) {
-                        coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 2 * gasTurbines.size() + i] = (1 - gasTurbines.get(i).getEffe()) / gasTurbines.get(i).getEffe() * gasTurbines.get(i).getEffh();   // 燃气轮机中品味热
+                        coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 2 * gasTurbines.size() + i] = (1 - gasTurbines.get(i).getEffe()) / gasTurbines.get(i).getEffe();   // 燃气轮机中品味热和低品位热
                     }
                     for (int i = 0; i < gasBoilers.size(); i++) {
                         coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + 2 * storages.size() + 2 * converters.size() + 1 + airCons.size() + 2 * gasBoilers.size() + i] = 1;   // 燃气锅炉产热功率

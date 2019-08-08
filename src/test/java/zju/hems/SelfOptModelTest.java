@@ -30,7 +30,7 @@ public class SelfOptModelTest  extends TestCase {
         Converter converter = new Converter(0.95, 0.95);
         converters.add(converter);
         List<GasBoiler> gasBoilers = new ArrayList<>(1);
-        GasBoiler gasBoiler = new GasBoiler(0.04, 100, 0.85, 0, 1000, 500);
+        GasBoiler gasBoiler = new GasBoiler(0.04, 100, 0.85, 0, 1000, 500, 0);
         gasBoilers.add(gasBoiler);
         List<GasTurbine> gasTurbines = new ArrayList<>(1);
         GasTurbine gasTurbine = new GasTurbine(0.063, 0.33, 0.6, 200, 50, 1000, - 500, 500, 0);
@@ -46,8 +46,8 @@ public class SelfOptModelTest  extends TestCase {
         SteamLoad steamLoad = new SteamLoad(Lsteams, 0.8);
         steamLoads.add(steamLoad);
         List<Storage> storages = new ArrayList<>(3);
-        Storage storage = new Storage(0.005, 0.00075, 1250, 1250, 13000, 0.1, 0.9, 0.1, 0.5, 0.5, 0.0025, 0.95, 0.95);
         for (int i = 0; i < 3; i++) {
+            Storage storage = new Storage(0.005, 0.00075, 1250, 1250, 13000, 0.1, 0.9, 0.1, 0.5, 0.5, 0.0025, 0.95, 0.95);
             storages.add(storage);
         }
         User user = new User("1", absorptionChillers, airCons, converters, gasBoilers, gasTurbines, iceStorageAcs, photovoltaics, steamLoads, storages);
