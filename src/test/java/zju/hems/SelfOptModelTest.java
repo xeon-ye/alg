@@ -17,7 +17,7 @@ public class SelfOptModelTest  extends TestCase {
     double[] pvPowers = new double[periodNum];   // 光伏出力
     double[] Lsteams = new double[periodNum];   // 蒸汽负荷
 
-    public void testCase1() throws IOException {
+    public void testSelfOpt() throws IOException {
         InputStream inputStream = this.getClass().getResourceAsStream("/iesfiles/selfopt/input_with_cold.csv");
         readData(inputStream);
         List<AbsorptionChiller> absorptionChillers = new ArrayList<>(1);
@@ -46,7 +46,7 @@ public class SelfOptModelTest  extends TestCase {
         SteamLoad steamLoad = new SteamLoad(Lsteams, 0.8);
         steamLoads.add(steamLoad);
         List<Storage> storages = new ArrayList<>(3);
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < 2; i++) {
             Storage storage = new Storage(0.005, 0.00075, 1250, 1250, 13000, 0.1, 0.9, 0.1, 0.5, 0.5, 0.0025, 0.95, 0.95);
             storages.add(storage);
         }
@@ -55,19 +55,82 @@ public class SelfOptModelTest  extends TestCase {
         users.put(user.getUserId(), user);
         Microgrid microgrid = new Microgrid(users);
         Map<String, double[]> gatePowers = new HashMap<>();   // 用户关口功率
-        double[] gatePower = new double[96];
+        double[] gatePower = new double[periodNum];
         for (int i = 0; i < gatePower.length; i++) {
             gatePower[i] = 8000;
         }
         gatePowers.put(user.getUserId(), gatePower);
         SelfOptModel selfOptModel = new SelfOptModel(microgrid, periodNum, acLoad, dcLoad, coolingLoad, elecPrices, gasPrices, steamPrices, gatePowers);
-        selfOptModel.doSelfOpt();
+        selfOptModel.mgSelfOpt();
         Map<String, UserResult> microgridResult = selfOptModel.getMicrogridResult();
         for (UserResult userResult : microgridResult.values()) {
             System.out.println(userResult.getUserId() + "\t" + userResult.getStatus());
             if (userResult.getStatus().equals("Optimal")) {
                 System.out.println(userResult.getMinCost());
                 writeResult("D:\\user" + userResult.getUserId() + "Result_with_cold.csv", userResult);
+            }
+        }
+    }
+
+    public void testDemandResp() throws IOException {
+        InputStream inputStream = this.getClass().getResourceAsStream("/iesfiles/selfopt/input_with_cold.csv");
+        readData(inputStream);
+        List<AbsorptionChiller> absorptionChillers = new ArrayList<>(1);
+        AbsorptionChiller absorptionChiller = new AbsorptionChiller(0.00008, 0, 1000, 0.8);
+        absorptionChillers.add(absorptionChiller);
+        List<AirCon> airCons = new ArrayList<>(1);
+        AirCon airCon = new AirCon(0.0097, 1, 1.05, 0, 500, 4.3);
+        airCons.add(airCon);
+        List<Converter> converters = new ArrayList<>(1);
+        Converter converter = new Converter(0.95, 0.95);
+        converters.add(converter);
+        List<GasBoiler> gasBoilers = new ArrayList<>(1);
+        GasBoiler gasBoiler = new GasBoiler(0.04, 100, 0.85, 0, 1000, 500, 0);
+        gasBoilers.add(gasBoiler);
+        List<GasTurbine> gasTurbines = new ArrayList<>(1);
+        GasTurbine gasTurbine = new GasTurbine(0.063, 0.33, 0.6, 200, 50, 1000, - 500, 500, 0);
+        gasTurbines.add(gasTurbine);
+        List<IceStorageAc> iceStorageAcs = new ArrayList<>(1);
+        IceStorageAc iceStorageAc = new IceStorageAc(0.01, 1, 3, 3, 0.9, 1,
+                0.002, 500, 3000, 0.1, 0.95, 0.1, 1.05, 500, 500);
+        iceStorageAcs.add(iceStorageAc);
+        List<Photovoltaic> photovoltaics = new ArrayList<>(1);
+        Photovoltaic photovoltaic = new Photovoltaic(0.0005, pvPowers);
+        photovoltaics.add(photovoltaic);
+        List<SteamLoad> steamLoads = new ArrayList<>(1);
+        SteamLoad steamLoad = new SteamLoad(Lsteams, 0.8);
+        steamLoads.add(steamLoad);
+        List<Storage> storages = new ArrayList<>(3);
+        for (int i = 0; i < 2; i++) {
+            Storage storage = new Storage(0.005, 0.00075, 1250, 1250, 13000, 0.1, 0.9, 0.1, 0.5, 0.5, 0.0025, 0.95, 0.95);
+            storages.add(storage);
+        }
+        User user = new User("1", absorptionChillers, airCons, converters, gasBoilers, gasTurbines, iceStorageAcs, photovoltaics, steamLoads, storages);
+        Map<String, User> users = new HashMap<>();
+        users.put(user.getUserId(), user);
+        Microgrid microgrid = new Microgrid(users);
+        Map<String, double[]> gatePowers = new HashMap<>();   // 用户关口功率
+        int[] peakShaveTime = new int[periodNum];
+        for (int i = 72; i < 76; i++) {
+            peakShaveTime[i] = 1;
+        }
+        double[] gatePower = new double[periodNum];
+        for (int i = 0; i < gatePower.length; i++) {
+            gatePower[i] = 8000;
+        }
+        for (int i = 72; i < 76; i++) {
+            gatePower[i] = 3000;
+        }
+        gatePowers.put(user.getUserId(), gatePower);
+        SelfOptModel selfOptModel = new SelfOptModel(microgrid, periodNum, acLoad, dcLoad, coolingLoad, elecPrices, gasPrices, steamPrices, gatePowers);
+        selfOptModel.setPeakShaveTime(peakShaveTime);
+        selfOptModel.mgDemandResp();
+        Map<String, UserResult> microgridResult = selfOptModel.getMicrogridResult();
+        for (UserResult userResult : microgridResult.values()) {
+            System.out.println(userResult.getUserId() + "\t" + userResult.getStatus());
+            if (userResult.getStatus().equals("Optimal")) {
+                System.out.println(userResult.getMinCost());
+                writeResult("D:\\user" + userResult.getUserId() + "Result_DR.csv", userResult);
             }
         }
     }
