@@ -722,7 +722,7 @@ public class SelfOptModel {
                     2 * peakShaveTimeNum +
                     3 * periodNum][varNum];
 
-            // 设置变量上下限
+            // 设置变量上下限和类型
             for (int j = 0; j < periodNum; j++) {
                 int handledVarNum = 0;
                 for (int i = 0; i < iceStorageAcs.size(); i++) {

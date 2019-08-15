@@ -9,7 +9,7 @@ public class XMLparseTest  extends TestCase {
         ChangeDbData.createTables(dbFile);
         // 解析和存储发电计划
         String planFile = "C:/Users/Administrator/IdeaProjects/alg/src/test/resources/bpafiles/示范区BPA运行方式/PLANLOAD-20190614.xml";
-        PlanRw.parseAndSave("XJ1", "1", planFile, "d:/rsa.db");
+        PlanRw.parseAndSave("XJ1", "20180812", planFile, dbFile);
 
 //        String inputPfPath = "C:/Users/Administrator/IdeaProjects/alg/src/test/resources/bpafiles/示范区BPA运行方式/XIAOJIN.DAT";
 //        String outputPfPath = "d:/XIAOJIN.DAT";
