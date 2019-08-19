@@ -21,11 +21,13 @@ public class UserResult {
     List<double[]> gasTurbinesP;    // 燃气轮机产电功率
     List<double[]> storagesP;   // 储能充电功率(外部)
     List<double[]> convertersP;  // 变流器AC-DC交流侧功率
+    double[] Pin;   // 电网输入功率
     double[] purP; // 向电网购电功率
     List<double[]> airConsP;    // 中央空调耗电功率
     List<double[]> gasBoilersState; // 燃气锅炉启停状态
     List<double[]> gasBoilersH; // 燃气锅炉产热功率
     List<double[]> absorptionChillersH; // 吸收式制冷机耗热功率
+    double[] Hin;   // 园区输入热功率
     double[] purH; // 向园区购热功率
 
     public UserResult(String userId, String status) {
@@ -35,9 +37,9 @@ public class UserResult {
 
     public UserResult(String userId, String status, double minCost, List<double[]> frigesP, List<double[]> iceTanksP,
                       List<double[]> iceTanksQ, List<double[]> gasTurbinesState, List<double[]> gasTurbinesP,
-                      List<double[]> storagesP, List<double[]> convertersP, double[] purP, List<double[]> airConsP,
-                      List<double[]> gasBoilersState, List<double[]> gasBoilersH, List<double[]> absorptionChillersH,
-                      double[] purH) {
+                      List<double[]> storagesP, List<double[]> convertersP, double[] Pin, double[] purP,
+                      List<double[]> airConsP, List<double[]> gasBoilersState, List<double[]> gasBoilersH,
+                      List<double[]> absorptionChillersH, double[] Hin, double[] purH) {
         this.userId = userId;
         this.status = status;
         this.minCost = minCost;
@@ -48,11 +50,13 @@ public class UserResult {
         this.gasTurbinesP = gasTurbinesP;
         this.storagesP = storagesP;
         this.convertersP = convertersP;
+        this.Pin = Pin;
         this.purP = purP;
         this.airConsP = airConsP;
         this.gasBoilersState = gasBoilersState;
         this.gasBoilersH = gasBoilersH;
         this.absorptionChillersH = absorptionChillersH;
+        this.Hin = Hin;
         this.purH = purH;
     }
 
@@ -136,6 +140,14 @@ public class UserResult {
         this.convertersP = convertersP;
     }
 
+    public double[] getPin() {
+        return Pin;
+    }
+
+    public void setPin(double[] pin) {
+        Pin = pin;
+    }
+
     public double[] getPurP() {
         return purP;
     }
@@ -174,6 +186,14 @@ public class UserResult {
 
     public void setAbsorptionChillersH(List<double[]> absorptionChillersH) {
         this.absorptionChillersH = absorptionChillersH;
+    }
+
+    public double[] getHin() {
+        return Hin;
+    }
+
+    public void setHin(double[] hin) {
+        Hin = hin;
     }
 
     public double[] getPurH() {

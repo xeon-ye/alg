@@ -211,6 +211,56 @@ public class SelfOptModelTest  extends TestCase {
         }
     }
 
+    public void testDistDemandResp() throws IOException {
+        DemandRespModel demandRespModel = demandRespTestModel();
+        demandRespModel.mgSelfOpt();
+        Map<String, UserResult> selfOptResult = demandRespModel.getMicrogridResult();
+        System.out.println(selfOptResult.get("1").getMinCost());
+        System.out.println("---------自趋优计算结束---------");
+        demandRespModel.setSelfOptResult(selfOptResult);
+        Map<String, User> users = demandRespModel.getMicrogrid().getUsers();
+        // 原始关口功率
+        Map<String, double[]> origGatePowers = new HashMap<>();
+        for (String userId : users.keySet()) {
+            double[] ogGatePower = new double[periodNum];
+            for (int i = 0; i < periodNum; i++) {
+                ogGatePower[i] = demandRespModel.getGatePowers().get(userId)[i];
+            }
+            origGatePowers.put(userId, ogGatePower);
+        }
+        // 关口功率指令
+        int[] peakShaveTime = new int[periodNum];
+        for (int i = 72; i < 76; i++) {
+            peakShaveTime[i] = 1;
+        }
+        demandRespModel.setPeakShaveTime(peakShaveTime);
+        Map<String, double[]> insGatePowers = new HashMap<>();
+        for (String userId : users.keySet()) {
+            double[] insGatePower = new double[periodNum];
+            for (int i = 0; i < periodNum; i++) {
+                if (peakShaveTime[i] == 1) {
+                    insGatePower[i] = 3000;
+                } else {
+                    insGatePower[i] = origGatePowers.get(userId)[i];
+                }
+            }
+            insGatePowers.put(userId, insGatePower);
+        }
+        demandRespModel.setInsGatePowers(insGatePowers);
+        demandRespModel.calPeakShavePowers();   // 应削峰量
+        demandRespModel.setClearingPrice(3);
+        demandRespModel.mgDistDemandResp();
+        Map<String, UserResult> microgridResult = demandRespModel.getMicrogridResult();
+        for (String userId : microgridResult.keySet()) {
+            UserResult userResult = microgridResult.get(userId);
+            System.out.println(userResult.getUserId() + "\t" + userResult.getStatus());
+            if (userResult.getStatus().equals("Optimal")) {
+                System.out.println(userResult.getMinCost());
+                writeResult("D:\\user" + userResult.getUserId() + "Result_DR.csv", userResult);
+            }
+        }
+    }
+
     public void readData(InputStream inputStream) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
         String data;

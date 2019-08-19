@@ -609,6 +609,7 @@ public class SelfOptModel {
                     for (int i = 0; i < converters.size(); i++) {
                         convertersP.add(new double[periodNum]);
                     }
+                    double[] Pin = new double[periodNum];
                     double[] purP = new double[periodNum];
                     List<double[]> airConsP = new ArrayList<>(airCons.size());
                     for (int i = 0; i < airCons.size(); i++) {
@@ -624,6 +625,7 @@ public class SelfOptModel {
                     for (int i = 0; i < absorptionChillers.size(); i++) {
                         absorptionChillersH.add(new double[periodNum]);
                     }
+                    double[] Hin = new double[periodNum];
                     double[] purH = new double[periodNum];
                     for (int j = 0; j < periodNum; j++) {
                         for (int i = 0; i < iceStorageAcs.size(); i++) {
@@ -643,6 +645,7 @@ public class SelfOptModel {
                             convertersP.get(i)[j] = result[j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + 2 * storages.size() + i] -
                                     result[j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + 2 * storages.size() + converters.size() + i];
                         }
+                        Pin[j] = result[j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + 2 * storages.size() + 2 * converters.size()];
                         purP[j] = result[j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + 2 * storages.size() + 2 * converters.size() + 1];
                         for (int i = 0; i < airCons.size(); i++) {
                             airConsP.get(i)[j] = result[j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + 2 * storages.size() + 2 * converters.size() + 2 + i];
@@ -656,11 +659,14 @@ public class SelfOptModel {
                             absorptionChillersH.get(i)[j] = result[j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() +
                                     2 * storages.size() + 2 * converters.size() + 2 + airCons.size() + 3 * gasBoilers.size() + i];
                         }
+                        Hin[j] = result[j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + 2 * storages.size() +
+                                2 * converters.size() + 2 + airCons.size() + 3 * gasBoilers.size() + absorptionChillers.size()];
                         purH[j] = result[j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + 2 * storages.size() +
                                 2 * converters.size() + 2 + airCons.size() + 3 * gasBoilers.size() + absorptionChillers.size() + 1];
                     }
-                    UserResult userResult = new UserResult(user.getUserId(), cplex.getStatus().toString(), minCost, frigesP, iceTanksP, iceTanksQ,
-                            gasTurbinesState, gasTurbinesP, storagesP, convertersP, purP, airConsP, gasBoilersState, gasBoilersH, absorptionChillersH, purH);
+                    UserResult userResult = new UserResult(user.getUserId(), cplex.getStatus().toString(), minCost,
+                            frigesP, iceTanksP, iceTanksQ, gasTurbinesState, gasTurbinesP, storagesP, convertersP, Pin,
+                            purP, airConsP, gasBoilersState, gasBoilersH, absorptionChillersH, Hin, purH);
                     microgridResult.put(user.getUserId(), userResult);
                 } else {
                     UserResult userResult = new UserResult(user.getUserId(), cplex.getStatus().toString());
