@@ -119,7 +119,8 @@ public class SelfOptModelTest  extends TestCase {
         selfOptModel.mgSelfOpt();
         Map<String, UserResult> selfOptResult = selfOptModel.getMicrogridResult();
         System.out.println(selfOptResult.get("1").getMinCost());
-        System.out.println("------------------------");
+        System.out.println("---------自趋优计算结束---------");
+
         // 关口功率指令
         int[] peakShaveTime = new int[periodNum];
         for (int i = 72; i < 76; i++) {
@@ -138,9 +139,9 @@ public class SelfOptModelTest  extends TestCase {
         insGatePowers.put(user.getUserId(), insGatePower);
         selfOptModel.setInsGatePowers(insGatePowers);
         // 采样点数
-        int sampleNum = 20;
+        int sampleNum = 19;
         // 采样范围
-        double sampleRange = 2;
+        double sampleRange = 1.9;
         Map<String, double[]> increCosts = new HashMap<>(users.size());
         // 应削峰量
         Map<String, double[]> peakShavePowers = new HashMap<>(users.size());
