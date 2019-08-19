@@ -110,27 +110,90 @@ public class SelfOptModelTest  extends TestCase {
         users.put(user.getUserId(), user);
         Microgrid microgrid = new Microgrid(users);
         Map<String, double[]> gatePowers = new HashMap<>();   // 用户关口功率
+        double[] gatePower = new double[periodNum];
+        for (int i = 0; i < periodNum; i++) {
+            gatePower[i] = 8000;
+        }
+        gatePowers.put(user.getUserId(), gatePower);
+        SelfOptModel selfOptModel = new SelfOptModel(microgrid, periodNum, acLoad, dcLoad, coolingLoad, elecPrices, gasPrices, steamPrices, gatePowers);
+        selfOptModel.mgSelfOpt();
+        Map<String, UserResult> selfOptResult = selfOptModel.getMicrogridResult();
+        System.out.println(selfOptResult.get("1").getMinCost());
+        System.out.println("------------------------");
+        // 关口功率指令
         int[] peakShaveTime = new int[periodNum];
         for (int i = 72; i < 76; i++) {
             peakShaveTime[i] = 1;
         }
-        double[] gatePower = new double[periodNum];
-        for (int i = 0; i < gatePower.length; i++) {
-            gatePower[i] = 8000;
-        }
-        for (int i = 72; i < 76; i++) {
-            gatePower[i] = 3000;
-        }
-        gatePowers.put(user.getUserId(), gatePower);
-        SelfOptModel selfOptModel = new SelfOptModel(microgrid, periodNum, acLoad, dcLoad, coolingLoad, elecPrices, gasPrices, steamPrices, gatePowers);
         selfOptModel.setPeakShaveTime(peakShaveTime);
-        selfOptModel.mgDemandResp();
-        Map<String, UserResult> microgridResult = selfOptModel.getMicrogridResult();
-        for (UserResult userResult : microgridResult.values()) {
-            System.out.println(userResult.getUserId() + "\t" + userResult.getStatus());
-            if (userResult.getStatus().equals("Optimal")) {
-                System.out.println(userResult.getMinCost());
-                writeResult("D:\\user" + userResult.getUserId() + "Result_DR.csv", userResult);
+        Map<String, double[]> insGatePowers = new HashMap<>();
+        double[] insGatePower = new double[periodNum];
+        for (int i = 0; i < periodNum; i++) {
+            if (peakShaveTime[i] == 1) {
+                insGatePower[i] = 3000;
+            } else {
+                insGatePower[i] = gatePower[i];
+            }
+        }
+        insGatePowers.put(user.getUserId(), insGatePower);
+        selfOptModel.setInsGatePowers(insGatePowers);
+        // 采样点数
+        int sampleNum = 20;
+        // 采样范围
+        double sampleRange = 2;
+        Map<String, double[]> increCosts = new HashMap<>(users.size());
+        // 应削峰量
+        Map<String, double[]> peakShavePowers = new HashMap<>(users.size());
+        for (String userId : users.keySet()) {
+            increCosts.put(userId, new double[sampleNum]);
+            peakShavePowers.put(userId, new double[periodNum]);
+            double[] purP = selfOptResult.get(userId).getPurP();
+            for (int i = 0; i < periodNum; i++) {
+                if (peakShaveTime[i] == 1) {
+                    peakShavePowers.get(userId)[i] = purP[i] - selfOptModel.getInsGatePowers().get(userId)[i];
+                }
+            }
+        }
+        // 原始关口功率
+        Map<String, double[]> ogGatePowers = new HashMap<>();
+        for (String userId : users.keySet()) {
+            double[] ogGatePower = new double[periodNum];
+            for (int i = 0; i < periodNum; i++) {
+                ogGatePower[i] = selfOptModel.getGatePowers().get(userId)[i];
+            }
+            ogGatePowers.put(userId, ogGatePower);
+        }
+        for (int i = 0; i < sampleNum; i++) {
+            Map<String, double[]> newGatePowers = new HashMap<>();
+            for (String userId : selfOptResult.keySet()) {
+                double[] purP = selfOptResult.get(userId).getPurP();
+                double[] newGatePower = new double[periodNum];
+                for (int j = 0; j < periodNum; j++) {
+                    if (peakShaveTime[j] == 1) {
+                        newGatePower[j] = purP[j] - peakShavePowers.get(userId)[j] * sampleRange * (i + 1) / sampleNum;
+                    } else {
+                        newGatePower[j] = ogGatePowers.get(userId)[j];
+                    }
+                }
+                newGatePowers.put(userId, newGatePower);
+            }
+            selfOptModel.setGatePowers(newGatePowers);
+            selfOptModel.mgDemandResp();
+            Map<String, UserResult> microgridResult = selfOptModel.getMicrogridResult();
+            for (String userId : microgridResult.keySet()) {
+                UserResult userResult = microgridResult.get(userId);
+                System.out.println(userResult.getUserId() + "\t" + userResult.getStatus());
+                if (userResult.getStatus().equals("Optimal")) {
+                    System.out.println(userResult.getMinCost());
+                    writeResult("D:\\user" + userResult.getUserId() + "Result_DR.csv", userResult);
+                }
+                increCosts.get(userId)[i] = userResult.getMinCost() - selfOptResult.get(userId).getMinCost();
+            }
+        }
+        for (String userId : users.keySet()) {
+            double[] increCost = increCosts.get(userId);
+            for (int i = 0; i < sampleNum; i++) {
+                System.out.println(sampleRange * (i + 1) / sampleNum + "," + increCost[i]);
             }
         }
     }

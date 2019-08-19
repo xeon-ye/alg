@@ -25,6 +25,7 @@ public class SelfOptModel {
     double[] steamPrices;    // 园区CHP蒸汽价格
     Map<String, double[]> gatePowers;   // 用户关口功率
     int[] peakShaveTime;   // 削峰时段
+    Map<String, double[]> insGatePowers;   // 用户关口功率
 
     Map<String, UserResult> microgridResult;
 
@@ -1169,23 +1170,27 @@ public class SelfOptModel {
 
             // 关口功率约束
             for (int j = 0; j < periodNum; j++) {
-                if (peakShaveTime[j] == 0) {
-                    // 非削峰时段关口功率约束
-                    coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + 2 * storages.size() + 2 * converters.size()] = 1;    // 电网输入电功率
-                    cplex.addLe(cplex.scalProd(x, coeff[coeffNum]), gatePowers.get(user.getUserId())[j]);
-                    coeffNum += 1;
-                } else {
-                    // 削峰功率上限约束
-                    coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + 2 * storages.size() + 2 * converters.size()] = 1;    // 电网输入电功率
-                    cplex.addGe(cplex.scalProd(x, coeff[coeffNum]), gatePowers.get(user.getUserId())[j]);
-                    coeffNum += 1;
-                }
+                // 削峰量达到要求约束
+                coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + 2 * storages.size() + 2 * converters.size()] = 1;    // 电网输入电功率
+                cplex.addLe(cplex.scalProd(x, coeff[coeffNum]), gatePowers.get(user.getUserId())[j]);
+                coeffNum += 1;
+//                if (peakShaveTime[j] == 0) {
+//                    // 非削峰时段关口功率约束
+//                    coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + 2 * storages.size() + 2 * converters.size()] = 1;    // 电网输入电功率
+//                    cplex.addLe(cplex.scalProd(x, coeff[coeffNum]), gatePowers.get(user.getUserId())[j]);
+//                    coeffNum += 1;
+//                } else {
+//                    // 削峰功率上限约束
+//                    coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + 2 * storages.size() + 2 * converters.size()] = 1;    // 电网输入电功率
+//                    cplex.addGe(cplex.scalProd(x, coeff[coeffNum]), gatePowers.get(user.getUserId())[j]);
+//                    coeffNum += 1;
+//                }
 
                 // |P-Pref|约束
                 if (peakShaveTime[j] == 1) {
                     coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + 2 * storages.size() + 2 * converters.size() + 2] = 1;
                     coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + 2 * storages.size() + 2 * converters.size()] = -1;
-                    cplex.addLe(cplex.scalProd(x, coeff[coeffNum]), -gatePowers.get(user.getUserId())[j]);
+                    cplex.addLe(cplex.scalProd(x, coeff[coeffNum]), - gatePowers.get(user.getUserId())[j]);
                     coeffNum += 1;
                     coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + 2 * storages.size() + 2 * converters.size() + 2] = 1;
                     coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + 2 * storages.size() + 2 * converters.size()] = 1;
@@ -1252,7 +1257,6 @@ public class SelfOptModel {
                 if (cplex.getStatus() == IloCplex.Status.Optimal) {
                     double[] result = cplex.getValues(x);
                     double minCost = 0;
-                    // 加上光伏运行成本
                     for (int j = 0; j < periodNum; j++) {
                         int handledVarNum = 0;
                         for (int i = 0; i < iceStorageAcs.size(); i++) {
@@ -1278,6 +1282,7 @@ public class SelfOptModel {
                         handledVarNum += 1;
                         minCost += result[j * periodVarNum + handledVarNum] * elecPrices[j] * t; // 购电成本
 
+                        handledVarNum += 1;
                         handledVarNum += 1;
                         for (int i = 0; i < airCons.size(); i++) {
                             minCost += result[j * periodVarNum + handledVarNum + i] * airCons.get(i).getCoper() * t;   // 运维成本
@@ -1391,15 +1396,31 @@ public class SelfOptModel {
         }
     }
 
-    public Map<String, UserResult> getMicrogridResult() {
-        return microgridResult;
-    }
-
     public int[] getPeakShaveTime() {
         return peakShaveTime;
     }
 
     public void setPeakShaveTime(int[] peakShaveTime) {
         this.peakShaveTime = peakShaveTime;
+    }
+
+    public Map<String, double[]> getGatePowers() {
+        return gatePowers;
+    }
+
+    public void setGatePowers(Map<String, double[]> gatePowers) {
+        this.gatePowers = gatePowers;
+    }
+
+    public Map<String, double[]> getInsGatePowers() {
+        return insGatePowers;
+    }
+
+    public void setInsGatePowers(Map<String, double[]> insGatePowers) {
+        this.insGatePowers = insGatePowers;
+    }
+
+    public Map<String, UserResult> getMicrogridResult() {
+        return microgridResult;
     }
 }
