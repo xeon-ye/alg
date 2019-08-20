@@ -211,13 +211,13 @@ public class SelfOptModelTest  extends TestCase {
         }
     }
 
-    public void testDistDemandResp() throws IOException {
+    public void testCenDistDemandResp() throws IOException {
         DemandRespModel demandRespModel = demandRespTestModel();
         demandRespModel.mgSelfOpt();
         Map<String, UserResult> selfOptResult = demandRespModel.getMicrogridResult();
         System.out.println(selfOptResult.get("1").getMinCost());
-        System.out.println("---------自趋优计算结束---------");
         demandRespModel.setSelfOptResult(selfOptResult);
+        System.out.println("---------自趋优计算结束---------");
         Map<String, User> users = demandRespModel.getMicrogrid().getUsers();
         // 原始关口功率
         Map<String, double[]> origGatePowers = new HashMap<>();
@@ -248,16 +248,34 @@ public class SelfOptModelTest  extends TestCase {
         }
         demandRespModel.setInsGatePowers(insGatePowers);
         demandRespModel.calPeakShavePowers();   // 应削峰量
-        demandRespModel.setClearingPrice(3);
-        demandRespModel.mgDistDemandResp();
+        System.out.println("---------100%需求响应计算开始---------");
+        demandRespModel.setGatePowers(insGatePowers);
+        demandRespModel.mgDemandResp();
+        demandRespModel.setDemandRespResult(demandRespModel.getMicrogridResult());
+        demandRespModel.setGatePowers(origGatePowers);
+        System.out.println("---------100%需求响应计算结束---------");
+        double clearingPrice = 0.0302;
+        demandRespModel.setClearingPrice(clearingPrice);
+        demandRespModel.mgCenDistDemandResp();
         Map<String, UserResult> microgridResult = demandRespModel.getMicrogridResult();
+        Map<String, Double> peakShaveRatios = demandRespModel.getPeakShaveRatios();
         for (String userId : microgridResult.keySet()) {
             UserResult userResult = microgridResult.get(userId);
-            System.out.println(userResult.getUserId() + "\t" + userResult.getStatus());
+            System.out.println(userId + "\t" + userResult.getStatus());
             if (userResult.getStatus().equals("Optimal")) {
                 System.out.println(userResult.getMinCost());
-                writeResult("D:\\user" + userResult.getUserId() + "Result_DR.csv", userResult);
+                System.out.println(peakShaveRatios.get(userId));
+                writeResult("D:\\user" + userId + "Result_DR.csv", userResult);
             }
+        }
+        System.out.println("---------分布式需求响应计算结束---------");
+        List<Offer> offers = demandRespModel.getOffers();
+        ClearingModel clearingModel = new ClearingModel(offers, 0.0302);
+        clearingModel.clearing();
+        Map<String, Double> bidRatios = clearingModel.getBidRatios();
+        System.out.println(clearingModel.getClearingPrice());
+        for (String key : bidRatios.keySet()) {
+            System.out.println(key + "\t" + bidRatios.get(key));
         }
     }
 
