@@ -37,9 +37,9 @@ public class SoFileLoader {
                 writeSoFile("/win32/libSym.dll", "libSym.dll");
                 writeSoFile("/win32/libBonmin.dll", "libBonmin.dll");
 				// Only available for 64-bit runtime.
-   				writeSoFile("/win32/libBonmin.dll", "cusolver64_10.dll");
-                writeSoFile("/win32/libBonmin.dll", "cusparse64_10.dll");
-                writeSoFile("/win32/libBonmin.dll", "expression_forest.dll");
+                writeSoFile("/win32/cusolver64_10.dll", "cusolver64_10.dll");
+                writeSoFile("/win32/cusparse64_10.dll", "cusparse64_10.dll");
+                writeSoFile("/win32/expression_forest.dll", "expression_forest.dll");
                 //SuperLU库
                 //writeSoFile("/win32/libsuperlu_4.3.a", "libsuperlu_4.3.a");
 
