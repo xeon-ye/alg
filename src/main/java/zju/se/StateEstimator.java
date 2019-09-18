@@ -202,7 +202,7 @@ public class StateEstimator implements SeConstants, MeasTypeCons {
 
         long start = System.currentTimeMillis();
         alg.doSeAnalyse();
-        log.debug("状态估计迭代过程用时: " + (System.currentTimeMillis() - start) + "ms");
+        log.info("状态估计迭代过程用时: " + (System.currentTimeMillis() - start) + "ms");
 
         //MeasureUtil.setEstValue(sm, r, Y);
         //showInfo(initial, r, sm);

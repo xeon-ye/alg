@@ -110,7 +110,7 @@ public class NewtonSolverTest extends TestCase {
                 return false;
             }
         });
-        assertTrue(solver.solveWls());
+        assertTrue(solver.solveWls(false));
         assertEquals(3.5, state.getValue(0), 1e-4);
         assertEquals(1.4, state.getValue(1), 1e-4);
     }

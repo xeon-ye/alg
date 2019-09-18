@@ -213,7 +213,21 @@ public class ASparseMatrixLink2D extends ASparseMatrixLink implements Serializab
             }
         }
     }
-
+    /**
+     * <br>计算  Ax = b,使用dgssvx引擎, solver2和solve3配合适合多次计算，而A的结构不变，只是值变化的情况</br>
+     * <br>solve2是第一次调用时使用，perm_c和etree用于存储第一次对A进行LU分解的结构信息，在cpp中进行赋值</br>
+     *
+     * @param m      A的行数
+     * @param n      A的列数
+     * @param nnz    A的非零元个数
+     * @param a      A的非零元的数值
+     * @param asub   A的非零元行号
+     * @param xa     xa的第i个元素表示前i行共有多少个非零元
+     * @param b      向量b
+     * @param perm_c 用于存储A分解后的信息
+     * @param etree  用于存储A分解后的信息
+     * @return 计算结果x
+     */
     public void getSluStrucNC(double[] a, int[] asub, int[] xa) {
         xa[0] = 0;
         for (int i = 1; i < getN() + 1; i++)

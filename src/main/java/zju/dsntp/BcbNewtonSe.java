@@ -55,7 +55,7 @@ public class BcbNewtonSe extends AbstractSeAlg implements NewtonWlsModel {
 
         NewtonSolver solver = new NewtonSolver();
         solver.setModel(this);
-        setConverged(solver.solveWls());
+        setConverged(solver.solveWls(false));
         setIterNum(solver.getIterNum());
         setTimeUsed(System.currentTimeMillis() - start);
     }

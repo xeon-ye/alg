@@ -85,7 +85,7 @@ public class NewtonSolver {
             start = System.nanoTime();
             //-----  evaluate jacobian  -----
             left = model.getJocobian(state);
-//            log.debug("Time used for forming jocobian matrix J : " + (System.nanoTime() - start) / 1000 + "us");
+            // log.info("Time used for forming jocobian matrix J : " + (System.nanoTime() - start) / 1000 + "us");
             if (linearSolver == LINEAR_SOLVER_COLT) {
                 //LUDecompositionQuick luSolver = new LUDecompositionQuick(1e-6);
                 LUDecompositionQuick solver = new LUDecompositionQuick();
@@ -116,7 +116,7 @@ public class NewtonSolver {
                     sluMTSolver.solve(jacStruc, left, result);
                 }
             }
-//            log.debug("计算Jx=b用时: " + (System.nanoTime() - start) / 1000 + " us");
+            log.info("计算Jx=b用时: " + (System.nanoTime() - start) / 1000 + " us");
             //check for convergence
             double max = 0;
             int columns = left.columns();
@@ -137,7 +137,7 @@ public class NewtonSolver {
      *
      * @return 是否收敛
      */
-    public boolean solveWls() {
+    public boolean solveWls(boolean useCuda) {
         iterNum = 0;
         state = model.getInitial();
         //量测值
@@ -242,11 +242,23 @@ public class NewtonSolver {
                 ASparseMatrixLink2D gainStruc = new ASparseMatrixLink2D(left.rows(), left.columns(), left.cardinality());
                 ColtMatrixUtil.toMyMatrix(left, gainStruc);
                 //第一次求解
-                double[] r = sluSolver.solve2(gainStruc, result.toArray(), true);
-                result.assign(r);
+                if (useCuda) {
+                    double[] r = sluSolver.solveCudaGPU(gainStruc, result.toArray(), true);
+                    result.assign(r);
+                } else {
+                    double[] r = sluSolver.solve2(gainStruc, result.toArray(), true);
+                    result.assign(r);
+                }
             } else {
-                double[] r = sluSolver.solve2(left, result.toArray());
-                result.assign(r);
+                if (useCuda) {
+                    ASparseMatrixLink2D gainStruc = new ASparseMatrixLink2D(left.rows(), left.columns(), left.cardinality());
+                    ColtMatrixUtil.toMyMatrix(left, gainStruc);
+                    double[] r = sluSolver.solveCudaGPU(gainStruc, result.toArray(), true);
+                    result.assign(r);
+                } else {
+                    double[] r = sluSolver.solve2(left, result.toArray());
+                    result.assign(r);
+                }
             }
             log.debug("Solve Ax = b time used: " + (System.currentTimeMillis() - start) + " ms");
 

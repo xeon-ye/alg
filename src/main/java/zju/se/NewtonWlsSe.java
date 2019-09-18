@@ -98,7 +98,7 @@ public class NewtonWlsSe extends AbstractSeAlg implements NewtonWlsModel {
 
         NewtonSolver solver = new NewtonSolver();
         solver.setModel(this);
-        setConverged(solver.solveWls());
+        setConverged(solver.solveWls(true));
         setIterNum(solver.getIterNum());
         setTimeUsed(System.currentTimeMillis() - start);
     }

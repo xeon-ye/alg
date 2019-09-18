@@ -2,6 +2,7 @@ package jpscpu;
 
 import cern.colt.matrix.DoubleMatrix1D;
 import cern.colt.matrix.DoubleMatrix2D;
+import zju.matrix.ASparseMatrixLink;
 import zju.matrix.ASparseMatrixLink2D;
 import zju.util.ColtMatrixUtil;
 
@@ -47,7 +48,7 @@ public class LinearSolver {
      * @param nnz  A的非零元个数
      * @param a    A的非零元的数值
      * @param asub A的非零元行号
-     * @param xa   xa的第i个元素表示前i行共有多少个非零元
+     * @param xa   xa的第i个元素表示前i列共有多少个非零元
      * @param b    向量b
      * @return 计算结果x
      */
@@ -61,7 +62,7 @@ public class LinearSolver {
      * @param nnz  A的非零元个数
      * @param a    A的非零元的数值
      * @param asub A的非零元行号
-     * @param xa   xa的第i个元素表示前i行共有多少个非零元
+     * @param xa   xa的第i个元素表示前i列共有多少个非零元
      * @param b    向量b
      * @return 计算结果x
      */
@@ -76,7 +77,7 @@ public class LinearSolver {
      * @param nnz    A的非零元个数
      * @param a      A的非零元的数值
      * @param asub   A的非零元行号
-     * @param xa     xa的第i个元素表示前i行共有多少个非零元
+     * @param xa     xa的第i个元素表示前i列共有多少个非零元
      * @param b      向量b
      * @param perm_c 用于存储A分解后的信息
      * @param etree  用于存储A分解后的信息
@@ -93,7 +94,7 @@ public class LinearSolver {
      * @param nnz    A的非零元个数
      * @param a      A的非零元的数值
      * @param asub   A的非零元行号
-     * @param xa     xa的第i个元素表示前i行共有多少个非零元
+     * @param xa     xa的第i个元素表示前i列共有多少个非零元
      * @param b      向量b
      * @param perm_c 用于存储A分解后的信息
      * @param etree  用于存储A分解后的信息
@@ -110,7 +111,7 @@ public class LinearSolver {
      * @param nnz    A的非零元个数
      * @param a      A的非零元的数值
      * @param asub   A的非零元行号
-     * @param xa     xa的第i个元素表示前i行共有多少个非零元
+     * @param xa     xa的第i个元素表示前i列共有多少个非零元
      * @param b      向量b
      * @param perm_c 用于存储A分解后的信息
      * @param etree  用于存储A分解后的信息
@@ -129,7 +130,7 @@ public class LinearSolver {
      * @param nnz    A的非零元个数
      * @param a      A的非零元的数值
      * @param asub   A的非零元行号
-     * @param xa     xa的第i个元素表示前i行共有多少个非零元
+     * @param xa     xa的第i个元素表示前i列共有多少个非零元
      * @param b      向量b
      * @param perm_c 用于存储A分解后的信息
      * @param etree  用于存储A分解后的信息
@@ -161,6 +162,64 @@ public class LinearSolver {
     private native int solveMlpSym(int n, int m, double objValue[], double columnLower[], double columnUpper[],
                                    double rowLower[], double rowUpper[], double element[],
                                    int column[], int starts[], int whichInt[], double[] result);
+
+    /**
+     * <br>计算  Ax = b,使用CUDA GPU加速
+     *
+     * @param m      A的行数
+     * @param n      A的列数
+     * @param nnz    A的非零元个数
+     * @param csrValA      A的非零元的数值
+     * @param csrColIndA   A的非零元列号
+     * @param csrRowPtrA     xa的第i个元素表示前i行共有多少个非零元
+     * @param b      向量b
+     * @param tolerance 迭代收敛条件
+     * @return 计算结果x
+     */
+    /**
+     * <br>计算  Ax = b,使用dgssvx引擎, solver2和solve3配合适合多次计算，而A的结构不变，只是值变化的情况</br>
+     * <br>solve2是第一次调用时使用，perm_c和etree用于存储第一次对A进行LU分解的结构信息，在cpp中进行赋值</br>
+     *
+     * @param m      A的行数
+     * @param n      A的列数
+     * @param nnz    A的非零元个数
+     * @param a      A的非零元的数值
+     * @param asub   A的非零元行号
+     * @param xa     xa的第i个元素表示前i列共有多少个非零元
+     * @param b      向量b
+     * @param perm_c 用于存储A分解后的信息
+     * @param etree  用于存储A分解后的信息
+     * @return 计算结果x
+     */
+    private native double[] solveCudaGPU(int m, int n, int nnz, double[] csrValA, int[] csrColIndA, int[] csrRowPtrA, double[] b, double tolerance);
+
+
+    /**
+     * 对于Ax=b, A的结构不变且需要多次求解的问题
+     *
+     * @param left        矩阵A
+     * @param b           向量b
+     * @param isFirstTime 是否是第一次计算
+     * @return x
+     */
+    public double[] solveCudaGPU(ASparseMatrixLink2D left, double[] b, boolean isFirstTime) {
+        ASparseMatrixLink csrLeft = left.transpose();
+        m = left.getM();
+        n = left.getN();
+        nnz = left.getVA().size();
+        // 获得A矩阵转置阵的CSC表示，即为A矩阵的CSR表示
+        a = new double[csrLeft.getVA().size()];
+        asub = new int[csrLeft.getVA().size()];
+        xa = new int[csrLeft.getN() + 1];
+        left.getSluStrucNC(a, asub, xa);
+        return solveCudaGPU(m, n, nnz, a, asub, xa, b, 1e-3);
+//        if (isFirstTime) {
+//
+//        } else {
+//            left.getSluStrucNC(a);
+//            return solveCudaGPU(m, n, nnz, a, asub, xa, b, 1e-5);
+//        }
+    }
 
     /**
      * 求解Ax = b, 求解结果存储在right中，第一次求解可以调用该方法

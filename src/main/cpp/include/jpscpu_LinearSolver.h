@@ -11,6 +11,10 @@ extern "C" {
 #define jpscpu_LinearSolver_SUPERLU_DRIVE_0 0L
 #undef jpscpu_LinearSolver_SUPERLU_DRIVE_1
 #define jpscpu_LinearSolver_SUPERLU_DRIVE_1 1L
+#undef jpscpu_LinearSolver_MLP_DRIVE_CBC
+#define jpscpu_LinearSolver_MLP_DRIVE_CBC 2L
+#undef jpscpu_LinearSolver_MLP_DRIVE_SYM
+#define jpscpu_LinearSolver_MLP_DRIVE_SYM 3L
 /*
  * Class:     jpscpu_LinearSolver
  * Method:    solve0
@@ -59,13 +63,29 @@ JNIEXPORT jdoubleArray JNICALL Java_jpscpu_LinearSolver_solve4
 JNIEXPORT jdoubleArray JNICALL Java_jpscpu_LinearSolver_solve5
   (JNIEnv *, jobject, jint, jint, jint, jdoubleArray, jintArray, jintArray, jdoubleArray, jintArray, jintArray, jintArray, jdoubleArray, jdoubleArray, jint, jint, jdoubleArray, jintArray, jintArray, jintArray, jintArray, jintArray, jint, jdoubleArray, jintArray, jintArray, jintArray);
 
+/*
+ * Class:     jpscpu_LinearSolver
+ * Method:    solveMlpCbc
+ * Signature: (II[D[D[D[D[D[D[I[I[I[D)I
+ */
 JNIEXPORT jint JNICALL Java_jpscpu_LinearSolver_solveMlpCbc
-  (JNIEnv *, jobject, jint, jint, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray,
-  jintArray, jintArray, jintArray, jdoubleArray);
+  (JNIEnv *, jobject, jint, jint, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jintArray, jintArray, jintArray, jdoubleArray);
 
+/*
+ * Class:     jpscpu_LinearSolver
+ * Method:    solveMlpSym
+ * Signature: (II[D[D[D[D[D[D[I[I[I[D)I
+ */
 JNIEXPORT jint JNICALL Java_jpscpu_LinearSolver_solveMlpSym
-  (JNIEnv *, jobject, jint, jint, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray,
-  jintArray, jintArray, jintArray, jdoubleArray);
+  (JNIEnv *, jobject, jint, jint, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jintArray, jintArray, jintArray, jdoubleArray);
+
+/*
+ * Class:     jpscpu_LinearSolver
+ * Method:    solveCudaGPU
+ * Signature: (III[D[I[I[DD)[D
+ */
+JNIEXPORT jdoubleArray JNICALL Java_jpscpu_LinearSolver_solveCudaGPU
+  (JNIEnv *, jobject, jint, jint, jint, jdoubleArray, jintArray, jintArray, jdoubleArray, jdouble);
 
 #ifdef __cplusplus
 }
