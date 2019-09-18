@@ -17,7 +17,7 @@ public class BpaSwiOutResultRw {
         SqliteDb sqliteDb = new SqliteDb(dbFile);
         String TABLE_DATA_NAME = "MonitorData";
         String initSql = "CREATE TABLE "  + TABLE_DATA_NAME + " (" +
-                " calendar     varchar(8) NOT NULL," +
+                " calendar     varchar(10) NOT NULL," +
                 " time              decimal(7,3) NULL, " +
                 " busName1     varchar(8) NOT NULL," +
                 " baseKv1              decimal(4,3) NULL, " +
@@ -41,7 +41,7 @@ public class BpaSwiOutResultRw {
 
         TABLE_DATA_NAME = "Damping";
         initSql = "CREATE TABLE "  + TABLE_DATA_NAME + " (" +
-                " calendar     varchar(8) NOT NULL," +
+                " calendar     varchar(10) NOT NULL," +
                 " busName1     varchar(8) NOT NULL," +
                 " baseKv1          decimal(6,3)     NULL, " +
                 " busName2     varchar(8) NOT NULL," +

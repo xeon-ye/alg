@@ -13,6 +13,7 @@ public class BpaSwiModelRw {
         SqliteDb sqliteDb = new SqliteDb(dbFile);
         String TABLE_DATA_NAME = "Generator";
         String initSql = "CREATE TABLE "  + TABLE_DATA_NAME + " (" +
+                " psId     varchar(10) NOT NULL," +
                 " type     varchar(3) NOT NULL," +
                 " busName     varchar(8) NOT NULL," +
                 " baseKv              decimal(4,3) NOT NULL, " +
@@ -37,6 +38,7 @@ public class BpaSwiModelRw {
 
         TABLE_DATA_NAME = "GeneratorDW";
         initSql = "CREATE TABLE "  + TABLE_DATA_NAME + " (" +
+                " psId     varchar(10) NOT NULL," +
                 " type     varchar(3) NOT NULL," +
                 " busName     varchar(8) NOT NULL," +
                 " baseKv              decimal(4,3) NOT NULL, " +
@@ -54,6 +56,7 @@ public class BpaSwiModelRw {
 
         TABLE_DATA_NAME = "Exciter";
         initSql = "CREATE TABLE "  + TABLE_DATA_NAME + " (" +
+                " psId     varchar(10) NOT NULL," +
                 " type     varchar(3) NOT NULL," +
                 " busName     varchar(8) NOT NULL," +
                 " baseKv              decimal(4,3) NOT NULL, " +
@@ -100,6 +103,7 @@ public class BpaSwiModelRw {
 
         TABLE_DATA_NAME = "ExciterExtraInfo";
         initSql = "CREATE TABLE "  + TABLE_DATA_NAME + " (" +
+                " psId     varchar(10) NOT NULL," +
                 " type     varchar(3) NOT NULL," +
                 " busName     varchar(8) NOT NULL," +
                 " baseKv              decimal(4,3) NOT NULL, " +
@@ -126,6 +130,7 @@ public class BpaSwiModelRw {
 
         TABLE_DATA_NAME = "PSS";
         initSql = "CREATE TABLE "  + TABLE_DATA_NAME + " (" +
+                " psId     varchar(10) NOT NULL," +
                 " type     varchar(3) NOT NULL," +
                 " genName     varchar(8) NOT NULL," +
                 " baseKv              decimal(4,1) NOT NULL, " +
@@ -166,6 +171,7 @@ public class BpaSwiModelRw {
 
         TABLE_DATA_NAME = "PSSExtraInfo";
         initSql = "CREATE TABLE "  + TABLE_DATA_NAME + " (" +
+                " psId     varchar(10) NOT NULL," +
                 " type     varchar(3) NOT NULL," +
                 " genName     varchar(8) NOT NULL," +
                 " baseKv              decimal(4,1) NOT NULL, " +
@@ -189,6 +195,7 @@ public class BpaSwiModelRw {
 
         TABLE_DATA_NAME = "Governor";
         initSql = "CREATE TABLE "  + TABLE_DATA_NAME + " (" +
+                " psId     varchar(10) NOT NULL," +
                 " type     varchar(3) NOT NULL," +
                 " genName     varchar(8) NOT NULL," +
                 " baseKv              decimal(4,1) NOT NULL, " +
@@ -213,6 +220,7 @@ public class BpaSwiModelRw {
 
         TABLE_DATA_NAME = "GovernorExtraInfo";
         initSql = "CREATE TABLE "  + TABLE_DATA_NAME + " (" +
+                " psId     varchar(10) NOT NULL," +
                 " type     varchar(3) NOT NULL," +
                 " genName     varchar(8) NOT NULL," +
                 " baseKv              decimal(4,1) NOT NULL, " +
@@ -231,6 +239,7 @@ public class BpaSwiModelRw {
 
         TABLE_DATA_NAME = "PrimeMover";
         initSql = "CREATE TABLE "  + TABLE_DATA_NAME + " (" +
+                " psId     varchar(10) NOT NULL," +
                 " type     varchar(3) NOT NULL," +
                 " busName     varchar(8) NOT NULL," +
                 " baseKv              decimal(4,1) NOT NULL, " +
@@ -250,6 +259,7 @@ public class BpaSwiModelRw {
 
         TABLE_DATA_NAME = "PV";
         initSql = "CREATE TABLE "  + TABLE_DATA_NAME + " (" +
+                " psId     varchar(10) NOT NULL," +
                 " type     varchar(3) NOT NULL," +
                 " busName     varchar(8) NOT NULL," +
                 " baseKv              decimal(4,1) NOT NULL, " +
@@ -267,6 +277,7 @@ public class BpaSwiModelRw {
 
         TABLE_DATA_NAME = "BC";
         initSql = "CREATE TABLE "  + TABLE_DATA_NAME + " (" +
+                " psId     varchar(10) NOT NULL," +
                 " type     varchar(3) NOT NULL," +
                 " busName     varchar(8) NOT NULL," +
                 " baseKv              decimal(4,1) NOT NULL, " +
@@ -290,6 +301,7 @@ public class BpaSwiModelRw {
 
         TABLE_DATA_NAME = "BCExtraInfo";
         initSql = "CREATE TABLE "  + TABLE_DATA_NAME + " (" +
+                " psId     varchar(10) NOT NULL," +
                 " type     varchar(3) NOT NULL," +
                 " busName     varchar(8) NOT NULL," +
                 " baseKv              decimal(4,1) NOT NULL, " +
@@ -308,6 +320,7 @@ public class BpaSwiModelRw {
 
         TABLE_DATA_NAME = "Servo";
         initSql = "CREATE TABLE "  + TABLE_DATA_NAME + " (" +
+                " psId     varchar(10) NOT NULL," +
                 " type     varchar(3) NOT NULL," +
                 " genName     varchar(8) NOT NULL," +
                 " baseKv              decimal(4,1) NOT NULL, " +
@@ -332,6 +345,7 @@ public class BpaSwiModelRw {
 
         TABLE_DATA_NAME = "Load";
         initSql = "CREATE TABLE "  + TABLE_DATA_NAME + " (" +
+                " psId     varchar(10) NOT NULL," +
                 " type     varchar(3) NOT NULL," +
                 " chgCode     varchar(1) NULL," +
                 " busName     varchar(8) NULL," +
@@ -377,6 +391,7 @@ public class BpaSwiModelRw {
 
         TABLE_DATA_NAME = "ShortCircuitFault";
         initSql = "CREATE TABLE "  + TABLE_DATA_NAME + " (" +
+                " psId     varchar(10) NOT NULL," +
                 " type     varchar(3) NOT NULL," +
                 " busASign     varchar(1) NULL," +
                 " busAName     varchar(8) NOT NULL," +
@@ -395,6 +410,7 @@ public class BpaSwiModelRw {
 
         TABLE_DATA_NAME = "FFCard";
         initSql = "CREATE TABLE "  + TABLE_DATA_NAME + " (" +
+                " psId     varchar(10) NOT NULL," +
                 " type     varchar(2) NOT NULL," +
                 " t              decimal(3,0) NOT NULL, " +
                 " dt     decimal(3,1) NULL," +
@@ -427,8 +443,32 @@ public class BpaSwiModelRw {
                 ")";
         sqliteDb.initDb(initSql);
 
+        TABLE_DATA_NAME = "F0Card";
+        initSql = "CREATE TABLE "  + TABLE_DATA_NAME + " (" +
+                " psId     varchar(10) NOT NULL," +
+                " type     varchar(2) NOT NULL," +
+                " ig              INTEGER NULL, " +
+                " ia              INTEGER NULL, " +
+                " genName1     varchar(8) NOT NULL," +
+                " genBaseKv1              decimal(4,1) NOT NULL, " +
+                " id1     varchar(1) NOT NULL," +
+                " genName2     varchar(8) NOT NULL," +
+                " genBaseKv2              decimal(4,1) NOT NULL, " +
+                " id2     varchar(1) NOT NULL," +
+                " amax     decimal(5,0) NULL," +
+                " amin              decimal(5,0) NULL, " +
+                " iv              INTEGER NULL, " +
+                " busName1     varchar(8) NOT NULL," +
+                " busBaseKv1              decimal(4,1) NOT NULL, " +
+                " iF              INTEGER NULL, " +
+                " busName2     varchar(8) NOT NULL," +
+                " busBaseKv2              decimal(4,1) NOT NULL " +
+                ")";
+        sqliteDb.initDb(initSql);
+
         TABLE_DATA_NAME = "FLTCard";
         initSql = "CREATE TABLE "  + TABLE_DATA_NAME + " (" +
+                " psId     varchar(10) NOT NULL," +
                 " type     varchar(3) NOT NULL," +
                 " busAName     varchar(8) NOT NULL," +
                 " busABaseKv              decimal(4,1) NOT NULL, " +
@@ -453,6 +493,7 @@ public class BpaSwiModelRw {
 
         TABLE_DATA_NAME = "CaseCard";
         initSql = "CREATE TABLE "  + TABLE_DATA_NAME + " (" +
+                " psId     varchar(10) NOT NULL," +
                 " type     varchar(4) NOT NULL," +
                 " caseId     varchar(10) NOT NULL," +
                 " iNoPersist              INTEGER NULL, " +
@@ -470,25 +511,28 @@ public class BpaSwiModelRw {
         sqliteDb.initDb(initSql);
     }
 
-    public static void parseAndSave(String filePath, String dbFile) {
-        parseAndSave(new File(filePath), dbFile);
+    public static void parseAndSave(String psId, String filePath, String dbFile) {
+        parseAndSave(psId, new File(filePath), dbFile);
     }
 
-    public static void parseAndSave(File file, String dbFile) {
+    public static void parseAndSave(String psId, File file, String dbFile) {
         try {
-            parseAndSave(new FileInputStream(file), dbFile);
+            parseAndSave(psId, new FileInputStream(file), dbFile);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
     }
 
-    public static void parseAndSave(InputStream in, String dbFile) {
+    public static void parseAndSave(String psId, InputStream in, String dbFile) {
         BpaSwiModel model = BpaSwiModelParser.parse(in, "GBK");
         SqliteDb sqliteDb = new SqliteDb(dbFile);
         List<String> sqls = new LinkedList<>();
         String TABLE_DATA_NAME = "Generator";
+        String sql = "delete from " + TABLE_DATA_NAME + " where psId='" + psId + "'";
+        sqliteDb.executeSql(sql);
         for (Generator generator : model.getGenerators()) {
             String insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
+                    "'" + psId + "'," +
                     "'" + generator.getType() + generator.getSubType() + "'," +
                     "'" + generator.getBusName() + "'," + generator.getBaseKv() + "," +
                     "'" + generator.getId() + "'," + generator.geteMWS() + "," +
@@ -506,8 +550,11 @@ public class BpaSwiModelRw {
 
         sqls.clear();
         TABLE_DATA_NAME = "GeneratorDW";
+        sql = "delete from " + TABLE_DATA_NAME + " where psId='" + psId + "'";
+        sqliteDb.executeSql(sql);
         for (GeneratorDW generatorDW : model.getGeneratorDws()) {
             String insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
+                    "'" + psId + "'," +
                     "'M'," + "'" + generatorDW.getBusName() + "'," +
                     generatorDW.getBaseKv() + ",'" + generatorDW.getId() + "'," +
                     generatorDW.getBaseMva() + "," + generatorDW.getPowerFactor() + "," +
@@ -521,8 +568,11 @@ public class BpaSwiModelRw {
 
         sqls.clear();
         TABLE_DATA_NAME = "Exciter";
+        sql = "delete from " + TABLE_DATA_NAME + " where psId='" + psId + "'";
+        sqliteDb.executeSql(sql);
         for (Exciter exciter : model.getExciters()) {
             String insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
+                    "'" + psId + "'," +
                     "'" + exciter.getType() + exciter.getSubType() + "'," +
                     "'" + exciter.getBusName() + "'," + exciter.getBaseKv() + "," +
                     "'" + exciter.getGeneratorCode() + "'," + exciter.getRc() + "," +
@@ -551,8 +601,11 @@ public class BpaSwiModelRw {
 
         sqls.clear();
         TABLE_DATA_NAME = "ExciterExtraInfo";
+        sql = "delete from " + TABLE_DATA_NAME + " where psId='" + psId + "'";
+        sqliteDb.executeSql(sql);
         for (ExciterExtraInfo exciterExtraInfo : model.getExciterExtraInfos()) {
             String insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
+                    "'" + psId + "'," +
                     "'" + exciterExtraInfo.getType() + "'," + "'" + exciterExtraInfo.getBusName() + "'," +
                     exciterExtraInfo.getBaseKv() + "," + "'" + exciterExtraInfo.getGeneratorCode() + "'," +
                     exciterExtraInfo.getVamax() + "," + exciterExtraInfo.getVamin() + "," +
@@ -571,8 +624,11 @@ public class BpaSwiModelRw {
 
         sqls.clear();
         TABLE_DATA_NAME = "PSS";
+        sql = "delete from " + TABLE_DATA_NAME + " where psId='" + psId + "'";
+        sqliteDb.executeSql(sql);
         for (PSS pss : model.getPssList()) {
             String insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
+                    "'" + psId + "'," +
                     "'" + pss.getType() + pss.getSubType() + "'," +
                     "'" + pss.getGenName() + "'," + pss.getBaseKv() + "," +
                     "'" + pss.getId() + "'," + pss.getKqv() + "," +
@@ -598,8 +654,11 @@ public class BpaSwiModelRw {
 
         sqls.clear();
         TABLE_DATA_NAME = "PSSExtraInfo";
+        sql = "delete from " + TABLE_DATA_NAME + " where psId='" + psId + "'";
+        sqliteDb.executeSql(sql);
         for (PSSExtraInfo pssExtraInfo : model.getPssExtraInfos()) {
             String insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
+                    "'" + psId + "'," +
                     "'" + pssExtraInfo.getType() + "'," + "'" + pssExtraInfo.getGenName() + "'," +
                     pssExtraInfo.getBaseKv() + ",'" + pssExtraInfo.getId() + "'," +
                     pssExtraInfo.getKp() + "," + pssExtraInfo.getT1() + "," +
@@ -616,8 +675,11 @@ public class BpaSwiModelRw {
 
         sqls.clear();
         TABLE_DATA_NAME = "Governor";
+        sql = "delete from " + TABLE_DATA_NAME + " where psId='" + psId + "'";
+        sqliteDb.executeSql(sql);
         for (Governor governor : model.getGovernors()) {
             String insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
+                    "'" + psId + "'," +
                     "'" + governor.getType() + governor.getSubType() + "'," +
                     "'" + governor.getGenName() + "'," + governor.getBaseKv() + "," +
                     "'" + governor.getGeneratorCode() + "'," + governor.getKw() + "," +
@@ -635,8 +697,11 @@ public class BpaSwiModelRw {
 
         sqls.clear();
         TABLE_DATA_NAME = "GovernorExtraInfo";
+        sql = "delete from " + TABLE_DATA_NAME + " where psId='" + psId + "'";
+        sqliteDb.executeSql(sql);
         for (GovernorExtraInfo governorExtraInfo : model.getGovernorExtraInfos()) {
             String insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
+                    "'" + psId + "'," +
                     "'" + governorExtraInfo.getType() + "'," + "'" + governorExtraInfo.getGenName() + "'," +
                     governorExtraInfo.getBaseKv() + "," + "'" + governorExtraInfo.getGeneratorCode() + "'," +
                     governorExtraInfo.getDelt2() + "," + governorExtraInfo.getTr2() + "," +
@@ -651,8 +716,11 @@ public class BpaSwiModelRw {
 
         sqls.clear();
         TABLE_DATA_NAME = "PrimeMover";
+        sql = "delete from " + TABLE_DATA_NAME + " where psId='" + psId + "'";
+        sqliteDb.executeSql(sql);
         for (PrimeMover primeMover : model.getPrimeMovers()) {
             String insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
+                    "'" + psId + "'," +
                     "'" + primeMover.getType() + primeMover.getSubType() + "'," +
                     "'" + primeMover.getBusName() + "'," + primeMover.getBaseKv() + "," +
                     "'" + primeMover.getGeneratorCode() + "'," + primeMover.getMaxPower() + "," +
@@ -668,8 +736,11 @@ public class BpaSwiModelRw {
 
         sqls.clear();
         TABLE_DATA_NAME = "PV";
+        sql = "delete from " + TABLE_DATA_NAME + " where psId='" + psId + "'";
+        sqliteDb.executeSql(sql);
         for (PV pv : model.getPvs()) {
             String insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
+                    "'" + psId + "'," +
                     "'" + pv.getType() + "'," + "'" + pv.getBusName() + "',"
                     + pv.getBaseKv() + "," + "'" + pv.getId() + "'," +
                     pv.getT() + "," + pv.getS() + "," +
@@ -683,8 +754,11 @@ public class BpaSwiModelRw {
 
         sqls.clear();
         TABLE_DATA_NAME = "BC";
+        sql = "delete from " + TABLE_DATA_NAME + " where psId='" + psId + "'";
+        sqliteDb.executeSql(sql);
         for (BC bc : model.getBcs()) {
             String insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
+                    "'" + psId + "'," +
                     "'" + bc.getType() + "'," + "'" + bc.getBusName() + "',"
                     + bc.getBaseKv() + "," + "'" + bc.getId() + "'," +
                     bc.getpPercent() + "," + bc.getIpCon() + "," +
@@ -701,8 +775,11 @@ public class BpaSwiModelRw {
 
         sqls.clear();
         TABLE_DATA_NAME = "BCExtraInfo";
+        sql = "delete from " + TABLE_DATA_NAME + " where psId='" + psId + "'";
+        sqliteDb.executeSql(sql);
         for (BCExtraInfo bcExtraInfo : model.getBcExtraInfos()) {
             String insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
+                    "'" + psId + "'," +
                     "'" + bcExtraInfo.getType() + "'," + "'" + bcExtraInfo.getBusName() + "',"
                     + bcExtraInfo.getBaseKv() + "," + "'" + bcExtraInfo.getId() + "'," +
                     bcExtraInfo.getqPercent() + "," + bcExtraInfo.getRpCon() + "," +
@@ -717,8 +794,11 @@ public class BpaSwiModelRw {
 
         sqls.clear();
         TABLE_DATA_NAME = "Servo";
+        sql = "delete from " + TABLE_DATA_NAME + " where psId='" + psId + "'";
+        sqliteDb.executeSql(sql);
         for (Servo servo : model.getServos()) {
             String insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
+                    "'" + psId + "'," +
                     "'" + servo.getType() + servo.getSubType() + "'," +
                     "'" + servo.getGenName() + "'," + servo.getBaseKv() + "," +
                     "'" + servo.getGeneratorCode() + "'," + servo.getPe() + "," +
@@ -736,8 +816,11 @@ public class BpaSwiModelRw {
 
         sqls.clear();
         TABLE_DATA_NAME = "Load";
+        sql = "delete from " + TABLE_DATA_NAME + " where psId='" + psId + "'";
+        sqliteDb.executeSql(sql);
         for (Load load : model.getLoads()) {
             String insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
+                    "'" + psId + "'," +
                     "'" + load.getType() + load.getSubType() + "','" + load.getChgCode() + "'," +
                     "'" + load.getBusName() + "'," + load.getBaseKv() + "," +
                     "'" + load.getZone() + "','" + load.getAreaName() + "'," +
@@ -764,8 +847,11 @@ public class BpaSwiModelRw {
 
         sqls.clear();
         TABLE_DATA_NAME = "ShortCircuitFault";
+        sql = "delete from " + TABLE_DATA_NAME + " where psId='" + psId + "'";
+        sqliteDb.executeSql(sql);
         for (ShortCircuitFault shortCircuitFault : model.getShortCircuitFaults()) {
             String insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
+                    "'" + psId + "'," +
                     "'LS','" + shortCircuitFault.getBusASign() + "'," +
                     "'" + shortCircuitFault.getBusAName() + "'," + shortCircuitFault.getBusABaseKv() + "," +
                     "'" + shortCircuitFault.getBusBSign() + "','" + shortCircuitFault.getBusBName() + "'," +
@@ -780,8 +866,11 @@ public class BpaSwiModelRw {
 
         sqls.clear();
         TABLE_DATA_NAME = "FLTCard";
+        sql = "delete from " + TABLE_DATA_NAME + " where psId='" + psId + "'";
+        sqliteDb.executeSql(sql);
         for (FLTCard fltCard : model.getFltCards()) {
             String insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
+                    "'" + psId + "'," +
                     "'" + fltCard.getType() + "','" + fltCard.getBusAName() + "'," +
                     fltCard.getBusABaseKv() + ",'" + fltCard.getBusBName() + "'," +
                     fltCard.getBusBBaseKv() + ",'" + fltCard.getCircuitId() + "'," +
@@ -799,8 +888,11 @@ public class BpaSwiModelRw {
 
         sqls.clear();
         TABLE_DATA_NAME = "FFCard";
+        sql = "delete from " + TABLE_DATA_NAME + " where psId='" + psId + "'";
+        sqliteDb.executeSql(sql);
         FFCard ffCard = model.getFf();
         String insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
+                "'" + psId + "'," +
                 "'" + ffCard.getType() + "'," + ffCard.getT() + "," +
                 ffCard.getDt() + "," + ffCard.getEndT() + "," +
                 ffCard.getDtc() + "," + ffCard.getIstp() + "," +
@@ -821,9 +913,31 @@ public class BpaSwiModelRw {
         sqliteDb.executeSqls(sqls);
 
         sqls.clear();
+        TABLE_DATA_NAME = "F0Card";
+        sql = "delete from " + TABLE_DATA_NAME + " where psId='" + psId + "'";
+        sqliteDb.executeSql(sql);
+        F0Card f0Card = model.getF0();
+        insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
+                "'" + psId + "','" + f0Card.getType() + "'," +
+                f0Card.getIg() + "," + f0Card.getIa() + "," +
+                "'" + f0Card.getGenName1() + "'," + f0Card.getGenBaseKv1() + "," +
+                "'" + f0Card.getId1() + "','" + f0Card.getGenName2() + "'," +
+                f0Card.getGenBaseKv2() + ",'" + f0Card.getId2() + "'," +
+                f0Card.getAmax() + "," + f0Card.getAmin() + "," +
+                f0Card.getIv()+ ",'" + f0Card.getBusName1() + "'," +
+                f0Card.getBusBaseKv1() + "," + f0Card.getiF() + "," +
+                "'" + f0Card.getBusName2() + "'," + f0Card.getBusBaseKv2() +
+                ")";
+        sqls.add(insertSql);
+        sqliteDb.executeSqls(sqls);
+
+        sqls.clear();
         TABLE_DATA_NAME = "CaseCard";
+        sql = "delete from " + TABLE_DATA_NAME + " where psId='" + psId + "'";
+        sqliteDb.executeSql(sql);
         CaseCard caseCard = model.getCaseCard();
         insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
+                "'" + psId + "'," +
                 "'" + caseCard.getType() + "','" + caseCard.getCaseId() + "'," +
                 caseCard.getiNoPersist() + "," + caseCard.getIxo() + "," +
                 caseCard.getDsw() + "," + caseCard.getIwscc() + "," +
@@ -836,121 +950,138 @@ public class BpaSwiModelRw {
         sqliteDb.executeSqls(sqls);
     }
 
-    public static void write(String dbFile, String caseID, String inputPath, String outputPath) {
-       write(dbFile, caseID, new File(inputPath), new File(outputPath));
+    public static void write(String dbFile, String psId, String caseID, String inputPath, String outputPath) {
+       write(dbFile, psId, caseID, new File(inputPath), new File(outputPath));
     }
 
-    public static void write(String dbFile, String caseID, File inputFile, File outputFile) {
+    public static void write(String dbFile, String psId, String caseID, File inputFile, File outputFile) {
         try {
-            write(dbFile, caseID, new FileInputStream(inputFile), new FileOutputStream(outputFile));
+            write(dbFile, psId, caseID, new FileInputStream(inputFile), new FileOutputStream(outputFile));
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
     }
 
-    public static void write(String dbFile, String caseID, InputStream in, OutputStream out) {
+    public static void write(String dbFile, String psId, String caseID, InputStream in, OutputStream out) {
         SqliteDb sqliteDb = new SqliteDb(dbFile);
         BpaSwiModel modifiedModel = new BpaSwiModel();
-        List<Object> objects = sqliteDb.queryData("Generator");
-        modifiedModel.generators = new ArrayList<>(objects.size());
+        List<Object> objects = sqliteDb.queryData("Generator", psId);
+        List<Generator> generators = new ArrayList<>(objects.size());
         for (Object object : objects) {
-            modifiedModel.generators.add((Generator) object);
+            generators.add((Generator) object);
         }
+        modifiedModel.setGenerators(generators);
         objects.clear();
-        objects = sqliteDb.queryData("GeneratorDW");
-        modifiedModel.generatorDws = new ArrayList<>(objects.size());
+        objects = sqliteDb.queryData("GeneratorDW", psId);
+        List<GeneratorDW> generatorDWS = new ArrayList<>(objects.size());
         for (Object object : objects) {
-            modifiedModel.generatorDws.add((GeneratorDW) object);
+            generatorDWS.add((GeneratorDW) object);
         }
+        modifiedModel.setGeneratorDws(generatorDWS);
         objects.clear();
-        objects = sqliteDb.queryData("Exciter");
-        modifiedModel.exciters = new ArrayList<>(objects.size());
+        objects = sqliteDb.queryData("Exciter", psId);
+        List<Exciter> exciters = new ArrayList<>(objects.size());
         for (Object object : objects) {
-            modifiedModel.exciters.add((Exciter) object);
+            exciters.add((Exciter) object);
         }
+        modifiedModel.setExciters(exciters);
         objects.clear();
-        objects = sqliteDb.queryData("ExciterExtraInfo");
-        modifiedModel.exciterExtraInfos = new ArrayList<>(objects.size());
+        objects = sqliteDb.queryData("ExciterExtraInfo", psId);
+        List<ExciterExtraInfo> exciterExtraInfos = new ArrayList<>(objects.size());
         for (Object object : objects) {
-            modifiedModel.exciterExtraInfos.add((ExciterExtraInfo) object);
+            exciterExtraInfos.add((ExciterExtraInfo) object);
         }
+        modifiedModel.setExciterExtraInfos(exciterExtraInfos);
         objects.clear();
-        objects = sqliteDb.queryData("PSS");
-        modifiedModel.pssList = new ArrayList<>(objects.size());
+        objects = sqliteDb.queryData("PSS", psId);
+        List<PSS> psses = new ArrayList<>(objects.size());
         for (Object object : objects) {
-            modifiedModel.pssList.add((PSS) object);
+            psses.add((PSS) object);
         }
+        modifiedModel.setPssList(psses);
         objects.clear();
-        objects = sqliteDb.queryData("PSSExtraInfo");
-        modifiedModel.pssExtraInfos = new ArrayList<>(objects.size());
+        objects = sqliteDb.queryData("PSSExtraInfo", psId);
+        List<PSSExtraInfo> pssExtraInfos = new ArrayList<>(objects.size());
         for (Object object : objects) {
-            modifiedModel.pssExtraInfos.add((PSSExtraInfo) object);
+            pssExtraInfos.add((PSSExtraInfo) object);
         }
+        modifiedModel.setPssExtraInfos(pssExtraInfos);
         objects.clear();
-        objects = sqliteDb.queryData("PrimeMover");
-        modifiedModel.primeMovers = new ArrayList<>(objects.size());
+        objects = sqliteDb.queryData("PrimeMover", psId);
+        List<PrimeMover> primeMovers = new ArrayList<>(objects.size());
         for (Object object : objects) {
-            modifiedModel.primeMovers.add((PrimeMover) object);
+            primeMovers.add((PrimeMover) object);
         }
+        modifiedModel.setPrimeMovers(primeMovers);
         objects.clear();
-        objects = sqliteDb.queryData("Governor");
-        modifiedModel.governors = new ArrayList<>(objects.size());
+        objects = sqliteDb.queryData("Governor", psId);
+        List<Governor> governors = new ArrayList<>(objects.size());
         for (Object object : objects) {
-            modifiedModel.governors.add((Governor) object);
+            governors.add((Governor) object);
         }
+        modifiedModel.setGovernors(governors);
         objects.clear();
-        objects = sqliteDb.queryData("GovernorExtraInfo");
-        modifiedModel.governorExtraInfos = new ArrayList<>(objects.size());
+        objects = sqliteDb.queryData("GovernorExtraInfo", psId);
+        List<GovernorExtraInfo> governorExtraInfos = new ArrayList<>(objects.size());
         for (Object object : objects) {
-            modifiedModel.governorExtraInfos.add((GovernorExtraInfo) object);
+            governorExtraInfos.add((GovernorExtraInfo) object);
         }
+        modifiedModel.setGovernorExtraInfos(governorExtraInfos);
         objects.clear();
-        objects = sqliteDb.queryData("PV");
-        modifiedModel.pvs = new ArrayList<>(objects.size());
+        objects = sqliteDb.queryData("PV", psId);
+        List<PV> pvs = new ArrayList<>(objects.size());
         for (Object object : objects) {
-            modifiedModel.pvs.add((PV) object);
+            pvs.add((PV) object);
         }
+        modifiedModel.setPvs(pvs);
         objects.clear();
-        objects = sqliteDb.queryData("BC");
-        modifiedModel.bcs = new ArrayList<>(objects.size());
+        objects = sqliteDb.queryData("BC", psId);
+        List<BC> bcs= new ArrayList<>(objects.size());
         for (Object object : objects) {
-            modifiedModel.bcs.add((BC) object);
+            bcs.add((BC) object);
         }
+        modifiedModel.setBcs(bcs);
         objects.clear();
-        objects = sqliteDb.queryData("BCExtraInfo");
-        modifiedModel.bcExtraInfos = new ArrayList<>(objects.size());
+        objects = sqliteDb.queryData("BCExtraInfo", psId);
+        List<BCExtraInfo> bcExtraInfos = new ArrayList<>(objects.size());
         for (Object object : objects) {
-            modifiedModel.bcExtraInfos.add((BCExtraInfo) object);
+            bcExtraInfos.add((BCExtraInfo) object);
         }
+        modifiedModel.setBcExtraInfos(bcExtraInfos);
         objects.clear();
-        objects = sqliteDb.queryData("Servo");
-        modifiedModel.servos = new ArrayList<>(objects.size());
+        objects = sqliteDb.queryData("Servo", psId);
+        List<Servo> servos = new ArrayList<>(objects.size());
         for (Object object : objects) {
-            modifiedModel.servos.add((Servo) object);
+            servos.add((Servo) object);
         }
+        modifiedModel.setServos(servos);
         objects.clear();
-        objects = sqliteDb.queryData("Load");
-        modifiedModel.loads = new ArrayList<>(objects.size());
+        objects = sqliteDb.queryData("Load", psId);
+        List<Load> loads = new ArrayList<>(objects.size());
         for (Object object : objects) {
-            modifiedModel.loads.add((Load) object);
+            loads.add((Load) object);
         }
+        modifiedModel.setLoads(loads);
         objects.clear();
-        objects = sqliteDb.queryData("ShortCircuitFault");
-        modifiedModel.shortCircuitFaults = new ArrayList<>(objects.size());
+        objects = sqliteDb.queryData("ShortCircuitFault", psId);
+        List<ShortCircuitFault> shortCircuitFaults = new ArrayList<>(objects.size());
         for (Object object : objects) {
-            modifiedModel.shortCircuitFaults.add((ShortCircuitFault) object);
+            shortCircuitFaults.add((ShortCircuitFault) object);
         }
+        modifiedModel.setShortCircuitFaults(shortCircuitFaults);
         objects.clear();
-        objects = sqliteDb.queryData("FLTCard");
-        modifiedModel.fltCards = new ArrayList<>(objects.size());
+        objects = sqliteDb.queryData("FLTCard", psId);
+        List<FLTCard> fltCards = new ArrayList<>(objects.size());
         for (Object object : objects) {
-            modifiedModel.fltCards.add((FLTCard) object);
+            fltCards.add((FLTCard) object);
         }
+        modifiedModel.setFltCards(fltCards);
         objects.clear();
-        modifiedModel.ff = (FFCard) sqliteDb.queryData("FFCard").get(0);
-        CaseCard caseCard = (CaseCard) sqliteDb.queryData("CaseCard").get(0);
+        modifiedModel.setFf((FFCard) sqliteDb.queryData("FFCard", psId).get(0));
+        modifiedModel.setF0((F0Card) sqliteDb.queryData("F0Card", psId).get(0));
+        CaseCard caseCard = (CaseCard) sqliteDb.queryData("CaseCard", psId).get(0);
         caseCard.setCaseId(caseID);
-        modifiedModel.caseCard = caseCard;
+        modifiedModel.setCaseCard(caseCard);
 
         boolean r = BpaSwiModelWriter.readAndWrite(in, "GBK", out, "GBK", modifiedModel);
     }

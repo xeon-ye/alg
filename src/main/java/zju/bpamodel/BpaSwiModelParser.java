@@ -80,6 +80,7 @@ public class BpaSwiModelParser {
             List<FLTCard> fltCards = new ArrayList<>();
             List<Load> loads = new ArrayList<>();
             FFCard ffCard = null;
+            F0Card f0Card = null;
             CaseCard caseCard = null;
             while ((strLine = reader.readLine()) != null) {
                 try {
@@ -105,6 +106,8 @@ public class BpaSwiModelParser {
                             } else {
                                 exciters.add(Exciter.createExciter(strLine));
                             }
+                        } else if (strLine.charAt(1) == '0') {
+                            f0Card = F0Card.createF0(strLine);
                         }
                     } else if (strLine.startsWith("E")) {
                         if ((strLine.charAt(1) >= 'A' && strLine.charAt(1) <= 'G')
@@ -174,6 +177,7 @@ public class BpaSwiModelParser {
             model.setFltCards(fltCards);
             model.setLoads(loads);
             model.setFf(ffCard);
+            model.setF0(f0Card);
             model.setCaseCard(caseCard);
             model.buildMaps();
             reader.close();

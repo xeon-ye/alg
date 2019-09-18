@@ -189,6 +189,9 @@ public class BpaSwiModelWriter {
                         out.write("\n");
                     }
                     out.write("\n");
+                    out.write(swiModel.getF0().toString());
+                    out.write("\n");
+                    out.write("\n");
                     out.write(swiModel.getFf().toString());
                     out.write("\n\n");
                     break;

@@ -15,6 +15,7 @@ public class BpaPfModelRw {
         SqliteDb sqliteDb = new SqliteDb(dbFile);
         String TABLE_DATA_NAME = "PowerExchange";
         String initSql = "CREATE TABLE "  + TABLE_DATA_NAME + " (" +
+                " psId     varchar(10) NOT NULL," +
                 " type     varchar(3) NOT NULL," +
                 " chgCode     varchar(1) NULL," +
                 " areaName     varchar(10) NULL," +
@@ -29,6 +30,7 @@ public class BpaPfModelRw {
 
         TABLE_DATA_NAME = "Bus";
         initSql = "CREATE TABLE "  + TABLE_DATA_NAME + " (" +
+                " psId     varchar(10) NOT NULL," +
                 " type     varchar(3) NOT NULL," +
                 " chgCode     varchar(1) NULL," +
                 " owner     varchar(3) NULL," +
@@ -56,6 +58,7 @@ public class BpaPfModelRw {
 
         TABLE_DATA_NAME = "AcLine";
         initSql = "CREATE TABLE "  + TABLE_DATA_NAME + " (" +
+                " psId     varchar(10) NOT NULL," +
                 " type     varchar(3) NOT NULL," +
                 " chgCode     varchar(1) NULL," +
                 " owner     varchar(3) NULL," +
@@ -80,6 +83,7 @@ public class BpaPfModelRw {
 
         TABLE_DATA_NAME = "Transformer";
         initSql = "CREATE TABLE "  + TABLE_DATA_NAME + " (" +
+                " psId     varchar(10) NOT NULL," +
                 " type     varchar(3) NOT NULL," +
                 " chgCode     varchar(1) NULL," +
                 " owner     varchar(3) NULL," +
@@ -105,25 +109,28 @@ public class BpaPfModelRw {
         sqliteDb.initDb(initSql);
     }
 
-    public static void parseAndSave(String filePath, String dbFile) {
-        parseAndSave(new File(filePath), dbFile);
+    public static void parseAndSave(String psId, String filePath, String dbFile) {
+        parseAndSave(psId, new File(filePath), dbFile);
     }
 
-    public static void parseAndSave(File file, String dbFile) {
+    public static void parseAndSave(String psId, File file, String dbFile) {
         try {
-            parseAndSave(new FileInputStream(file), dbFile);
+            parseAndSave(psId, new FileInputStream(file), dbFile);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
     }
 
-    public static void parseAndSave(InputStream in, String dbFile) {
+    public static void parseAndSave(String psId, InputStream in, String dbFile) {
         ElectricIsland model = BpaPfModelParser.parse(in, "GBK");
         SqliteDb sqliteDb = new SqliteDb(dbFile);
         List<String> sqls = new LinkedList<>();
         String TABLE_DATA_NAME = "PowerExchange";
+        String sql = "delete from " + TABLE_DATA_NAME + " where psId='" + psId + "'";
+        sqliteDb.executeSql(sql);
         for (PowerExchange powerExchange : model.getPowerExchanges()) {
             String insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
+                    "'" + psId + "'," +
                     "'" + powerExchange.getType() + powerExchange.getSubType() + "'," +
                     "'" + powerExchange.getChgCode() + "','" + powerExchange.getAreaName() + "'," +
                     "'" + powerExchange.getAreaBusName() + "'," + powerExchange.getAreaBusBaseKv() + "," +
@@ -136,8 +143,11 @@ public class BpaPfModelRw {
 
         sqls.clear();
         TABLE_DATA_NAME = "Bus";
+        sql = "delete from " + TABLE_DATA_NAME + " where psId='" + psId + "'";
+        sqliteDb.executeSql(sql);
         for (Bus bus : model.getBuses()) {
             String insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
+                    "'" + psId + "'," +
                     "'B" + bus.getSubType() + "'," +
                     "'" + bus.getChgCode() + "','" + bus.getOwner() + "'," +
                     "'" + bus.getName() + "'," + bus.getBaseKv() + "," +
@@ -157,8 +167,11 @@ public class BpaPfModelRw {
 
         sqls.clear();
         TABLE_DATA_NAME = "AcLine";
+        sql = "delete from " + TABLE_DATA_NAME + " where psId='" + psId + "'";
+        sqliteDb.executeSql(sql);
         for (AcLine acLine : model.getAclines()) {
             String insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
+                    "'" + psId + "'," +
                     "'L','" + acLine.getChgCode() + "','" + acLine.getOwner() + "'," +
                     acLine.getLinkMeterCode() + ",'" + acLine.getBusName1() + "'," +
                     "'" + acLine.getBusName2() + "'," + acLine.getBaseKv1() + "," +
@@ -175,8 +188,11 @@ public class BpaPfModelRw {
 
         sqls.clear();
         TABLE_DATA_NAME = "Transformer";
+        sql = "delete from " + TABLE_DATA_NAME + " where psId='" + psId + "'";
+        sqliteDb.executeSql(sql);
         for (Transformer transformer : model.getTransformers()) {
             String insertSql = "insert into " + TABLE_DATA_NAME + " values(" +
+                    "'" + psId + "'," +
                     "'T" + transformer.getSubType() + "'," +
                     "'" + transformer.getChgCode() + "','" + transformer.getOwner() + "'," +
                     "'" + transformer.getBusName1() + "','" + transformer.getBusName2() + "'," +
@@ -194,55 +210,55 @@ public class BpaPfModelRw {
         sqliteDb.executeSqls(sqls);
     }
 
-    public static void write(String dbFile, String caseID, String inputPath, String outputPath) {
-       write(dbFile, caseID, new File(inputPath), new File(outputPath));
+    public static void write(String dbFile, String psId, String caseID, String inputPath, String outputPath) {
+       write(dbFile, psId, caseID, new File(inputPath), new File(outputPath));
     }
 
-    public static void write(String dbFile, String[] busNames, double[] baseKvs, double[] genMws, String caseID, String inputPath, String outputPath) {
-        write(dbFile, busNames, baseKvs, genMws, caseID, new File(inputPath), new File(outputPath));
+    public static void write(String dbFile, String psId, String[] busNames, double[] baseKvs, double[] genMws, String caseID, String inputPath, String outputPath) {
+        write(dbFile, psId, busNames, baseKvs, genMws, caseID, new File(inputPath), new File(outputPath));
     }
 
-    public static void write(String dbFile, String caseID, File inputFile, File outputFile) {
+    public static void write(String dbFile, String psId, String caseID, File inputFile, File outputFile) {
         try {
-            write(dbFile, caseID, new FileInputStream(inputFile), new FileOutputStream(outputFile));
+            write(dbFile, psId, caseID, new FileInputStream(inputFile), new FileOutputStream(outputFile));
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
     }
 
-    public static void write(String dbFile, String[] busNames, double[] baseKvs, double[] genMws, String caseID, File inputFile, File outputFile) {
+    public static void write(String dbFile, String psId, String[] busNames, double[] baseKvs, double[] genMws, String caseID, File inputFile, File outputFile) {
         try {
-            write(dbFile, busNames, baseKvs, genMws, caseID, new FileInputStream(inputFile), new FileOutputStream(outputFile));
+            write(dbFile, psId, busNames, baseKvs, genMws, caseID, new FileInputStream(inputFile), new FileOutputStream(outputFile));
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
     }
 
-    public static void write(String dbFile, String caseID,InputStream in, OutputStream out) {
+    public static void write(String dbFile, String psId, String caseID,InputStream in, OutputStream out) {
         SqliteDb sqliteDb = new SqliteDb(dbFile);
         ElectricIsland modifiedModel = new ElectricIsland();
-        List<Object> objects = sqliteDb.queryData("PowerExchange");
+        List<Object> objects = sqliteDb.queryData("PowerExchange", psId);
         List<PowerExchange> powerExchanges = new ArrayList<>(objects.size());
         for (Object object : objects) {
             powerExchanges.add((PowerExchange) object);
         }
         modifiedModel.setPowerExchanges(powerExchanges);
         objects.clear();
-        objects = sqliteDb.queryData("Bus");
+        objects = sqliteDb.queryData("Bus", psId);
         List<Bus> buses = new ArrayList<>(objects.size());
         for (Object object : objects) {
             buses.add((Bus) object);
         }
         modifiedModel.setBuses(buses);
         objects.clear();
-        objects = sqliteDb.queryData("AcLine");
+        objects = sqliteDb.queryData("AcLine", psId);
         List<AcLine> acLines = new ArrayList<>(objects.size());
         for (Object object : objects) {
             acLines.add((AcLine) object);
         }
         modifiedModel.setAclines(acLines);
         objects.clear();
-        objects = sqliteDb.queryData("Transformer");
+        objects = sqliteDb.queryData("Transformer", psId);
         List<Transformer> transformers = new ArrayList<>(objects.size());
         for (Object object : objects) {
             transformers.add((Transformer) object);
@@ -253,17 +269,17 @@ public class BpaPfModelRw {
         BpaPfModelWriter.readAndWrite(in, "GBK", out, "GBK", caseID, modifiedModel);
     }
 
-    public static void write(String dbFile, String[] busNames, double[] baseKvs, double[] genMws, String caseID,InputStream in, OutputStream out) {
+    public static void write(String dbFile, String psId, String[] busNames, double[] baseKvs, double[] genMws, String caseID, InputStream in, OutputStream out) {
         SqliteDb sqliteDb = new SqliteDb(dbFile);
         ElectricIsland modifiedModel = new ElectricIsland();
-        List<Object> objects = sqliteDb.queryData("PowerExchange");
+        List<Object> objects = sqliteDb.queryData("PowerExchange", psId);
         List<PowerExchange> powerExchanges = new ArrayList<>(objects.size());
         for (Object object : objects) {
             powerExchanges.add((PowerExchange) object);
         }
         modifiedModel.setPowerExchanges(powerExchanges);
         objects.clear();
-        objects = sqliteDb.queryData("Bus");
+        objects = sqliteDb.queryData("Bus", psId);
         List<Bus> buses = new ArrayList<>(objects.size());
         for (Object object : objects) {
             Bus bus = (Bus) object;
@@ -277,14 +293,14 @@ public class BpaPfModelRw {
         }
         modifiedModel.setBuses(buses);
         objects.clear();
-        objects = sqliteDb.queryData("AcLine");
+        objects = sqliteDb.queryData("AcLine", psId);
         List<AcLine> acLines = new ArrayList<>(objects.size());
         for (Object object : objects) {
             acLines.add((AcLine) object);
         }
         modifiedModel.setAclines(acLines);
         objects.clear();
-        objects = sqliteDb.queryData("Transformer");
+        objects = sqliteDb.queryData("Transformer", psId);
         List<Transformer> transformers = new ArrayList<>(objects.size());
         for (Object object : objects) {
             transformers.add((Transformer) object);

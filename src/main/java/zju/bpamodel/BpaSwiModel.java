@@ -31,6 +31,7 @@ public class BpaSwiModel implements Serializable {
     List<FLTCard> fltCards;
     List<Load> loads;
     FFCard ff;
+    F0Card f0;
     Map<Generator, Exciter> exciterMap;
     Map<Generator, GeneratorDW> generatorDwMap;
     Map<Exciter, ExciterExtraInfo> exciterExtraInfoMap;
@@ -212,6 +213,14 @@ public class BpaSwiModel implements Serializable {
 
     public void setFf(FFCard ff) {
         this.ff = ff;
+    }
+
+    public F0Card getF0() {
+        return f0;
+    }
+
+    public void setF0(F0Card f0) {
+        this.f0 = f0;
     }
 
     public Map<Generator, Exciter> getExciterMap() {

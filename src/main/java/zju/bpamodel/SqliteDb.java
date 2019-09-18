@@ -159,10 +159,10 @@ public class SqliteDb {
         return tableNames;
     }
 
-    public List<Object> queryData(String tableName) {
+    public List<Object> queryData(String tableName, String psId) {
         List<Object> objs = new LinkedList<>();
         Connection conn = createConn();
-        String sql = "select * from " + tableName;
+        String sql = "select * from " + tableName + " where psId='" + psId + "'";
         Statement stmt = null;
         ResultSet rs = null;
         try {
@@ -707,6 +707,26 @@ public class SqliteDb {
             obj.setTdodph(rs.getDouble("tdodph"));
             obj.setTqodph(rs.getDouble("tqodph"));
             obj.setCfacl2(rs.getDouble("cfacl2"));
+            return obj;
+        } else if (tableName.equals("F0Card")) {
+            F0Card obj = new F0Card();
+            obj.setType(rs.getString("type"));
+            obj.setIg(rs.getInt("ig"));
+            obj.setIa(rs.getInt("ia"));
+            obj.setGenName1(rs.getString("genName1"));
+            obj.setGenBaseKv1(rs.getDouble("genBaseKv1"));
+            obj.setId1(rs.getString("id1").charAt(0));
+            obj.setGenName2(rs.getString("genName2"));
+            obj.setGenBaseKv2(rs.getDouble("genBaseKv2"));
+            obj.setId2(rs.getString("id2").charAt(0));
+            obj.setAmax(rs.getDouble("amax"));
+            obj.setAmin(rs.getDouble("amin"));
+            obj.setIv(rs.getInt("iv"));
+            obj.setBusName1(rs.getString("busName1"));
+            obj.setBusBaseKv1(rs.getDouble("busBaseKv1"));
+            obj.setiF(rs.getInt("iF"));
+            obj.setBusName2(rs.getString("busName2"));
+            obj.setBusBaseKv2(rs.getDouble("busBaseKv2"));
             return obj;
         }
         return null;

@@ -15,7 +15,7 @@ public class BpaSwiSwxResultRw {
         SqliteDb sqliteDb = new SqliteDb(dbFile);
         String TABLE_DATA_NAME = "GeneratorData";
         String initSql = "CREATE TABLE "  + TABLE_DATA_NAME + " (" +
-                " calendar     varchar(8) NOT NULL," +
+                " calendar     varchar(10) NOT NULL," +
                 " busName1     varchar(8) NOT NULL," +
                 " baseKv1          decimal(6,3)     NULL, " +
                 " busName2     varchar(8) NOT NULL," +
@@ -34,7 +34,7 @@ public class BpaSwiSwxResultRw {
 
         TABLE_DATA_NAME = "BusData";
         initSql = "CREATE TABLE "  + TABLE_DATA_NAME + " (" +
-                " calendar     varchar(8) NOT NULL," +
+                " calendar     varchar(10) NOT NULL," +
                 " busName     varchar(8) NOT NULL," +
                 " baseKv          decimal(6,3)     NULL, " +
                 " time              decimal(7,3) NULL, " +
@@ -45,7 +45,7 @@ public class BpaSwiSwxResultRw {
 
         TABLE_DATA_NAME = "LineData";
         initSql = "CREATE TABLE "  + TABLE_DATA_NAME + " (" +
-                " calendar     varchar(8) NOT NULL," +
+                " calendar     varchar(10) NOT NULL," +
                 " busName1     varchar(8) NOT NULL," +
                 " baseKv1          decimal(6,3)     NULL, " +
                 " busName2     varchar(8) NOT NULL," +

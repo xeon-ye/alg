@@ -17,7 +17,7 @@ public class BpaPfResultRw {
         SqliteDb sqliteDb = new SqliteDb(dbFile);
         String TABLE_DATA_NAME = "BusPfResult";
         String initSql = "CREATE TABLE "  + TABLE_DATA_NAME + " (" +
-                " calendar     varchar(8) NOT NULL," +
+                " calendar     varchar(10) NOT NULL," +
                 " name     varchar(8) NOT NULL," +
                 " baseKv              decimal(4,3) NULL, " +
                 " vInKv              decimal(7,4) NULL, " +
@@ -33,7 +33,7 @@ public class BpaPfResultRw {
 
         TABLE_DATA_NAME = "BranchPfResult";
         initSql = "CREATE TABLE "  + TABLE_DATA_NAME + " (" +
-                " calendar     varchar(8) NOT NULL," +
+                " calendar     varchar(10) NOT NULL," +
                 " busName1     varchar(8) NOT NULL," +
                 " baseKv1              decimal(4,3) NULL, " +
                 " busName2     varchar(8) NULL," +
@@ -48,7 +48,7 @@ public class BpaPfResultRw {
 
         TABLE_DATA_NAME = "TransformerPfResult";
         initSql = "CREATE TABLE "  + TABLE_DATA_NAME + " (" +
-                " calendar     varchar(8) NOT NULL," +
+                " calendar     varchar(10) NOT NULL," +
                 " busName1     varchar(8) NOT NULL," +
                 " baseKv1              decimal(4,3) NULL, " +
                 " busName2     varchar(8) NULL," +
