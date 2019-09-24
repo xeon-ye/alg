@@ -10,7 +10,8 @@ public class GasTurbine {
     double coper;   // 单位输出功率的运维成本
     double calorificValue;  // 天然气热值
     double Effe;   // 燃气轮机发电效率
-    double Effh;   // 中品味热回收效率
+    double Effhm;   // 中品味热回收效率
+    double Effhl;   // 低品味热回收效率
     double css; // 启停成本
     double minP;    // 最小产电功率
     double maxP;    // 最大产电功率
@@ -18,11 +19,12 @@ public class GasTurbine {
     double maxRampRate;    // 爬坡率上限
     int initState;   // 初始启停状态
 
-    public GasTurbine(double coper, double Effe, double Effh, double css, double minP,
+    public GasTurbine(double coper, double Effe, double Effhm, double Effhl, double css, double minP,
                       double maxP, double minRampRate, double maxRampRate, int initState) {
         this.coper = coper;
         this.Effe = Effe;
-        this.Effh = Effh;
+        this.Effhm = Effhm;
+        this.Effhl = Effhl;
         this.css = css;
         this.maxP = maxP;
         this.minP = minP;
@@ -55,12 +57,20 @@ public class GasTurbine {
         this.Effe = effe;
     }
 
-    public double getEffh() {
-        return Effh;
+    public double getEffhm() {
+        return Effhm;
     }
 
-    public void setEffh(double effh) {
-        this.Effh = effh;
+    public void setEffhm(double effhm) {
+        Effhm = effhm;
+    }
+
+    public double getEffhl() {
+        return Effhl;
+    }
+
+    public void setEffhl(double effhl) {
+        Effhl = effhl;
     }
 
     public double getCss() {

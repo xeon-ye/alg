@@ -18,13 +18,15 @@ public class SelfOptModelTest  extends TestCase {
     double[] Lsteams = new double[periodNum];   // 蒸汽负荷
 
     public SelfOptModel selfOptTestModel() throws IOException {
-        InputStream inputStream = this.getClass().getResourceAsStream("/iesfiles/selfopt/input_with_cold.csv");
+        InputStream inputStream = this.getClass().getResourceAsStream("/iesfiles/selfopt/input_with_cold1.csv");
         readData(inputStream);
-        List<AbsorptionChiller> absorptionChillers = new ArrayList<>(1);
-        AbsorptionChiller absorptionChiller = new AbsorptionChiller(0.00008, 0, 1000, 0.8);
-        absorptionChillers.add(absorptionChiller);
+        List<AbsorptionChiller> absorptionChillers = new ArrayList<>(2);
+        for (int i = 0; i < 2; i++) {
+            AbsorptionChiller absorptionChiller = new AbsorptionChiller(0.00008, 0, 500, 0.8);
+            absorptionChillers.add(absorptionChiller);
+        }
         List<AirCon> airCons = new ArrayList<>(1);
-        AirCon airCon = new AirCon(0.0097, 1, 1.05, 0, 500, 4.3);
+        AirCon airCon = new AirCon(0.0097, 1, 1.00, 0, 500, 4.3);
         airCons.add(airCon);
         List<Converter> converters = new ArrayList<>(1);
         Converter converter = new Converter(0.95, 0.95);
@@ -33,20 +35,20 @@ public class SelfOptModelTest  extends TestCase {
         GasBoiler gasBoiler = new GasBoiler(0.04, 100, 0.85, 0, 1000, 500, 0);
         gasBoilers.add(gasBoiler);
         List<GasTurbine> gasTurbines = new ArrayList<>(1);
-        GasTurbine gasTurbine = new GasTurbine(0.063, 0.33, 0.6, 200, 50, 1000, - 500, 500, 0);
+        GasTurbine gasTurbine = new GasTurbine(0.063, 0.33, 0.6, 0.3, 200, 50, 1000, - 500, 500, 0);
         gasTurbines.add(gasTurbine);
         List<IceStorageAc> iceStorageAcs = new ArrayList<>(1);
         IceStorageAc iceStorageAc = new IceStorageAc(0.01, 1, 3, 3, 0.9, 1,
-                0.002, 500, 3000, 0.1, 0.95, 0.1, 1.05, 500, 500);
+                0.002, 500, 3000, 0.1, 0.95, 0.1, 1.00, 500, 500);
         iceStorageAcs.add(iceStorageAc);
         List<Photovoltaic> photovoltaics = new ArrayList<>(1);
         Photovoltaic photovoltaic = new Photovoltaic(0.0005, pvPowers);
         photovoltaics.add(photovoltaic);
         List<SteamLoad> steamLoads = new ArrayList<>(1);
-        SteamLoad steamLoad = new SteamLoad(Lsteams, 0.8);
+        SteamLoad steamLoad = new SteamLoad(Lsteams, 0.2);
         steamLoads.add(steamLoad);
         List<Storage> storages = new ArrayList<>(3);
-        for (int i = 0; i < 2; i++) {
+        for (int i = 0; i < 3; i++) {
             Storage storage = new Storage(0.005, 0.00075, 1250, 1250, 13000, 0.1, 0.9, 0.1, 0.5, 0.5, 0.0025, 0.95, 0.95);
             storages.add(storage);
         }
@@ -64,13 +66,13 @@ public class SelfOptModelTest  extends TestCase {
     }
 
     public DemandRespModel demandRespTestModel() throws IOException {
-        InputStream inputStream = this.getClass().getResourceAsStream("/iesfiles/selfopt/input_with_cold.csv");
+        InputStream inputStream = this.getClass().getResourceAsStream("/iesfiles/selfopt/input_with_cold1.csv");
         readData(inputStream);
         List<AbsorptionChiller> absorptionChillers = new ArrayList<>(1);
-        AbsorptionChiller absorptionChiller = new AbsorptionChiller(0.00008, 0, 1000, 0.8);
+        AbsorptionChiller absorptionChiller = new AbsorptionChiller(0.00008, 0, 500, 0.8);
         absorptionChillers.add(absorptionChiller);
         List<AirCon> airCons = new ArrayList<>(1);
-        AirCon airCon = new AirCon(0.0097, 1, 1.05, 0, 500, 4.3);
+        AirCon airCon = new AirCon(0.0097, 1, 1.00, 0, 500, 4.3);
         airCons.add(airCon);
         List<Converter> converters = new ArrayList<>(1);
         Converter converter = new Converter(0.95, 0.95);
@@ -79,17 +81,17 @@ public class SelfOptModelTest  extends TestCase {
         GasBoiler gasBoiler = new GasBoiler(0.04, 100, 0.85, 0, 1000, 500, 0);
         gasBoilers.add(gasBoiler);
         List<GasTurbine> gasTurbines = new ArrayList<>(1);
-        GasTurbine gasTurbine = new GasTurbine(0.063, 0.33, 0.6, 200, 50, 1000, - 500, 500, 0);
+        GasTurbine gasTurbine = new GasTurbine(0.063, 0.33, 0.6, 0.3, 200, 50, 1000, - 500, 500, 0);
         gasTurbines.add(gasTurbine);
         List<IceStorageAc> iceStorageAcs = new ArrayList<>(1);
         IceStorageAc iceStorageAc = new IceStorageAc(0.01, 1, 3, 3, 0.9, 1,
-                0.002, 500, 3000, 0.1, 0.95, 0.1, 1.05, 500, 500);
+                0.002, 500, 3000, 0.1, 0.95, 0.1, 1.00, 500, 500);
         iceStorageAcs.add(iceStorageAc);
         List<Photovoltaic> photovoltaics = new ArrayList<>(1);
         Photovoltaic photovoltaic = new Photovoltaic(0.0005, pvPowers);
         photovoltaics.add(photovoltaic);
         List<SteamLoad> steamLoads = new ArrayList<>(1);
-        SteamLoad steamLoad = new SteamLoad(Lsteams, 0.8);
+        SteamLoad steamLoad = new SteamLoad(Lsteams, 0.2);
         steamLoads.add(steamLoad);
         List<Storage> storages = new ArrayList<>(3);
         for (int i = 0; i < 2; i++) {
