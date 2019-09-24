@@ -18,50 +18,235 @@ public class SelfOptModelTest  extends TestCase {
     double[] Lsteams = new double[periodNum];   // 蒸汽负荷
 
     public SelfOptModel selfOptTestModel() throws IOException {
-        InputStream inputStream = this.getClass().getResourceAsStream("/iesfiles/selfopt/input_with_cold1.csv");
-        readData(inputStream);
-        List<AbsorptionChiller> absorptionChillers = new ArrayList<>(2);
-        for (int i = 0; i < 2; i++) {
-            AbsorptionChiller absorptionChiller = new AbsorptionChiller(0.00008, 0, 500, 0.8);
-            absorptionChillers.add(absorptionChiller);
-        }
-        List<AirCon> airCons = new ArrayList<>(1);
-        AirCon airCon = new AirCon(0.0097, 1, 1.00, 0, 500, 4.3);
-        airCons.add(airCon);
-        List<Converter> converters = new ArrayList<>(1);
-        Converter converter = new Converter(0.95, 0.95);
-        converters.add(converter);
-        List<GasBoiler> gasBoilers = new ArrayList<>(1);
-        GasBoiler gasBoiler = new GasBoiler(0.04, 100, 0.85, 0, 1000, 500, 0);
-        gasBoilers.add(gasBoiler);
-        List<GasTurbine> gasTurbines = new ArrayList<>(1);
-        GasTurbine gasTurbine = new GasTurbine(0.063, 0.33, 0.6, 0.3, 200, 50, 1000, - 500, 500, 0);
-        gasTurbines.add(gasTurbine);
-        List<IceStorageAc> iceStorageAcs = new ArrayList<>(1);
-        IceStorageAc iceStorageAc = new IceStorageAc(0.01, 1, 3, 3, 0.9, 1,
-                0.002, 500, 3000, 0.1, 0.95, 0.1, 1.00, 500, 500);
-        iceStorageAcs.add(iceStorageAc);
-        List<Photovoltaic> photovoltaics = new ArrayList<>(1);
-        Photovoltaic photovoltaic = new Photovoltaic(0.0005, pvPowers);
-        photovoltaics.add(photovoltaic);
-        List<SteamLoad> steamLoads = new ArrayList<>(1);
-        SteamLoad steamLoad = new SteamLoad(Lsteams, 0.2);
-        steamLoads.add(steamLoad);
-        List<Storage> storages = new ArrayList<>(3);
-        for (int i = 0; i < 3; i++) {
-            Storage storage = new Storage(0.005, 0.00075, 1250, 1250, 13000, 0.1, 0.9, 0.1, 0.5, 0.5, 0.0025, 0.95, 0.95);
-            storages.add(storage);
-        }
-        User user = new User("1", absorptionChillers, airCons, converters, gasBoilers, gasTurbines, iceStorageAcs, photovoltaics, steamLoads, storages);
         Map<String, User> users = new HashMap<>();
-        users.put(user.getUserId(), user);
+        // 用户1
+//        InputStream inputStream = this.getClass().getResourceAsStream("/iesfiles/selfopt/input_with_cold1.csv");
+//        readData(inputStream);
+//        List<AbsorptionChiller> absorptionChillers = new ArrayList<>(2);
+//        for (int i = 0; i < 2; i++) {
+//            AbsorptionChiller absorptionChiller = new AbsorptionChiller(0.00008, 0, 500, 0.8);
+//            absorptionChillers.add(absorptionChiller);
+//        }
+//        List<AirCon> airCons = new ArrayList<>(1);
+//        for (int i = 0; i < 1; i++) {
+//            AirCon airCon = new AirCon(0.0097, 1, 1.00, 0, 500, 4.3);
+//            airCons.add(airCon);
+//        }
+//        List<Converter> converters = new ArrayList<>(1);
+//        for (int i = 0; i < 1; i++) {
+//            Converter converter = new Converter(0.95, 0.95);
+//            converters.add(converter);
+//        }
+//        List<GasBoiler> gasBoilers = new ArrayList<>(1);
+//        for (int i = 0; i < 1; i++) {
+//            GasBoiler gasBoiler = new GasBoiler(0.04, 100, 0.85, 0, 1000, 500, 0);
+//            gasBoilers.add(gasBoiler);
+//        }
+//        List<GasTurbine> gasTurbines = new ArrayList<>(1);
+//        for (int i = 0; i < 1; i++) {
+//            GasTurbine gasTurbine = new GasTurbine(0.063, 0.33, 0.6, 0.3, 200, 50, 1000, -500, 500, 0);
+//            gasTurbines.add(gasTurbine);
+//        }
+//        List<IceStorageAc> iceStorageAcs = new ArrayList<>(1);
+//        for (int i = 0; i < 1; i++) {
+//            IceStorageAc iceStorageAc = new IceStorageAc(0.01, 1, 3, 3, 0.9, 1,
+//                    0.002, 500, 3000, 0.1, 0.95, 0.1, 1.00, 500, 500);
+//            iceStorageAcs.add(iceStorageAc);
+//        }
+//        List<Photovoltaic> photovoltaics = new ArrayList<>(1);
+//        for (int i = 0; i < 1; i++) {
+//            Photovoltaic photovoltaic = new Photovoltaic(0.0005, pvPowers);
+//            photovoltaics.add(photovoltaic);
+//        }
+//        List<SteamLoad> steamLoads = new ArrayList<>(1);
+//        for (int i = 0; i < 1; i++) {
+//            SteamLoad steamLoad = new SteamLoad(Lsteams, 0.2);
+//            steamLoads.add(steamLoad);
+//        }
+//        List<Storage> storages = new ArrayList<>(3);
+//        for (int i = 0; i < 3; i++) {
+//            Storage storage = new Storage(0.005, 0.00075, 1250, 1250, 13000, 0.1, 0.9, 0.1, 0.5, 0.5, 0.0025, 0.95, 0.95);
+//            storages.add(storage);
+//        }
+//        User user = new User("1", absorptionChillers, airCons, converters, gasBoilers, gasTurbines, iceStorageAcs, photovoltaics, steamLoads, storages);
+//        users.put(user.getUserId(), user);
+
+        // 用户2
+        InputStream inputStream = this.getClass().getResourceAsStream("/iesfiles/selfopt/input_with_cold2.csv");
+        readData(inputStream);
+        List<AbsorptionChiller> absorptionChillers2 = new ArrayList<>(4);
+        for (int i = 0; i < 3; i++) {
+            AbsorptionChiller absorptionChiller = new AbsorptionChiller(0.00008, 0, 500, 0.8);
+            absorptionChillers2.add(absorptionChiller);
+        }
+        List<AirCon> airCons2 = new ArrayList<>(2);
+        for (int i = 0; i < 1; i++) {
+            AirCon airCon = new AirCon(0.0097, 1, 1.00, 0, 500, 4.3);
+            airCons2.add(airCon);
+        }
+        List<Converter> converters2 = new ArrayList<>(1);
+        for (int i = 0; i < 1; i++) {
+            Converter converter = new Converter(0.95, 0.95);
+            converters2.add(converter);
+        }
+        List<GasBoiler> gasBoilers2 = new ArrayList<>(1);
+        for (int i = 0; i < 1; i++) {
+            GasBoiler gasBoiler = new GasBoiler(0.04, 100, 0.85, 0, 1000, 500, 0);
+            gasBoilers2.add(gasBoiler);
+        }
+        List<GasTurbine> gasTurbines2 = new ArrayList<>(1);
+        for (int i = 0; i < 1; i++) {
+            GasTurbine gasTurbine = new GasTurbine(0.063, 0.33, 0.6, 0.3, 200, 50, 1000, -500, 500, 0);
+            gasTurbines2.add(gasTurbine);
+        }
+        List<IceStorageAc> iceStorageAcs2 = new ArrayList<>(2);
+        for (int i = 0; i < 2; i++) {
+            IceStorageAc iceStorageAc = new IceStorageAc(0.01, 1, 3, 3, 0.9, 1,
+                    0.002, 500, 3000, 0.1, 0.95, 0.1, 1.00, 500, 500);
+            iceStorageAcs2.add(iceStorageAc);
+        }
+        List<Photovoltaic> photovoltaics2 = new ArrayList<>(1);
+        for (int i = 0; i < 1; i++) {
+            Photovoltaic photovoltaic = new Photovoltaic(0.0005, pvPowers);
+            photovoltaics2.add(photovoltaic);
+        }
+        List<SteamLoad> steamLoads2 = new ArrayList<>(1);
+        for (int i = 0; i < 1; i++) {
+            SteamLoad steamLoad = new SteamLoad(Lsteams, 0.2);
+            steamLoads2.add(steamLoad);
+        }
+        List<Storage> storages2 = new ArrayList<>(1);
+        for (int i = 0; i < 1; i++) {
+            Storage storage = new Storage(0.005, 0.00075, 1250, 1250, 13000, 0.1, 0.9, 0.1, 0.5, 0.5, 0.0025, 0.95, 0.95);
+            storages2.add(storage);
+        }
+        User user2 = new User("2", absorptionChillers2, airCons2, converters2, gasBoilers2, gasTurbines2, iceStorageAcs2, photovoltaics2, steamLoads2, storages2);
+        users.put(user2.getUserId(), user2);
+
+        // 用户3
+//        inputStream = this.getClass().getResourceAsStream("/iesfiles/selfopt/input_with_cold3.csv");
+//        readData(inputStream);
+//        List<AbsorptionChiller> absorptionChillers3 = new ArrayList<>(1);
+//        for (int i = 0; i < 1; i++) {
+//            AbsorptionChiller absorptionChiller = new AbsorptionChiller(0.00008, 0, 500, 0.8);
+//            absorptionChillers3.add(absorptionChiller);
+//        }
+//        List<AirCon> airCons3 = new ArrayList<>(1);
+//        for (int i = 0; i < 1; i++) {
+//            AirCon airCon = new AirCon(0.0097, 1, 1.00, 0, 500, 4.3);
+//            airCons3.add(airCon);
+//        }
+//        List<Converter> converters3 = new ArrayList<>(1);
+//        for (int i = 0; i < 1; i++) {
+//            Converter converter = new Converter(0.95, 0.95);
+//            converters3.add(converter);
+//        }
+//        List<GasBoiler> gasBoilers3 = new ArrayList<>(1);
+//        for (int i = 0; i < 1; i++) {
+//            GasBoiler gasBoiler = new GasBoiler(0.04, 100, 0.85, 0, 1000, 500, 0);
+//            gasBoilers3.add(gasBoiler);
+//        }
+//        List<GasTurbine> gasTurbines3 = new ArrayList<>(1);
+//        for (int i = 0; i < 1; i++) {
+//            GasTurbine gasTurbine = new GasTurbine(0.063, 0.33, 0.6, 0.3, 200, 50, 1000, -500, 500, 0);
+//            gasTurbines3.add(gasTurbine);
+//        }
+//        List<IceStorageAc> iceStorageAcs3 = new ArrayList<>(1);
+//        List<Photovoltaic> photovoltaics3 = new ArrayList<>(1);
+//        for (int i = 0; i < 1; i++) {
+//            Photovoltaic photovoltaic = new Photovoltaic(0.0005, pvPowers);
+//            photovoltaics3.add(photovoltaic);
+//        }
+//        List<SteamLoad> steamLoads3 = new ArrayList<>(1);
+//        for (int i = 0; i < 1; i++) {
+//            SteamLoad steamLoad = new SteamLoad(Lsteams, 0.2);
+//            steamLoads3.add(steamLoad);
+//        }
+//        List<Storage> storages3 = new ArrayList<>(1);
+//        User user3 = new User("3", absorptionChillers3, airCons3, converters3, gasBoilers3, gasTurbines3, iceStorageAcs3, photovoltaics3, steamLoads3, storages3);
+//        users.put(user3.getUserId(), user3);
+//
+//        // 用户4
+//        inputStream = this.getClass().getResourceAsStream("/iesfiles/selfopt/input_with_cold4.csv");
+//        readData(inputStream);
+//        List<AbsorptionChiller> absorptionChillers4 = new ArrayList<>(1);
+//        for (int i = 0; i < 1; i++) {
+//            AbsorptionChiller absorptionChiller = new AbsorptionChiller(0.00008, 0, 500, 0.8);
+//            absorptionChillers4.add(absorptionChiller);
+//        }
+//        List<AirCon> airCons4 = new ArrayList<>(1);
+//        for (int i = 0; i < 1; i++) {
+//            AirCon airCon = new AirCon(0.0097, 1, 1.00, 0, 500, 4.3);
+//            airCons4.add(airCon);
+//        }
+//        List<Converter> converters4 = new ArrayList<>(1);
+//        for (int i = 0; i < 1; i++) {
+//            Converter converter = new Converter(0.95, 0.95);
+//            converters4.add(converter);
+//        }
+//        List<GasBoiler> gasBoilers4 = new ArrayList<>(1);
+//        for (int i = 0; i < 1; i++) {
+//            GasBoiler gasBoiler = new GasBoiler(0.04, 100, 0.85, 0, 1000, 500, 0);
+//            gasBoilers4.add(gasBoiler);
+//        }
+//        List<GasTurbine> gasTurbines4 = new ArrayList<>(1);
+//        List<IceStorageAc> iceStorageAcs4 = new ArrayList<>(1);
+//        List<Photovoltaic> photovoltaics4 = new ArrayList<>(1);
+//        for (int i = 0; i < 1; i++) {
+//            Photovoltaic photovoltaic = new Photovoltaic(0.0005, pvPowers);
+//            photovoltaics4.add(photovoltaic);
+//        }
+//        List<SteamLoad> steamLoads4 = new ArrayList<>(1);
+//        for (int i = 0; i < 1; i++) {
+//            SteamLoad steamLoad = new SteamLoad(Lsteams, 0.2);
+//            steamLoads4.add(steamLoad);
+//        }
+//        List<Storage> storages4 = new ArrayList<>(3);
+//        User user4 = new User("4", absorptionChillers4, airCons4, converters4, gasBoilers4, gasTurbines4, iceStorageAcs4, photovoltaics4, steamLoads4, storages4);
+//        users.put(user4.getUserId(), user4);
+//
+//        // 用户5
+//        inputStream = this.getClass().getResourceAsStream("/iesfiles/selfopt/input_with_cold5.csv");
+//        readData(inputStream);
+//        List<AbsorptionChiller> absorptionChillers5 = new ArrayList<>(1);
+//        List<AirCon> airCons5 = new ArrayList<>(1);
+//        List<Converter> converters5 = new ArrayList<>(1);
+//        for (int i = 0; i < 1; i++) {
+//            Converter converter = new Converter(0.95, 0.95);
+//            converters5.add(converter);
+//        }
+//        List<GasBoiler> gasBoilers5 = new ArrayList<>(1);
+//        for (int i = 0; i < 1; i++) {
+//            GasBoiler gasBoiler = new GasBoiler(0.04, 100, 0.85, 0, 1000, 500, 0);
+//            gasBoilers5.add(gasBoiler);
+//        }
+//        List<GasTurbine> gasTurbines5 = new ArrayList<>(1);
+//        List<IceStorageAc> iceStorageAcs5 = new ArrayList<>(1);
+//        List<Photovoltaic> photovoltaics5 = new ArrayList<>(1);
+//        for (int i = 0; i < 1; i++) {
+//            Photovoltaic photovoltaic = new Photovoltaic(0.0005, pvPowers);
+//            photovoltaics5.add(photovoltaic);
+//        }
+//        List<SteamLoad> steamLoads5 = new ArrayList<>(1);
+//        for (int i = 0; i < 1; i++) {
+//            SteamLoad steamLoad = new SteamLoad(Lsteams, 0.2);
+//            steamLoads5.add(steamLoad);
+//        }
+//        List<Storage> storages5 = new ArrayList<>(1);
+//        User user5 = new User("5", absorptionChillers5, airCons5, converters5, gasBoilers5, gasTurbines5, iceStorageAcs5, photovoltaics5, steamLoads5, storages5);
+//        users.put(user5.getUserId(), user5);
+
         Microgrid microgrid = new Microgrid(users);
         Map<String, double[]> gatePowers = new HashMap<>();   // 用户关口功率
         double[] gatePower = new double[periodNum];
         for (int i = 0; i < periodNum; i++) {
             gatePower[i] = 8000;
         }
-        gatePowers.put(user.getUserId(), gatePower);
+//        gatePowers.put(user.getUserId(), gatePower);
+        gatePowers.put(user2.getUserId(), gatePower);
+//        gatePowers.put(user3.getUserId(), gatePower);
+//        gatePowers.put(user4.getUserId(), gatePower);
+//        gatePowers.put(user5.getUserId(), gatePower);
         return new SelfOptModel(microgrid, periodNum, acLoad, dcLoad, coolingLoad, elecPrices, gasPrices, steamPrices, gatePowers);
     }
 
