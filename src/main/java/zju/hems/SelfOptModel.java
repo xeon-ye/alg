@@ -17,28 +17,19 @@ public class SelfOptModel {
     Microgrid microgrid;
     int periodNum; // 一天的时段数
     double t;   // 单位时段长度
-    double[] acLoad;    // 交流负荷
-    double[] dcLoad;    // 直流负荷
-    double[] coolingLoad;   // 冷负荷
     double[] elecPrices;    // 电价
     double[] gasPrices;    // 天然气价格
     double[] steamPrices;    // 园区CHP蒸汽价格
-    Map<String, double[]> gatePowers;   // 用户关口功率
 
     Map<String, UserResult> microgridResult;
 
-    public SelfOptModel(Microgrid microgrid, int periodNum, double[] acLoad, double[] dcLoad, double[] coolingLoad,
-                        double[] elecPrices, double[] gasPrices, double[] steamPrices, Map<String, double[]> gatePowers) {
+    public SelfOptModel(Microgrid microgrid, int periodNum, double[] elecPrices, double[] gasPrices, double[] steamPrices) {
         this.microgrid = microgrid;
         this.periodNum = periodNum;
         t = 24. / periodNum;
-        this.acLoad = acLoad;
-        this.dcLoad = dcLoad;
-        this.coolingLoad = coolingLoad;
         this.elecPrices = elecPrices;
         this.gasPrices = gasPrices;
         this.steamPrices = steamPrices;
-        this.gatePowers = gatePowers;
     }
 
     public void mgSelfOpt() {
@@ -56,8 +47,13 @@ public class SelfOptModel {
         List<GasTurbine> gasTurbines = user.getGasTurbines();
         List<IceStorageAc> iceStorageAcs = user.getIceStorageAcs();
         List<Storage> storages = user.getStorages();
-        List<Photovoltaic> photovoltaics = user.getPhotovoltaics();
-        List<SteamLoad> steamLoads = user.getSteamLoads();
+        SteamLoad steamLoad = user.getSteamLoad();
+        Photovoltaic photovoltaic = user.getPhotovoltaic();
+        double[] acLoad = user.acLoad;
+        double[] dcLoad = user.dcLoad;
+        double[] heatLoad = user.heatLoad;
+        double[] coolingLoad = user.coolingLoad;
+        double[] gatePowers = user.gatePowers;
         try {
             // 变量：制冷机耗电功率，蓄冰槽耗电功率，蓄冰槽制冷功率(Q)，燃气轮机启停状态，表示燃气轮机状态变化的变量，
             // 燃气轮机产电功率，储能充电功率(外部)，储能放电功率(外部)，变流器AC-DC交流侧功率，变流器DC-AC交流侧功率，
@@ -268,9 +264,7 @@ public class SelfOptModel {
                     coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + storages.size() + i] = 1;   // 储能放电功率
                 }
                 double periodDcLoad = dcLoad[j];
-                for (Photovoltaic photovoltaic : photovoltaics) {
-                    periodDcLoad -= photovoltaic.getPower()[j];
-                }
+                periodDcLoad -= photovoltaic.getPower()[j];
                 cplex.addEq(cplex.scalProd(x, coeff[coeffNum]), periodDcLoad);
                 coeffNum += 1;
 
@@ -518,7 +512,7 @@ public class SelfOptModel {
             // 关口功率约束
             for (int j = 0; j < periodNum; j++) {
                 coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + 2 * storages.size() + 2 * converters.size()] = 1;    // 电网输入电功率
-                cplex.addLe(cplex.scalProd(x, coeff[coeffNum]), gatePowers.get(user.getUserId())[j]);
+                cplex.addLe(cplex.scalProd(x, coeff[coeffNum]), gatePowers[j]);
                 coeffNum += 1;
             }
 
@@ -536,11 +530,7 @@ public class SelfOptModel {
                 for (int i = 0; i < absorptionChillers.size(); i++) {
                     coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + 2 * storages.size() + 2 * converters.size() + 2 + airCons.size() + 3 * gasBoilers.size()] = - 1;   // 吸收式制冷机耗热功率
                 }
-                double steamLoadVal = 0;
-                for (SteamLoad steamLoad : steamLoads) {
-                    steamLoadVal += steamLoad.getDemand()[j] * (1 - steamLoad.getEffh());
-                }
-                cplex.addGe(cplex.scalProd(x, coeff[coeffNum]), steamLoadVal);
+                cplex.addGe(cplex.scalProd(x, coeff[coeffNum]), steamLoad.getDemand()[j] * (1 - steamLoad.getEffh()) + heatLoad[j]);
                 coeffNum += 1;
 
                 // 中品味热约束
@@ -551,11 +541,7 @@ public class SelfOptModel {
                     coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + 2 * storages.size() + 2 * converters.size() + 2 + airCons.size() + 2 * gasBoilers.size() + i] = 1;   // 燃气锅炉产热功率
                 }
                 coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + 2 * storages.size() + 2 * converters.size() + 2 + airCons.size() + 3 * gasBoilers.size() + absorptionChillers.size()] = 1;   // 园区输入热功率
-                double Hdr = 0;
-                for (SteamLoad steamLoad : steamLoads) {
-                    Hdr += steamLoad.getDemand()[j];
-                }
-                cplex.addGe(cplex.scalProd(x, coeff[coeffNum]), Hdr);
+                cplex.addGe(cplex.scalProd(x, coeff[coeffNum]), steamLoad.getDemand()[j]);
                 coeffNum += 1;
             }
 
@@ -582,9 +568,7 @@ public class SelfOptModel {
                     double minCost = cplex.getObjValue();
                     // 加上光伏运行成本
                     for (int j = 0; j < periodNum; j++) {
-                        for (Photovoltaic photovoltaic : photovoltaics) {
-                            minCost += photovoltaic.getCoper() * photovoltaic.getPower()[j];
-                        }
+                        minCost += photovoltaic.getCoper() * photovoltaic.getPower()[j];
                     }
                     createUserResult(user.getUserId(), cplex.getStatus().toString(), minCost, cplex.getValues(x),
                             periodVarNum, iceStorageAcs, gasTurbines, storages, converters, airCons, gasBoilers,
@@ -689,14 +673,6 @@ public class SelfOptModel {
 
     public Microgrid getMicrogrid() {
         return microgrid;
-    }
-
-    public Map<String, double[]> getGatePowers() {
-        return gatePowers;
-    }
-
-    public void setGatePowers(Map<String, double[]> gatePowers) {
-        this.gatePowers = gatePowers;
     }
 
     public Map<String, UserResult> getMicrogridResult() {

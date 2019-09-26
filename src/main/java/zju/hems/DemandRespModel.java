@@ -22,9 +22,8 @@ public class DemandRespModel extends SelfOptModel {
     Map<String, Double> peakShaveRatios; // 削峰比例
     List<Offer> offers; // 报价
 
-    public DemandRespModel(Microgrid microgrid, int periodNum, double[] acLoad, double[] dcLoad, double[] coolingLoad,
-                           double[] elecPrices, double[] gasPrices, double[] steamPrices, Map<String, double[]> gatePowers) {
-        super(microgrid, periodNum, acLoad, dcLoad, coolingLoad, elecPrices, gasPrices, steamPrices, gatePowers);
+    public DemandRespModel(Microgrid microgrid, int periodNum, double[] elecPrices, double[] gasPrices, double[] steamPrices) {
+        super(microgrid, periodNum, elecPrices, gasPrices, steamPrices);
     }
 
     public void mgOrigDemandResp() {
@@ -45,8 +44,13 @@ public class DemandRespModel extends SelfOptModel {
         List<GasTurbine> gasTurbines = user.getGasTurbines();
         List<IceStorageAc> iceStorageAcs = user.getIceStorageAcs();
         List<Storage> storages = user.getStorages();
-        List<Photovoltaic> photovoltaics = user.getPhotovoltaics();
-        List<SteamLoad> steamLoads = user.getSteamLoads();
+        SteamLoad steamLoad = user.getSteamLoad();
+        Photovoltaic photovoltaic = user.getPhotovoltaic();
+        double[] acLoad = user.acLoad;
+        double[] dcLoad = user.dcLoad;
+        double[] heatLoad = user.heatLoad;
+        double[] coolingLoad = user.coolingLoad;
+        double[] gatePowers = user.gatePowers;
         try {
             int peakShaveTimeNum = 0;
             for (int i = 0; i < peakShaveTime.length; i++) {
@@ -275,9 +279,7 @@ public class DemandRespModel extends SelfOptModel {
                     coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + storages.size() + i] = 1;   // 储能放电功率
                 }
                 double periodDcLoad = dcLoad[j];
-                for (Photovoltaic photovoltaic : photovoltaics) {
-                    periodDcLoad -= photovoltaic.getPower()[j];
-                }
+                periodDcLoad -= photovoltaic.getPower()[j];
                 cplex.addEq(cplex.scalProd(x, coeff[coeffNum]), periodDcLoad);
                 coeffNum += 1;
 
@@ -527,12 +529,12 @@ public class DemandRespModel extends SelfOptModel {
                 if (peakShaveTime[j] == 0) {
                     // 非削峰时段关口功率约束
                     coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + 2 * storages.size() + 2 * converters.size()] = 1;    // 电网输入电功率
-                    cplex.addLe(cplex.scalProd(x, coeff[coeffNum]), gatePowers.get(user.getUserId())[j]);
+                    cplex.addLe(cplex.scalProd(x, coeff[coeffNum]), gatePowers[j]);
                     coeffNum += 1;
                 } else {
                     // 削峰功率上限约束
                     coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + 2 * storages.size() + 2 * converters.size()] = 1;    // 电网输入电功率
-                    cplex.addGe(cplex.scalProd(x, coeff[coeffNum]), gatePowers.get(user.getUserId())[j]);
+                    cplex.addGe(cplex.scalProd(x, coeff[coeffNum]), gatePowers[j]);
                     coeffNum += 1;
                 }
 
@@ -540,11 +542,11 @@ public class DemandRespModel extends SelfOptModel {
                 if (peakShaveTime[j] == 1) {
                     coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + 2 * storages.size() + 2 * converters.size() + 2] = 1;
                     coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + 2 * storages.size() + 2 * converters.size()] = - 1;
-                    cplex.addLe(cplex.scalProd(x, coeff[coeffNum]), - gatePowers.get(user.getUserId())[j]);
+                    cplex.addLe(cplex.scalProd(x, coeff[coeffNum]), - gatePowers[j]);
                     coeffNum += 1;
                     coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + 2 * storages.size() + 2 * converters.size() + 2] = 1;
                     coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + 2 * storages.size() + 2 * converters.size()] = 1;
-                    cplex.addLe(cplex.scalProd(x, coeff[coeffNum]), gatePowers.get(user.getUserId())[j]);
+                    cplex.addLe(cplex.scalProd(x, coeff[coeffNum]), gatePowers[j]);
                     coeffNum += 1;
                 }
             }
@@ -563,11 +565,7 @@ public class DemandRespModel extends SelfOptModel {
                 for (int i = 0; i < absorptionChillers.size(); i++) {
                     coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + 2 * storages.size() + 2 * converters.size() + 3 + airCons.size() + 3 * gasBoilers.size()] = - 1;   // 吸收式制冷机耗热功率
                 }
-                double steamLoadVal = 0;
-                for (SteamLoad steamLoad : steamLoads) {
-                    steamLoadVal += steamLoad.getDemand()[j] * (1 - steamLoad.getEffh());
-                }
-                cplex.addGe(cplex.scalProd(x, coeff[coeffNum]), steamLoadVal);
+                cplex.addGe(cplex.scalProd(x, coeff[coeffNum]), steamLoad.getDemand()[j] * (1 - steamLoad.getEffh()) + heatLoad[j]);
                 coeffNum += 1;
 
                 // 中品味热约束
@@ -578,11 +576,7 @@ public class DemandRespModel extends SelfOptModel {
                     coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + 2 * storages.size() + 2 * converters.size() + 3 + airCons.size() + 2 * gasBoilers.size() + i] = 1;   // 燃气锅炉产热功率
                 }
                 coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + 2 * storages.size() + 2 * converters.size() + 3 + airCons.size() + 3 * gasBoilers.size() + absorptionChillers.size()] = 1;   // 园区输入热功率
-                double Hdr = 0;
-                for (SteamLoad steamLoad : steamLoads) {
-                    Hdr += steamLoad.getDemand()[j];
-                }
-                cplex.addGe(cplex.scalProd(x, coeff[coeffNum]), Hdr);
+                cplex.addGe(cplex.scalProd(x, coeff[coeffNum]), steamLoad.getDemand()[j]);
                 coeffNum += 1;
             }
 
@@ -655,9 +649,7 @@ public class DemandRespModel extends SelfOptModel {
                         handledVarNum += 1;
                         minCost += result[j * periodVarNum + handledVarNum] * steamPrices[j] * t; // 购热成本
 
-                        for (Photovoltaic photovoltaic : photovoltaics) {
-                            minCost += photovoltaic.getCoper() * photovoltaic.getPower()[j];    // 光伏运行成本
-                        }
+                        minCost += photovoltaic.getCoper() * photovoltaic.getPower()[j];    // 光伏运行成本
                     }
 
                     createUserResult(user.getUserId(), cplex.getStatus().toString(), minCost, cplex.getValues(x),
@@ -693,8 +685,13 @@ public class DemandRespModel extends SelfOptModel {
         List<GasTurbine> gasTurbines = user.getGasTurbines();
         List<IceStorageAc> iceStorageAcs = user.getIceStorageAcs();
         List<Storage> storages = user.getStorages();
-        List<Photovoltaic> photovoltaics = user.getPhotovoltaics();
-        List<SteamLoad> steamLoads = user.getSteamLoads();
+        SteamLoad steamLoad = user.getSteamLoad();
+        Photovoltaic photovoltaic = user.getPhotovoltaic();
+        double[] acLoad = user.acLoad;
+        double[] dcLoad = user.dcLoad;
+        double[] heatLoad = user.heatLoad;
+        double[] coolingLoad = user.coolingLoad;
+        double[] gatePowers = user.gatePowers;
         try {
             // 变量：制冷机耗电功率，蓄冰槽耗电功率，蓄冰槽制冷功率(Q)，燃气轮机启停状态，表示燃气轮机状态变化的变量，
             // 燃气轮机产电功率，储能充电功率(外部)，储能放电功率(外部)，变流器AC-DC交流侧功率，变流器DC-AC交流侧功率，
@@ -905,9 +902,7 @@ public class DemandRespModel extends SelfOptModel {
                     coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + storages.size() + i] = 1;   // 储能放电功率
                 }
                 double periodDcLoad = dcLoad[j];
-                for (Photovoltaic photovoltaic : photovoltaics) {
-                    periodDcLoad -= photovoltaic.getPower()[j];
-                }
+                periodDcLoad -= photovoltaic.getPower()[j];
                 cplex.addEq(cplex.scalProd(x, coeff[coeffNum]), periodDcLoad);
                 coeffNum += 1;
 
@@ -1157,12 +1152,12 @@ public class DemandRespModel extends SelfOptModel {
                 // 非削峰时段关口功率约束
                 if (peakShaveTime[j] == 0) {
                     coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + 2 * storages.size() + 2 * converters.size()] = 1;    // 电网输入电功率
-                    cplex.addLe(cplex.scalProd(x, coeff[coeffNum]), gatePowers.get(user.getUserId())[j]);
+                    cplex.addLe(cplex.scalProd(x, coeff[coeffNum]), gatePowers[j]);
                     coeffNum += 1;
                 } else {
                     // 削峰时段功率约束
                     coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + 2 * storages.size() + 2 * converters.size()] = 1;    // 电网输入电功率
-                    cplex.addEq(cplex.scalProd(x, coeff[coeffNum]), gatePowers.get(user.getUserId())[j]);
+                    cplex.addEq(cplex.scalProd(x, coeff[coeffNum]), gatePowers[j]);
                     coeffNum += 1;
                 }
             }
@@ -1181,11 +1176,7 @@ public class DemandRespModel extends SelfOptModel {
                 for (int i = 0; i < absorptionChillers.size(); i++) {
                     coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + 2 * storages.size() + 2 * converters.size() + 2 + airCons.size() + 3 * gasBoilers.size()] = - 1;   // 吸收式制冷机耗热功率
                 }
-                double steamLoadVal = 0;
-                for (SteamLoad steamLoad : steamLoads) {
-                    steamLoadVal += steamLoad.getDemand()[j] * (1 - steamLoad.getEffh());
-                }
-                cplex.addGe(cplex.scalProd(x, coeff[coeffNum]), steamLoadVal);
+                cplex.addGe(cplex.scalProd(x, coeff[coeffNum]), steamLoad.getDemand()[j] * (1 - steamLoad.getEffh()) + heatLoad[j]);
                 coeffNum += 1;
 
                 // 中品味热约束
@@ -1196,11 +1187,7 @@ public class DemandRespModel extends SelfOptModel {
                     coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + 2 * storages.size() + 2 * converters.size() + 2 + airCons.size() + 2 * gasBoilers.size() + i] = 1;   // 燃气锅炉产热功率
                 }
                 coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + 2 * storages.size() + 2 * converters.size() + 2 + airCons.size() + 3 * gasBoilers.size() + absorptionChillers.size()] = 1;   // 园区输入热功率
-                double Hdr = 0;
-                for (SteamLoad steamLoad : steamLoads) {
-                    Hdr += steamLoad.getDemand()[j];
-                }
-                cplex.addGe(cplex.scalProd(x, coeff[coeffNum]), Hdr);
+                cplex.addGe(cplex.scalProd(x, coeff[coeffNum]), steamLoad.getDemand()[j]);
                 coeffNum += 1;
             }
 
@@ -1227,9 +1214,7 @@ public class DemandRespModel extends SelfOptModel {
                     double minCost = cplex.getObjValue();
                     // 加上光伏运行成本
                     for (int j = 0; j < periodNum; j++) {
-                        for (Photovoltaic photovoltaic : photovoltaics) {
-                            minCost += photovoltaic.getCoper() * photovoltaic.getPower()[j];
-                        }
+                        minCost += photovoltaic.getCoper() * photovoltaic.getPower()[j];
                     }
                     createUserResult(user.getUserId(), cplex.getStatus().toString(), minCost, cplex.getValues(x),
                             periodVarNum, iceStorageAcs, gasTurbines, storages, converters, airCons, gasBoilers,
@@ -1267,8 +1252,13 @@ public class DemandRespModel extends SelfOptModel {
         List<GasTurbine> gasTurbines = user.getGasTurbines();
         List<IceStorageAc> iceStorageAcs = user.getIceStorageAcs();
         List<Storage> storages = user.getStorages();
-        List<Photovoltaic> photovoltaics = user.getPhotovoltaics();
-        List<SteamLoad> steamLoads = user.getSteamLoads();
+        SteamLoad steamLoad = user.getSteamLoad();
+        Photovoltaic photovoltaic = user.getPhotovoltaic();
+        double[] acLoad = user.acLoad;
+        double[] dcLoad = user.dcLoad;
+        double[] heatLoad = user.heatLoad;
+        double[] coolingLoad = user.coolingLoad;
+        double[] gatePowers = user.gatePowers;
         try {
             // 变量：制冷机耗电功率，蓄冰槽耗电功率，蓄冰槽制冷功率(Q)，燃气轮机启停状态，表示燃气轮机状态变化的变量，
             // 燃气轮机产电功率，储能充电功率(外部)，储能放电功率(外部)，变流器AC-DC交流侧功率，变流器DC-AC交流侧功率，
@@ -1489,9 +1479,7 @@ public class DemandRespModel extends SelfOptModel {
                     coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + storages.size() + i] = 1;   // 储能放电功率
                 }
                 double periodDcLoad = dcLoad[j];
-                for (Photovoltaic photovoltaic : photovoltaics) {
-                    periodDcLoad -= photovoltaic.getPower()[j];
-                }
+                periodDcLoad -= photovoltaic.getPower()[j];
                 cplex.addEq(cplex.scalProd(x, coeff[coeffNum]), periodDcLoad);
                 coeffNum += 1;
 
@@ -1739,7 +1727,7 @@ public class DemandRespModel extends SelfOptModel {
             // 关口功率约束
             for (int j = 0; j < periodNum; j++) {
                 coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + 2 * storages.size() + 2 * converters.size()] = 1;    // 电网输入电功率
-                cplex.addLe(cplex.scalProd(x, coeff[coeffNum]), gatePowers.get(userId)[j]);
+                cplex.addLe(cplex.scalProd(x, coeff[coeffNum]), gatePowers[j]);
                 coeffNum += 1;
             }
 
@@ -1767,11 +1755,7 @@ public class DemandRespModel extends SelfOptModel {
                 for (int i = 0; i < absorptionChillers.size(); i++) {
                     coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + 2 * storages.size() + 2 * converters.size() + 2 + airCons.size() + 3 * gasBoilers.size()] = - 1;   // 吸收式制冷机耗热功率
                 }
-                double steamLoadVal = 0;
-                for (SteamLoad steamLoad : steamLoads) {
-                    steamLoadVal += steamLoad.getDemand()[j] * (1 - steamLoad.getEffh());
-                }
-                cplex.addGe(cplex.scalProd(x, coeff[coeffNum]), steamLoadVal);
+                cplex.addGe(cplex.scalProd(x, coeff[coeffNum]), steamLoad.getDemand()[j] * (1 - steamLoad.getEffh()) + heatLoad[j]);
                 coeffNum += 1;
 
                 // 中品味热约束
@@ -1782,11 +1766,7 @@ public class DemandRespModel extends SelfOptModel {
                     coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + 2 * storages.size() + 2 * converters.size() + 2 + airCons.size() + 2 * gasBoilers.size() + i] = 1;   // 燃气锅炉产热功率
                 }
                 coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + 2 * storages.size() + 2 * converters.size() + 2 + airCons.size() + 3 * gasBoilers.size() + absorptionChillers.size()] = 1;   // 园区输入热功率
-                double Hdr = 0;
-                for (SteamLoad steamLoad : steamLoads) {
-                    Hdr += steamLoad.getDemand()[j];
-                }
-                cplex.addGe(cplex.scalProd(x, coeff[coeffNum]), Hdr);
+                cplex.addGe(cplex.scalProd(x, coeff[coeffNum]), steamLoad.getDemand()[j]);
                 coeffNum += 1;
             }
 
@@ -1813,9 +1793,7 @@ public class DemandRespModel extends SelfOptModel {
                     double minCost = cplex.getObjValue();
                     // 加上光伏运行成本
                     for (int j = 0; j < periodNum; j++) {
-                        for (Photovoltaic photovoltaic : photovoltaics) {
-                            minCost += photovoltaic.getCoper() * photovoltaic.getPower()[j];
-                        }
+                        minCost += photovoltaic.getCoper() * photovoltaic.getPower()[j];
                     }
                     // 加上购买削峰量成本
                     for (int j = 0; j < periodNum; j++) {

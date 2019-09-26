@@ -1,6 +1,7 @@
 package zju.hems;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 用户.
@@ -16,13 +17,19 @@ public class User {
     List<GasBoiler> gasBoilers;
     List<GasTurbine> gasTurbines;
     List<IceStorageAc> iceStorageAcs;
-    List<Photovoltaic> photovoltaics;
-    List<SteamLoad> steamLoads;
     List<Storage> storages;
+    Photovoltaic photovoltaic;
+    SteamLoad steamLoad;
+    double[] acLoad;    // 交流负荷
+    double[] dcLoad;    // 直流负荷
+    double[] heatLoad;    // 热水负荷
+    double[] coolingLoad;   // 冷负荷
+    double[] gatePowers;   // 用户关口功率
 
     public User(String userId, List<AbsorptionChiller> absorptionChillerList, List<AirCon> airCons, List<Converter> converters,
                  List<GasBoiler> gasBoilers, List<GasTurbine> gasTurbines, List<IceStorageAc> iceStorageAcs,
-                 List<Photovoltaic> photovoltaics, List<SteamLoad> steamLoads, List<Storage> storages) {
+                List<Storage> storages, SteamLoad steamLoad, Photovoltaic photovoltaic, double[] acLoad,
+                double[] dcLoad, double[] heatLoad, double[] coolingLoad, double[] gatePowers) {
         this.userId = userId;
         this.absorptionChillers = absorptionChillerList;
         this.airCons = airCons;
@@ -30,8 +37,25 @@ public class User {
         this.gasBoilers = gasBoilers;
         this.gasTurbines = gasTurbines;
         this.iceStorageAcs = iceStorageAcs;
-        this.photovoltaics = photovoltaics;
-        this.steamLoads = steamLoads;
+        this.storages = storages;
+        this.steamLoad = steamLoad;
+        this.photovoltaic = photovoltaic;
+        this.acLoad = acLoad;
+        this.dcLoad = dcLoad;
+        this.heatLoad = heatLoad;
+        this.coolingLoad = coolingLoad;
+        this.gatePowers = gatePowers;
+    }
+
+    public User(String userId, List<AbsorptionChiller> absorptionChillerList, List<AirCon> airCons, List<Converter> converters,
+                List<GasBoiler> gasBoilers, List<GasTurbine> gasTurbines, List<IceStorageAc> iceStorageAcs, List<Storage> storages) {
+        this.userId = userId;
+        this.absorptionChillers = absorptionChillerList;
+        this.airCons = airCons;
+        this.converters = converters;
+        this.gasBoilers = gasBoilers;
+        this.gasTurbines = gasTurbines;
+        this.iceStorageAcs = iceStorageAcs;
         this.storages = storages;
     }
 
@@ -91,27 +115,67 @@ public class User {
         this.iceStorageAcs = iceStorageAcs;
     }
 
-    public List<Photovoltaic> getPhotovoltaics() {
-        return photovoltaics;
-    }
-
-    public void setPhotovoltaics(List<Photovoltaic> photovoltaics) {
-        this.photovoltaics = photovoltaics;
-    }
-
-    public List<SteamLoad> getSteamLoads() {
-        return steamLoads;
-    }
-
-    public void setSteamLoads(List<SteamLoad> steamLoads) {
-        this.steamLoads = steamLoads;
-    }
-
     public List<Storage> getStorages() {
         return storages;
     }
 
     public void setStorages(List<Storage> storages) {
         this.storages = storages;
+    }
+
+    public SteamLoad getSteamLoad() {
+        return steamLoad;
+    }
+
+    public void setSteamLoad(SteamLoad steamLoad) {
+        this.steamLoad = steamLoad;
+    }
+
+    public Photovoltaic getPhotovoltaic() {
+        return photovoltaic;
+    }
+
+    public void setPhotovoltaic(Photovoltaic photovoltaic) {
+        this.photovoltaic = photovoltaic;
+    }
+
+    public double[] getAcLoad() {
+        return acLoad;
+    }
+
+    public void setAcLoad(double[] acLoad) {
+        this.acLoad = acLoad;
+    }
+
+    public double[] getDcLoad() {
+        return dcLoad;
+    }
+
+    public void setDcLoad(double[] dcLoad) {
+        this.dcLoad = dcLoad;
+    }
+
+    public double[] getHeatLoad() {
+        return heatLoad;
+    }
+
+    public void setHeatLoad(double[] heatLoad) {
+        this.heatLoad = heatLoad;
+    }
+
+    public double[] getCoolingLoad() {
+        return coolingLoad;
+    }
+
+    public void setCoolingLoad(double[] coolingLoad) {
+        this.coolingLoad = coolingLoad;
+    }
+
+    public double[] getGatePowers() {
+        return gatePowers;
+    }
+
+    public void setGatePowers(double[] gatePowers) {
+        this.gatePowers = gatePowers;
     }
 }
