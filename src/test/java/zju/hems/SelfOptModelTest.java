@@ -409,6 +409,44 @@ public class SelfOptModelTest  extends TestCase {
         out = new FileOutputStream(new File(filePath));
         osw = new OutputStreamWriter(out);
         bw = new BufferedWriter(osw);
+
+        for (int i = 0; i < userResult.getFrigesP().size(); i++) {
+            bw.write("制冷机" + (i + 1) + "耗电功率" + ",");
+        }
+        for (int i = 0; i < userResult.getIceTanksP().size(); i++) {
+            bw.write("蓄冰槽" + (i + 1) + "耗电功率" + ",");
+        }
+        for (int i = 0; i < userResult.getIceTanksQ().size(); i++) {
+            bw.write("蓄冰槽" + (i + 1) + "制冷功率" + ",");
+        }
+        for (int i = 0; i < userResult.getGasTurbinesState().size(); i++) {
+            bw.write("燃气轮机" + (i + 1) + "启停状态" + ",");
+        }
+        for (int i = 0; i < userResult.getGasTurbinesP().size(); i++) {
+            bw.write("燃气轮机" + (i + 1) + "产电功率" + ",");
+        }
+        for (int i = 0; i < userResult.getStoragesP().size(); i++) {
+            bw.write("储能" + (i + 1) + "充电功率(外部)" + ",");
+        }
+        for (int i = 0; i < userResult.getConvertersP().size(); i++) {
+            bw.write("变流器" + (i + 1) + "AC-DC交流侧功率" + ",");
+        }
+        bw.write("向电网购电功率" + ",");
+        for (int i = 0; i < userResult.getAirConsP().size(); i++) {
+            bw.write("中央空调" + (i + 1) + "耗电功率" + ",");
+        }
+        for (int i = 0; i < userResult.getGasBoilersState().size(); i++) {
+            bw.write("燃气锅炉" + (i + 1) + "启停状态" + ",");
+        }
+        for (int i = 0; i < userResult.getGasBoilersH().size(); i++) {
+            bw.write("燃气锅炉" + (i + 1) + "产热状态" + ",");
+        }
+        for (int i = 0; i < userResult.getAbsorptionChillersH().size(); i++) {
+            bw.write("吸收式制冷机" + (i + 1) + "耗热功率" + ",");
+        }
+        bw.write("向园区购热功率");
+        bw.newLine();
+
         for (int j = 0; j < periodNum; j++) {
             for (int i = 0; i < userResult.getFrigesP().size(); i++) {
                 bw.write(userResult.getFrigesP().get(i)[j] + ",");
