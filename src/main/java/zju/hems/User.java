@@ -18,8 +18,9 @@ public class User {
     List<GasTurbine> gasTurbines;
     List<IceStorageAc> iceStorageAcs;
     List<Storage> storages;
-    Photovoltaic photovoltaic;
+    double basicCap;    // 基本电费对应的容量
     SteamLoad steamLoad;
+    Photovoltaic photovoltaic;
     double[] acLoad;    // 交流负荷
     double[] dcLoad;    // 直流负荷
     double[] heatLoad;    // 热水负荷
@@ -28,7 +29,7 @@ public class User {
 
     public User(String userId, List<AbsorptionChiller> absorptionChillerList, List<AirCon> airCons, List<Converter> converters,
                  List<GasBoiler> gasBoilers, List<GasTurbine> gasTurbines, List<IceStorageAc> iceStorageAcs,
-                List<Storage> storages, SteamLoad steamLoad, Photovoltaic photovoltaic, double[] acLoad,
+                List<Storage> storages, double basicCap, SteamLoad steamLoad, Photovoltaic photovoltaic, double[] acLoad,
                 double[] dcLoad, double[] heatLoad, double[] coolingLoad, double[] gatePowers) {
         this.userId = userId;
         this.absorptionChillers = absorptionChillerList;
@@ -38,6 +39,7 @@ public class User {
         this.gasTurbines = gasTurbines;
         this.iceStorageAcs = iceStorageAcs;
         this.storages = storages;
+        this.basicCap = basicCap;
         this.steamLoad = steamLoad;
         this.photovoltaic = photovoltaic;
         this.acLoad = acLoad;
@@ -47,8 +49,9 @@ public class User {
         this.gatePowers = gatePowers;
     }
 
-    public User(String userId, List<AbsorptionChiller> absorptionChillerList, List<AirCon> airCons, List<Converter> converters,
-                List<GasBoiler> gasBoilers, List<GasTurbine> gasTurbines, List<IceStorageAc> iceStorageAcs, List<Storage> storages) {
+    public User(String userId, List<AbsorptionChiller> absorptionChillerList, List<AirCon> airCons,
+                List<Converter> converters, List<GasBoiler> gasBoilers, List<GasTurbine> gasTurbines,
+                List<IceStorageAc> iceStorageAcs, List<Storage> storages, double basicCap) {
         this.userId = userId;
         this.absorptionChillers = absorptionChillerList;
         this.airCons = airCons;
@@ -57,6 +60,7 @@ public class User {
         this.gasTurbines = gasTurbines;
         this.iceStorageAcs = iceStorageAcs;
         this.storages = storages;
+        this.basicCap = basicCap;
     }
 
     public String getUserId() {
@@ -121,6 +125,14 @@ public class User {
 
     public void setStorages(List<Storage> storages) {
         this.storages = storages;
+    }
+
+    public double getBasicCap() {
+        return basicCap;
+    }
+
+    public void setBasicCap(double basicCap) {
+        this.basicCap = basicCap;
     }
 
     public SteamLoad getSteamLoad() {
