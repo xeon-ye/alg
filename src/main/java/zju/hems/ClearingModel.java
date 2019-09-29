@@ -69,7 +69,7 @@ public class ClearingModel {
                     for (int i = 0; i < offers.size(); i++) {
                         Offer offer = offers.get(i);
                         bidRatios.put(offer.getUserId(), result[i]);
-                        if (result[i] > 1e-6 && offer.getPrice() > clearingPrice) {
+                        if (result[i] > 1 && offer.getPrice() > clearingPrice) {
                             clearingPrice = offer.getPrice();
                         }
                     }

@@ -22,6 +22,7 @@ public class DemandRespModel extends SelfOptModel {
     Map<String, Double> peakShaveCapRatios;   // 用户应削峰容量占总削峰容量的比例
     Map<String, Double> peakShaveRatios; // 削峰比例
     List<Offer> offers; // 报价
+    Map<String, double[]> shaveGatePowers = new HashMap<>();
 
     public DemandRespModel(Microgrid microgrid, int periodNum, double[] elecPrices, double[] gasPrices, double[] steamPrices) {
         super(microgrid, periodNum, elecPrices, gasPrices, steamPrices);
@@ -1225,6 +1226,10 @@ public class DemandRespModel extends SelfOptModel {
                     userResult.setMinCost(Double.MAX_VALUE);
                     microgridResult.put(user.getUserId(), userResult);
                 }
+            } else {
+                UserResult userResult = new UserResult(user.getUserId(), cplex.getStatus().toString());
+                userResult.setMinCost(Double.MAX_VALUE);
+                microgridResult.put(user.getUserId(), userResult);
             }
 
             cplex.end();
@@ -1816,7 +1821,7 @@ public class DemandRespModel extends SelfOptModel {
                         }
                     }
                     // 按超出指定削峰量的部分计算平均成本
-                    double price = Double.MAX_VALUE;
+                    double price = 0;
                     if (result[varNum - 1] - 1 > 1e-6) {
                         price = (peakShaveCost - demandRespResult.get(userId).getMinCost()) / ((result[varNum - 1] - 1) * peakShaveCapRatios.get(userId) * totalPeakShaveCap);
                     }
@@ -1849,6 +1854,7 @@ public class DemandRespModel extends SelfOptModel {
             availCap[i] = parkGatePower[i] - parkPeakShavePower[i];
         }
         for (String userId : users.keySet()) {
+            double[] shaveGatePower = new double[periodNum];
             peakShavePowers.put(userId, new double[periodNum]);
             double peakShaveCapRatio = 0;
             double[] purP = selfOptResult.get(userId).getPurP();
@@ -1856,9 +1862,13 @@ public class DemandRespModel extends SelfOptModel {
                 if (peakShaveTime[i] == 1) {
                     peakShavePowers.get(userId)[i] = purP[i] - availCap[i] * users.get(userId).getBasicCap() / totalBasicCap;
                     peakShaveCapRatio += peakShavePowers.get(userId)[i] / totalPeakShaveCap;
+                    shaveGatePower[i] = availCap[i] * users.get(userId).getBasicCap() / totalBasicCap;
+                } else {
+                    shaveGatePower[i] = users.get(userId).getGatePowers()[i];
                 }
             }
             peakShaveCapRatios.put(userId, peakShaveCapRatio);
+            shaveGatePowers.put(userId, shaveGatePower);
         }
     }
 
@@ -1904,5 +1914,9 @@ public class DemandRespModel extends SelfOptModel {
 
     public List<Offer> getOffers() {
         return offers;
+    }
+
+    public Map<String, double[]> getShaveGatePowers() {
+        return shaveGatePowers;
     }
 }
