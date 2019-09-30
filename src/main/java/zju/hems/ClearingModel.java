@@ -12,14 +12,16 @@ import java.util.Map;
 public class ClearingModel {
 
     List<Offer> offers; // 报价
+    Map<String, Double> timeShaveCapRatios;   // 用户应削峰容量占总削峰容量的比例
     double maxPrice;    // 最大出清价格
     String status;  // 求解状态
     Map<String, Double> bidRatios;  // 中标削峰比例
     double clearingPrice;   // 出清价格
 
-    public ClearingModel(List<Offer> offers, double maxPrice) {
+    public ClearingModel(List<Offer> offers, double maxPrice, Map<String, Double> timeShaveCapRatios) {
         this.offers = offers;
         this.maxPrice = maxPrice;
+        this.timeShaveCapRatios = timeShaveCapRatios;
     }
 
     public void clearing() {
@@ -50,12 +52,12 @@ public class ClearingModel {
             double[] objValue = new double[varNum];
             for (int i = 0; i < offers.size(); i++) {
                 Offer offer = offers.get(i);
-                objValue[i] = offer.getPrice() * offer.getPeakShaveCapRatio() - maxPrice * offer.getPeakShaveCapRatio();
+                objValue[i] = offer.getPrice() * timeShaveCapRatios.get(offer.getUserId()) - maxPrice * timeShaveCapRatios.get(offer.getUserId());
             }
             cplex.addMinimize(cplex.scalProd(x, objValue));
 
             for (int i = 0; i < offers.size(); i++) {
-                coeff[i] = offers.get(i).getPeakShaveCapRatio();
+                coeff[i] = timeShaveCapRatios.get(offers.get(i).getUserId());
             }
             cplex.addLe(cplex.scalProd(x, coeff), 1);
 

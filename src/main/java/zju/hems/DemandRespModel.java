@@ -10,8 +10,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static java.lang.Math.abs;
-
 public class DemandRespModel extends SelfOptModel {
     Map<String, UserResult> selfOptResult;  // 自趋优结果
     Map<String, UserResult> demandRespResult;   // 100%需求响应结果
@@ -20,6 +18,7 @@ public class DemandRespModel extends SelfOptModel {
     Map<String, double[]> peakShavePowers;    // 应削峰量
     double totalPeakShaveCap;   // 总应削峰量
     Map<String, Double> peakShaveCapRatios;   // 用户应削峰容量占总削峰容量的比例
+    List<Map<String, Double>> timeShaveCapRatios;   // 每个时刻用户应削峰容量占总削峰容量的比例
     Map<String, Double> peakShaveRatios; // 削峰比例
     List<Offer> offers; // 报价
     Map<String, double[]> shaveGatePowers = new HashMap<>();
@@ -1426,7 +1425,7 @@ public class DemandRespModel extends SelfOptModel {
                 objValue[j * periodVarNum + handledVarNum] = elecPrices[j] * t; // 购电成本
                 // 购买削峰量成本
                 if (peakShaveTime[j] == 1) {
-                    objValue[j * periodVarNum + handledVarNum] += clearingPrice;
+                    objValue[j * periodVarNum + handledVarNum] += clearingPrice * t;
                 }
 
                 handledVarNum += 1;
@@ -1805,7 +1804,7 @@ public class DemandRespModel extends SelfOptModel {
                     // 加上购买削峰量成本
                     for (int j = 0; j < periodNum; j++) {
                         if (peakShaveTime[j] == 1) {
-                            minCost -= clearingPrice * (selfOptResult.get(userId).getPin()[j] - peakShavePowers.get(userId)[j]);
+                            minCost -= clearingPrice * t * (selfOptResult.get(userId).getPin()[j] - peakShavePowers.get(userId)[j]);
                         }
                     }
                     double[] result = cplex.getValues(x);
@@ -1816,7 +1815,7 @@ public class DemandRespModel extends SelfOptModel {
                     double peakShaveCost = minCost;
                     for (int j = 0; j < periodNum; j++) {
                         if (peakShaveTime[j] == 1) {
-                            peakShaveCost -= clearingPrice * (peakShavePowers.get(userId)[j] - (selfOptResult.get(userId).getPin()[j] -
+                            peakShaveCost -= clearingPrice * t * (peakShavePowers.get(userId)[j] - (selfOptResult.get(userId).getPin()[j] -
                                     result[j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + 2 * storages.size() + 2 * converters.size()]));
                         }
                     }
@@ -1870,6 +1869,24 @@ public class DemandRespModel extends SelfOptModel {
             peakShaveCapRatios.put(userId, peakShaveCapRatio);
             shaveGatePowers.put(userId, shaveGatePower);
         }
+        timeShaveCapRatios = new ArrayList<>();
+        double[] totalTimeShaveCap = new double[periodNum];
+        for (String userId : users.keySet()) {
+            for (int i = 0; i < periodNum; i++) {
+                if (peakShaveTime[i] == 1) {
+                    totalTimeShaveCap[i] += peakShavePowers.get(userId)[i];
+                }
+            }
+        }
+        for (int i = 0; i < periodNum; i++) {
+            if (peakShaveTime[i] == 1) {
+                Map<String, Double> timeShaveCapRatio = new HashMap<>();
+                for (String userId : users.keySet()) {
+                    timeShaveCapRatio.put(userId, peakShavePowers.get(userId)[i] / totalTimeShaveCap[i]);
+                }
+                timeShaveCapRatios.add(timeShaveCapRatio);
+            }
+        }
     }
 
     public void setSelfOptResult(Map<String, UserResult> selfOptResult) {
@@ -1918,5 +1935,9 @@ public class DemandRespModel extends SelfOptModel {
 
     public Map<String, double[]> getShaveGatePowers() {
         return shaveGatePowers;
+    }
+
+    public List<Map<String, Double>> getTimeShaveCapRatios() {
+        return timeShaveCapRatios;
     }
 }

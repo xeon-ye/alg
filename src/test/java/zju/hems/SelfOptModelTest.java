@@ -364,20 +364,29 @@ public class SelfOptModelTest  extends TestCase {
             }
         }
         System.out.println("---------100%需求响应计算结束---------");
-        double clearingPrice = 0.36;
+        List<Map<String, Double>> timeShaveCapRatios = demandRespModel.getTimeShaveCapRatios();
+        double clearingPrice = 0.54;
         double lastClearingPrice = clearingPrice;
         demandRespModel.setClearingPrice(clearingPrice);
         demandRespModel.mgCenDistDemandResp();
         Map<String, UserResult> microgridResult = demandRespModel.getMicrogridResult();
         List<Offer> offers = demandRespModel.getOffers();
         List<Offer> lastOffers = offers;
-        Map<String, Double> bidRatios = new HashMap<>();
-        Map<String, Double> lastBidRatios = new HashMap<>();
+        List<Map<String, Double>> bidRatiosList = new ArrayList<>();
+        List<Map<String, Double>> lastBidRatiosList = new ArrayList<>();
         double maxRatio = 0;   // 最大削峰比例
-        for (Offer offer : offers) {
-            maxRatio += offer.getMaxPeakShaveRatio() * offer.getPeakShaveCapRatio();
-            bidRatios.put(offer.getUserId(), offer.getMaxPeakShaveRatio());
-            lastBidRatios.put(offer.getUserId(), offer.getMaxPeakShaveRatio());
+        for (int i = 0; i < periodNum; i++) {
+            if (peakShaveTime[i] == 1) {
+                Map<String, Double> bidRatios = new HashMap<>();
+                Map<String, Double> lastBidRatios = new HashMap<>();
+                for (Offer offer : offers) {
+                    maxRatio += offer.getMaxPeakShaveRatio() * offer.getPeakShaveCapRatio();
+                    bidRatios.put(offer.getUserId(), offer.getMaxPeakShaveRatio());
+                    lastBidRatios.put(offer.getUserId(), offer.getMaxPeakShaveRatio());
+                }
+                bidRatiosList.add(bidRatios);
+                lastBidRatiosList.add(lastBidRatios);
+            }
         }
         int iterNum = 1;
         List<Double> clearingPrices = new ArrayList<>();
@@ -387,12 +396,18 @@ public class SelfOptModelTest  extends TestCase {
         while (maxRatio > 1) {
             lastClearingPrice = clearingPrice;
             lastOffers = offers;
-            lastBidRatios = bidRatios;
+            lastBidRatiosList = bidRatiosList;
             microgridResult = demandRespModel.getMicrogridResult();
-            ClearingModel clearingModel = new ClearingModel(offers, 0.36);
-            clearingModel.clearing();
-            clearingPrice = clearingModel.getClearingPrice();
-            bidRatios = clearingModel.getBidRatios();
+            bidRatiosList.clear();
+            for (int i = 0; i < timeShaveCapRatios.size(); i++) {
+                Map<String, Double> timeShaveCapRatio = timeShaveCapRatios.get(i);
+                ClearingModel clearingModel = new ClearingModel(offers, 0.54, timeShaveCapRatio);
+                clearingModel.clearing();
+                if (clearingPrice > clearingModel.getClearingPrice()) {
+                    clearingPrice = clearingModel.getClearingPrice();
+                }
+                bidRatiosList.add(clearingModel.getBidRatios());
+            }
             // 出清价格变化上限
             if (lastClearingPrice - clearingPrice > 0.1) {
                 clearingPrice = lastClearingPrice - 0.1;
@@ -413,10 +428,22 @@ public class SelfOptModelTest  extends TestCase {
         for (Offer offer : lastOffers) {
             System.out.println(offer.getUserId() + "\t" + offer.getPrice() + "\t" + offer.getMaxPeakShaveRatio());
         }
-        System.out.println("---------出清价格和中标比例---------");
+        System.out.println("---------出清价格和中标比例、容量---------");
         System.out.println(lastClearingPrice);
-        for (String key : lastBidRatios.keySet()) {
-            System.out.println(key + "\t" + lastBidRatios.get(key));
+        for (Map<String, Double> lastBidRatios : lastBidRatiosList) {
+            for (String key : lastBidRatios.keySet()) {
+                System.out.print(key + ":\t" + lastBidRatios.get(key) + "\t");
+            }
+            System.out.println();
+        }
+        System.out.println();
+        int count = 45;
+        for (Map<String, Double> lastBidRatios : lastBidRatiosList) {
+            for (String key : lastBidRatios.keySet()) {
+                System.out.print(key + ":\t" + lastBidRatios.get(key) * peakShavePowers.get(key)[count] + "\t");
+            }
+            count++;
+            System.out.println();
         }
         System.out.println("---------出清价格和申报容量变化---------");
         for (int i = 0; i < iterNum; i++) {
