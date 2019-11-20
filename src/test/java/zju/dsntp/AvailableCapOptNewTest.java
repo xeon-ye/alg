@@ -311,7 +311,7 @@ public class AvailableCapOptNewTest extends TestCase {
         testsys.setSupplyCns(supplyID);
         testsys.setSupplyCnBaseKv(supplyBaseKv);
 
-        AvailableCapOptNew model = new AvailableCapOptNew(testsys);
+        AvailableCapOptVF model = new AvailableCapOptVF(testsys);
         String loadsPath = this.getClass().getResource("/loadtransferfiles/testcase4/loads.txt").getPath();
         String supplyCapacityPath = this.getClass().getResource("/loadtransferfiles/testcase4/supplyCapacity.txt").getPath();
         readSupplyCapacity(supplyCapacityPath);
@@ -321,21 +321,21 @@ public class AvailableCapOptNewTest extends TestCase {
         model.setSupplyCap(supplyCap);
         String[] impLoads = {"6", "19", "22"};
         model.setImpLoads(impLoads);
-        String[] ErrorSupply = new String[]{"25"};
+        String[] ErrorSupply = new String[]{"28"};
         model.setErrorSupply(ErrorSupply);
         model.buildLoops();
         model.buildImpPathes();
         long time = 0;
-        for (int i = 0; i < 1; i++) {
+        for (int i = 0; i < 10; i++) {
             long startT = System.nanoTime();
 //            model.doOptPathLimit();
             model.doOpt();
-//            System.out.println(System.nanoTime() - startT);
-//            if (i >= 10) {
-//                time += System.nanoTime() - startT;
-//            }
+            System.out.println(System.nanoTime() - startT);
+            if (i >= 5) {
+                time += System.nanoTime() - startT;
+            }
         }
-//        System.out.println(time / 5);
+        System.out.println(time / 5);
 //        model.allMinSwitch();
 //        this.minSwitchResult = model.getOptResult();
 //        for(int i = 0; i < minSwitchResult.getSupplyId().length; i++) {

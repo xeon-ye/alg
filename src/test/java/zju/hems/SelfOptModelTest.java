@@ -320,12 +320,12 @@ public class SelfOptModelTest  extends TestCase {
         }
         List<GasBoiler> gasBoilers = new ArrayList<>(1);
         for (int i = 0; i < 1; i++) {
-            GasBoiler gasBoiler = new GasBoiler(0.04, 100, 0.85, 0, 1000, 500, 0);
+            GasBoiler gasBoiler = new GasBoiler(0.04, 0, 0.85, 0, 1000, 500, 0);
             gasBoilers.add(gasBoiler);
         }
         List<GasTurbine> gasTurbines = new ArrayList<>(1);
         for (int i = 0; i < 1; i++) {
-            GasTurbine gasTurbine = new GasTurbine(0.063, 0.33, 0.6, 0.3, 200, 50, 1000, -500, 500, 0);
+            GasTurbine gasTurbine = new GasTurbine(0.063, 0.33, 0.6, 0.3, 0, 50, 1000, -500, 500, 0);
             gasTurbines.add(gasTurbine);
         }
         List<IceStorageAc> iceStorageAcs = new ArrayList<>(1);
@@ -362,12 +362,12 @@ public class SelfOptModelTest  extends TestCase {
         }
         List<GasBoiler> gasBoilers2 = new ArrayList<>(1);
         for (int i = 0; i < 1; i++) {
-            GasBoiler gasBoiler = new GasBoiler(0.04, 100, 0.85, 0, 1000, 500, 0);
+            GasBoiler gasBoiler = new GasBoiler(0.04, 0, 0.85, 0, 1000, 500, 0);
             gasBoilers2.add(gasBoiler);
         }
         List<GasTurbine> gasTurbines2 = new ArrayList<>(1);
         for (int i = 0; i < 1; i++) {
-            GasTurbine gasTurbine = new GasTurbine(0.063, 0.33, 0.6, 0.3, 200, 50, 1000, -500, 500, 0);
+            GasTurbine gasTurbine = new GasTurbine(0.063, 0.33, 0.6, 0.3, 0, 50, 1000, -500, 500, 0);
             gasTurbines2.add(gasTurbine);
         }
         List<IceStorageAc> iceStorageAcs2 = new ArrayList<>(2);
@@ -404,12 +404,12 @@ public class SelfOptModelTest  extends TestCase {
         }
         List<GasBoiler> gasBoilers3 = new ArrayList<>(1);
         for (int i = 0; i < 1; i++) {
-            GasBoiler gasBoiler = new GasBoiler(0.04, 100, 0.85, 0, 1000, 500, 0);
+            GasBoiler gasBoiler = new GasBoiler(0.04, 0, 0.85, 0, 1000, 500, 0);
             gasBoilers3.add(gasBoiler);
         }
         List<GasTurbine> gasTurbines3 = new ArrayList<>(1);
         for (int i = 0; i < 1; i++) {
-            GasTurbine gasTurbine = new GasTurbine(0.063, 0.33, 0.6, 0.3, 200, 50, 1000, -500, 500, 0);
+            GasTurbine gasTurbine = new GasTurbine(0.063, 0.33, 0.6, 0.3, 0, 50, 1000, -500, 500, 0);
             gasTurbines3.add(gasTurbine);
         }
         List<IceStorageAc> iceStorageAcs3 = new ArrayList<>(1);
@@ -441,7 +441,7 @@ public class SelfOptModelTest  extends TestCase {
         }
         List<GasBoiler> gasBoilers4 = new ArrayList<>(1);
         for (int i = 0; i < 1; i++) {
-            GasBoiler gasBoiler = new GasBoiler(0.04, 100, 0.85, 0, 1000, 500, 0);
+            GasBoiler gasBoiler = new GasBoiler(0.04, 0, 0.85, 0, 1000, 500, 0);
             gasBoilers4.add(gasBoiler);
         }
         List<GasTurbine> gasTurbines4 = new ArrayList<>(1);
@@ -458,7 +458,7 @@ public class SelfOptModelTest  extends TestCase {
         List<Converter> converters5 = new ArrayList<>(1);
         List<GasBoiler> gasBoilers5 = new ArrayList<>(1);
         for (int i = 0; i < 1; i++) {
-            GasBoiler gasBoiler = new GasBoiler(0.04, 100, 0.85, 0, 1000, 500, 0);
+            GasBoiler gasBoiler = new GasBoiler(0.04, 0, 0.85, 0, 1000, 500, 0);
             gasBoilers5.add(gasBoiler);
         }
         List<GasTurbine> gasTurbines5 = new ArrayList<>(1);
