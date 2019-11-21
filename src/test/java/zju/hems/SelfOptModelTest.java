@@ -1,9 +1,13 @@
 package zju.hems;
 
 import junit.framework.TestCase;
+import org.jgrapht.UndirectedGraph;
+import org.jgrapht.graph.SimpleGraph;
 
 import java.io.*;
 import java.util.*;
+
+import static java.lang.Math.abs;
 
 public class SelfOptModelTest  extends TestCase {
 
@@ -299,7 +303,7 @@ public class SelfOptModelTest  extends TestCase {
         return new Microgrid(users);
     }
 
-    public Microgrid cenIDRModel() throws IOException {
+    public Microgrid distIDRModel() throws IOException {
         Map<String, User> users = new HashMap<>();
         InputStream inputStream;
         // 用户1
@@ -340,7 +344,7 @@ public class SelfOptModelTest  extends TestCase {
             storages.add(storage);
         }
         User user = new User("1", absorptionChillers, airCons, converters, gasBoilers, gasTurbines, iceStorageAcs, storages, 4500);
-        inputStream = this.getClass().getResourceAsStream("/iesfiles/selfopt/input_user1.csv");
+        inputStream = this.getClass().getResourceAsStream("/iesfiles/CIIDR/input_user1.csv");
         readUserData(inputStream, user);
         users.put(user.getUserId(), user);
 
@@ -376,13 +380,13 @@ public class SelfOptModelTest  extends TestCase {
                     0.002, 500, 3000, 0.1, 0.95, 0.1, 1.00, 500, 500);
             iceStorageAcs2.add(iceStorageAc);
         }
-        List<Storage> storages2 = new ArrayList<>(1);
+        List<Storage> storages2 = new ArrayList<>(2);
         for (int i = 0; i < 2; i++) {
             Storage storage = new Storage(0.005, 0.00075, 1250, 1250, 13000, 0.1, 0.9, 0.1, 0.5, 0.5, 0.0025, 0.95, 0.95);
             storages2.add(storage);
         }
         User user2 = new User("2", absorptionChillers2, airCons2, converters2, gasBoilers2, gasTurbines2, iceStorageAcs2, storages2, 2100);
-        inputStream = this.getClass().getResourceAsStream("/iesfiles/selfopt/input_user2.csv");
+        inputStream = this.getClass().getResourceAsStream("/iesfiles/CIIDR/input_user2.csv");
         readUserData(inputStream, user2);
         users.put(user2.getUserId(), user2);
 
@@ -413,13 +417,13 @@ public class SelfOptModelTest  extends TestCase {
             gasTurbines3.add(gasTurbine);
         }
         List<IceStorageAc> iceStorageAcs3 = new ArrayList<>(1);
-        List<Storage> storages3 = new ArrayList<>(1);
-        for (int i = 0; i < 3; i++) {
+        List<Storage> storages3 = new ArrayList<>(2);
+        for (int i = 0; i < 2; i++) {
             Storage storage = new Storage(0.005, 0.00075, 1250, 1250, 13000, 0.1, 0.9, 0.1, 0.5, 0.5, 0.0025, 0.95, 0.95);
             storages3.add(storage);
         }
         User user3 = new User("3", absorptionChillers3, airCons3, converters3, gasBoilers3, gasTurbines3, iceStorageAcs3, storages3, 1600);
-        inputStream = this.getClass().getResourceAsStream("/iesfiles/selfopt/input_user3.csv");
+        inputStream = this.getClass().getResourceAsStream("/iesfiles/CIIDR/input_user3.csv");
         readUserData(inputStream, user3);
         users.put(user3.getUserId(), user3);
 
@@ -448,7 +452,7 @@ public class SelfOptModelTest  extends TestCase {
         List<IceStorageAc> iceStorageAcs4 = new ArrayList<>(1);
         List<Storage> storages4 = new ArrayList<>(3);
         User user4 = new User("4", absorptionChillers4, airCons4, converters4, gasBoilers4, gasTurbines4, iceStorageAcs4, storages4, 1800);
-        inputStream = this.getClass().getResourceAsStream("/iesfiles/selfopt/input_user4.csv");
+        inputStream = this.getClass().getResourceAsStream("/iesfiles/CIIDR/input_user4.csv");
         readUserData(inputStream, user4);
         users.put(user4.getUserId(), user4);
 
@@ -465,11 +469,11 @@ public class SelfOptModelTest  extends TestCase {
         List<IceStorageAc> iceStorageAcs5 = new ArrayList<>(1);
         List<Storage> storages5 = new ArrayList<>(1);
         User user5 = new User("5", absorptionChillers5, airCons5, converters5, gasBoilers5, gasTurbines5, iceStorageAcs5, storages5, 3800);
-        inputStream = this.getClass().getResourceAsStream("/iesfiles/selfopt/input_user5.csv");
+        inputStream = this.getClass().getResourceAsStream("/iesfiles/CIIDR/input_user5.csv");
         readUserData(inputStream, user5);
         users.put(user5.getUserId(), user5);
 
-        inputStream = this.getClass().getResourceAsStream("/iesfiles/selfopt/energy_price.csv");
+        inputStream = this.getClass().getResourceAsStream("/iesfiles/CIIDR/energy_price.csv");
         readEnergyPrice(inputStream);
 
         return new Microgrid(users);
@@ -1015,9 +1019,8 @@ public class SelfOptModelTest  extends TestCase {
         System.out.println("---------分布式需求响应计算结束---------");
     }
 
-    //todo
     public void testCenIDR() throws IOException {
-        Microgrid microgrid = microgridModel();
+        Microgrid microgrid = distIDRModel();
         DemandRespModel demandRespModel = new DemandRespModel(microgrid, periodNum, elecPrices, gasPrices, steamPrices);
         demandRespModel.mgSelfOpt();
         Map<String, UserResult> selfOptResult = demandRespModel.getMicrogridResult();
@@ -1042,71 +1045,280 @@ public class SelfOptModelTest  extends TestCase {
         }
         // 关口功率指令
         int[] peakShaveTime = new int[periodNum];
+        double[] gatePowerSum = new double[periodNum];
+        for (int i = 45; i < 49; i++) {
+            peakShaveTime[i] = 1;
+            gatePowerSum[i] = 11000;
+        }
+        demandRespModel.setPeakShaveTime(peakShaveTime);
+        demandRespModel.setGatePowerSum(gatePowerSum);
+        demandRespModel.cenIDR();
+        for (String userId : demandRespModel.getMicrogridResult().keySet()) {
+            UserResult userResult = demandRespModel.getMicrogridResult().get(userId);
+            System.out.println(userId + "\t" + userResult.getStatus());
+            if (userResult.getStatus().equals("Optimal")) {
+                System.out.println(userResult.getMinCost());
+                writeResult("D:\\user" + userId + "Result_DR.csv", userResult);
+            }
+        }
+    }
+
+    public void testDistIDR() throws IOException {
+        Microgrid microgrid = distIDRModel();
+        DemandRespModel demandRespModel = new DemandRespModel(microgrid, periodNum, elecPrices, gasPrices, steamPrices);
+        demandRespModel.mgSelfOpt();
+        Map<String, UserResult> selfOptResult = demandRespModel.getMicrogridResult();
+        for (UserResult userResult : selfOptResult.values()) {
+            System.out.println(userResult.getUserId() + "\t" + userResult.getStatus());
+            if (userResult.getStatus().equals("Optimal")) {
+                System.out.println(userResult.getMinCost());
+                writeResult("D:\\user" + userResult.getUserId() + "Result.csv", userResult);
+            }
+        }
+        demandRespModel.setSelfOptResult(selfOptResult);
+        System.out.println("---------自趋优计算结束---------");
+        Map<String, User> users = microgrid.getUsers();
+        // 原始关口功率
+        double[] parkGatePower = new double[periodNum]; // 园区关口功率
+        Map<String, double[]> origGatePowers = new HashMap<>();
+        for (String userId : users.keySet()) {
+            double[] ogGatePower = new double[periodNum];
+            double[] purP = selfOptResult.get(userId).getPurP();
+            for (int i = 0; i < periodNum; i++) {
+                ogGatePower[i] = microgrid.getUsers().get(userId).getGatePowers()[i];
+                parkGatePower[i] += purP[i];
+            }
+            origGatePowers.put(userId, ogGatePower);
+        }
+        // 关口功率指令
+        int[] peakShaveTime = new int[periodNum];
         for (int i = 45; i < 49; i++) {
             peakShaveTime[i] = 1;
         }
         demandRespModel.setPeakShaveTime(peakShaveTime);
-        Map<String, double[]> insGatePowers = new HashMap<>();
-        for (String userId : users.keySet()) {
-            double[] insGatePower = new double[periodNum];
-            for (int i = 0; i < periodNum; i++) {
-                if (peakShaveTime[i] == 1) {
-                    insGatePower[i] = 1673.9;
-                } else {
-                    insGatePower[i] = origGatePowers.get(userId)[i];
-                }
-            }
-            insGatePowers.put(userId, insGatePower);
-        }
-        // 采样点数
-        int sampleNum = 10;
-        // 采样范围
-        double sampleStart = 0.5;
-        double sampleEnd = 1;
-        Map<String, double[]> increCosts = new HashMap<>(users.size());
-        // 应削峰量
-        Map<String, double[]> peakShavePowers = new HashMap<>(users.size());
-        for (String userId : users.keySet()) {
-            increCosts.put(userId, new double[sampleNum]);
-            peakShavePowers.put(userId, new double[periodNum]);
-            double[] purP = selfOptResult.get(userId).getPurP();
-            for (int i = 0; i < periodNum; i++) {
-                if (peakShaveTime[i] == 1) {
-                    peakShavePowers.get(userId)[i] = purP[i] - insGatePowers.get(userId)[i];
-                }
+        double[] parkPeakShavePower = new double[periodNum];
+        for (int i = 0; i < periodNum; i++) {
+            if (peakShaveTime[i] == 1) {
+                parkPeakShavePower[i] = parkGatePower[i] - 11000;
             }
         }
-        for (int i = 0; i < sampleNum; i++) {
-            for (String userId : selfOptResult.keySet()) {
-                double[] purP = selfOptResult.get(userId).getPurP();
-                double[] newGatePower = new double[periodNum];
-                for (int j = 0; j < periodNum; j++) {
-                    if (peakShaveTime[j] == 1) {
-                        newGatePower[j] = purP[j] - peakShavePowers.get(userId)[j] * (sampleStart + (sampleEnd - sampleStart) * (i + 1) / sampleNum);
-                    } else {
-                        newGatePower[j] = origGatePowers.get(userId)[j];
+        demandRespModel.calPeakShavePowers(parkGatePower, parkPeakShavePower);   // 应削峰量
+        System.out.println("---------各用户应削峰量---------");
+        Map<String, double[]> peakShavePowers = demandRespModel.getPeakShavePowers();
+        for (String userId : users.keySet()) {
+            System.out.print(userId + "\t");
+            double[] peakShavePower = peakShavePowers.get(userId);
+            for (int i = 0; i < periodNum; i++) {
+                if (peakShaveTime[i] == 1) {
+                    System.out.print(peakShavePower[i] + "\t");
+                }
+            }
+            System.out.println();
+        }
+        System.out.println("---------100%需求响应计算开始---------");
+        Map<String, double[]> shaveGatePowers = demandRespModel.getShaveGatePowers();
+        for (String userId : users.keySet()) {
+            users.get(userId).setGatePowers(shaveGatePowers.get(userId));
+        }
+        demandRespModel.mgDemandResp();
+        demandRespModel.setDemandRespResult(demandRespModel.getMicrogridResult());
+        for (String userId : users.keySet()) {
+            users.get(userId).setGatePowers(origGatePowers.get(userId));
+        }
+        for (String userId : demandRespModel.getMicrogridResult().keySet()) {
+            UserResult userResult = demandRespModel.getMicrogridResult().get(userId);
+            System.out.println(userId + "\t" + userResult.getStatus());
+            if (userResult.getStatus().equals("Optimal")) {
+                System.out.println(userResult.getMinCost());
+                writeResult("D:\\user" + userId + "Result_DR.csv", userResult);
+            }
+        }
+        System.out.println("---------100%需求响应计算结束---------");
+        // 通信网络
+        UndirectedGraph<String, String> g = new SimpleGraph<>(String.class);
+        for (String userId : users.keySet()) {
+            g.addVertex(userId);
+        }
+        g.addEdge("1", "2", "1_2");
+        g.addEdge("1", "3", "1_3");
+        g.addEdge("2", "3", "2_3");
+        g.addEdge("3", "4", "3_4");
+        g.addEdge("3", "5", "3_5");
+        // 初始化边际成本
+        Map<String, double[]> mcs = new HashMap<>(users.size());
+        for (String userId : users.keySet()) {
+            double[] mc = new double[periodNum];
+            for (int i = 0; i < periodNum; i++) {
+                if (peakShaveTime[i] == 1) {
+                    mc[i] = 0.54;
+                }
+            }
+            mcs.put(userId, mc);
+        }
+        demandRespModel.setMcs(mcs);
+        demandRespModel.mgDistIDR();
+        // 开始迭代
+        Map<String, double[]> lastMcs = demandRespModel.getMcs();
+        Map<String, double[]> lastPeakShaveCaps = demandRespModel.getPeakShaveCaps();
+        Map<String, double[]> peakShaveCaps = demandRespModel.getPeakShaveCaps();
+        double w1 = 1;
+        double w2 = 1;
+        Map<String, Double> error1s = new HashMap<>(users.size());
+        Map<String, Double> error2s = new HashMap<>(users.size());
+        double maxError1 = 0;
+        double maxError2 = 0;
+        int iterNum = 1;
+        // 更新边际成本
+        for (String userId : users.keySet()) {
+            double[] lastMc = lastMcs.get(userId);
+            double[] lastPeakShaveCap = lastPeakShaveCaps.get(userId);
+            double[] mc = new double[periodNum];
+            for (int i = 0; i < periodNum; i++) {
+                if (peakShaveTime[i] == 1) {
+                    mc[i] = lastMc[i];
+                    for (String e : g.edgesOf(userId)) {
+                        String adjNode = g.getEdgeTarget(e);
+                        if (adjNode.equals(userId)) {
+                            adjNode = g.getEdgeSource(e);
+                        }
+                        double[] adjMc = lastMcs.get(adjNode);
+                        mc[i] -= w1 * (lastMc[i] - adjMc[i]);
                     }
+                    //todo 减总削峰量还是应削峰量？
+                    mc[i] -= w2 * (lastPeakShaveCap[i] - parkPeakShavePower[i]);
                 }
-                microgrid.getUsers().get(userId).setGatePowers(newGatePower);
             }
-            demandRespModel.mgDemandResp();
-            Map<String, UserResult> microgridResult = demandRespModel.getMicrogridResult();
-            for (String userId : microgridResult.keySet()) {
-                UserResult userResult = microgridResult.get(userId);
-                System.out.println(userResult.getUserId() + "\t" + userResult.getStatus());
-                if (userResult.getStatus().equals("Optimal")) {
-                    System.out.println(userResult.getMinCost());
-                    writeResult("D:\\user" + userResult.getUserId() + "Result_DR.csv", userResult);
-                }
-                increCosts.get(userId)[i] = userResult.getMinCost() - selfOptResult.get(userId).getMinCost();
-            }
+            mcs.put(userId, mc);
         }
+        demandRespModel.setMcs(mcs);
+        // 更新IDR容量
+        demandRespModel.mgDistIDR();
+
+        mcs = demandRespModel.getMcs();
+        peakShaveCaps = demandRespModel.getPeakShaveCaps();
         for (String userId : users.keySet()) {
-            double[] increCost = increCosts.get(userId);
-            for (int i = 0; i < sampleNum; i++) {
-                System.out.println(userId + "," + (sampleStart + (sampleEnd - sampleStart) * (i + 1) / sampleNum) + "," + increCost[i]);
+            double[] lastMc = lastMcs.get(userId);
+            double[] lastPeakShaveCap = lastPeakShaveCaps.get(userId);
+            double[] mc = mcs.get(userId);
+            double[] peakShaveCap = peakShaveCaps.get(userId);
+            double error1 = 0;
+            double error2 = 0;
+            for (int i = 0; i < periodNum; i++) {
+                if (peakShaveTime[i] == 1) {
+                    error1 += abs(mc[i] - lastMc[i]);
+                    error2 += abs(peakShaveCap[i] - lastPeakShaveCap[i]);
+                }
+            }
+            error1s.put(userId, error1);
+            error2s.put(userId, error2);
+        }
+        maxError1 = 0;
+        maxError2 = 0;
+        for (String userId : users.keySet()) {
+            if (maxError1 < error1s.get(userId)) {
+                maxError1 = error1s.get(userId);
+            }
+            if (maxError2 < error2s.get(userId)) {
+                maxError2 = error2s.get(userId);
             }
         }
+
+        List<Map<String, Double>> timeShaveCapRatios = demandRespModel.getTimeShaveCapRatios();
+        double clearingPrice = 0.54;
+        double lastClearingPrice = clearingPrice;
+        demandRespModel.setClearingPrice(clearingPrice);
+        demandRespModel.mgCenDistDemandResp();
+        Map<String, UserResult> microgridResult = demandRespModel.getMicrogridResult();
+        List<Offer> offers = demandRespModel.getOffers();
+        List<Offer> lastOffers = offers;
+        List<Map<String, Double>> bidRatiosList = new ArrayList<>();
+        List<Map<String, Double>> lastBidRatiosList = new ArrayList<>();
+        double maxRatio = 0;   // 最大削峰比例
+        for (int i = 0; i < periodNum; i++) {
+            if (peakShaveTime[i] == 1) {
+                Map<String, Double> bidRatios = new HashMap<>();
+                Map<String, Double> lastBidRatios = new HashMap<>();
+                for (Offer offer : offers) {
+                    maxRatio += offer.getMaxPeakShaveRatio() * offer.getPeakShaveCapRatio();
+                    bidRatios.put(offer.getUserId(), offer.getMaxPeakShaveRatio());
+                    lastBidRatios.put(offer.getUserId(), offer.getMaxPeakShaveRatio());
+                }
+                bidRatiosList.add(bidRatios);
+                lastBidRatiosList.add(lastBidRatios);
+            }
+        }
+        List<Double> clearingPrices = new ArrayList<>();
+        List<Double> maxRatios = new ArrayList<>();
+        clearingPrices.add(clearingPrice);
+        maxRatios.add(maxRatio);
+        while (maxRatio > 1) {
+            lastClearingPrice = clearingPrice;
+            lastOffers = offers;
+            lastBidRatiosList = bidRatiosList;
+            microgridResult = demandRespModel.getMicrogridResult();
+            bidRatiosList.clear();
+            for (int i = 0; i < timeShaveCapRatios.size(); i++) {
+                Map<String, Double> timeShaveCapRatio = timeShaveCapRatios.get(i);
+                ClearingModel clearingModel = new ClearingModel(offers, 0.54, timeShaveCapRatio);
+                clearingModel.clearing();
+                if (clearingPrice > clearingModel.getClearingPrice()) {
+                    clearingPrice = clearingModel.getClearingPrice();
+                }
+                bidRatiosList.add(clearingModel.getBidRatios());
+            }
+            // 出清价格变化上限
+            if (lastClearingPrice - clearingPrice > 0.1) {
+                clearingPrice = lastClearingPrice - 0.1;
+            }
+            demandRespModel.setClearingPrice(clearingPrice);
+            demandRespModel.mgCenDistDemandResp();
+            offers = demandRespModel.getOffers();
+            maxRatio = 0;   // 最大削峰比例
+            for (Offer offer : offers) {
+                maxRatio += offer.getMaxPeakShaveRatio() * offer.getPeakShaveCapRatio();
+            }
+            clearingPrices.add(clearingPrice);
+            maxRatios.add(maxRatio);
+            iterNum++;
+        }
+        System.out.println("---------市场出清计算结束---------");
+        System.out.println("---------最终报价情况---------");
+        for (Offer offer : lastOffers) {
+            System.out.println(offer.getUserId() + "\t" + offer.getPrice() + "\t" + offer.getMaxPeakShaveRatio());
+        }
+        System.out.println("---------出清价格和中标比例、容量---------");
+        System.out.println(lastClearingPrice);
+        for (Map<String, Double> lastBidRatios : lastBidRatiosList) {
+            for (String key : lastBidRatios.keySet()) {
+                System.out.print(key + ":\t" + lastBidRatios.get(key) + "\t");
+            }
+            System.out.println();
+        }
+        System.out.println();
+        int count = 45;
+        for (Map<String, Double> lastBidRatios : lastBidRatiosList) {
+            for (String key : lastBidRatios.keySet()) {
+                System.out.print(key + ":\t" + lastBidRatios.get(key) * peakShavePowers.get(key)[count] + "\t");
+            }
+            count++;
+            System.out.println();
+        }
+        System.out.println("---------出清价格和申报容量变化---------");
+        for (int i = 0; i < iterNum; i++) {
+            System.out.println(clearingPrices.get(i) + "\t" + maxRatios.get(i));
+        }
+        System.out.println("---------用户自趋优结果---------");
+        Map<String, Double> peakShaveRatios = demandRespModel.getPeakShaveRatios();
+        for (String userId : microgridResult.keySet()) {
+            UserResult userResult = microgridResult.get(userId);
+            System.out.println(userId + "\t" + userResult.getStatus());
+            if (userResult.getStatus().equals("Optimal")) {
+                System.out.println(userResult.getMinCost());
+                System.out.println(peakShaveRatios.get(userId));
+                writeResult("D:\\user" + userId + "Result_DR.csv", userResult);
+            }
+        }
+        System.out.println("---------分布式需求响应计算结束---------");
     }
 
     public void readUserData(InputStream inputStream, User user) throws IOException {
