@@ -26,6 +26,7 @@ public class User {
     double[] heatLoad;    // 热水负荷
     double[] coolingLoad;   // 冷负荷
     double[] gatePowers;   // 用户关口功率
+    InterruptibleLoad interruptibleLoad;    // 可中断负荷
 
     public User(String userId, List<AbsorptionChiller> absorptionChillerList, List<AirCon> airCons, List<Converter> converters,
                  List<GasBoiler> gasBoilers, List<GasTurbine> gasTurbines, List<IceStorageAc> iceStorageAcs,
@@ -61,6 +62,21 @@ public class User {
         this.iceStorageAcs = iceStorageAcs;
         this.storages = storages;
         this.basicCap = basicCap;
+    }
+
+    public User(String userId, List<AbsorptionChiller> absorptionChillerList, List<AirCon> airCons,
+                List<Converter> converters, List<GasBoiler> gasBoilers, List<GasTurbine> gasTurbines,
+                List<IceStorageAc> iceStorageAcs, List<Storage> storages, double basicCap, InterruptibleLoad interruptibleLoad) {
+        this.userId = userId;
+        this.absorptionChillers = absorptionChillerList;
+        this.airCons = airCons;
+        this.converters = converters;
+        this.gasBoilers = gasBoilers;
+        this.gasTurbines = gasTurbines;
+        this.iceStorageAcs = iceStorageAcs;
+        this.storages = storages;
+        this.basicCap = basicCap;
+        this.interruptibleLoad = interruptibleLoad;
     }
 
     public String getUserId() {
@@ -189,5 +205,13 @@ public class User {
 
     public void setGatePowers(double[] gatePowers) {
         this.gatePowers = gatePowers;
+    }
+
+    public InterruptibleLoad getInterruptibleLoad() {
+        return interruptibleLoad;
+    }
+
+    public void setInterruptibleLoad(InterruptibleLoad interruptibleLoad) {
+        this.interruptibleLoad = interruptibleLoad;
     }
 }
