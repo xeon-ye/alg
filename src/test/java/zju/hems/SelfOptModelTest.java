@@ -499,6 +499,27 @@ public class SelfOptModelTest  extends TestCase {
         }
     }
 
+    public void testDispatchOpt() throws IOException {
+        Microgrid microgrid = microgridModel();
+        double dispatchTime = 24;
+        int periodNum = 96;
+        for (User user : microgrid.getUsers().values()) {
+            user.setWindPower(new WindPower(0.0005, new double[periodNum]));
+        }
+//        DispatchOptModel dispatchOptModel = new DispatchOptModel(microgrid, dispatchTime, periodNum, elecPrices, gasPrices, steamPrices);
+//        dispatchOptModel.mgDispatchOpt();
+//        Map<String, UserResult> microgridResult = dispatchOptModel.getMicrogridResult();
+        SelfOptDispatch selfOptDispatch = new SelfOptDispatch();
+        Map<String, UserResult> microgridResult = selfOptDispatch.doDispatchOpt(microgrid, dispatchTime, periodNum, elecPrices, gasPrices, steamPrices);
+        for (UserResult userResult : microgridResult.values()) {
+            System.out.println(userResult.getUserId() + "\t" + userResult.getStatus());
+            if (userResult.getStatus().equals("Optimal")) {
+                System.out.println(userResult.getMinCost());
+//                writeResult("D:\\user" + userResult.getUserId() + "DispatchResult.csv", userResult);
+            }
+        }
+    }
+
     public void testDemandResp() throws IOException {
         Microgrid microgrid = microgridModel();
         DemandRespModel demandRespModel = new DemandRespModel(microgrid, periodNum, elecPrices, gasPrices, steamPrices);

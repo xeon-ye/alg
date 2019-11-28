@@ -28,6 +28,8 @@ public class User {
     double[] gatePowers;   // 用户关口功率
     InterruptibleLoad interruptibleLoad;    // 可中断负荷
 
+    WindPower windPower;
+
     public User(String userId, List<AbsorptionChiller> absorptionChillerList, List<AirCon> airCons, List<Converter> converters,
                  List<GasBoiler> gasBoilers, List<GasTurbine> gasTurbines, List<IceStorageAc> iceStorageAcs,
                 List<Storage> storages, double basicCap, SteamLoad steamLoad, Photovoltaic photovoltaic, double[] acLoad,
@@ -213,5 +215,13 @@ public class User {
 
     public void setInterruptibleLoad(InterruptibleLoad interruptibleLoad) {
         this.interruptibleLoad = interruptibleLoad;
+    }
+
+    public WindPower getWindPower() {
+        return windPower;
+    }
+
+    public void setWindPower(WindPower windPower) {
+        this.windPower = windPower;
     }
 }
