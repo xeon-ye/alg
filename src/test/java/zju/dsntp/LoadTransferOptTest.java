@@ -947,4 +947,21 @@ public class LoadTransferOptTest extends TestCase implements DsModelCons {
         }
         return isSucess;
     }
+
+    // 读pso迭代结果
+    public void testReadPsoResult() throws Exception {
+        BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream("D:/pso结果.txt")));
+        String data;
+        double[] v = new double[147];
+        int count = 0;
+        while ((data = br.readLine()) != null) {
+            if (data.startsWith("iteration")) {
+                v[count] = Double.parseDouble(data.split(" ")[4]);
+                count++;
+            }
+        }
+        for (int i = 146; i >= 0; i--) {
+            System.out.println(v[i]);
+        }
+    }
 }
