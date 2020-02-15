@@ -28,8 +28,8 @@ public class DemandRespModel extends SelfOptModel {
 
     double[] gatePowerSum;  // 总关口功率
 
-    public DemandRespModel(Microgrid microgrid, int periodNum, double[] elecPrices, double[] gasPrices, double[] steamPrices) {
-        super(microgrid, periodNum, elecPrices, gasPrices, steamPrices);
+    public DemandRespModel(Microgrid microgrid, int periodNum, double t, double[] elecPrices, double[] gasPrices, double[] steamPrices) {
+        super(microgrid, periodNum, t, elecPrices, gasPrices, steamPrices);
     }
 
     public void mgOrigDemandResp() {
@@ -479,7 +479,7 @@ public class DemandRespModel extends SelfOptModel {
                         coeff[coeffNum][(j - 1) * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + storages.size() + i] *= 1 - storages.get(i).getLossCoef();
                         coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + i] = t * storages.get(i).getEffIn(); // 储能充电量
                         coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + storages.size() + i] = - t / storages.get(i).getEffOut(); // 储能放电量
-                        cplex.addEq(cplex.scalProd(x, coeff[coeffNum]), storages.get(i).getInitS() - (1 - storages.get(i).getLossCoef()) * storages.get(i).getInitS());
+                        cplex.addEq(cplex.scalProd(x, coeff[coeffNum]), storages.get(i).getEndS() - (1 - storages.get(i).getLossCoef()) * storages.get(i).getInitS());
                         coeffNum += 1;
                     }
                 }
@@ -1102,7 +1102,7 @@ public class DemandRespModel extends SelfOptModel {
                         coeff[coeffNum][(j - 1) * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + storages.size() + i] *= 1 - storages.get(i).getLossCoef();
                         coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + i] = t * storages.get(i).getEffIn(); // 储能充电量
                         coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + storages.size() + i] = - t / storages.get(i).getEffOut(); // 储能放电量
-                        cplex.addEq(cplex.scalProd(x, coeff[coeffNum]), storages.get(i).getInitS() - (1 - storages.get(i).getLossCoef()) * storages.get(i).getInitS());
+                        cplex.addEq(cplex.scalProd(x, coeff[coeffNum]), storages.get(i).getEndS() - (1 - storages.get(i).getLossCoef()) * storages.get(i).getInitS());
                         coeffNum += 1;
                     }
                 }
@@ -1684,7 +1684,7 @@ public class DemandRespModel extends SelfOptModel {
                         coeff[coeffNum][(j - 1) * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + storages.size() + i] *= 1 - storages.get(i).getLossCoef();
                         coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + i] = t * storages.get(i).getEffIn(); // 储能充电量
                         coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + storages.size() + i] = - t / storages.get(i).getEffOut(); // 储能放电量
-                        cplex.addEq(cplex.scalProd(x, coeff[coeffNum]), storages.get(i).getInitS() - (1 - storages.get(i).getLossCoef()) * storages.get(i).getInitS());
+                        cplex.addEq(cplex.scalProd(x, coeff[coeffNum]), storages.get(i).getEndS() - (1 - storages.get(i).getLossCoef()) * storages.get(i).getInitS());
                         coeffNum += 1;
                     }
                 }
@@ -2402,7 +2402,7 @@ public class DemandRespModel extends SelfOptModel {
                             coeff[coeffStart + coeffNum][userStart + (j - 1) * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + storages.size() + i] *= 1 - storages.get(i).getLossCoef();
                             coeff[coeffStart + coeffNum][userStart + j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + i] = t * storages.get(i).getEffIn(); // 储能充电量
                             coeff[coeffStart + coeffNum][userStart + j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + storages.size() + i] = -t / storages.get(i).getEffOut(); // 储能放电量
-                            cplex.addEq(cplex.scalProd(x, coeff[coeffStart + coeffNum]), storages.get(i).getInitS() - (1 - storages.get(i).getLossCoef()) * storages.get(i).getInitS());
+                            cplex.addEq(cplex.scalProd(x, coeff[coeffStart + coeffNum]), storages.get(i).getEndS() - (1 - storages.get(i).getLossCoef()) * storages.get(i).getInitS());
                             coeffNum += 1;
                         }
                     }
@@ -3083,7 +3083,7 @@ public class DemandRespModel extends SelfOptModel {
                         coeff[coeffNum][(j - 1) * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + storages.size() + i] *= 1 - storages.get(i).getLossCoef();
                         coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + i] = t * storages.get(i).getEffIn(); // 储能充电量
                         coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + storages.size() + i] = - t / storages.get(i).getEffOut(); // 储能放电量
-                        cplex.addEq(cplex.scalProd(x, coeff[coeffNum]), storages.get(i).getInitS() - (1 - storages.get(i).getLossCoef()) * storages.get(i).getInitS());
+                        cplex.addEq(cplex.scalProd(x, coeff[coeffNum]), storages.get(i).getEndS() - (1 - storages.get(i).getLossCoef()) * storages.get(i).getInitS());
                         coeffNum += 1;
                     }
                 }
@@ -3754,7 +3754,7 @@ public class DemandRespModel extends SelfOptModel {
                             coeff[coeffStart + coeffNum][userStart + (j - 1) * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + storages.size() + i] *= 1 - storages.get(i).getLossCoef();
                             coeff[coeffStart + coeffNum][userStart + j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + i] = t * storages.get(i).getEffIn(); // 储能充电量
                             coeff[coeffStart + coeffNum][userStart + j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + storages.size() + i] = -t / storages.get(i).getEffOut(); // 储能放电量
-                            cplex.addEq(cplex.scalProd(x, coeff[coeffStart + coeffNum]), storages.get(i).getInitS() - (1 - storages.get(i).getLossCoef()) * storages.get(i).getInitS());
+                            cplex.addEq(cplex.scalProd(x, coeff[coeffStart + coeffNum]), storages.get(i).getEndS() - (1 - storages.get(i).getLossCoef()) * storages.get(i).getInitS());
                             coeffNum += 1;
                         }
                     }
@@ -4451,7 +4451,7 @@ public class DemandRespModel extends SelfOptModel {
                         coeff[coeffNum][(j - 1) * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + storages.size() + i] *= 1 - storages.get(i).getLossCoef();
                         coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + i] = t * storages.get(i).getEffIn(); // 储能充电量
                         coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + storages.size() + i] = - t / storages.get(i).getEffOut(); // 储能放电量
-                        cplex.addEq(cplex.scalProd(x, coeff[coeffNum]), storages.get(i).getInitS() - (1 - storages.get(i).getLossCoef()) * storages.get(i).getInitS());
+                        cplex.addEq(cplex.scalProd(x, coeff[coeffNum]), storages.get(i).getEndS() - (1 - storages.get(i).getLossCoef()) * storages.get(i).getInitS());
                         coeffNum += 1;
                     }
                 }

@@ -17,6 +17,7 @@ public class Storage {
     double minSOC;  // 最小SOC
     double maxSOC;  // 最大SOC
     double initSOC;  // 初始SOC
+    double endSOC;  // 控制结束时的SOC
     double yin = 1; // 充电爬坡率约束系数
     double yout = 1; // 放电爬坡率约束系数
     double lossCoef;    // 自损耗系数
@@ -28,9 +29,10 @@ public class Storage {
     double minS;    // 电池最低电量
     double maxS;    // 电池最高电量
     double initS;   // 电池初始电量
+    double endS;   // 电池终止电量
 
     public Storage(double coper, double cbw, double maxPIn, double maxPOut, double R, double minSOC, double maxSOC,
-                   double initSOC, double yin, double yout, double lossCoef, double effIn, double effOut) {
+                   double initSOC, double endSOC, double yin, double yout, double lossCoef, double effIn, double effOut) {
         this.coper = coper;
         this.cbw = cbw;
         this.maxPIn = maxPIn;
@@ -39,6 +41,7 @@ public class Storage {
         this.minSOC = minSOC;
         this.maxSOC = maxSOC;
         this.initSOC = initSOC;
+        this.endSOC = endSOC;
         this.yin = yin;
         this.yout = yout;
         this.lossCoef = lossCoef;
@@ -48,6 +51,7 @@ public class Storage {
         minS = minSOC * R;
         maxS = maxSOC * R;
         initS = initSOC * R;
+        endS = endSOC * R;
     }
 
     public double getCoper() {
@@ -122,6 +126,14 @@ public class Storage {
         this.initSOC = initSOC;
     }
 
+    public double getEndSOC() {
+        return endSOC;
+    }
+
+    public void setEndSOC(double endSOC) {
+        this.endSOC = endSOC;
+    }
+
     public double getYin() {
         return yin;
     }
@@ -176,5 +188,9 @@ public class Storage {
 
     public double getInitS() {
         return initS;
+    }
+
+    public double getEndS() {
+        return endS;
     }
 }

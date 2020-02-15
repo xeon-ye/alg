@@ -15,7 +15,7 @@ import java.util.*;
 public class SelfOptModel {
 
     Microgrid microgrid;
-    int periodNum; // 一天的时段数
+    int periodNum; // 时段数
     double t;   // 单位时段长度
     double[] elecPrices;    // 电价
     double[] gasPrices;    // 天然气价格
@@ -23,10 +23,10 @@ public class SelfOptModel {
 
     Map<String, UserResult> microgridResult;
 
-    public SelfOptModel(Microgrid microgrid, int periodNum, double[] elecPrices, double[] gasPrices, double[] steamPrices) {
+    public SelfOptModel(Microgrid microgrid, int periodNum, double t, double[] elecPrices, double[] gasPrices, double[] steamPrices) {
         this.microgrid = microgrid;
         this.periodNum = periodNum;
-        t = 24. / periodNum;
+        this.t = t;
         this.elecPrices = elecPrices;
         this.gasPrices = gasPrices;
         this.steamPrices = steamPrices;
@@ -458,7 +458,7 @@ public class SelfOptModel {
                         coeff[coeffNum][(j - 1) * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + storages.size() + i] *= 1 - storages.get(i).getLossCoef();
                         coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + i] = t * storages.get(i).getEffIn(); // 储能充电量
                         coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + storages.size() + i] = - t / storages.get(i).getEffOut(); // 储能放电量
-                        cplex.addEq(cplex.scalProd(x, coeff[coeffNum]), storages.get(i).getInitS() - (1 - storages.get(i).getLossCoef()) * storages.get(i).getInitS());
+                        cplex.addEq(cplex.scalProd(x, coeff[coeffNum]), storages.get(i).getEndS() - (1 - storages.get(i).getLossCoef()) * storages.get(i).getInitS());
                         coeffNum += 1;
                     }
                 }
