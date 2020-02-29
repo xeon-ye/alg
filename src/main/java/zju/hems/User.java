@@ -1,7 +1,6 @@
 package zju.hems;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * 用户.
@@ -27,6 +26,7 @@ public class User {
     double[] coolingLoad;   // 冷负荷
     double[] gatePowers;   // 用户关口功率
     InterruptibleLoad interruptibleLoad;    // 可中断负荷
+    List<ChargingPile> chargingPiles;   // 充电桩
 
     WindPower windPower;
 
@@ -34,15 +34,7 @@ public class User {
                  List<GasBoiler> gasBoilers, List<GasTurbine> gasTurbines, List<IceStorageAc> iceStorageAcs,
                 List<Storage> storages, double basicCap, SteamLoad steamLoad, Photovoltaic photovoltaic, double[] acLoad,
                 double[] dcLoad, double[] heatLoad, double[] coolingLoad, double[] gatePowers) {
-        this.userId = userId;
-        this.absorptionChillers = absorptionChillerList;
-        this.airCons = airCons;
-        this.converters = converters;
-        this.gasBoilers = gasBoilers;
-        this.gasTurbines = gasTurbines;
-        this.iceStorageAcs = iceStorageAcs;
-        this.storages = storages;
-        this.basicCap = basicCap;
+        this(userId, absorptionChillerList, airCons, converters, gasBoilers, gasTurbines, iceStorageAcs, storages, basicCap);
         this.steamLoad = steamLoad;
         this.photovoltaic = photovoltaic;
         this.acLoad = acLoad;
@@ -69,16 +61,15 @@ public class User {
     public User(String userId, List<AbsorptionChiller> absorptionChillerList, List<AirCon> airCons,
                 List<Converter> converters, List<GasBoiler> gasBoilers, List<GasTurbine> gasTurbines,
                 List<IceStorageAc> iceStorageAcs, List<Storage> storages, double basicCap, InterruptibleLoad interruptibleLoad) {
-        this.userId = userId;
-        this.absorptionChillers = absorptionChillerList;
-        this.airCons = airCons;
-        this.converters = converters;
-        this.gasBoilers = gasBoilers;
-        this.gasTurbines = gasTurbines;
-        this.iceStorageAcs = iceStorageAcs;
-        this.storages = storages;
-        this.basicCap = basicCap;
+        this(userId, absorptionChillerList, airCons, converters, gasBoilers, gasTurbines, iceStorageAcs, storages, basicCap);
         this.interruptibleLoad = interruptibleLoad;
+    }
+
+    public User(String userId, List<AbsorptionChiller> absorptionChillerList, List<AirCon> airCons,
+                List<Converter> converters, List<GasBoiler> gasBoilers, List<GasTurbine> gasTurbines,
+                List<IceStorageAc> iceStorageAcs, List<Storage> storages, double basicCap, List<ChargingPile> chargingPiles) {
+        this(userId, absorptionChillerList, airCons, converters, gasBoilers, gasTurbines, iceStorageAcs, storages, basicCap);
+        this.chargingPiles = chargingPiles;
     }
 
     public String getUserId() {
@@ -215,6 +206,14 @@ public class User {
 
     public void setInterruptibleLoad(InterruptibleLoad interruptibleLoad) {
         this.interruptibleLoad = interruptibleLoad;
+    }
+
+    public List<ChargingPile> getChargingPiles() {
+        return chargingPiles;
+    }
+
+    public void setChargingPiles(List<ChargingPile> chargingPiles) {
+        this.chargingPiles = chargingPiles;
     }
 
     public WindPower getWindPower() {

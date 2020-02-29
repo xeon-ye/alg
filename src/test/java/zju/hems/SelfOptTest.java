@@ -12,11 +12,12 @@ import static java.lang.Math.pow;
 
 public class SelfOptTest  extends TestCase {
 
-    int periodNum = 80; // 一天的时段数
+    int periodNum = 68; // 一天的时段数
     double t = 0.25;    // 每个时段15分钟
     double[] elecPrices = new double[periodNum];    // 电价
     double[] gasPrices = new double[periodNum];    // 天然气价格
     double[] steamPrices = new double[periodNum];    // 园区CHP蒸汽价格
+    double[] chargePrices = new double[periodNum];    // 充电桩充电价格
 
     public Microgrid microgridModel() throws IOException {
         Map<String, User> users = new HashMap<>();
@@ -53,14 +54,36 @@ public class SelfOptTest  extends TestCase {
                     0.002, 500, 3000, 0.1, 0.95, 0.1, 1.00, 500, 500);
             iceStorageAcs.add(iceStorageAc);
         }
-        List<Storage> storages = new ArrayList<>(3);
+        List<Storage> storages = new ArrayList<>(1);
         for (int i = 0; i < 1; i++) {
 //            Storage storage = new Storage(0.005, 0.00075, 6000, 6000, 50000, 0.05, 0.95, 0.05, 0.05, 0.5, 0.5, 0.0025, 0.95, 0.95);
-            Storage storage = new Storage(0.005, 0.00075, 6000, 6000, 50000, 0.05, 0.95, 0.4975489443718, 0.05, 0.5, 0.5, 0.0025, 0.95, 0.95);
+//            Storage storage = new Storage(0.005, 0.00075, 6000, 6000, 50000, 0.05, 0.95, 0.4975489443718, 0.05, 0.5, 0.5, 0.0025, 0.95, 0.95);    // 日内4点
+            Storage storage = new Storage(0.005, 0.00075, 6000, 6000, 50000, 0.05, 0.95, 0.835, 0.05, 0.5, 0.5, 0.0025, 0.95, 0.95);    // 日内7点
             storages.add(storage);
         }
-        User user = new User("1", absorptionChillers, airCons, converters, gasBoilers, gasTurbines, iceStorageAcs, storages, 4500);
-        inputStream = this.getClass().getResourceAsStream("/iesfiles/gzData/input_rn_user1.csv");
+        List<ChargingPile> chargingPiles = new ArrayList<>(10);
+        ChargingPile chargingPile1 = new ChargingPile(24, 120, 1, 85, 0, 0, 0);
+        ChargingPile chargingPile2 = new ChargingPile(12, 60, 2, 0, 8, 0, 0);
+        ChargingPile chargingPile3 = new ChargingPile(18, 90, 3, 0, 0, 85, 0);
+        ChargingPile chargingPile4 = new ChargingPile(6, 30, 4, 0, 0, 0, 20);
+        ChargingPile chargingPile5 = new ChargingPile(0, 21, 1, 30, 0, 0, 0);
+        ChargingPile chargingPile6 = new ChargingPile(0, 7, 2, 0, 24, 0, 0);
+        ChargingPile chargingPile7 = new ChargingPile(0, 14, 3, 0, 0, 40, 0);
+        ChargingPile chargingPile8 = new ChargingPile(12, 60, 4, 0, 0, 0, 33.8);
+        ChargingPile chargingPile9 = new ChargingPile(18, 90, 2, 0, 6, 0, 0);
+        ChargingPile chargingPile10 = new ChargingPile(24, 120, 3, 0, 0, 75, 0);
+        chargingPiles.add(chargingPile1);
+        chargingPiles.add(chargingPile2);
+        chargingPiles.add(chargingPile3);
+        chargingPiles.add(chargingPile4);
+        chargingPiles.add(chargingPile5);
+        chargingPiles.add(chargingPile6);
+        chargingPiles.add(chargingPile7);
+        chargingPiles.add(chargingPile8);
+        chargingPiles.add(chargingPile9);
+        chargingPiles.add(chargingPile10);
+        User user = new User("1", absorptionChillers, airCons, converters, gasBoilers, gasTurbines, iceStorageAcs, storages, 4500, chargingPiles);
+        inputStream = this.getClass().getResourceAsStream("/iesfiles/gzData/input_rncp_user1.csv");
         readUserData(inputStream, user);
         users.put(user.getUserId(), user);
 
@@ -185,7 +208,7 @@ public class SelfOptTest  extends TestCase {
 //        readUserData(inputStream, user5);
 //        users.put(user5.getUserId(), user5);
 
-        inputStream = this.getClass().getResourceAsStream("/iesfiles/gzData/energy_rn_price.csv");
+        inputStream = this.getClass().getResourceAsStream("/iesfiles/gzData/energy_rncp_price.csv");
         readEnergyPrice(inputStream);
 
         return new Microgrid(users);
@@ -382,7 +405,7 @@ public class SelfOptTest  extends TestCase {
 //        gatePowers[57] = 2958.342735;
 //        gatePowers[58] = 4289.747597;
 //        gatePowers[59] = 2907.299995;
-        SelfOptModel selfOptModel = new SelfOptModel(microgrid, periodNum, t, elecPrices, gasPrices, steamPrices);
+        SelfOptModel selfOptModel = new SelfOptModel(microgrid, periodNum, t, elecPrices, gasPrices, steamPrices, chargePrices);
         selfOptModel.mgSelfOpt();
         Map<String, UserResult> microgridResult = selfOptModel.getMicrogridResult();
         for (UserResult userResult : microgridResult.values()) {
@@ -390,6 +413,35 @@ public class SelfOptTest  extends TestCase {
             if (userResult.getStatus().equals("Optimal")) {
                 System.out.println(userResult.getMinCost());
                 writeResult("D:\\user" + userResult.getUserId() + "Result.csv", userResult, microgrid.getUsers().get("1").getAcLoad(), microgrid.getUsers().get("1").getPhotovoltaic().getPower());
+            }
+        }
+    }
+
+    public void testDR() throws IOException {
+        Microgrid microgrid = microgridModel();
+        DemandRespModel demandRespModel = new DemandRespModel(microgrid, periodNum, t, elecPrices, gasPrices, steamPrices, chargePrices);
+        // 关口功率指令
+        Map<String, User> users = microgrid.getUsers();
+        int[] peakShaveTime = new int[periodNum];
+        for (int i = 22; i < 26; i++) {
+            peakShaveTime[i] = 1;
+        }
+        demandRespModel.setPeakShaveTime(peakShaveTime);
+        for (String userId : users.keySet()) {
+            User user = users.get(userId);
+            for (int i = 0; i < periodNum; i++) {
+                if (peakShaveTime[i] == 1) {
+                    user.getGatePowers()[i] = 4500;
+                }
+            }
+        }
+        demandRespModel.mgOrigDemandResp();
+        Map<String, UserResult> microgridResult = demandRespModel.getMicrogridResult();
+        for (UserResult userResult : microgridResult.values()) {
+            System.out.println(userResult.getUserId() + "\t" + userResult.getStatus());
+            if (userResult.getStatus().equals("Optimal")) {
+                System.out.println(userResult.getMinCost());
+                writeResult("D:\\user" + userResult.getUserId() + "Result_DR.csv", userResult, microgrid.getUsers().get("1").getAcLoad(), microgrid.getUsers().get("1").getPhotovoltaic().getPower());
             }
         }
     }
@@ -1160,6 +1212,7 @@ public class SelfOptTest  extends TestCase {
             elecPrices[t] = Double.parseDouble(newdata[0]);
             gasPrices[t] = Double.parseDouble(newdata[1]);
             steamPrices[t] = Double.parseDouble(newdata[2]);
+            chargePrices[t] = elecPrices[t] + 0.8;
             t += 1;
         }
     }
@@ -1208,6 +1261,14 @@ public class SelfOptTest  extends TestCase {
             bw.write("吸收式制冷机" + (i + 1) + "耗热功率" + ",");
         }
         bw.write("向园区购热功率,");
+        if (userResult.getChargingPilesState() != null) {
+            for (int i = 0; i < userResult.getChargingPilesState().size(); i++) {
+                bw.write("充电桩" + (i + 1) + "启停状态" + ",");
+            }
+            for (int i = 0; i < userResult.getChargingPilesP().size(); i++) {
+                bw.write("充电桩" + (i + 1) + "功率" + ",");
+            }
+        }
         bw.write("负荷,");
         bw.write("光伏出力");
         bw.newLine();
@@ -1248,6 +1309,14 @@ public class SelfOptTest  extends TestCase {
                 bw.write(userResult.getAbsorptionChillersH().get(i)[j] + ",");
             }
             bw.write(userResult.getPurH()[j] + ",");
+            if (userResult.getChargingPilesState() != null) {
+                for (int i = 0; i < userResult.getChargingPilesState().size(); i++) {
+                    bw.write(userResult.getChargingPilesState().get(i)[j] + ",");
+                }
+                for (int i = 0; i < userResult.getChargingPilesP().size(); i++) {
+                    bw.write(userResult.getChargingPilesP().get(i)[j] + ",");
+                }
+            }
             bw.write(acLoads[j] + "," + pvPowers[j] + ",");
             bw.newLine();
         }
