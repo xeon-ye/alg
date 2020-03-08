@@ -43,8 +43,8 @@ public class SelfOptModel {
     public void mgSelfOpt() {
         microgridResult = new HashMap<>(microgrid.getUsers().size());
         for (User user : microgrid.getUsers().values()) {
-//            userSelfOpt(user);
-            chargingPileOpt(user);
+            userSelfOpt(user);
+//            chargingPileOpt(user);
         }
     }
 
@@ -537,7 +537,7 @@ public class SelfOptModel {
                 }
                 coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + 2 * storages.size() + 2 * converters.size() + 2 + airCons.size() + 3 * gasBoilers.size() + absorptionChillers.size()] = 1;   // 园区输入热功率
                 for (int i = 0; i < absorptionChillers.size(); i++) {
-                    coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + 2 * storages.size() + 2 * converters.size() + 2 + airCons.size() + 3 * gasBoilers.size()] = - 1;   // 吸收式制冷机耗热功率
+                    coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + 2 * storages.size() + 2 * converters.size() + 2 + airCons.size() + 3 * gasBoilers.size() + i] = - 1;   // 吸收式制冷机耗热功率
                 }
                 cplex.addGe(cplex.scalProd(x, coeff[coeffNum]), steamLoad.getDemand()[j] * (1 - steamLoad.getEffh()) + heatLoad[j]);
                 coeffNum += 1;
@@ -1106,7 +1106,7 @@ public class SelfOptModel {
                 }
                 coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + 2 * storages.size() + 2 * converters.size() + 2 + airCons.size() + 3 * gasBoilers.size() + absorptionChillers.size()] = 1;   // 园区输入热功率
                 for (int i = 0; i < absorptionChillers.size(); i++) {
-                    coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + 2 * storages.size() + 2 * converters.size() + 2 + airCons.size() + 3 * gasBoilers.size()] = - 1;   // 吸收式制冷机耗热功率
+                    coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + 2 * storages.size() + 2 * converters.size() + 2 + airCons.size() + 3 * gasBoilers.size() + i] = - 1;   // 吸收式制冷机耗热功率
                 }
                 cplex.addGe(cplex.scalProd(x, coeff[coeffNum]), steamLoad.getDemand()[j] * (1 - steamLoad.getEffh()) + heatLoad[j]);
                 coeffNum += 1;
