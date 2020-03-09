@@ -548,7 +548,7 @@ public class SelfOptModelTest  extends TestCase {
         Map<String, User> users = microgrid.getUsers();
         users.remove("1");
         users.remove("2");
-        users.remove("4");
+        users.remove("3");
         users.remove("5");
         // 原始关口功率
         Map<String, double[]> origGatePowers = new HashMap<>();
@@ -570,7 +570,7 @@ public class SelfOptModelTest  extends TestCase {
             double[] insGatePower = new double[periodNum];
             for (int i = 0; i < periodNum; i++) {
                 if (peakShaveTime[i] == 1) {
-                    insGatePower[i] = 1275.362;
+                    insGatePower[i] = 1434.783;
                 } else {
                     insGatePower[i] = origGatePowers.get(userId)[i];
                 }
@@ -578,10 +578,10 @@ public class SelfOptModelTest  extends TestCase {
             insGatePowers.put(userId, insGatePower);
         }
         // 采样点数
-        int sampleNum = 10;
+        int sampleNum = 1;
         // 采样范围
-        double sampleStart = 0;
-        double sampleEnd = 1;
+        double sampleStart = 0.861;
+        double sampleEnd = 0.861;
         Map<String, double[]> increCosts = new HashMap<>(users.size());
         // 应削峰量
         Map<String, double[]> peakShavePowers = new HashMap<>(users.size());
@@ -710,18 +710,12 @@ public class SelfOptModelTest  extends TestCase {
         List<Map<String, Double>> bidRatiosList = new ArrayList<>();
         List<Map<String, Double>> lastBidRatiosList = new ArrayList<>();
         double maxRatio = 0;   // 最大削峰比例
-        for (int i = 0; i < periodNum; i++) {
-            if (peakShaveTime[i] == 1) {
-                Map<String, Double> bidRatios = new HashMap<>();
-                Map<String, Double> lastBidRatios = new HashMap<>();
-                for (Offer offer : offers) {
-                    maxRatio += offer.getMaxPeakShaveRatio() * offer.getPeakShaveCapRatio();
-                    bidRatios.put(offer.getUserId(), offer.getMaxPeakShaveRatio());
-                    lastBidRatios.put(offer.getUserId(), offer.getMaxPeakShaveRatio());
-                }
-                bidRatiosList.add(bidRatios);
-                lastBidRatiosList.add(lastBidRatios);
-            }
+        bidRatiosList.add(new HashMap<>());
+        lastBidRatiosList.add(new HashMap<>());
+        for (Offer offer : offers) {
+            maxRatio += offer.getMaxPeakShaveRatio() * offer.getPeakShaveCapRatio();
+            bidRatiosList.get(0).put(offer.getUserId(), offer.getMaxPeakShaveRatio());
+            lastBidRatiosList.get(0).put(offer.getUserId(), offer.getMaxPeakShaveRatio());
         }
         int iterNum = 1;
         List<Double> clearingPrices = new ArrayList<>();
@@ -973,18 +967,12 @@ public class SelfOptModelTest  extends TestCase {
         List<Map<String, Double>> bidRatiosList = new ArrayList<>();
         List<Map<String, Double>> lastBidRatiosList = new ArrayList<>();
         double maxRatio = 0;   // 最大削峰比例
-        for (int i = 0; i < periodNum; i++) {
-            if (peakShaveTime[i] == 1) {
-                Map<String, Double> bidRatios = new HashMap<>();
-                Map<String, Double> lastBidRatios = new HashMap<>();
-                for (Offer offer : offers) {
-                    maxRatio += offer.getMaxPeakShaveRatio() * offer.getPeakShaveCapRatio();
-                    bidRatios.put(offer.getUserId(), offer.getMaxPeakShaveRatio());
-                    lastBidRatios.put(offer.getUserId(), offer.getMaxPeakShaveRatio());
-                }
-                bidRatiosList.add(bidRatios);
-                lastBidRatiosList.add(lastBidRatios);
-            }
+        bidRatiosList.add(new HashMap<>());
+        lastBidRatiosList.add(new HashMap<>());
+        for (Offer offer : offers) {
+            maxRatio += offer.getMaxPeakShaveRatio() * offer.getPeakShaveCapRatio();
+            bidRatiosList.get(0).put(offer.getUserId(), offer.getMaxPeakShaveRatio());
+            lastBidRatiosList.get(0).put(offer.getUserId(), offer.getMaxPeakShaveRatio());
         }
         int iterNum = 1;
         List<Double> clearingPrices = new ArrayList<>();
