@@ -53,12 +53,14 @@ public class SelfOptModelTest  extends TestCase {
                     0.002, 500, 3000, 0.1, 0.95, 0.1, 1.00, 500, 500);
             iceStorageAcs.add(iceStorageAc);
         }
-        List<Storage> storages = new ArrayList<>(3);
-        for (int i = 0; i < 3; i++) {
+        List<Storage> storages = new ArrayList<>(2);
+        for (int i = 0; i < 1; i++) {
             Storage storage = new Storage(0.005, 0.00075, 1250, 1250, 13000, 0.1, 0.9, 0.1, 0.1, 0.5, 0.5, 0.0025, 0.95, 0.95);
             storages.add(storage);
         }
-        User user = new User("1", absorptionChillers, airCons, converters, gasBoilers, gasTurbines, iceStorageAcs, storages, 4500);
+        InterruptibleLoad interruptibleLoad1 = new InterruptibleLoad(3 * 1e-4, 1.038, 100);
+//        interruptibleLoad1.setMaxP(0);
+        User user = new User("1", absorptionChillers, airCons, converters, gasBoilers, gasTurbines, iceStorageAcs, storages, 4500, interruptibleLoad1);
         inputStream = this.getClass().getResourceAsStream("/iesfiles/selfopt/input_user1.csv");
         readUserData(inputStream, user);
         users.put(user.getUserId(), user);
@@ -96,11 +98,13 @@ public class SelfOptModelTest  extends TestCase {
             iceStorageAcs2.add(iceStorageAc);
         }
         List<Storage> storages2 = new ArrayList<>(1);
-        for (int i = 0; i < 1; i++) {
+        for (int i = 0; i < 0; i++) {
             Storage storage = new Storage(0.005, 0.00075, 1250, 1250, 13000, 0.1, 0.9, 0.1, 0.1, 0.5, 0.5, 0.0025, 0.95, 0.95);
             storages2.add(storage);
         }
-        User user2 = new User("2", absorptionChillers2, airCons2, converters2, gasBoilers2, gasTurbines2, iceStorageAcs2, storages2, 2100);
+        InterruptibleLoad interruptibleLoad2 = new InterruptibleLoad(2 * 1e-4, 1.051, 1100);
+//        interruptibleLoad2.setMaxP(0);
+        User user2 = new User("2", absorptionChillers2, airCons2, converters2, gasBoilers2, gasTurbines2, iceStorageAcs2, storages2, 2100, interruptibleLoad2);
         inputStream = this.getClass().getResourceAsStream("/iesfiles/selfopt/input_user2.csv");
         readUserData(inputStream, user2);
         users.put(user2.getUserId(), user2);
@@ -133,7 +137,9 @@ public class SelfOptModelTest  extends TestCase {
         }
         List<IceStorageAc> iceStorageAcs3 = new ArrayList<>(1);
         List<Storage> storages3 = new ArrayList<>(1);
-        User user3 = new User("3", absorptionChillers3, airCons3, converters3, gasBoilers3, gasTurbines3, iceStorageAcs3, storages3, 1600);
+        InterruptibleLoad interruptibleLoad3 = new InterruptibleLoad(1 * 1e-4, 1.021, 700);
+//        interruptibleLoad3.setMaxP(0);
+        User user3 = new User("3", absorptionChillers3, airCons3, converters3, gasBoilers3, gasTurbines3, iceStorageAcs3, storages3, 1600, interruptibleLoad3);
         inputStream = this.getClass().getResourceAsStream("/iesfiles/selfopt/input_user3.csv");
         readUserData(inputStream, user3);
         users.put(user3.getUserId(), user3);
@@ -162,7 +168,9 @@ public class SelfOptModelTest  extends TestCase {
         List<GasTurbine> gasTurbines4 = new ArrayList<>(1);
         List<IceStorageAc> iceStorageAcs4 = new ArrayList<>(1);
         List<Storage> storages4 = new ArrayList<>(3);
-        User user4 = new User("4", absorptionChillers4, airCons4, converters4, gasBoilers4, gasTurbines4, iceStorageAcs4, storages4, 1800);
+        InterruptibleLoad interruptibleLoad4 = new InterruptibleLoad(4.6 * 1e-4, 1.051, 370);
+//        interruptibleLoad4.setMaxP(0);
+        User user4 = new User("4", absorptionChillers4, airCons4, converters4, gasBoilers4, gasTurbines4, iceStorageAcs4, storages4, 1800, interruptibleLoad4);
         inputStream = this.getClass().getResourceAsStream("/iesfiles/selfopt/input_user4.csv");
         readUserData(inputStream, user4);
         users.put(user4.getUserId(), user4);
@@ -179,7 +187,9 @@ public class SelfOptModelTest  extends TestCase {
         List<GasTurbine> gasTurbines5 = new ArrayList<>(1);
         List<IceStorageAc> iceStorageAcs5 = new ArrayList<>(1);
         List<Storage> storages5 = new ArrayList<>(1);
-        User user5 = new User("5", absorptionChillers5, airCons5, converters5, gasBoilers5, gasTurbines5, iceStorageAcs5, storages5, 3800);
+        InterruptibleLoad interruptibleLoad5 = new InterruptibleLoad(6.65 * 1e-4, 1.000, 650);
+//        interruptibleLoad5.setMaxP(0);
+        User user5 = new User("5", absorptionChillers5, airCons5, converters5, gasBoilers5, gasTurbines5, iceStorageAcs5, storages5, 3800, interruptibleLoad5);
         inputStream = this.getClass().getResourceAsStream("/iesfiles/selfopt/input_user5.csv");
         readUserData(inputStream, user5);
         users.put(user5.getUserId(), user5);
@@ -536,6 +546,10 @@ public class SelfOptModelTest  extends TestCase {
         System.out.println("---------自趋优计算结束---------");
 
         Map<String, User> users = microgrid.getUsers();
+        users.remove("1");
+        users.remove("2");
+        users.remove("3");
+        users.remove("5");
         // 原始关口功率
         Map<String, double[]> origGatePowers = new HashMap<>();
         for (String userId : users.keySet()) {
@@ -556,7 +570,7 @@ public class SelfOptModelTest  extends TestCase {
             double[] insGatePower = new double[periodNum];
             for (int i = 0; i < periodNum; i++) {
                 if (peakShaveTime[i] == 1) {
-                    insGatePower[i] = 1673.9;
+                    insGatePower[i] = 1434.783;
                 } else {
                     insGatePower[i] = origGatePowers.get(userId)[i];
                 }
@@ -564,10 +578,10 @@ public class SelfOptModelTest  extends TestCase {
             insGatePowers.put(userId, insGatePower);
         }
         // 采样点数
-        int sampleNum = 10;
+        int sampleNum = 1;
         // 采样范围
-        double sampleStart = 0.5;
-        double sampleEnd = 1;
+        double sampleStart = 0.861;
+        double sampleEnd = 0.861;
         Map<String, double[]> increCosts = new HashMap<>(users.size());
         // 应削峰量
         Map<String, double[]> peakShavePowers = new HashMap<>(users.size());
@@ -582,7 +596,7 @@ public class SelfOptModelTest  extends TestCase {
             }
         }
         for (int i = 0; i < sampleNum; i++) {
-            for (String userId : selfOptResult.keySet()) {
+            for (String userId : users.keySet()) {
                 double[] purP = selfOptResult.get(userId).getPurP();
                 double[] newGatePower = new double[periodNum];
                 for (int j = 0; j < periodNum; j++) {
@@ -696,18 +710,12 @@ public class SelfOptModelTest  extends TestCase {
         List<Map<String, Double>> bidRatiosList = new ArrayList<>();
         List<Map<String, Double>> lastBidRatiosList = new ArrayList<>();
         double maxRatio = 0;   // 最大削峰比例
-        for (int i = 0; i < periodNum; i++) {
-            if (peakShaveTime[i] == 1) {
-                Map<String, Double> bidRatios = new HashMap<>();
-                Map<String, Double> lastBidRatios = new HashMap<>();
-                for (Offer offer : offers) {
-                    maxRatio += offer.getMaxPeakShaveRatio() * offer.getPeakShaveCapRatio();
-                    bidRatios.put(offer.getUserId(), offer.getMaxPeakShaveRatio());
-                    lastBidRatios.put(offer.getUserId(), offer.getMaxPeakShaveRatio());
-                }
-                bidRatiosList.add(bidRatios);
-                lastBidRatiosList.add(lastBidRatios);
-            }
+        bidRatiosList.add(new HashMap<>());
+        lastBidRatiosList.add(new HashMap<>());
+        for (Offer offer : offers) {
+            maxRatio += offer.getMaxPeakShaveRatio() * offer.getPeakShaveCapRatio();
+            bidRatiosList.get(0).put(offer.getUserId(), offer.getMaxPeakShaveRatio());
+            lastBidRatiosList.get(0).put(offer.getUserId(), offer.getMaxPeakShaveRatio());
         }
         int iterNum = 1;
         List<Double> clearingPrices = new ArrayList<>();
@@ -781,7 +789,7 @@ public class SelfOptModelTest  extends TestCase {
                 writeResult("D:\\user" + userId + "Result_DR.csv", userResult);
             }
         }
-        System.out.println("---------分布式需求响应计算结束---------");
+        System.out.println("---------集中分布式需求响应计算结束---------");
     }
 
     public void testDRPes() throws IOException {
@@ -959,18 +967,12 @@ public class SelfOptModelTest  extends TestCase {
         List<Map<String, Double>> bidRatiosList = new ArrayList<>();
         List<Map<String, Double>> lastBidRatiosList = new ArrayList<>();
         double maxRatio = 0;   // 最大削峰比例
-        for (int i = 0; i < periodNum; i++) {
-            if (peakShaveTime[i] == 1) {
-                Map<String, Double> bidRatios = new HashMap<>();
-                Map<String, Double> lastBidRatios = new HashMap<>();
-                for (Offer offer : offers) {
-                    maxRatio += offer.getMaxPeakShaveRatio() * offer.getPeakShaveCapRatio();
-                    bidRatios.put(offer.getUserId(), offer.getMaxPeakShaveRatio());
-                    lastBidRatios.put(offer.getUserId(), offer.getMaxPeakShaveRatio());
-                }
-                bidRatiosList.add(bidRatios);
-                lastBidRatiosList.add(lastBidRatios);
-            }
+        bidRatiosList.add(new HashMap<>());
+        lastBidRatiosList.add(new HashMap<>());
+        for (Offer offer : offers) {
+            maxRatio += offer.getMaxPeakShaveRatio() * offer.getPeakShaveCapRatio();
+            bidRatiosList.get(0).put(offer.getUserId(), offer.getMaxPeakShaveRatio());
+            lastBidRatiosList.get(0).put(offer.getUserId(), offer.getMaxPeakShaveRatio());
         }
         int iterNum = 1;
         List<Double> clearingPrices = new ArrayList<>();
@@ -1044,7 +1046,7 @@ public class SelfOptModelTest  extends TestCase {
                 writeResult("D:\\pesUser" + userId + "Result_DR.csv", userResult);
             }
         }
-        System.out.println("---------分布式需求响应计算结束---------");
+        System.out.println("---------集中分布式需求响应计算结束---------");
     }
 
     public void testCenIDR() throws IOException {

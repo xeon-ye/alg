@@ -29,6 +29,8 @@ public class UserResult {
     List<double[]> absorptionChillersH; // 吸收式制冷机耗热功率
     double[] Hin;   // 园区输入热功率
     double[] purH; // 向园区购热功率
+    List<double[]> chargingPilesState; // 充电桩启停状态
+    List<double[]> chargingPilesP;    // 充电桩耗电功率
 
     public UserResult(String userId, String status) {
         this.userId = userId;
@@ -58,6 +60,18 @@ public class UserResult {
         this.absorptionChillersH = absorptionChillersH;
         this.Hin = Hin;
         this.purH = purH;
+    }
+
+    public UserResult(String userId, String status, double minCost, List<double[]> frigesP, List<double[]> iceTanksP,
+                      List<double[]> iceTanksQ, List<double[]> gasTurbinesState, List<double[]> gasTurbinesP,
+                      List<double[]> storagesP, List<double[]> convertersP, double[] Pin, double[] purP,
+                      List<double[]> airConsP, List<double[]> gasBoilersState, List<double[]> gasBoilersH,
+                      List<double[]> absorptionChillersH, double[] Hin, double[] purH,
+                      List<double[]> chargingPilesState, List<double[]> chargingPilesP) {
+        this(userId, status, minCost, frigesP, iceTanksP, iceTanksQ, gasTurbinesState, gasTurbinesP, storagesP,
+                convertersP, Pin, purP, airConsP, gasBoilersState, gasBoilersH, absorptionChillersH, Hin, purH);
+        this.chargingPilesState = chargingPilesState;
+        this.chargingPilesP = chargingPilesP;
     }
 
     public String getUserId() {
@@ -202,5 +216,21 @@ public class UserResult {
 
     public void setPurH(double[] purH) {
         this.purH = purH;
+    }
+
+    public List<double[]> getChargingPilesState() {
+        return chargingPilesState;
+    }
+
+    public void setChargingPilesState(List<double[]> chargingPilesState) {
+        this.chargingPilesState = chargingPilesState;
+    }
+
+    public List<double[]> getChargingPilesP() {
+        return chargingPilesP;
+    }
+
+    public void setChargingPilesP(List<double[]> chargingPilesP) {
+        this.chargingPilesP = chargingPilesP;
     }
 }
