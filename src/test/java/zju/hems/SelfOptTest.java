@@ -12,7 +12,7 @@ import static java.lang.Math.pow;
 
 public class SelfOptTest  extends TestCase {
 
-    int periodNum = 96; // 一天的时段数
+    int periodNum = 80; // 一天的时段数
     double t = 0.25;    // 每个时段15分钟
     double[] elecPrices = new double[periodNum];    // 电价
     double[] gasPrices = new double[periodNum];    // 天然气价格
@@ -168,6 +168,118 @@ public class SelfOptTest  extends TestCase {
         return new Microgrid(users);
     }
 
+    public Microgrid wanliModel() throws IOException {
+        Map<String, User> users = new HashMap<>();
+        InputStream inputStream;
+        // 用户1
+        List<AbsorptionChiller> absorptionChillers = new ArrayList<>(1);
+        for (int i = 0; i < 1; i++) {
+            AbsorptionChiller absorptionChiller = new AbsorptionChiller(0.00008, 0, 10750, 0.8);
+            absorptionChillers.add(absorptionChiller);
+        }
+        List<AirCon> airCons = new ArrayList<>(3);
+        AirCon airCon = new AirCon(0.0097, 1, 1.00, 0, 1341, 4.3);
+        airCons.add(airCon);
+        airCon = new AirCon(0.0097, 1, 1.00, 0, 1341, 4.3);
+        airCons.add(airCon);
+        airCon = new AirCon(0.009701, 1, 1.00, 0, 1341, 4.3);
+        airCons.add(airCon);
+        List<Converter> converters = new ArrayList<>(1);
+        for (int i = 0; i < 1; i++) {
+            Converter converter = new Converter(1, 1);
+            converters.add(converter);
+        }
+        List<GasBoiler> gasBoilers = new ArrayList<>(1);
+        for (int i = 0; i < 1; i++) {
+            GasBoiler gasBoiler = new GasBoiler(0.04, 100, 0.9, 100, 10000, 5000, 0);
+            gasBoilers.add(gasBoiler);
+        }
+        List<GasTurbine> gasTurbines = new ArrayList<>(1);
+        for (int i = 0; i < 1; i++) {
+            GasTurbine gasTurbine = new GasTurbine(0.063, 0.33, 0.7, 0, 200, 200, 15000, -7500, 7500, 0);
+            gasTurbines.add(gasTurbine);
+        }
+        List<IceStorageAc> iceStorageAcs = new ArrayList<>(1);
+        for (int i = 0; i < 0; i++) {
+            IceStorageAc iceStorageAc = new IceStorageAc(0.01, 1, 3, 3, 0.9, 1,
+                    0.002, 500, 3000, 0.1, 0.95, 0.1, 1.00, 500, 500);
+            iceStorageAcs.add(iceStorageAc);
+        }
+        List<Storage> storages = new ArrayList<>(1);
+        for (int i = 0; i < 1; i++) {
+//            Storage storage = new Storage(0.005, 0.00075, 6000, 6000, 36000, 0.1, 0.9, 0.1, 0.1, 1, 1, 0.0025, 0.95, 0.95);
+            Storage storage = new Storage(0.005, 0.00075, 6000, 6000, 36000, 0.1, 0.9, 0.66, 0.1, 1, 1, 0.0025, 0.95, 0.95); // 日内4点
+//            Storage storage = new Storage(0.005, 0.00075, 6000, 6000, 50000, 0.05, 0.95, 0.4975489443718, 0.05, 0.5, 0.5, 0.0025, 0.95, 0.95);    // 日内4点
+//            Storage storage = new Storage(0.005, 0.00075, 6000, 6000, 50000, 0.05, 0.95, 0.835, 0.05, 0.5, 0.5, 0.0025, 0.95, 0.95);    // 日内7点
+            storages.add(storage);
+        }
+        User user = new User("1", absorptionChillers, airCons, converters, gasBoilers, gasTurbines, iceStorageAcs, storages, 4500);
+        inputStream = this.getClass().getResourceAsStream("/iesfiles/gzTestData/input_rn_user1.csv");
+        readUserData(inputStream, user);
+        users.put(user.getUserId(), user);
+
+        inputStream = this.getClass().getResourceAsStream("/iesfiles/gzTestData/energy_rn_price.csv");
+        readEnergyPrice(inputStream);
+
+        return new Microgrid(users);
+    }
+
+    public Microgrid wanliSSModel() throws IOException {
+        Map<String, User> users = new HashMap<>();
+        InputStream inputStream;
+        // 用户1
+        List<AbsorptionChiller> absorptionChillers = new ArrayList<>(1);
+        for (int i = 0; i < 1; i++) {
+            AbsorptionChiller absorptionChiller = new AbsorptionChiller(0.00008, 0, 10750, 0.8);
+            absorptionChillers.add(absorptionChiller);
+        }
+        List<AirCon> airCons = new ArrayList<>(3);
+        AirCon airCon = new AirCon(0.0097, 1, 1.00, 0, 1341, 4.3);
+        airCons.add(airCon);
+        airCon = new AirCon(0.0097, 1, 1.00, 0, 1341, 4.3);
+        airCons.add(airCon);
+        airCon = new AirCon(0.009701, 1, 1.00, 0, 1341, 4.3);
+        airCons.add(airCon);
+        List<Converter> converters = new ArrayList<>(1);
+        for (int i = 0; i < 1; i++) {
+            Converter converter = new Converter(1, 1);
+            converters.add(converter);
+        }
+        List<GasBoiler> gasBoilers = new ArrayList<>(1);
+        for (int i = 0; i < 1; i++) {
+            GasBoiler gasBoiler = new GasBoiler(0.04, 100, 0.9, 100, 10000, 5000, 0);
+            gasBoilers.add(gasBoiler);
+        }
+        List<GasTurbine> gasTurbines = new ArrayList<>(1);
+        for (int i = 0; i < 1; i++) {
+            GasTurbine gasTurbine = new GasTurbine(0.063, 0.33, 0.7, 0, 200, 200, 15000, -7500, 7500, 0);
+            gasTurbines.add(gasTurbine);
+        }
+        List<IceStorageAc> iceStorageAcs = new ArrayList<>(1);
+        for (int i = 0; i < 0; i++) {
+            IceStorageAc iceStorageAc = new IceStorageAc(0.01, 1, 3, 3, 0.9, 1,
+                    0.002, 500, 3000, 0.1, 0.95, 0.1, 1.00, 500, 500);
+            iceStorageAcs.add(iceStorageAc);
+        }
+        List<Storage> storages = new ArrayList<>(1);
+        for (int i = 0; i < 1; i++) {
+//            Storage storage = new Storage(0.005, 0.00075, 6000, 6000, 36000, 0.1, 0.9, 0.66, 0.1, 1, 1, 0.0025, 0.95, 0.95); // 日内4点
+            Storage storage = new Storage(0.005, 0.00075, 6000, 6000, 36000, 0.1, 0.9, 0.685, 0.1, 1, 1, 0.0025, 0.95, 0.95); // 实时4点
+//            Storage storage = new Storage(0.005, 0.00075, 6000, 6000, 50000, 0.05, 0.95, 0.4975489443718, 0.05, 0.5, 0.5, 0.0025, 0.95, 0.95);    // 日内4点
+//            Storage storage = new Storage(0.005, 0.00075, 6000, 6000, 50000, 0.05, 0.95, 0.835, 0.05, 0.5, 0.5, 0.0025, 0.95, 0.95);    // 日内7点
+            storages.add(storage);
+        }
+        User user = new User("1", absorptionChillers, airCons, converters, gasBoilers, gasTurbines, iceStorageAcs, storages, 4500);
+        inputStream = this.getClass().getResourceAsStream("/iesfiles/gzTestData/input_ss_user1.csv");
+        readUserData(inputStream, user);
+        users.put(user.getUserId(), user);
+
+        inputStream = this.getClass().getResourceAsStream("/iesfiles/gzTestData/energy_ss_price.csv");
+        readEnergyPrice(inputStream);
+
+        return new Microgrid(users);
+    }
+
     public Microgrid distIDRModel() throws IOException {
         Map<String, User> users = new HashMap<>();
         InputStream inputStream;
@@ -264,7 +376,7 @@ public class SelfOptTest  extends TestCase {
     }
 
     public void testSelfOpt() throws IOException {
-        Microgrid microgrid = microgridModel();
+        Microgrid microgrid = wanliModel();
         // 日内自趋优参数设置
 //        double[] gatePowers = microgrid.getUsers().get("1").getGatePowers();
 //        gatePowers[54] = 3072.699547;
@@ -287,12 +399,35 @@ public class SelfOptTest  extends TestCase {
     }
 
     public void testDR() throws IOException {
-        Microgrid microgrid = microgridModel();
+        Microgrid microgrid = wanliModel();
+        SelfOptModel selfOptModel = new SelfOptModel(microgrid, periodNum, t, elecPrices, gasPrices, steamPrices, chargePrices);
+        selfOptModel.mgSelfOpt();
+        Map<String, UserResult> microgridResult = selfOptModel.getMicrogridResult();
+        double[] purP = microgridResult.get("1").getPurP();
+
+        // 实时需求响应
+//        periodNum--;
+//        microgrid = wanliSSModel();
+//        DemandRespModel demandRespModel = new DemandRespModel(microgrid, periodNum, t, elecPrices, gasPrices, steamPrices, chargePrices);
+//        // 关口功率指令
+//        Map<String, User> users = microgrid.getUsers();
+//        int[] peakShaveTime = new int[periodNum];
+//        for (int i = 0; i < periodNum; i++) {
+//            peakShaveTime[i] = 1;
+//        }
+//        demandRespModel.setPeakShaveTime(peakShaveTime);
+//        for (String userId : users.keySet()) {
+//            User user = users.get(userId);
+//            for (int i = 0; i < periodNum; i++) {
+//                user.getGatePowers()[i] = purP[i + 1];
+//            }
+//        }
+        // 日内削峰需求响应
         DemandRespModel demandRespModel = new DemandRespModel(microgrid, periodNum, t, elecPrices, gasPrices, steamPrices, chargePrices);
         // 关口功率指令
         Map<String, User> users = microgrid.getUsers();
         int[] peakShaveTime = new int[periodNum];
-        for (int i = 22; i < 26; i++) {
+        for (int i = 12; i < 16; i++) {
             peakShaveTime[i] = 1;
         }
         demandRespModel.setPeakShaveTime(peakShaveTime);
@@ -300,12 +435,12 @@ public class SelfOptTest  extends TestCase {
             User user = users.get(userId);
             for (int i = 0; i < periodNum; i++) {
                 if (peakShaveTime[i] == 1) {
-                    user.getGatePowers()[i] = 4500;
+                    user.getGatePowers()[i] = purP[i] - 6000;
                 }
             }
         }
         demandRespModel.mgOrigDemandResp();
-        Map<String, UserResult> microgridResult = demandRespModel.getMicrogridResult();
+        microgridResult = demandRespModel.getMicrogridResult();
         for (UserResult userResult : microgridResult.values()) {
             System.out.println(userResult.getUserId() + "\t" + userResult.getStatus());
             if (userResult.getStatus().equals("Optimal")) {
@@ -941,9 +1076,9 @@ public class SelfOptTest  extends TestCase {
     public void readUserData(InputStream inputStream, User user) throws IOException {
         double[] acLoad = new double[periodNum];
         double[] dcLoad = new double[periodNum];
-        double[] origPvPowers = new double[15 * periodNum];
         double[] pvPowers = new double[periodNum];
-        double[] coolingLoad = new double[periodNum];
+        double[] coolingLoad1 = new double[periodNum];
+        double[] coolingLoad2 = new double[periodNum];
         double[] heatLoad = new double[periodNum];
         double[] Lsteams = new double[periodNum];
         double[] gatePowers = new double[periodNum];
@@ -952,34 +1087,24 @@ public class SelfOptTest  extends TestCase {
         int t = 0;
         br.readLine();
         while ((data = br.readLine()) != null) {
-            String[] newdata = data.split(",", 7);
+            String[] newdata = data.split(",", 8);
             acLoad[t] = Double.parseDouble(newdata[0]);
             dcLoad[t] = Double.parseDouble(newdata[1]);
-            origPvPowers[t] = Double.parseDouble(newdata[2]) * 1000;
-            coolingLoad[t] = Double.parseDouble(newdata[3]);
-            heatLoad[t] = Double.parseDouble(newdata[4]);
-            Lsteams[t] = Double.parseDouble(newdata[5]);
-            gatePowers[t] = Double.parseDouble(newdata[6]);
+            pvPowers[t] = Double.parseDouble(newdata[2]);
+            coolingLoad1[t] = Double.parseDouble(newdata[3]);
+            coolingLoad2[t] = Double.parseDouble(newdata[4]);
+            heatLoad[t] = Double.parseDouble(newdata[5]);
+            Lsteams[t] = Double.parseDouble(newdata[6]);
+            gatePowers[t] = Double.parseDouble(newdata[7]);
             t += 1;
-            if (t == periodNum) {
-                break;
-            }
-        }
-        while ((data = br.readLine()) != null) {
-            String[] newdata = data.split(",", 7);
-            origPvPowers[t] = Double.parseDouble(newdata[2]) * 1000;
-            t += 1;
-        }
-        for (int i = 0; i < periodNum; i++) {
-            pvPowers[i] = origPvPowers[15 * i];
-            acLoad[i] += pvPowers[i];
         }
         user.setSteamLoad(new SteamLoad(Lsteams, 0.2));
         user.setPhotovoltaic(new Photovoltaic(0.0005, pvPowers));
         user.setAcLoad(acLoad);
         user.setDcLoad(dcLoad);
         user.setHeatLoad(heatLoad);
-        user.setCoolingLoad(coolingLoad);
+        user.setCoolingLoad1(coolingLoad1);
+        user.setCoolingLoad2(coolingLoad2);
         user.setGatePowers(gatePowers);
     }
 

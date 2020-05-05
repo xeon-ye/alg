@@ -27,6 +27,8 @@ public class User {
     double[] gatePowers;   // 用户关口功率
     InterruptibleLoad interruptibleLoad;    // 可中断负荷
     List<ChargingPile> chargingPiles;   // 充电桩
+    double[] coolingLoad1;   // 冷负荷左
+    double[] coolingLoad2;   // 冷负荷右
 
     WindPower windPower;
 
@@ -222,5 +224,21 @@ public class User {
 
     public void setWindPower(WindPower windPower) {
         this.windPower = windPower;
+    }
+
+    public double[] getCoolingLoad1() {
+        return coolingLoad1;
+    }
+
+    public void setCoolingLoad1(double[] coolingLoad1) {
+        this.coolingLoad1 = coolingLoad1;
+    }
+
+    public double[] getCoolingLoad2() {
+        return coolingLoad2;
+    }
+
+    public void setCoolingLoad2(double[] coolingLoad2) {
+        this.coolingLoad2 = coolingLoad2;
     }
 }
