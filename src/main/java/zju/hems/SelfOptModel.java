@@ -43,8 +43,8 @@ public class SelfOptModel {
     public void mgSelfOpt() {
         microgridResult = new HashMap<>(microgrid.getUsers().size());
         for (User user : microgrid.getUsers().values()) {
-//            userSelfOpt(user);
-            gzTestSelfOpt(user);
+            userSelfOpt(user);
+//            gzTestSelfOpt(user);
 //            chargingPileOpt(user);
         }
     }
@@ -794,8 +794,11 @@ public class SelfOptModel {
                 objValue[j * periodVarNum + handledVarNum] = steamPrices[j] * t; // 购热成本
 
                 handledVarNum += 1;
-                for (int i = 0; i < storages.size(); i++) {
-                    objValue[j * periodVarNum + handledVarNum + i] = 1;   // 储能功率变化成本
+
+                if (j > 0) {
+                    for (int i = 0; i < storages.size(); i++) {
+                        objValue[j * periodVarNum + handledVarNum + i] = 0.01;   // 储能功率变化成本
+                    }
                 }
             }
             cplex.addMinimize(cplex.scalProd(x, objValue));
@@ -1147,7 +1150,7 @@ public class SelfOptModel {
                     coeff[coeffNum][(j - 1) * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + storages.size() + i] = -1; // 上一时刻储能放电功率
                     coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + i] = -1; // 储能充电功率
                     coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + storages.size() + i] = 1; // 储能放电功率
-                    coeff[coeffNum][3 * iceStorageAcs.size() + 3 * gasTurbines.size() + 2 * storages.size() + 2 * converters.size() +
+                    coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + 2 * storages.size() + 2 * converters.size() +
                             2 + airCons.size() + 3 * gasBoilers.size() + absorptionChillers.size() + 2 + i] = 1;
                     cplex.addGe(cplex.scalProd(x, coeff[coeffNum]), 0);
                     coeffNum += 1;
@@ -1155,7 +1158,7 @@ public class SelfOptModel {
                     coeff[coeffNum][(j - 1) * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + storages.size() + i] = 1; // 上一时刻储能放电功率
                     coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + i] = 1; // 储能充电功率
                     coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + storages.size() + i] = -1; // 储能放电功率
-                    coeff[coeffNum][3 * iceStorageAcs.size() + 3 * gasTurbines.size() + 2 * storages.size() + 2 * converters.size() +
+                    coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + 2 * storages.size() + 2 * converters.size() +
                             2 + airCons.size() + 3 * gasBoilers.size() + absorptionChillers.size() + 2 + i] = 1;
                     cplex.addGe(cplex.scalProd(x, coeff[coeffNum]), 0);
                     coeffNum += 1;
@@ -1173,10 +1176,10 @@ public class SelfOptModel {
                     }
                     double[] result = cplex.getValues(x);
                     // 减去储能功率变化成本
-                    for (int j = 0; j < periodNum; j++) {
+                    for (int j = 1; j < periodNum; j++) {
                         for (int i = 0; i < storages.size(); i++) {
                             minCost -= result[j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + 2 * storages.size() +
-                                    2 * converters.size() + 2 + airCons.size() + 3 * gasBoilers.size() + absorptionChillers.size() + 2 + i] * 1;    // 储能功率变化成本
+                                    2 * converters.size() + 2 + airCons.size() + 3 * gasBoilers.size() + absorptionChillers.size() + 2 + i] * 0.01;    // 储能功率变化成本
                         }
                     }
                     createUserResult(user.getUserId(), cplex.getStatus().toString(), minCost, cplex.getValues(x),
