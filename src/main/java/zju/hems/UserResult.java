@@ -23,7 +23,8 @@ public class UserResult {
     List<double[]> convertersP;  // 变流器AC-DC交流侧功率
     double[] Pin;   // 电网输入功率
     double[] purP; // 向电网购电功率
-    List<double[]> airConsP;    // 中央空调耗电功率
+    List<double[]> airConsP;    // 中央空调制冷耗电功率
+    List<double[]> airConsPh;    // 中央空调制热耗电功率
     List<double[]> gasBoilersState; // 燃气锅炉启停状态
     List<double[]> gasBoilersH; // 燃气锅炉产热功率
     List<double[]> absorptionChillersH; // 吸收式制冷机耗热功率
@@ -31,6 +32,8 @@ public class UserResult {
     double[] purH; // 向园区购热功率
     List<double[]> chargingPilesState; // 充电桩启停状态
     List<double[]> chargingPilesP;    // 充电桩耗电功率
+    List<double[]> heatStoragesP;   // 储热罐储热功率(外部)
+    List<double[]> heatStoragesS;   // 储热罐容量
 
     public UserResult(String userId, String status) {
         this.userId = userId;
@@ -178,6 +181,14 @@ public class UserResult {
         this.airConsP = airConsP;
     }
 
+    public List<double[]> getAirConsPh() {
+        return airConsPh;
+    }
+
+    public void setAirConsPh(List<double[]> airConsPh) {
+        this.airConsPh = airConsPh;
+    }
+
     public List<double[]> getGasBoilersState() {
         return gasBoilersState;
     }
@@ -232,5 +243,21 @@ public class UserResult {
 
     public void setChargingPilesP(List<double[]> chargingPilesP) {
         this.chargingPilesP = chargingPilesP;
+    }
+
+    public List<double[]> getHeatStoragesP() {
+        return heatStoragesP;
+    }
+
+    public void setHeatStoragesP(List<double[]> heatStoragesP) {
+        this.heatStoragesP = heatStoragesP;
+    }
+
+    public List<double[]> getHeatStoragesS() {
+        return heatStoragesS;
+    }
+
+    public void setHeatStoragesS(List<double[]> heatStoragesS) {
+        this.heatStoragesS = heatStoragesS;
     }
 }

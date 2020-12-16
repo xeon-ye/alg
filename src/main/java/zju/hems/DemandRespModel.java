@@ -7980,6 +7980,13 @@ public class DemandRespModel extends SelfOptModel {
                         }
                     }
                     double[] result = cplex.getValues(x);
+                    // 减去购买削峰量成本
+                    for (int j = 0; j < periodNum; j++) {
+                        if (peakShaveTime[j] == 1) {
+                            minCost += mc[j] * t * (selfOptResult.get(userId).getPin()[j] -
+                                    result[j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + 2 * storages.size() + 2 * converters.size() + 1]);
+                        }
+                    }
                     createUserResult(userId, cplex.getStatus().toString(), minCost, result, periodVarNum,
                             iceStorageAcs, gasTurbines, storages, converters, airCons, gasBoilers, absorptionChillers);
 

@@ -9,10 +9,16 @@ public class Photovoltaic {
 
     double coper;   // 单位输出功率的运维成本
     double[] power; // 光伏出力预测
+    double[] heatPower; // 光伏产热功率预测
 
     public Photovoltaic(double coper, double[] power) {
         this.coper = coper;
         this.power = power;
+    }
+
+    public Photovoltaic(double coper, double[] power, double[] heatPower) {
+        this(coper, power);
+        this.heatPower = heatPower;
     }
 
     public double getCoper() {
@@ -29,5 +35,13 @@ public class Photovoltaic {
 
     public void setPower(double[] power) {
         this.power = power;
+    }
+
+    public double[] getHeatPower() {
+        return heatPower;
+    }
+
+    public void setHeatPower(double[] heatPower) {
+        this.heatPower = heatPower;
     }
 }

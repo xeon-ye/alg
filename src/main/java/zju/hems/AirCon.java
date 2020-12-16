@@ -17,6 +17,8 @@ public class AirCon {
     double maxP;    // 最大耗电功率
     double EERc;    // 制冷能效比
     double EERh;    // 制热能效比
+    double minPh;    // 制热最小耗电功率
+    double maxPh;    // 制热最大耗电功率
 
     public AirCon(double coper, double Effac, double consumCoef, double minP, double maxP, double EERc) {
         this.coper = coper;
@@ -25,6 +27,13 @@ public class AirCon {
         this.minP = minP;
         this.maxP = maxP;
         this.EERc = EERc;
+    }
+
+    public AirCon(double coper, double Effac, double consumCoef, double minP, double maxP, double EERc, double EERh, double minPh, double maxPh) {
+        this(coper, Effac, consumCoef, minP, maxP, EERc);
+        this.EERh = EERh;
+        this.minPh = minPh;
+        this.maxPh = maxPh;
     }
 
     public double getCoper() {
@@ -105,5 +114,21 @@ public class AirCon {
 
     public void setEERh(double EERh) {
         this.EERh = EERh;
+    }
+
+    public double getMinPh() {
+        return minPh;
+    }
+
+    public void setMinPh(double minPh) {
+        this.minPh = minPh;
+    }
+
+    public double getMaxPh() {
+        return maxPh;
+    }
+
+    public void setMaxPh(double maxPh) {
+        this.maxPh = maxPh;
     }
 }

@@ -12,7 +12,8 @@ import static java.lang.Math.pow;
 
 public class SelfOptModelTest  extends TestCase {
 
-    int periodNum = 64; // 一天的时段数
+    int periodNum = 96; // 一天的时段数
+//    int periodNum = 64; // 一天的时段数
     double t = 0.25;    // 每个时段15分钟
     double[] elecPrices = new double[periodNum];    // 电价
     double[] gasPrices = new double[periodNum];    // 天然气价格
@@ -309,7 +310,7 @@ public class SelfOptModelTest  extends TestCase {
             Storage storage = new Storage(0.005, 0.00075, 1250, 1250, 13000, 0.1, 0.9, 0.83, 0.1, 0.5, 0.5, 0.0025, 0.95, 0.95);
             storages3.add(storage);
         }
-        InterruptibleLoad interruptibleLoad3 = new InterruptibleLoad(6.2 * 1e-5, 1.208, 300);
+        InterruptibleLoad interruptibleLoad3 = new InterruptibleLoad(6.2 * 1e-5, 1.208, 400);
         User user3 = new User("3", absorptionChillers3, airCons3, converters3, gasBoilers3, gasTurbines3, iceStorageAcs3, storages3, 1600, interruptibleLoad3);
         inputStream = this.getClass().getResourceAsStream("/iesfiles/CIIDR/input_user3.csv");
         readUserData(inputStream, user3);
@@ -335,7 +336,7 @@ public class SelfOptModelTest  extends TestCase {
         List<GasTurbine> gasTurbines4 = new ArrayList<>(1);
         List<IceStorageAc> iceStorageAcs4 = new ArrayList<>(1);
         List<Storage> storages4 = new ArrayList<>(3);
-        InterruptibleLoad interruptibleLoad4 = new InterruptibleLoad(6.09 * 1e-5, 1.208, 400);
+        InterruptibleLoad interruptibleLoad4 = new InterruptibleLoad(6.09 * 1e-5, 1.208, 800);
         User user4 = new User("4", absorptionChillers4, airCons4, converters4, gasBoilers4, gasTurbines4, iceStorageAcs4, storages4, 1800, interruptibleLoad4);
         inputStream = this.getClass().getResourceAsStream("/iesfiles/CIIDR/input_user4.csv");
         readUserData(inputStream, user4);
@@ -349,7 +350,7 @@ public class SelfOptModelTest  extends TestCase {
         List<GasTurbine> gasTurbines5 = new ArrayList<>(1);
         List<IceStorageAc> iceStorageAcs5 = new ArrayList<>(1);
         List<Storage> storages5 = new ArrayList<>(1);
-        InterruptibleLoad interruptibleLoad5 = new InterruptibleLoad(6.05 * 1e-5, 1.208, 500);
+        InterruptibleLoad interruptibleLoad5 = new InterruptibleLoad(6.05 * 1e-5, 1.208, 900);
         User user5 = new User("5", absorptionChillers5, airCons5, converters5, gasBoilers5, gasTurbines5, iceStorageAcs5, storages5, 3800, interruptibleLoad5);
         inputStream = this.getClass().getResourceAsStream("/iesfiles/CIIDR/input_user5.csv");
         readUserData(inputStream, user5);
@@ -361,8 +362,59 @@ public class SelfOptModelTest  extends TestCase {
         return new Microgrid(users);
     }
 
+    public Microgrid jsdkyModel() throws IOException {
+        Map<String, User> users = new HashMap<>();
+        InputStream inputStream;
+        List<AbsorptionChiller> absorptionChillers = new ArrayList<>(1);
+        for (int i = 0; i < 1; i++) {
+            AbsorptionChiller absorptionChiller = new AbsorptionChiller(0, 0, 211 / 0.8, 0.8);
+            absorptionChillers.add(absorptionChiller);
+        }
+        List<AirCon> airCons = new ArrayList<>(3);
+        AirCon airCon1 = new AirCon(0, 1, 1.00, 0, 26.8 / 4.3, 4.3, 3, 0, 25.2 / 3); // 地源热泵
+        AirCon airCon2 = new AirCon(0, 1, 1.00, 0, 1e5, 4.29, 2.99, 0, 1e5); // 空调
+        AirCon airCon3 = new AirCon(0, 1, 1.00, 0, 20 / 4.3, 4.3, 3, 0, 20.0 / 3); // 空气源热泵
+        airCons.add(airCon1);
+        airCons.add(airCon2);
+        airCons.add(airCon3);
+        List<Converter> converters = new ArrayList<>(1);
+        for (int i = 0; i < 1; i++) {
+            Converter converter = new Converter(1, 1);
+            converters.add(converter);
+        }
+        List<GasBoiler> gasBoilers = new ArrayList<>(1);
+        for (int i = 0; i < 1; i++) {
+            GasBoiler gasBoiler = new GasBoiler(0, 0, 0.9, 0, 10, 10, 0);
+            gasBoilers.add(gasBoiler);
+        }
+        List<GasTurbine> gasTurbines = new ArrayList<>(1);
+        List<IceStorageAc> iceStorageAcs = new ArrayList<>(1);
+        for (int i = 0; i < 1; i++) {
+            IceStorageAc iceStorageAc = new IceStorageAc(0, 1, 0, 4.3, 1, 1,
+                    1.0 / 48, 197, 197 * 4, 0, 0.95, 0, 1.00, 197, 197);
+            iceStorageAcs.add(iceStorageAc);
+        }
+        List<Storage> storages = new ArrayList<>(1);
+        List<HeatStorage> heatStorages = new ArrayList<>(1);
+        for (int i = 0; i < 1; i++) {
+            HeatStorage heatStorage = new HeatStorage(0, 1, 1, 0, 1.0 / 48,
+                    1750, 0.05, 0.95, 0.5, 500, 500);
+            heatStorages.add(heatStorage);
+        }
+        User user = new User("1", absorptionChillers, airCons, converters, gasBoilers, gasTurbines, iceStorageAcs, storages, 1000000);
+        user.setHeatStorages(heatStorages);
+        inputStream = this.getClass().getResourceAsStream("/iesfiles/dky/input_user1.csv");
+        readDkyUserData(inputStream, user);
+        users.put(user.getUserId(), user);
+
+        inputStream = this.getClass().getResourceAsStream("/iesfiles/dky/energy_price.csv");
+        readEnergyPrice(inputStream);
+
+        return new Microgrid(users);
+    }
+
     public void testSelfOpt() throws IOException {
-        Microgrid microgrid = distIDRModel();
+        Microgrid microgrid = jsdkyModel();
         SelfOptModel selfOptModel = new SelfOptModel(microgrid, periodNum, t, elecPrices, gasPrices, steamPrices);
         selfOptModel.mgSelfOpt();
         Map<String, UserResult> microgridResult = selfOptModel.getMicrogridResult();
@@ -370,7 +422,7 @@ public class SelfOptModelTest  extends TestCase {
             System.out.println(userResult.getUserId() + "\t" + userResult.getStatus());
             if (userResult.getStatus().equals("Optimal")) {
                 System.out.println(userResult.getMinCost());
-                writeResult("D:\\user" + userResult.getUserId() + "Result.csv", userResult);
+                writeDkyResult("D:\\user" + userResult.getUserId() + "Result.csv", userResult);
             }
         }
     }
@@ -738,19 +790,6 @@ public class SelfOptModelTest  extends TestCase {
             }
         }
         parkPeakShavePower[16] = parkPeakShavePower[16] + 1000;
-        demandRespModel.calPeakShavePowers(parkGatePower, parkPeakShavePower);   // 应削峰量
-        System.out.println("---------各用户应削峰量---------");
-        Map<String, double[]> peakShavePowers = demandRespModel.getPeakShavePowers();
-        for (String userId : users.keySet()) {
-            System.out.print(userId + "\t");
-            double[] peakShavePower = peakShavePowers.get(userId);
-            for (int i = 0; i < periodNum; i++) {
-                if (peakShaveTime[i] == 1) {
-                    System.out.print(peakShavePower[i] + "\t");
-                }
-            }
-            System.out.println();
-        }
         // 通信网络
         UndirectedGraph<String, String> g = new SimpleGraph<>(String.class);
         for (String userId : users.keySet()) {
@@ -826,10 +865,10 @@ public class SelfOptModelTest  extends TestCase {
             peakShaveCap5.add(new LinkedList<>());
         }
         int iterNum = 1;
-        double[][] p = {{2932.7, 2791.8, 2805.2, 2833.5},{749.1, 606.6, 623.0, 634.6}, {1396.4, 1255.5, 1268.8, 1289.0},{208.9, 68.0, 81.3, 101.5}, {208.9, 68.0, 81.3, 101.5}};
+        double[][] p = {{2990.5, 2862.1, 2876.0, 2896.7},{805.6, 678.4, 693.0, 701.7}, {1411.1, 1263.1, 1276.7, 1297.1},{164.0, 13.3, 27.2, 48.0}, {165.1, 13.4, 27.4, 48.3}};
         while (maxError1 > e1 || maxError2 > e2) {
             double w1 = 0.1 / pow(iterNum, 0.001);
-            double w2 = 4 * 1e-4 / pow(iterNum, 0.85);
+            double w2 = 3 * 1e-4 / pow(iterNum, 0.85);
             // 更新边际成本
             for (String userId : users.keySet()) {
                 double[] lastMc = new double[periodNum];
@@ -1426,6 +1465,91 @@ public class SelfOptModelTest  extends TestCase {
         System.out.println("---------分布式IDR计算结束---------");
     }
 
+    public void testIdpIDR() throws IOException {
+        Microgrid microgrid = distIDRModel();
+        DemandRespModel demandRespModel = new DemandRespModel(microgrid, periodNum, t, elecPrices, gasPrices, steamPrices);
+        demandRespModel.mgSelfOpt();
+        Map<String, UserResult> selfOptResult = demandRespModel.getMicrogridResult();
+        for (UserResult userResult : selfOptResult.values()) {
+            System.out.println(userResult.getUserId() + "\t" + userResult.getStatus());
+            if (userResult.getStatus().equals("Optimal")) {
+                System.out.println(userResult.getMinCost());
+                writeResult("D:\\user" + userResult.getUserId() + "Result.csv", userResult);
+            }
+        }
+        System.out.println("---------自趋优计算结束---------");
+
+        Map<String, User> users = microgrid.getUsers();
+        // 原始关口功率
+        Map<String, double[]> origGatePowers = new HashMap<>();
+        for (String userId : users.keySet()) {
+            double[] ogGatePower = new double[periodNum];
+            for (int i = 0; i < periodNum; i++) {
+                ogGatePower[i] = users.get(userId).getGatePowers()[i];
+            }
+            origGatePowers.put(userId, ogGatePower);
+        }
+        // 关口功率指令
+        int[] peakShaveTime = new int[periodNum];
+        for (int i = 13; i < 17; i++) {
+            peakShaveTime[i] = 1;
+        }
+        demandRespModel.setPeakShaveTime(peakShaveTime);
+        Map<String, Double> increCosts = new HashMap<>(users.size());
+        // 应削峰量
+        Map<String, double[]> peakShavePowers = new HashMap<>(users.size());
+        for (String userId : users.keySet()) {
+            peakShavePowers.put(userId, new double[periodNum]);
+        }
+        peakShavePowers.get("1")[13] = 1894.581;
+        peakShavePowers.get("1")[14] = 1652.99;
+        peakShavePowers.get("1")[15] = 1676.934;
+        peakShavePowers.get("1")[16] = 1708.235;
+        peakShavePowers.get("2")[13] = 1199.901;
+        peakShavePowers.get("2")[14] = 1046.894;
+        peakShavePowers.get("2")[15] = 1062.058;
+        peakShavePowers.get("2")[16] = 1081.882;
+        peakShavePowers.get("3")[13] = 799.9341;
+        peakShavePowers.get("3")[14] = 697.9293;
+        peakShavePowers.get("3")[15] = 708.0387;
+        peakShavePowers.get("3")[16] = 721.2547;
+        peakShavePowers.get("4")[13] = 757.8323;
+        peakShavePowers.get("4")[14] = 661.1961;
+        peakShavePowers.get("4")[15] = 670.7735;
+        peakShavePowers.get("4")[16] = 683.2939;
+        peakShavePowers.get("5")[13] = 884.1376;
+        peakShavePowers.get("5")[14] = 771.3955;
+        peakShavePowers.get("5")[15] = 782.5691;
+        peakShavePowers.get("5")[16] = 797.1762;
+        for (String userId : users.keySet()) {
+            double[] purP = selfOptResult.get(userId).getPurP();
+            double[] newGatePower = new double[periodNum];
+            for (int j = 0; j < periodNum; j++) {
+                if (peakShaveTime[j] == 1) {
+                    newGatePower[j] = purP[j] - peakShavePowers.get(userId)[j];
+                } else {
+                    newGatePower[j] = origGatePowers.get(userId)[j];
+                }
+            }
+            microgrid.getUsers().get(userId).setGatePowers(newGatePower);
+        }
+        demandRespModel.mgDemandResp();
+        Map<String, UserResult> microgridResult = demandRespModel.getMicrogridResult();
+        for (String userId : microgridResult.keySet()) {
+            UserResult userResult = microgridResult.get(userId);
+            System.out.println(userResult.getUserId() + "\t" + userResult.getStatus());
+            if (userResult.getStatus().equals("Optimal")) {
+                System.out.println(userResult.getMinCost());
+                writeResult("D:\\user" + userResult.getUserId() + "Result_DR.csv", userResult);
+            }
+            increCosts.put(userId, userResult.getMinCost() - selfOptResult.get(userId).getMinCost());
+        }
+        for (String userId : users.keySet()) {
+            double increCost = increCosts.get(userId);
+            System.out.println(userId + "," + increCost);
+        }
+    }
+
     public void readUserData(InputStream inputStream, User user) throws IOException {
         double[] acLoad = new double[periodNum];
         double[] dcLoad = new double[periodNum];
@@ -1455,6 +1579,46 @@ public class SelfOptModelTest  extends TestCase {
         user.setDcLoad(dcLoad);
         user.setHeatLoad(heatLoad);
         user.setCoolingLoad(coolingLoad);
+        user.setGatePowers(gatePowers);
+    }
+
+    public void readDkyUserData(InputStream inputStream, User user) throws IOException {
+        double[] acLoad = new double[periodNum];
+        double[] dcLoad = new double[periodNum];
+        double[] pvPowers = new double[periodNum];
+        double[] coolingLoad1 = new double[periodNum];
+        double[] coolingLoad2 = new double[periodNum];
+        double[] heatLoad1 = new double[periodNum];
+        double[] heatLoad2 = new double[periodNum];
+        double[] gatePowers = new double[periodNum];
+        double[] pvHeatPowers = new double[periodNum];
+        double[] windPowers = new double[periodNum];
+        BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
+        String data;
+        int t = 0;
+        br.readLine();
+        while ((data = br.readLine()) != null) {
+            String[] newdata = data.split(",", 10);
+            acLoad[t] = Double.parseDouble(newdata[0]);
+            dcLoad[t] = Double.parseDouble(newdata[1]);
+            pvPowers[t] = Double.parseDouble(newdata[2]);
+            coolingLoad1[t] = Double.parseDouble(newdata[3]);
+            coolingLoad2[t] = Double.parseDouble(newdata[4]);
+            heatLoad1[t] = Double.parseDouble(newdata[5]);
+            heatLoad2[t] = Double.parseDouble(newdata[6]);
+            gatePowers[t] = Double.parseDouble(newdata[7]);
+            pvHeatPowers[t] = Double.parseDouble(newdata[8]);
+            windPowers[t] = Double.parseDouble(newdata[9]);
+            t += 1;
+        }
+        user.setPhotovoltaic(new Photovoltaic(0, pvPowers, pvHeatPowers));
+        user.setWindPower(new WindPower(0, windPowers));
+        user.setAcLoad(acLoad);
+        user.setDcLoad(dcLoad);
+        user.setHeatLoad1(heatLoad1);
+        user.setHeatLoad2(heatLoad2);
+        user.setCoolingLoad1(coolingLoad1);
+        user.setCoolingLoad2(coolingLoad2);
         user.setGatePowers(gatePowers);
     }
 
@@ -1552,6 +1716,105 @@ public class SelfOptModelTest  extends TestCase {
             }
             for (int i = 0; i < userResult.getAbsorptionChillersH().size(); i++) {
                 bw.write(userResult.getAbsorptionChillersH().get(i)[j] + ",");
+            }
+            bw.write(String.valueOf(userResult.getPurH()[j]));
+            bw.newLine();
+        }
+        bw.close();
+        osw.close();
+        out.close();
+    }
+
+    public void writeDkyResult(String filePath, UserResult userResult) throws IOException {
+        FileOutputStream out;
+        OutputStreamWriter osw;
+        BufferedWriter bw;
+
+        out = new FileOutputStream(new File(filePath));
+        osw = new OutputStreamWriter(out);
+        bw = new BufferedWriter(osw);
+
+        for (int i = 0; i < userResult.getFrigesP().size(); i++) {
+            bw.write("制冷机" + (i + 1) + "耗电功率" + ",");
+        }
+        for (int i = 0; i < userResult.getIceTanksP().size(); i++) {
+            bw.write("蓄冰槽" + (i + 1) + "耗电功率" + ",");
+        }
+        for (int i = 0; i < userResult.getIceTanksQ().size(); i++) {
+            bw.write("蓄冰槽" + (i + 1) + "制冷功率" + ",");
+        }
+        for (int i = 0; i < userResult.getGasTurbinesState().size(); i++) {
+            bw.write("燃气轮机" + (i + 1) + "启停状态" + ",");
+        }
+        for (int i = 0; i < userResult.getGasTurbinesP().size(); i++) {
+            bw.write("燃气轮机" + (i + 1) + "产电功率" + ",");
+        }
+        for (int i = 0; i < userResult.getStoragesP().size(); i++) {
+            bw.write("储能" + (i + 1) + "充电功率(外部)" + ",");
+        }
+        for (int i = 0; i < userResult.getConvertersP().size(); i++) {
+            bw.write("变流器" + (i + 1) + "AC-DC交流侧功率" + ",");
+        }
+        bw.write("向电网购电功率" + ",");
+        for (int i = 0; i < userResult.getAirConsP().size(); i++) {
+            bw.write("空调" + (i + 1) + "制冷耗电功率" + ",");
+            bw.write("空调" + (i + 1) + "制热耗电功率" + ",");
+        }
+        for (int i = 0; i < userResult.getGasBoilersState().size(); i++) {
+            bw.write("燃气锅炉" + (i + 1) + "启停状态" + ",");
+        }
+        for (int i = 0; i < userResult.getGasBoilersH().size(); i++) {
+            bw.write("燃气锅炉" + (i + 1) + "产热状态" + ",");
+        }
+        for (int i = 0; i < userResult.getAbsorptionChillersH().size(); i++) {
+            bw.write("吸收式制冷机" + (i + 1) + "耗热功率" + ",");
+        }
+        for (int i = 0; i < userResult.getHeatStoragesP().size(); i++) {
+            bw.write("储热罐" + (i + 1) + "储热功率" + ",");
+            bw.write("储热罐" + (i + 1) + "储热容量" + ",");
+        }
+        bw.write("向园区购热功率");
+        bw.newLine();
+
+        for (int j = 0; j < periodNum; j++) {
+            for (int i = 0; i < userResult.getFrigesP().size(); i++) {
+                bw.write(userResult.getFrigesP().get(i)[j] + ",");
+            }
+            for (int i = 0; i < userResult.getIceTanksP().size(); i++) {
+                bw.write(userResult.getIceTanksP().get(i)[j] + ",");
+            }
+            for (int i = 0; i < userResult.getIceTanksQ().size(); i++) {
+                bw.write(userResult.getIceTanksQ().get(i)[j] + ",");
+            }
+            for (int i = 0; i < userResult.getGasTurbinesState().size(); i++) {
+                bw.write(userResult.getGasTurbinesState().get(i)[j] + ",");
+            }
+            for (int i = 0; i < userResult.getGasTurbinesP().size(); i++) {
+                bw.write(userResult.getGasTurbinesP().get(i)[j] + ",");
+            }
+            for (int i = 0; i < userResult.getStoragesP().size(); i++) {
+                bw.write(userResult.getStoragesP().get(i)[j] + ",");
+            }
+            for (int i = 0; i < userResult.getConvertersP().size(); i++) {
+                bw.write(userResult.getConvertersP().get(i)[j] + ",");
+            }
+            bw.write(userResult.getPurP()[j] + ",");
+            for (int i = 0; i < userResult.getAirConsP().size(); i++) {
+                bw.write(userResult.getAirConsP().get(i)[j] + ",");
+                bw.write(userResult.getAirConsPh().get(i)[j] + ",");
+            }
+            for (int i = 0; i < userResult.getGasBoilersState().size(); i++) {
+                bw.write(userResult.getGasBoilersState().get(i)[j] + ",");
+            }
+            for (int i = 0; i < userResult.getGasBoilersH().size(); i++) {
+                bw.write(userResult.getGasBoilersH().get(i)[j] + ",");
+            }
+            for (int i = 0; i < userResult.getAbsorptionChillersH().size(); i++) {
+                bw.write(userResult.getAbsorptionChillersH().get(i)[j] + ",");
+            }
+            for (int i = 0; i < userResult.getHeatStoragesP().size(); i++) {
+                bw.write(userResult.getHeatStoragesP().get(i)[j] + ",");
+                bw.write(userResult.getHeatStoragesS().get(i)[j] + ",");
             }
             bw.write(String.valueOf(userResult.getPurH()[j]));
             bw.newLine();

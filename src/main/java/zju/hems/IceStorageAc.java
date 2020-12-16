@@ -28,6 +28,7 @@ public class IceStorageAc {
     double consumCoef;  // 能耗比例系数
     double maxPice;    // 最大制冰功率
     double maxPmelt;    // 最大融冰功率
+    double coeffPower;    // 保冷耗电系数
 
     // 计算参数
     double minS;    // 蓄冰槽最小蓄冰量
@@ -57,6 +58,14 @@ public class IceStorageAc {
         minS = minT * S;
         maxS = maxT * S;
         initS = initT * S;
+    }
+
+    public IceStorageAc(double coper, double Effice, double EERc,
+                        double EERice, double Effmelt, double Effref, double lossCoef,
+                        double maxP, double S, double minT, double maxT, double initT, double consumCoef, double maxPice,
+                        double maxPmelt, double coeffPower) {
+        this(coper, Effice, EERc, EERice, Effmelt, Effref, lossCoef, maxP, S, minT, maxT, initT, consumCoef, maxPice, maxPmelt);
+        this.coeffPower = coeffPower;
     }
 
     public double getCoper() {
@@ -241,5 +250,13 @@ public class IceStorageAc {
 
     public void setMaxPmelt(double maxPmelt) {
         this.maxPmelt = maxPmelt;
+    }
+
+    public double getCoeffPower() {
+        return coeffPower;
+    }
+
+    public void setCoeffPower(double coeffPower) {
+        this.coeffPower = coeffPower;
     }
 }

@@ -31,6 +31,9 @@ public class User {
     double[] coolingLoad2;   // 冷负荷右
 
     WindPower windPower;
+    List<HeatStorage> heatStorages;
+    double[] heatLoad1;   // 热负荷左
+    double[] heatLoad2;   // 热负荷右
 
     public User(String userId, List<AbsorptionChiller> absorptionChillerList, List<AirCon> airCons, List<Converter> converters,
                  List<GasBoiler> gasBoilers, List<GasTurbine> gasTurbines, List<IceStorageAc> iceStorageAcs,
@@ -240,5 +243,29 @@ public class User {
 
     public void setCoolingLoad2(double[] coolingLoad2) {
         this.coolingLoad2 = coolingLoad2;
+    }
+
+    public List<HeatStorage> getHeatStorages() {
+        return heatStorages;
+    }
+
+    public void setHeatStorages(List<HeatStorage> heatStorages) {
+        this.heatStorages = heatStorages;
+    }
+
+    public double[] getHeatLoad1() {
+        return heatLoad1;
+    }
+
+    public void setHeatLoad1(double[] heatLoad1) {
+        this.heatLoad1 = heatLoad1;
+    }
+
+    public double[] getHeatLoad2() {
+        return heatLoad2;
+    }
+
+    public void setHeatLoad2(double[] heatLoad2) {
+        this.heatLoad2 = heatLoad2;
     }
 }
