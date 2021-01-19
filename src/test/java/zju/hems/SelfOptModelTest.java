@@ -12,8 +12,8 @@ import static java.lang.Math.pow;
 
 public class SelfOptModelTest  extends TestCase {
 
-    int periodNum = 96; // 一天的时段数
-//    int periodNum = 64; // 一天的时段数
+//    int periodNum = 96; // 一天的时段数
+    int periodNum = 64; // 一天的时段数
     double t = 0.25;    // 每个时段15分钟
     double[] elecPrices = new double[periodNum];    // 电价
     double[] gasPrices = new double[periodNum];    // 天然气价格
@@ -414,7 +414,7 @@ public class SelfOptModelTest  extends TestCase {
     }
 
     public void testSelfOpt() throws IOException {
-        Microgrid microgrid = jsdkyModel();
+        Microgrid microgrid = microgridModel();
         SelfOptModel selfOptModel = new SelfOptModel(microgrid, periodNum, t, elecPrices, gasPrices, steamPrices);
         selfOptModel.mgSelfOpt();
         Map<String, UserResult> microgridResult = selfOptModel.getMicrogridResult();
@@ -422,7 +422,8 @@ public class SelfOptModelTest  extends TestCase {
             System.out.println(userResult.getUserId() + "\t" + userResult.getStatus());
             if (userResult.getStatus().equals("Optimal")) {
                 System.out.println(userResult.getMinCost());
-                writeDkyResult("D:\\user" + userResult.getUserId() + "Result.csv", userResult);
+                writeResult("D:\\user" + userResult.getUserId() + "Result.csv", userResult);
+//                writeDkyResult("D:\\user" + userResult.getUserId() + "Result.csv", userResult);
             }
         }
     }
@@ -463,9 +464,9 @@ public class SelfOptModelTest  extends TestCase {
         System.out.println("---------自趋优计算结束---------");
 
         Map<String, User> users = microgrid.getUsers();
-        users.remove("1");
         users.remove("2");
         users.remove("3");
+        users.remove("4");
         users.remove("5");
         // 原始关口功率
         Map<String, double[]> origGatePowers = new HashMap<>();
@@ -487,7 +488,7 @@ public class SelfOptModelTest  extends TestCase {
             double[] insGatePower = new double[periodNum];
             for (int i = 0; i < periodNum; i++) {
                 if (peakShaveTime[i] == 1) {
-                    insGatePower[i] = 1434.783;
+                    insGatePower[i] = 3586.957;
                 } else {
                     insGatePower[i] = origGatePowers.get(userId)[i];
                 }
@@ -495,10 +496,10 @@ public class SelfOptModelTest  extends TestCase {
             insGatePowers.put(userId, insGatePower);
         }
         // 采样点数
-        int sampleNum = 1;
+        int sampleNum = 10;
         // 采样范围
-        double sampleStart = 0.861;
-        double sampleEnd = 0.861;
+        double sampleStart = 1.446;
+        double sampleEnd = 1.447;
         Map<String, double[]> increCosts = new HashMap<>(users.size());
         // 应削峰量
         Map<String, double[]> peakShavePowers = new HashMap<>(users.size());
@@ -727,11 +728,18 @@ public class SelfOptModelTest  extends TestCase {
         // 关口功率指令
         int[] peakShaveTime = new int[periodNum];
         double[] gatePowerSum = new double[periodNum];
+        // 集中-分布式算例
+//        for (int i = 45; i < 49; i++) {
+//            peakShaveTime[i] = 1;
+//            gatePowerSum[i] = 11000;
+//        }
+        //分布式算例
         for (int i = 13; i < 17; i++) {
             peakShaveTime[i] = 1;
             gatePowerSum[i] = 10000;
         }
         gatePowerSum[16] = 9000;
+
 //        gatePowerSum[13] = 10496.01;
 //        gatePowerSum[14] = 9790.01;
 //        gatePowerSum[15] = 9859.644;
@@ -749,7 +757,7 @@ public class SelfOptModelTest  extends TestCase {
         }
     }
 
-    public void testDistIDR() throws IOException {
+    public void testDistIDR1() throws IOException {
         Microgrid microgrid = distIDRModel();
         DemandRespModel demandRespModel = new DemandRespModel(microgrid, periodNum, t, elecPrices, gasPrices, steamPrices);
         demandRespModel.mgSelfOpt();
@@ -802,15 +810,36 @@ public class SelfOptModelTest  extends TestCase {
         g.addEdge("3", "5", "3_5");
         // 初始化边际成本
         Map<String, double[]> mcs = new HashMap<>(users.size());
-        for (String userId : users.keySet()) {
-            double[] mc = new double[periodNum];
-            for (int i = 0; i < periodNum; i++) {
-                if (peakShaveTime[i] == 1) {
-                    mc[i] = 0.84;
-                }
-            }
-            mcs.put(userId, mc);
-        }
+        double[] mc0 = new double[periodNum];
+        mc0[13] = 0.84;
+        mc0[14] = 0.84;
+        mc0[15] = 0.84;
+        mc0[16] = 0.84;
+        mcs.put("1", mc0);
+        mc0 = new double[periodNum];
+        mc0[13] = 0.58;
+        mc0[14] = 0.58;
+        mc0[15] = 0.58;
+        mc0[16] = 0.58;
+        mcs.put("2", mc0);
+        mc0 = new double[periodNum];
+        mc0[13] = 0.75;
+        mc0[14] = 0.75;
+        mc0[15] = 0.75;
+        mc0[16] = 0.75;
+        mcs.put("3", mc0);
+        mc0 = new double[periodNum];
+        mc0[13] = 0.42;
+        mc0[14] = 0.42;
+        mc0[15] = 0.42;
+        mc0[16] = 0.42;
+        mcs.put("4", mc0);
+        mc0 = new double[periodNum];
+        mc0[13] = 0.66;
+        mc0[14] = 0.66;
+        mc0[15] = 0.66;
+        mc0[16] = 0.66;
+        mcs.put("5", mc0);
         demandRespModel.setMcs(mcs);
         demandRespModel.mgDistIDR();
         // 开始迭代
@@ -818,7 +847,7 @@ public class SelfOptModelTest  extends TestCase {
         Map<String, double[]> lastPeakShaveCaps = new HashMap<>();
         Map<String, double[]> peakShaveCaps;
         double e1 = 0.001;
-        double e2 = 1;
+        double e2 = 10;
         Map<String, Double> error1s = new HashMap<>(users.size());
         Map<String, Double> error2s = new HashMap<>(users.size());
         double maxError1 = Double.MAX_VALUE;
@@ -865,10 +894,10 @@ public class SelfOptModelTest  extends TestCase {
             peakShaveCap5.add(new LinkedList<>());
         }
         int iterNum = 1;
-        double[][] p = {{2990.5, 2862.1, 2876.0, 2896.7},{805.6, 678.4, 693.0, 701.7}, {1411.1, 1263.1, 1276.7, 1297.1},{164.0, 13.3, 27.2, 48.0}, {165.1, 13.4, 27.4, 48.3}};
-        while (maxError1 > e1 || maxError2 > e2) {
-            double w1 = 0.1 / pow(iterNum, 0.001);
-            double w2 = 3 * 1e-4 / pow(iterNum, 0.85);
+        while (maxError1 > e1) {
+//        while (maxError1 > e1 || maxError2 > e2) {
+            double w1 = 0.2 / pow(iterNum, 0.001);
+            double w2 = 3 * 1e-4 / pow(iterNum, 0.95);
             // 更新边际成本
             for (String userId : users.keySet()) {
                 double[] lastMc = new double[periodNum];
@@ -929,8 +958,7 @@ public class SelfOptModelTest  extends TestCase {
                             double[] adjMc = lastMcs.get(adjNode);
                             mc[i] -= w1 * (lastMc[i] - adjMc[i]);
                         }
-//                        mc[i] -= w2 * (lastPeakShaveCap[i] - parkPeakShavePower[i] / users.size());
-                        mc[i] -= w2 * (lastPeakShaveCap[i] - p[count][i - 13]);
+                        mc[i] -= w2 * (lastPeakShaveCap[i] - parkPeakShavePower[i] / users.size());
                     }
                 }
                 mcs.put(userId, mc);
@@ -969,7 +997,7 @@ public class SelfOptModelTest  extends TestCase {
                     maxError2 = error2s.get(userId);
                 }
             }
-            if (iterNum > 51) {
+            if (iterNum > 200) {
                 break;
             }
             iterNum++;
@@ -1107,7 +1135,7 @@ public class SelfOptModelTest  extends TestCase {
         System.out.println("---------分布式IDR计算结束---------");
     }
 
-    public void testDistIDRNew() throws IOException {
+    public void testDistIDR2() throws IOException {
         Microgrid microgrid = distIDRModel();
         DemandRespModel demandRespModel = new DemandRespModel(microgrid, periodNum, t, elecPrices, gasPrices, steamPrices);
         demandRespModel.mgSelfOpt();
@@ -1158,34 +1186,66 @@ public class SelfOptModelTest  extends TestCase {
         g.addEdge("2", "3", "2_3");
         g.addEdge("3", "4", "3_4");
         g.addEdge("3", "5", "3_5");
+        double[][] d = new double[][]{{1 - (1.0/3 + 1.0/5), 1.0/3, 1.0/5, 0, 0}, {1.0/3, 1 - (1./3 + 1./5), 1./5, 0, 0},
+                {1./5, 1./5, 1-4./5, 1./5, 1./5}, {0, 0, 1./5, 1 - 1./5, 0}, {0, 0, 1./5, 0, 1 - 1./5}};
         // 初始化边际成本
         Map<String, double[]> mcs = new HashMap<>(users.size());
-        for (String userId : users.keySet()) {
-            double[] mc = new double[periodNum];
-            for (int i = 0; i < periodNum; i++) {
-                if (peakShaveTime[i] == 1) {
-                    mc[i] = 0.84;
-                }
-            }
-            mcs.put(userId, mc);
-        }
+        double[] mc0 = new double[periodNum];
+        mc0[13] = 0.84;
+        mc0[14] = 0.84;
+        mc0[15] = 0.84;
+        mc0[16] = 0.84;
+        mcs.put("1", mc0);
+        mc0 = new double[periodNum];
+        mc0[13] = 0.58;
+        mc0[14] = 0.58;
+        mc0[15] = 0.58;
+        mc0[16] = 0.58;
+        mcs.put("2", mc0);
+        mc0 = new double[periodNum];
+        mc0[13] = 0.75;
+        mc0[14] = 0.75;
+        mc0[15] = 0.75;
+        mc0[16] = 0.75;
+        mcs.put("3", mc0);
+        mc0 = new double[periodNum];
+        mc0[13] = 0.42;
+        mc0[14] = 0.42;
+        mc0[15] = 0.42;
+        mc0[16] = 0.42;
+        mcs.put("4", mc0);
+        mc0 = new double[periodNum];
+        mc0[13] = 0.66;
+        mc0[14] = 0.66;
+        mc0[15] = 0.66;
+        mc0[16] = 0.66;
+        mcs.put("5", mc0);
         demandRespModel.setMcs(mcs);
         demandRespModel.mgDistIDR();
         // 开始迭代
         Map<String, double[]> lastMcs = new HashMap<>();
         Map<String, double[]> lastPeakShaveCaps = new HashMap<>();
         Map<String, double[]> peakShaveCaps;
-        double e1 = 0.001;
-        double e2 = 1;
+        double e1 = 0.1;    //容量平均值迭代变化
+        double e2 = 0.001; //边际成本迭代变化
+        double e3 = 5;
+        double e4 = 10;
         Map<String, Double> error1s = new HashMap<>(users.size());
         Map<String, Double> error2s = new HashMap<>(users.size());
+        Map<String, Double> error3s = new HashMap<>(users.size());
+        Map<String, Double> error4s = new HashMap<>(users.size());
         double maxError1 = Double.MAX_VALUE;
         double maxError2 = Double.MAX_VALUE;
+        double maxError3 = Double.MAX_VALUE;
         Map<String, List<Double>> error1Map = new HashMap<>(users.size());
         Map<String, List<Double>> error2Map = new HashMap<>(users.size());
+        Map<String, List<Double>> error3Map = new HashMap<>(users.size());
+        Map<String, List<Double>> error4Map = new HashMap<>(users.size());
         for (String userId : users.keySet()) {
             error1Map.put(userId, new LinkedList<>());
             error2Map.put(userId, new LinkedList<>());
+            error3Map.put(userId, new LinkedList<>());
+            error4Map.put(userId, new LinkedList<>());
         }
         // 用户1边际成本变化
         List<List<Double>> mc1 = new ArrayList<>(4);
@@ -1223,10 +1283,10 @@ public class SelfOptModelTest  extends TestCase {
             peakShaveCap5.add(new LinkedList<>());
         }
         int iterNum = 1;
-        double[][] p = {{2990.5, 2862.1, 2876.0, 2896.7},{805.6, 678.4, 693.0, 701.7}, {1411.1, 1263.1, 1276.7, 1297.1},{164.0, 13.3, 27.2, 48.0}, {165.1, 13.4, 27.4, 48.3}};
-        while (maxError1 > e1 || maxError2 > e2) {
-            double w1 = 0.056 / pow(iterNum, 0.001);
-            double w2 = 0.75 * 1e-4 / pow(iterNum, 0.85);
+        while (maxError1 > e2) {
+//            double y = 3 * 1e-4 / pow(iterNum, 0.99);
+            double y = 0.1 * 1e-4 / pow(iterNum, 0.1);
+//            double y = 0.05 * 1e-4 / pow(iterNum, 0.05);
             // 更新边际成本
             for (String userId : users.keySet()) {
                 double[] lastMc = new double[periodNum];
@@ -1271,24 +1331,65 @@ public class SelfOptModelTest  extends TestCase {
                 lastMcs.put(userId, lastMc);
                 lastPeakShaveCaps.put(userId, lastPeakShaveCap);
             }
+            // 计算IDR容量偏差
+            Map<String, double[]> lastPavs = new HashMap<>(users.size());
+            Map<String, double[]> pavs = new HashMap<>(users.size());
+            for (String userId : users.keySet()) {
+                double[] lastPeakShaveCap = lastPeakShaveCaps.get(userId);
+                double[] pav = new double[periodNum];
+                for (int i = 0; i < periodNum; i++) {
+                    if (peakShaveTime[i] == 1) {
+                        pav[i] = lastPeakShaveCap[i];
+                    }
+                }
+                pavs.put(userId, pav);
+            }
+            double dp = 100;
+            int countIter = 0;
+            while (dp > e1) {
+                dp = 0;
+//                System.out.println(pavs.get("1")[13] + " " + pavs.get("2")[13] + " " + pavs.get("3")[13] +
+//                        " " + pavs.get("4")[13] + " " + pavs.get("5")[13]);
+                for (String userId : users.keySet()) {
+                    double[] pavi = pavs.get(userId);
+                    double[] pav = new double[periodNum];
+                    for (int i = 0; i < periodNum; i++) {
+                        if (peakShaveTime[i] == 1) {
+                            pav[i] = pavi[i];
+                        }
+                    }
+                    lastPavs.put(userId, pav);
+                }
+                for (String userId : users.keySet()) {
+                    double[] pav = new double[periodNum];
+                    int rowNum = Integer.parseInt(userId) - 1;
+                    for (int i = 0; i < periodNum; i++) {
+                        if (peakShaveTime[i] == 1) {
+                            for (int j = 0; j < 5; j++) {
+                                double[] adjPav = lastPavs.get(String.valueOf(j + 1));
+                                pav[i] += d[rowNum][j] * adjPav[i];
+                            }
+                            dp += abs(pav[i] - lastPavs.get(userId)[i]);
+                        }
+                    }
+                    pavs.put(userId, pav);
+                }
+                countIter++;
+            }
+            System.out.println("求IDR容量平均值迭代次数：" + countIter);
             int count = 0;
             for (String userId : users.keySet()) {
                 double[] lastMc = lastMcs.get(userId);
                 double[] lastPeakShaveCap = lastPeakShaveCaps.get(userId);
                 double[] mc = new double[periodNum];
+                int rowNum = Integer.parseInt(userId) - 1;
                 for (int i = 0; i < periodNum; i++) {
                     if (peakShaveTime[i] == 1) {
-                        mc[i] = lastMc[i];
-                        for (String e : g.edgesOf(userId)) {
-                            String adjNode = g.getEdgeTarget(e);
-                            if (adjNode.equals(userId)) {
-                                adjNode = g.getEdgeSource(e);
-                            }
-                            double[] adjMc = lastMcs.get(adjNode);
-                            mc[i] -= w1 * (lastMc[i] - adjMc[i]);
+                        for (int j = 0; j < 5; j++) {
+                            double[] adjMc = lastMcs.get(String.valueOf(j + 1));
+                            mc[i] += d[rowNum][j] * adjMc[i];
                         }
-//                        mc[i] -= w2 * (lastPeakShaveCap[i] - parkPeakShavePower[i] / users.size());
-                        mc[i] -= w2 * (lastPeakShaveCap[i] - p[count][i - 13]);
+                        mc[i] -= y * (pavs.get(userId)[i] * 5 - parkPeakShavePower[i]);
                     }
                 }
                 mcs.put(userId, mc);
@@ -1327,7 +1428,7 @@ public class SelfOptModelTest  extends TestCase {
                     maxError2 = error2s.get(userId);
                 }
             }
-            if (iterNum > 51) {
+            if (iterNum > 100) {
                 break;
             }
             iterNum++;

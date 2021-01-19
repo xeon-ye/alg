@@ -325,17 +325,17 @@ public class AvailableCapOptNewTest extends TestCase {
         model.setErrorSupply(ErrorSupply);
         model.buildLoops();
         model.buildImpPathes();
-        long time = 0;
-        for (int i = 0; i < 10; i++) {
-            long startT = System.nanoTime();
-//            model.doOptPathLimit();
-            model.doOpt();
-            System.out.println(System.nanoTime() - startT);
-            if (i >= 5) {
-                time += System.nanoTime() - startT;
-            }
-        }
-        System.out.println(time / 5);
+//        long time = 0;
+//        for (int i = 0; i < 10; i++) {
+//            long startT = System.nanoTime();
+////            model.doOptPathLimit();
+//            model.doOpt();
+//            System.out.println(System.nanoTime() - startT);
+//            if (i >= 5) {
+//                time += System.nanoTime() - startT;
+//            }
+//        }
+//        System.out.println(time / 5);
 //        model.allMinSwitch();
 //        this.minSwitchResult = model.getOptResult();
 //        for(int i = 0; i < minSwitchResult.getSupplyId().length; i++) {
@@ -347,11 +347,16 @@ public class AvailableCapOptNewTest extends TestCase {
 //            //   }
 //        }
 
-//        long startT = System.currentTimeMillis();
-//        model.loadMax("5");
-//        System.out.println("Time:");
-//        System.out.println(System.currentTimeMillis() - startT);
-//        System.out.println(model.maxLoad);
+        double load = model.loads.get("13");
+        double[] maxLoads = new double[10];
+        for (int i = 0; i < 10; i++) {
+            model.loads.put("13", load - 5 * i);
+            model.loadMax("19");
+            maxLoads[i] = model.maxLoad;
+        }
+        for (int i = 0; i < 10; i++) {
+            System.out.println(maxLoads[i] + ",");
+        }
 //        model.allLoadMax();
 //        this.maxLoadResult = model.maxLoadResult;
 //        for(int i = 0; i < maxLoadResult.size(); i++) {

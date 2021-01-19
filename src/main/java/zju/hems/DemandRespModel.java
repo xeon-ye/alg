@@ -3086,7 +3086,8 @@ public class DemandRespModel extends SelfOptModel {
                             2 * converters.size() + 2 + i] = - airCons.get(i).getConsumCoef();   // 中央空调耗电功率
                 }
                 if (peakShaveTime[j] == 1) {
-                    coeff[coeffNum][periodNum * periodVarNum + j - 13] = 1;   // 中断负荷功率
+//                    coeff[coeffNum][periodNum * periodVarNum + j - 13] = 1;   // 中断负荷功率
+                    coeff[coeffNum][periodNum * periodVarNum + j - 45] = 1;   // 中断负荷功率
                 }
                 cplex.addEq(cplex.scalProd(x, coeff[coeffNum]), acLoad[j]);
                 coeffNum += 1;
@@ -4281,7 +4282,8 @@ public class DemandRespModel extends SelfOptModel {
                             2 * converters.size() + 2 + i] = - airCons.get(i).getConsumCoef();   // 中央空调耗电功率
                 }
                 if (peakShaveTime[j] == 1) {
-                    coeff[coeffNum][periodNum * periodVarNum + 1 + j - 13] = 1;   // 中断负荷功率
+//                    coeff[coeffNum][periodNum * periodVarNum + 1 + j - 13] = 1;   // 中断负荷功率
+                    coeff[coeffNum][periodNum * periodVarNum + 1 + j - 45] = 1;
                 }
                 cplex.addEq(cplex.scalProd(x, coeff[coeffNum]), acLoad[j]);
                 coeffNum += 1;
@@ -6354,6 +6356,7 @@ public class DemandRespModel extends SelfOptModel {
                     }
                     if (peakShaveTime[j] == 1) {
                         coeff[coeffStart + coeffNum][userStart + periodNum * periodVarNum + j - 13] = 1;   // 中断负荷功率
+//                        coeff[coeffStart + coeffNum][userStart + periodNum * periodVarNum + j - 45] = 1;
                     }
                     cplex.addEq(cplex.scalProd(x, coeff[coeffStart + coeffNum]), acLoad[j]);
                     coeffNum += 1;

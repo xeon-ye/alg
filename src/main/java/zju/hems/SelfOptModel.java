@@ -43,10 +43,10 @@ public class SelfOptModel {
     public void mgSelfOpt() {
         microgridResult = new HashMap<>(microgrid.getUsers().size());
         for (User user : microgrid.getUsers().values()) {
-//            userSelfOpt(user);
+            userSelfOpt(user);
 //            gzTestSelfOpt(user);
 //            chargingPileOpt(user);
-            jsdkyOpt(user);
+//            jsdkyOpt(user);
         }
     }
 
@@ -833,7 +833,7 @@ public class SelfOptModel {
                 for (int i = 0; i < heatstorages.size(); i++) {
                     coeff[coeffNum][j * periodVarNum + 3 * iceStorageAcs.size() + 3 * gasTurbines.size() + 2 * storages.size() +
                             2 * converters.size() + 2 + 2 * airCons.size() + 3 * gasBoilers.size() + absorptionChillers.size() +
-                            2 + 2 * heatstorages.size() + i] = - heatstorages.get(i).getCoeffPower() * t;   // 储热罐耗电功率
+                            2 + 2 * heatstorages.size() + i] = - heatstorages.get(i).getCoeffPower();   // 储热罐耗电功率
                 }
                 cplex.addEq(cplex.scalProd(x, coeff[coeffNum]), acLoad[j] - photovoltaic.getPower()[j] - windPower.getPower()[j]);
                 coeffNum += 1;

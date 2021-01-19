@@ -380,7 +380,7 @@ public class LoadTransferOptTest extends TestCase implements DsModelCons {
         model.makeFeederCapArray();
 
 
-        //
+//        model.loadsMax1();
         model.allMinSwitch();
         this.minSwitchResult = model.getOptResult();
         for (int i = 0; i < minSwitchResult.getFeederId().length; i++) {
@@ -392,17 +392,17 @@ public class LoadTransferOptTest extends TestCase implements DsModelCons {
             //   }
         }
 
-        model.allLoadMax_1();
-        this.maxLoadResult = model.maxLoadResult;
-        for (int i = 0; i < maxLoadResult.size(); i++) {
-            System.out.println(model.nodes.get(i).getId());
-            System.out.println(maxLoadResult.get(model.nodes.get(i).getId()));
-        }
-        this.maxCircuitLoad = model.getMaxCircuitLoad();
-        for (int i = 0; i < model.edges.size(); i++) {
-            System.out.println(model.edges.get(i).getId());
-            System.out.println(maxCircuitLoad.get(model.edges.get(i).getId()));
-        }
+//        model.allLoadMax_1();
+//        this.maxLoadResult = model.maxLoadResult;
+//        for (int i = 0; i < maxLoadResult.size(); i++) {
+//            System.out.println(model.nodes.get(i).getId());
+//            System.out.println(maxLoadResult.get(model.nodes.get(i).getId()));
+//        }
+//        this.maxCircuitLoad = model.getMaxCircuitLoad();
+//        for (int i = 0; i < model.edges.size(); i++) {
+//            System.out.println(model.edges.get(i).getId());
+//            System.out.println(maxCircuitLoad.get(model.edges.get(i).getId()));
+//        }
     }
 
     public void testCase5() throws Exception {
