@@ -35,7 +35,7 @@ public class SeObjective {
     double a[], b[];
     double shortenRate = 1.0;
     // Parzen 窗宽
-    double mesSigma = 10 / Math.sqrt(2);
+    double mesSigma;
     int objType = OBJ_TYPE_WLS;
 
     public boolean eval_f(int n, double[] x, boolean new_x, double[] obj_value, int offset) {

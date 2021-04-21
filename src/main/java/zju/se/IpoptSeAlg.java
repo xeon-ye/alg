@@ -433,7 +433,7 @@ public class IpoptSeAlg extends AbstractSeAlg implements MeasTypeCons, IpoptMode
                 objective = solver.getObjective();
 
                 kexi = SeStatistics.calConsistencyRate(meas);
-                if (kexi > 0.8 && Math.abs(kexi - kexi_old) < 1e-6){
+                if (kexi > 0.9 && Math.abs(kexi - kexi_old) < 1e-4 && objFunc.getMesSigma() < 0.7){
                     break;
                 }
                 kexi_old = kexi;
