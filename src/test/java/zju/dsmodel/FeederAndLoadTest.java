@@ -193,6 +193,7 @@ public class FeederAndLoadTest extends TestCase {
         for (int i = 0; i < a.length; i++) {
             for (int j = 0; j < a[0].length; j++) {
                 if (Math.abs(a[i][j] - b[i][j]) > eps) {
+                    // System.out.println("a:" + a[i][j] + "  b:" +b[i][j]);
                     return false;
                 }
             }

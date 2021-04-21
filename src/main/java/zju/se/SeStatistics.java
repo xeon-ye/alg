@@ -43,6 +43,23 @@ public class SeStatistics implements MeasTypeCons {
     public static double base_voltage_110 = 132;
     public static double base_voltage_66 = 79.2;
 
+
+    /**
+     * This method calculate consistency rate of measurements.
+     *
+     * @param meas     system measurements
+     * @return consistency rate
+     */
+    public static double calConsistencyRate(MeasVector meas) {
+        double kexi = 0;
+        for (int i = 0; i < meas.getZ().getN(); i++) {
+            kexi += Math.exp(-Math.pow(meas.getZ().getValue(i) - meas.getZ_estimate().getValue(i), 2) / (2 * 4 * meas.getSigma().getValue(i)));
+        }
+        kexi = kexi / meas.getZ().getN();
+        log.info("状态估计置信度为：" + kexi);
+        return kexi;
+    }
+
     /**
      * This method calculate eligible rate of efficient measurements
      *

@@ -16,6 +16,7 @@ public class SeResultInfo implements Serializable {
     private long timeUsed;
     private int analogNum;
     private double eligibleRate;
+    private double consistencyRate;
     private PfResultInfo pfResult;
 
     public boolean isConverged() {
@@ -72,5 +73,13 @@ public class SeResultInfo implements Serializable {
 
     public void setEligibleRate(double eligibleRate) {
         this.eligibleRate = eligibleRate;
+    }
+
+    public double getConsistencyRate() {
+        return consistencyRate;
+    }
+
+    public void setConsistencyRate(double consistencyRate) {
+        this.consistencyRate = consistencyRate;
     }
 }

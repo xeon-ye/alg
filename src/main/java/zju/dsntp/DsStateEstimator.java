@@ -52,6 +52,13 @@ public class DsStateEstimator implements DsModelCons {
 
     public void doSe() {
         int convergeNum = 0;
+        // MSE requires per unit system.
+        if (alg.getObjFunc().getObjType() == SeObjective.OBJ_TYPE_MSE) {
+            if (!distriSys.isPerUnitSys()){
+                distriSys.setPerUnitSys(true);
+                distriSys.setBaseKva(1000.);
+            }
+        }
         for (DsTopoIsland island : distriSys.getActiveIslands()) {
             if (island.getBusV() == null)
                 island.initialVariables();
@@ -89,6 +96,8 @@ public class DsStateEstimator implements DsModelCons {
         double[] para2 = new double[meas.getZ().getN()];
         double[] badData_threshhold = null;
         if (objFunc.getObjType() == SeObjective.OBJ_TYPE_WLS) {
+            objFunc.setMeas(meas);
+        } else if (objFunc.getObjType() == SeObjective.OBJ_TYPE_MSE) {
             objFunc.setMeas(meas);
         } else if (objFunc.getObjType() == SeObjective.OBJ_TYPE_SIGMOID) {
             System.out.println("k = " + k + ", lambda = " + ((alpha2 - alpha1) / alpha1));

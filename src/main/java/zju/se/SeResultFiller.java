@@ -6,9 +6,7 @@ import zju.ieeeformat.BranchData;
 import zju.ieeeformat.BusData;
 import zju.ieeeformat.IEEEDataIsland;
 import zju.matrix.AVector;
-import zju.measure.MeasTypeCons;
-import zju.measure.MeasureInfo;
-import zju.measure.SystemMeasure;
+import zju.measure.*;
 import zju.util.StateCalByPolar;
 import zju.util.YMatrixGetter;
 
@@ -47,6 +45,8 @@ public class SeResultFiller implements MeasTypeCons {
         fillPrimaryMeasureValue();
         seResult.setAnalogNum(primaryMeasureNum);
         seResult.setEligibleRate(SeStatistics.calEligibleRate(island, sm)[0]);
+        MeasVector meas = new MeasVectorCreator().getMeasureVector(sm, false);//todo: check it
+        seResult.setConsistencyRate(SeStatistics.calConsistencyRate(meas));
     }
 
     public void fillSeIsland(AVector vTheta) {

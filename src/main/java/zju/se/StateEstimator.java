@@ -147,7 +147,8 @@ public class StateEstimator implements SeConstants, MeasTypeCons {
             // 采用VTHETA作为状态变量时，会把sm中对应的量测给抹去
             if (variable_type == AbstractSeAlg.VARIABLE_VTHETA
                     || variable_type == AbstractSeAlg.VARIABLE_VTHETA_PQ) {
-                if (objFunc.getObjType() == SeObjective.OBJ_TYPE_WLS) {
+                if (objFunc.getObjType() == SeObjective.OBJ_TYPE_WLS
+                        || objFunc.getObjType() == SeObjective.OBJ_TYPE_MSE) {
                     //todo; system measure is changed, must pay attention to it.
                     MeasureInfo[] vMeas = new MeasureInfo[origVMeas.size()];
                     origVMeas.values().toArray(vMeas); // 把origVMeas中的量测排成数组存入vMeas
@@ -235,7 +236,7 @@ public class StateEstimator implements SeConstants, MeasTypeCons {
                     case IpoptSeAlg.VARIABLE_VTHETA:
                     case IpoptSeAlg.VARIABLE_VTHETA_PQ:
                         objFunc = ((IpoptSeAlg) alg).getObjFunc();
-                        if (objFunc.getObjType() == SeObjective.OBJ_TYPE_WLS) {
+                        if (objFunc.getObjType() == SeObjective.OBJ_TYPE_WLS || objFunc.getObjType() == SeObjective.OBJ_TYPE_MSE) {
                             if (variable_type == IpoptSeAlg.VARIABLE_VTHETA)
                                 MeasureUtil.setVTheta(alg.getVariableState(), sm, clonedIsland.getBuses().size());
                             else
@@ -257,7 +258,7 @@ public class StateEstimator implements SeConstants, MeasTypeCons {
         double[] para1 = new double[meas.getZ().getN()];
         double[] para2 = new double[meas.getZ().getN()];
         double[] badData_threshhold = null;
-        if (objFunc.getObjType() == SeObjective.OBJ_TYPE_WLS) {
+        if (objFunc.getObjType() == SeObjective.OBJ_TYPE_WLS || objFunc.getObjType() == SeObjective.OBJ_TYPE_MSE) {
             objFunc.setMeas(meas);
         } else if (objFunc.getObjType() == SeObjective.OBJ_TYPE_SIGMOID) {
             System.out.println("k = " + k + ", lambda = " + ((alpha2 - alpha1) / alpha1));

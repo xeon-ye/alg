@@ -420,13 +420,59 @@ public class IpoptSeAlg extends AbstractSeAlg implements MeasTypeCons, IpoptMode
 
     public void doSeAnalyse() {
         long start = System.currentTimeMillis();
-        initial();
-        IpoptSolver solver = new IpoptSolver(this);
-        solver.solve(maxIter, tolerance, true);
-        setConverged(solver.isConverged());
-        objective = solver.getObjective();
-        System.out.println("状态估计目标函数值为：" + objective);
-        setTimeUsed(System.currentTimeMillis() - start);
+        if (objFunc.getObjType() == SeObjective.OBJ_TYPE_MSE) {
+            initial();
+            objFunc.setInitialMesSigma();
+            double kexi_old = 0;
+            double kexi;
+
+            while (objFunc.getMesSigma() > 0.1 / Math.sqrt(2)) {
+                IpoptSolver solver = new IpoptSolver(this);
+                solver.solve(maxIter, tolerance, true);
+                setConverged(solver.isConverged());
+                objective = solver.getObjective();
+
+                kexi = SeStatistics.calConsistencyRate(meas);
+                if (kexi > 0.8 && Math.abs(kexi - kexi_old) < 1e-6){
+                    break;
+                }
+                kexi_old = kexi;
+
+                double[] x1 = solver.getState();
+                int offset = 0;
+
+                int variable_type = getVariable_type();
+                switch (variable_type) {
+                    case IpoptSeAlg.VARIABLE_U:
+                    case IpoptSeAlg.VARIABLE_UI:
+                    case IpoptSeAlg.VARIABLE_VTHETA:
+                        offset = 2 * busNumber;
+                        break;
+                    case IpoptSeAlg.VARIABLE_VTHETA_PQ:
+                        offset = 4 * busNumber;
+                        break;
+                }
+
+                double[] vTheta = new double[offset];
+                if (offset > 0) {
+                    System.arraycopy(x1, 0, vTheta, 0, offset);
+                }
+                setVariableState(vTheta);
+
+                objFunc.setMesSigma(objFunc.getMesSigma() * 0.9);
+                System.out.println("Parzen 窗宽度为：" + objFunc.mesSigma);
+            }
+            System.out.println("状态估计目标函数值为：" + objective);
+            setTimeUsed(System.currentTimeMillis() - start);
+        } else {
+            initial();
+            IpoptSolver solver = new IpoptSolver(this);
+            solver.solve(maxIter, tolerance, true);
+            setConverged(solver.isConverged());
+            objective = solver.getObjective();
+            System.out.println("状态估计目标函数值为：" + objective);
+            setTimeUsed(System.currentTimeMillis() - start);
+        }
     }
 
     public boolean eval_f(int n, double[] x, boolean new_x, double[] obj_value) {

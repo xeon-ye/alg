@@ -203,6 +203,24 @@ public class SeTest_IeeeCase extends TestCase implements MeasTypeCons {
             //System.out.println("WLS状态估计用时：" + (System.currentTimeMillis() - start) + "ms");
         }
 
+        //下面这一段测试所有模型的MSE效果
+        if (ref != null) // ref是潮流计算的结果
+            dealZeroInjection(sm, ref, isZeroInjection); // 将零注入功率节点的节点注入功率量测从sm中剔除
+        if (alg instanceof IpoptSeAlg) {
+            for (int variable_type : variables_types) {
+                ((IpoptSeAlg) alg).getObjFunc().setObjType(SeObjective.OBJ_TYPE_MSE); // 设置目标函数
+                alg.setVariable_type(variable_type);
+                se.doSe();
+                assertTrue(alg.isConverged());
+                r = se.createPfResult();
+                assertNotNull(r);
+                printS1(ref, r, isTrueValue);
+                printZeroInjectionDelta(ref, r);
+                //System.out.println("MSE状态估计迭代次数：" + alg.getIterNum() + "\t用时：" + alg.getTimeUsed() + "\t");
+                //System.out.println("MSE状态估计用时：" + (System.currentTimeMillis() - start) + "ms");
+            }
+        }
+
         //下面这一段测试sigmoid函数的效果
 //        start = System.currentTimeMillis();
 //        alg.getObjFunc().setObjType(SeObjective.OBJ_TYPE_SIGMOID);

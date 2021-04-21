@@ -17,6 +17,7 @@ public class SeObjective {
     public static final int OBJ_TYPE_SIGMOID = 4;
     public static final int OBJ_TYPE_PARTION = 5;
     public static final int OBJ_TYPE_MNMR = 6;
+    public static final int OBJ_TYPE_MSE = 7;
 
     protected MeasVector meas;
     protected MeasureInfo[] aMeas = new MeasureInfo[0];
@@ -33,12 +34,16 @@ public class SeObjective {
 
     double a[], b[];
     double shortenRate = 1.0;
+    // Parzen 窗宽
+    double mesSigma = 10 / Math.sqrt(2);
     int objType = OBJ_TYPE_WLS;
 
     public boolean eval_f(int n, double[] x, boolean new_x, double[] obj_value, int offset) {
         switch (objType) {
             case OBJ_TYPE_WLS:
                 return eval_f_wls(x, obj_value, offset);
+            case OBJ_TYPE_MSE:
+                return eval_f_mse(x, obj_value, offset);
             case OBJ_TYPE_QL:
                 return eval_f_ql(x, obj_value, offset);
             case OBJ_TYPE_QC:
@@ -57,6 +62,8 @@ public class SeObjective {
         switch (objType) {
             case OBJ_TYPE_WLS:
                 return eval_grad_f_wls(x, grad_f, offset);
+            case OBJ_TYPE_MSE:
+                return eval_grad_f_mse(x, grad_f, offset);
             case OBJ_TYPE_QL:
                 return eval_grad_f_ql(x, grad_f, offset);
             case OBJ_TYPE_QC:
@@ -72,6 +79,7 @@ public class SeObjective {
     public void getHessStruc(DoubleMatrix2D hessian) {
         switch (objType) {
             case OBJ_TYPE_WLS:
+            case OBJ_TYPE_MSE:
                 for (int pos : aMeasPos)
                     hessian.setQuick(pos, pos, 1.0);
                 for (int pos : vMeasPos)
@@ -90,6 +98,7 @@ public class SeObjective {
         int start = hessian.cardinality();
         switch (objType) {
             case OBJ_TYPE_WLS:
+            case OBJ_TYPE_MSE:
                 for (int i = offset, j = 0; j < measInObjFunc.length; i++, j++) {
                     //hessian.setQuick(i, i, 1.0);
                     rows[start] = i;
@@ -125,6 +134,29 @@ public class SeObjective {
                 for (int pos : measInObjFunc)
                     //hessian.addQuick(i, i, obj_factor * meas.getWeight().getValue(pos));
                     values[start++] = obj_factor * meas.getWeight().getValue(pos);
+                break;
+            case OBJ_TYPE_MSE:
+                double squareMesSigma = mesSigma * mesSigma;
+                for (int i = 0; i < aMeasPos.length; i++) {
+                    double v = x[aMeasPos[i]] - aMeas[i].getValue();
+                    hessian.addQuick(aMeasPos[i], aMeasPos[i], -obj_factor * aMeas[i].getWeight() * Math.exp(-v * v / (2 * squareMesSigma)) * (v * v / (squareMesSigma * squareMesSigma) - 1 / (squareMesSigma)));
+                }
+                for (int i = 0; i < vMeasPos.length; i++) {
+                    double v = x[vMeasPos[i]] - vMeas[i].getValue();
+                    hessian.addQuick(vMeasPos[i], vMeasPos[i], -obj_factor * vMeas[i].getWeight() * Math.exp(-v * v / (2 * squareMesSigma)) * (v * v / (squareMesSigma * squareMesSigma) - 1 / (squareMesSigma)));
+                }
+                for (int i = 0; i < pMeasPos.length; i++) {
+                    double v = x[pMeasPos[i]] - pMeas[i].getValue();
+                    hessian.addQuick(pMeasPos[i], pMeasPos[i], -obj_factor * pMeas[i].getWeight() * Math.exp(-v * v / (2 * squareMesSigma)) * (v * v / (squareMesSigma * squareMesSigma) - 1 / (squareMesSigma)));
+                }
+                for (int i = 0; i < qMeasPos.length; i++) {
+                    double v = x[qMeasPos[i]] - qMeas[i].getValue();
+                    hessian.addQuick(qMeasPos[i], qMeasPos[i], -obj_factor * qMeas[i].getWeight() * Math.exp(-v * v / (2 * squareMesSigma)) * (v * v / (squareMesSigma * squareMesSigma) - 1 / (squareMesSigma)));
+                }
+                for (int pos : measInObjFunc) {
+                    double v = x[pos + offset];
+                    values[start++] = -obj_factor * meas.getWeight().getValue(pos) * Math.exp(-v * v / (2 * squareMesSigma)) * (v * v / (squareMesSigma * squareMesSigma) - 1 / (squareMesSigma));
+                }
                 break;
             case OBJ_TYPE_QL:
                 for (int j = 0; j < measInObjFunc.length; j++) {
@@ -291,6 +323,60 @@ public class SeObjective {
         return true;
     }
 
+    public boolean eval_f_mse(double[] x, double[] obj_value, int offset) {
+        double doubleSquareMesSigma = 2 * mesSigma * mesSigma;
+        obj_value[0] = 0;
+        for (int i = 0; i < aMeasPos.length; i++) {
+            double v = x[aMeasPos[i]] - aMeas[i].getValue();
+            obj_value[0] += shortenRate * aMeas[i].getWeight() * Math.exp(- v * v / doubleSquareMesSigma);
+        }
+        for (int i = 0; i < vMeasPos.length; i++) {
+            double v = x[vMeasPos[i]] - vMeas[i].getValue();
+            obj_value[0] += shortenRate * vMeas[i].getWeight() * Math.exp(- v * v / doubleSquareMesSigma);
+        }
+        for (int i = 0; i < pMeasPos.length; i++) {
+            double v = x[pMeasPos[i]] - pMeas[i].getValue();
+            obj_value[0] += shortenRate * pMeas[i].getWeight() * Math.exp(- v * v / doubleSquareMesSigma);
+        }
+        for (int i = 0; i < qMeasPos.length; i++) {
+            double v = x[qMeasPos[i]] - qMeas[i].getValue();
+            obj_value[0] += shortenRate * qMeas[i].getWeight() * Math.exp(- v * v / doubleSquareMesSigma);
+        }
+        for (int i : measInObjFunc) {
+            double v = x[i + offset];
+            obj_value[0] += shortenRate * meas.getWeight().getValue(i) * Math.exp(- v * v / doubleSquareMesSigma);
+        }
+        obj_value[0] = -obj_value[0];
+        return true;
+    }
+
+    public boolean eval_grad_f_mse(double[] x, double[] grad_f, int offset) {
+        double squareMesSigma = mesSigma * mesSigma;
+        for (int i = 0; i < x.length; i++)
+            grad_f[i] = 0;
+        for (int i = 0; i < aMeasPos.length; i++) {
+            double v = x[aMeasPos[i]] - aMeas[i].getValue();
+            grad_f[aMeasPos[i]] = -shortenRate * aMeas[i].getWeight() * (-v / squareMesSigma * Math.exp(-v * v / (2 * squareMesSigma)));
+        }
+        for (int i = 0; i < vMeasPos.length; i++) {
+            double v = x[vMeasPos[i]] - vMeas[i].getValue();
+            grad_f[vMeasPos[i]] = -shortenRate * vMeas[i].getWeight() * (-v / squareMesSigma * Math.exp(-v * v / (2 * squareMesSigma)));
+        }
+        for (int i = 0; i < pMeasPos.length; i++) {
+            double v = x[pMeasPos[i]] - pMeas[i].getValue();
+            grad_f[pMeasPos[i]] = -shortenRate * pMeas[i].getWeight() * (-v / squareMesSigma * Math.exp(-v * v / (2 * squareMesSigma)));
+        }
+        for (int i = 0; i < qMeasPos.length; i++) {
+            double v = x[qMeasPos[i]] - qMeas[i].getValue();
+            grad_f[qMeasPos[i]] = -shortenRate * qMeas[i].getWeight() * (-v / squareMesSigma * Math.exp(-v * v / (2 * squareMesSigma)));
+        }
+        for (int i : measInObjFunc) {
+            double v = x[i + offset];
+            grad_f[i + offset] = -shortenRate * (-v / squareMesSigma * Math.exp(-v * v / (2 * squareMesSigma))) * meas.getWeight().getValue(i);
+        }
+        return true;
+    }
+
     public int[] getMeasInObjFunc() {
         return measInObjFunc;
     }
@@ -305,6 +391,18 @@ public class SeObjective {
 
     public void setShortenRate(double shortenRate) {
         this.shortenRate = shortenRate;
+    }
+
+    public double getMesSigma() {
+        return mesSigma;
+    }
+
+    public void setMesSigma(double mesSigma) {
+        this.mesSigma = mesSigma;
+    }
+
+    public void setInitialMesSigma() {
+        this.mesSigma = 10 / Math.sqrt(2);
     }
 
     public int getObjType() {
