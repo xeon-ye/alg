@@ -387,7 +387,7 @@ public class DsPowerflowTest extends TestCase implements DsModelCons {
         DsTopoIsland island1 = ds1.getActiveIslands()[0];
         DsTopoIsland island2 = ds2.getActiveIslands()[0];
         assertStateEquals(island1, island2);
-        printBusV(ds2.getActiveIslands()[0], false, false);
+        printBusV(ds2.getActiveIslands()[0], false, true);
     }
 
     public void testRealCase() throws Exception {
@@ -550,19 +550,24 @@ public class DsPowerflowTest extends TestCase implements DsModelCons {
         SimpleDateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
         for (DsTopoNode tn : tns) {
             double[][] v = island.getBusV().get(tn);
+            // 复制一份v，防止在转换过程中被修改
+            double[][] newV = new double[v.length][];
+            for (int i = 0; i < v.length; i++) {
+                newV[i] = v[i].clone();
+            }
             if (!isCartesian)
-                FeederAndLoadTest.trans_rect2polar_deg(v);
+                FeederAndLoadTest.trans_polar2rect_deg(newV);
             if (isPerUnit) {
-                for (int i = 0; i < v.length; i++) {
-                    v[i][0] /= tn.getBaseKv() * 1000.;
+                for (int i = 0; i < newV.length; i++) {
+                    newV[i][0] /= tn.getBaseKv() * 1000.;
                     if (isCartesian)
-                        v[i][1] /= tn.getBaseKv() * 1000.;
+                        newV[i][1] /= tn.getBaseKv() * 1000.;
                 }
             } else {
-                for (int i = 0; i < v.length; i++) {
-                    v[i][0] /= 1000.;
+                for (int i = 0; i < newV.length; i++) {
+                    newV[i][0] /= (tn.getBaseKv() * 1000.);
                     if (isCartesian)
-                        v[i][1] /= tn.getBaseKv() * 1000.;
+                        newV[i][1] /= (tn.getBaseKv() * 1000.);
                 }
             }
             String id = tn.getConnectivityNodes().get(0).getId();
@@ -571,15 +576,15 @@ public class DsPowerflowTest extends TestCase implements DsModelCons {
             StringBuilder stringBuilder = new StringBuilder();
             sb.append(id).append("\t");
             stringBuilder.append(id).append(",");
-            for (int i = 0; i < v.length; i++) {
+            for (int i = 0; i < newV.length; i++) {
                 if (!tn.containsPhase(i)) {
                     sb.append("-\t-\t");
                     continue;
                 }
-                sb.append(df1.format(v[i][0])).append("\t");
-                sb.append(df2.format(v[i][1])).append("\t");
-                stringBuilder.append(df1.format(v[i][0])).append(",");
-                stringBuilder.append(df1.format(v[i][1])).append(",");
+                sb.append(df1.format(newV[i][0])).append("\t");
+                sb.append(df2.format(newV[i][1])).append("\t");
+                stringBuilder.append(df1.format(newV[i][0])).append(",");
+                stringBuilder.append(df1.format(newV[i][1])).append(",");
             }
             System.out.println(sb);
             //插入文件
